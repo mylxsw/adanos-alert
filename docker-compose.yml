@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  adanos-alert:
+    image: adanos-alert
+    build: .
+    ports:
+      - 3000:3000
