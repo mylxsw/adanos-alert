@@ -32,6 +32,9 @@ func (m MessageGroupRepo) Add(grp repository.MessageGroup) (id primitive.ObjectI
 
 func (m MessageGroupRepo) Get(id primitive.ObjectID) (grp repository.MessageGroup, err error) {
 	err = m.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&grp)
+	if err == mongo.ErrNoDocuments {
+		err = repository.ErrNotFound
+	}
 	return
 }
 

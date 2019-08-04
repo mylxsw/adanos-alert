@@ -20,22 +20,24 @@ type UserMeta struct {
 }
 
 type User struct {
-	ID primitive.ObjectID `bson:"_id" json:"id"`
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
-	Name  string          `bson:"name" json:"name"`
-	Metas []UserMeta      `bson:"metas" json:"metas"`
+	Name  string     `bson:"name" json:"name"`
+	Metas []UserMeta `bson:"metas" json:"metas"`
 
-	Status UserStatus     `bson:"status" json:"status"`
+	Status UserStatus `bson:"status" json:"status"`
 
-	CreatedAt time.Time   `bson:"created_at" json:"created_at"`
-	UpdatedAt time.Time   `bson:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
 }
 
 type UserRepo interface {
 	Add(user User) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (user User, err error)
 	Find(filter bson.M) (users []User, err error)
-	Paginate(filter bson.M, offset, limit int) (users []User, next int, err error)
-	Delete(id primitive.ObjectID) error
+	Paginate(filter bson.M, offset, limit int64) (users []User, next int64, err error)
+	DeleteID(id primitive.ObjectID) error
+	Delete(filter bson.M) error
 	Update(id primitive.ObjectID, user User) error
+	Count(filter bson.M) (int64, error)
 }

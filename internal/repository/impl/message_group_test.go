@@ -7,6 +7,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MessageGroupRepoTestSuit struct {
@@ -39,6 +40,10 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	m.Equal(grp.Status, grp2.Status)
 	m.NotEmpty(grp2.CreatedAt)
 	m.NotEmpty(grp2.UpdatedAt)
+
+	_, err = m.repo.Get(primitive.NewObjectID())
+	m.Error(err)
+	m.Equal(repository.ErrNotFound, err)
 
 	grp.Status = repository.MessageGroupStatusPending
 	id2, err := m.repo.Add(grp)
