@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
-	"github.com/mylxsw/adanos-alert/internal/repository/impl"
+	"github.com/mylxsw/adanos-alert/internal/job"
+	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/glacier"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -52,10 +54,9 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.Singleton(impl.NewSequenceRepo)
-	app.Singleton(impl.NewKVRepo)
-	app.Singleton(impl.NewMessageRepo)
-	app.Singleton(impl.NewMessageGroupRepo)
+	app.Provider(repository.ServiceProvider{})
+	app.Provider(api.ServiceProvider{})
+	app.Provider(job.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
