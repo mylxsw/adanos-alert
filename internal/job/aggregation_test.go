@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -43,9 +44,10 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 
 		// add a rule for test
 		ruleID, err := mockRuleRepo.Add(repository.Rule{
-			Name:   "test",
-			Rule:   `"php" in Tags`,
-			Status: repository.RuleStatusEnabled,
+			Name:     "test",
+			Rule:     `"php" in Tags`,
+			Interval: 30,
+			Status:   repository.RuleStatusEnabled,
 		})
 		a.NoError(err)
 
@@ -89,6 +91,17 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 		canceledMsgCount, err := mockMsgRepo.Count(bson.M{"status": repository.MessageStatusCanceled})
 		a.NoError(err)
 		a.EqualValues(5, canceledMsgCount)
+
+		// message grouping
+		// change create_at -10s
+		mockMsgGroupRepo.Groups[0].CreatedAt = mockMsgGroupRepo.Groups[0].CreatedAt.Add(-10 * time.Second)
+		job.NewAggregationJob(a.app).Handle()
+		a.Equal(repository.MessageGroupStatusCollecting, mockMsgGroupRepo.Groups[0].Status)
+
+		// change created_at -30s, reach grouping condition
+		mockMsgGroupRepo.Groups[0].CreatedAt = mockMsgGroupRepo.Groups[0].CreatedAt.Add(-20 * time.Second)
+		job.NewAggregationJob(a.app).Handle()
+		a.Equal(repository.MessageGroupStatusPending, mockMsgGroupRepo.Groups[0].Status)
 	})
 }
 

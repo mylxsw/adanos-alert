@@ -21,6 +21,10 @@ func NewMessageRepo(db *mongo.Database) repository.MessageRepo {
 
 func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
 	msg.CreatedAt = time.Now()
+	if msg.Status == "" {
+		msg.Status = repository.MessageStatusPending
+	}
+
 	rs, err := m.col.InsertOne(context.TODO(), msg)
 	if err != nil {
 		return id, err

@@ -43,11 +43,24 @@ func (m *MessageGroupRepo) DeleteID(id primitive.ObjectID) error {
 }
 
 func (m *MessageGroupRepo) Traverse(filter bson.M, cb func(grp repository.MessageGroup) error) error {
-	panic("implement me")
+	for _, grp := range m.filter(filter) {
+		if err := cb(grp); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (m *MessageGroupRepo) Update(id primitive.ObjectID, grp repository.MessageGroup) error {
-	panic("implement me")
+	for i, g := range m.Groups {
+		if g.ID == id {
+			m.Groups[i] = grp
+			break
+		}
+	}
+
+	return nil
 }
 
 func (m *MessageGroupRepo) Count(filter bson.M) (int64, error) {
