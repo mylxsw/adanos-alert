@@ -13,6 +13,7 @@ func (s ServiceProvider) Register(app *container.Container) {
 	app.MustSingleton(NewMessageRepo)
 	app.MustSingleton(NewMessageGroupRepo)
 	app.MustSingleton(NewUserRepo)
+	app.MustSingleton(NewRuleRepo)
 }
 
 func (s ServiceProvider) Boot(app *glacier.Glacier) {}

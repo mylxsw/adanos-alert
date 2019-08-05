@@ -17,7 +17,7 @@ func (s ServiceProvider) Register(app *container.Container) {
 func (s ServiceProvider) Boot(app *glacier.Glacier) {
 	app.PeriodJob(func(pj *period_job.Manager, cc *container.Container) {
 		cc.MustResolve(func(aggregationJob *AggregationJob) {
-			pj.Run("aggregation", aggregationJob, 10*time.Second)
+			pj.Run("aggregation", aggregationJob, 30*time.Second)
 		})
 	})
 }

@@ -14,6 +14,7 @@ const (
 	RuleStatusDisabled RuleStatus = "disabled"
 )
 
+// Rule is a rule definition
 type Rule struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name        string             `bson:"name" json:"name"`
@@ -28,6 +29,17 @@ type Rule struct {
 
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
+}
+
+// ToGroupRule convert Rule to MessageGroupRule
+func (rule Rule) ToGroupRule() MessageGroupRule {
+	return MessageGroupRule{
+		ID:        rule.ID,
+		Name:      rule.Name,
+		Interval:  rule.Interval,
+		Threshold: rule.Threshold,
+		Rule:      rule.Rule,
+	}
 }
 
 type RuleRepo interface {

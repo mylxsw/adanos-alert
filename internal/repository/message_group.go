@@ -17,8 +17,19 @@ const (
 	MessageGroupStatusCanceled   MessageGroupStatus = "canceled"
 )
 
+type MessageGroupRule struct {
+	ID        primitive.ObjectID `bson:"_id" json:"id"`
+	Name      string             `bson:"name" json:"name"`
+	Interval  int64              `bson:"interval" json:"interval"`
+	Threshold int64              `bson:"threshold" json:"threshold"`
+	Rule      string             `bson:"rule" json:"rule"`
+}
+
 type MessageGroup struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+
+	MessageCount int64            `bson:"message_count" json:"message_count"`
+	Rule         MessageGroupRule `bson:"rule" json:"rule"`
 
 	Status    MessageGroupStatus `bson:"status" json:"status"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
@@ -35,4 +46,6 @@ type MessageGroupRepo interface {
 	Traverse(filter bson.M, cb func(grp MessageGroup) error) error
 	Update(id primitive.ObjectID, grp MessageGroup) error
 	Count(filter bson.M) (int64, error)
+
+	CollectingGroup(rule MessageGroupRule) (group MessageGroup, err error)
 }

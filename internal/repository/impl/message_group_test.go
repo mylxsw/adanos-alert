@@ -2,6 +2,7 @@ package impl_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
@@ -87,6 +88,38 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	count, err = m.repo.Count(bson.M{"status": repository.MessageGroupStatusFailed})
 	m.NoError(err)
 	m.EqualValues(10, count)
+
+	// Test collecting group
+	rule := repository.Rule{
+		ID:          primitive.NewObjectID(),
+		Name:        "test",
+		Description: "test rule",
+		Interval:    30,
+		Threshold:   0,
+		Priority:    100,
+		Rule:        `"php" in Tags`,
+		Status:      repository.RuleStatusEnabled,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	groupRule := rule.ToGroupRule()
+	m.Equal(rule.ID, groupRule.ID)
+	m.Equal(rule.Name, groupRule.Name)
+	m.Equal(rule.Interval, groupRule.Interval)
+	m.Equal(rule.Threshold, groupRule.Threshold)
+	m.Equal(rule.Rule, groupRule.Rule)
+
+	collectingGroup, err := m.repo.CollectingGroup(groupRule)
+	m.NoError(err)
+	m.Equal(repository.MessageGroupStatusCollecting, collectingGroup.Status)
+	m.Equal(groupRule.Rule, collectingGroup.Rule.Rule)
+	m.NotEmpty(collectingGroup.CreatedAt)
+
+	collectingGroup2, err := m.repo.CollectingGroup(groupRule)
+	m.NoError(err)
+	m.Equal(collectingGroup.ID, collectingGroup2.ID)
+	m.EqualValues(collectingGroup.CreatedAt.Unix(), collectingGroup2.CreatedAt.Unix())
 }
 
 func TestMessageGroupRepo(t *testing.T) {

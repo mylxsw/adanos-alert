@@ -116,3 +116,21 @@ func (m MessageGroupRepo) DeleteID(id primitive.ObjectID) error {
 func (m MessageGroupRepo) Count(filter bson.M) (int64, error) {
 	return m.col.CountDocuments(context.TODO(), filter)
 }
+
+func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (group repository.MessageGroup, err error) {
+	err = m.col.FindOneAndUpdate(
+		context.TODO(),
+		bson.M{"rule._id": rule.ID, "status": repository.MessageGroupStatusCollecting},
+		bson.M{"$set": bson.M{"rule": rule}},
+		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+	).Decode(&group)
+
+	// since we create a group automatically, we need update created_at fields manually
+	if err == nil && group.CreatedAt.IsZero() {
+		group.CreatedAt = time.Now()
+		group.UpdatedAt = group.CreatedAt
+		_ = m.Update(group.ID, group)
+	}
+
+	return
+}

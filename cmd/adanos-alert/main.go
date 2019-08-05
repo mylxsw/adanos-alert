@@ -11,10 +11,10 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/glacier"
+	"github.com/urfave/cli"
+	"github.com/urfave/cli/altsrc"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/urfave/cli.v1"
-	"gopkg.in/urfave/cli.v1/altsrc"
 )
 
 var Version string
@@ -27,14 +27,14 @@ func main() {
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_uri",
 		Usage:  "Mongodb connection uri",
-		EnvVar: "ADANOS_MONGODB_URI",
+		EnvVar: "MONGODB_HOST",
 		Value:  "mongodb://localhost:27017",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_db",
 		Usage:  "Mongodb database name",
-		EnvVar: "ADANOS_MONGODB_DB",
-		Value:  "adanos",
+		EnvVar: "MONGODB_DB",
+		Value:  "adanos-alert",
 	}))
 
 	app.Singleton(func(c *cli.Context) *configs.Config {

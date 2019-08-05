@@ -8,6 +8,13 @@ import (
 )
 
 type MessageMeta map[string]string
+type MessageStatus string
+
+const (
+	MessageStatusPending  MessageStatus = "pending"
+	MessageStatusGrouped  MessageStatus = "grouped"
+	MessageStatusCanceled MessageStatus = "canceled"
+)
 
 type Message struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -16,6 +23,7 @@ type Message struct {
 	Tags      []string           `bson:"tags" json:"tags"`
 	Origin    string             `bson:"origin" json:"origin"`
 	GroupID   primitive.ObjectID `bson:"group_id" json:"group_id"`
+	Status    MessageStatus      `bson:"status" json:"status"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 }
 
