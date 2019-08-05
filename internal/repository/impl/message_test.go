@@ -30,10 +30,11 @@ func (s *MessageTestSuit) TearDownTest() {
 func (s *MessageTestSuit) TestMessageCURD() {
 	msg := repository.Message{
 		Content: "message content",
-		Tags: []repository.MessageTag{
-			{Key: "level", Value: "error"},
-			{Key: "biz_code", Value: "laravel"},
+		Meta: repository.MessageMeta{
+			"level":       "error",
+			"environment": "dev",
 		},
+		Tags:   []string{"test", "test2"},
 		Origin: "elasticsearch",
 	}
 
@@ -45,11 +46,11 @@ func (s *MessageTestSuit) TestMessageCURD() {
 	s.NoError(err)
 	s.Equal(msg.Content, m.Content)
 	s.NotEmpty(m.CreatedAt)
-	s.Equal(2, len(m.Tags))
+	s.Equal(2, len(m.Meta))
 
 	for i := 0; i < 100; i++ {
 		msg.Content = fmt.Sprintf("new message content %d", i)
-		msg.Tags = append(msg.Tags, repository.MessageTag{Key: "filename", Value: "/var/log/message"})
+		msg.Meta["filename"] = "/var/log/message"
 
 		id, err := s.repo.Add(msg)
 		s.NoError(err)
@@ -61,7 +62,7 @@ func (s *MessageTestSuit) TestMessageCURD() {
 	s.EqualValues(101, count)
 
 	groupId := primitive.NewObjectID()
-	s.NoError(s.repo.Traverse(bson.M{"tags.key": "filename", "tags.value": "/var/log/message"}, func(msg repository.Message) error {
+	s.NoError(s.repo.Traverse(bson.M{"meta.filename": "/var/log/message"}, func(msg repository.Message) error {
 		msg.GroupID = groupId
 		return s.repo.UpdateID(msg.ID, msg)
 	}))

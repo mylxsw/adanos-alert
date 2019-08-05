@@ -8,7 +8,7 @@ import (
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/job"
-	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/repository/impl"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/glacier"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -54,7 +54,7 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.Provider(repository.ServiceProvider{})
+	app.Provider(impl.ServiceProvider{})
 	app.Provider(api.ServiceProvider{})
 	app.Provider(job.ServiceProvider{})
 

@@ -8,24 +8,24 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type SequenceTestSuit struct {
+type SequenceTestSuite struct {
 	suite.Suite
 	repo repository.SequenceRepo
 }
 
-func (s *SequenceTestSuit) SetupTest() {
+func (s *SequenceTestSuite) SetupTest() {
 	db, err := Database()
 	s.NoError(err)
 
 	s.repo = impl.NewSequenceRepo(db)
 }
 
-func (s *SequenceTestSuit) TearDownTest() {
+func (s *SequenceTestSuite) TearDownTest() {
 	s.NoError(s.repo.Truncate("test"))
 	s.NoError(s.repo.Truncate("test2"))
 }
 
-func (s *SequenceTestSuit) TestSequence() {
+func (s *SequenceTestSuite) TestSequence() {
 	{
 		seq, err := s.repo.Next("test")
 		s.NoError(err)
@@ -54,5 +54,5 @@ func (s *SequenceTestSuit) TestSequence() {
 }
 
 func TestSequenceRepo(t *testing.T) {
-	suite.Run(t, new(SequenceTestSuit))
+	suite.Run(t, new(SequenceTestSuite))
 }

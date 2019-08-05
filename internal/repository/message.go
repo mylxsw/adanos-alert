@@ -7,15 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MessageTag struct {
-	Key   string `bson:"key" json:"key"`
-	Value string `bson:"value" json:"value"`
-}
+type MessageMeta map[string]string
 
 type Message struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Content   string             `bson:"content" json:"content"`
-	Tags      []MessageTag       `bson:"tags" json:"tags"`
+	Meta      MessageMeta        `bson:"meta" json:"meta"`
+	Tags      []string           `bson:"tags" json:"tags"`
 	Origin    string             `bson:"origin" json:"origin"`
 	GroupID   primitive.ObjectID `bson:"group_id" json:"group_id"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
