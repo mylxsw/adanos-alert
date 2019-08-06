@@ -6,11 +6,9 @@ import (
 )
 
 func routers(router *web.Router, mw web.RequestMiddleware) {
-	welcome := controller.NewWelcomeController()
 
 	router.Group("/", func(router *web.Router) {
-		router.Get("/", welcome.Home)
-
+		controller.NewWelcomeController().Register(router)
 
 	}, mw.AccessLog(), mw.JSONExceptionHandler(), mw.CORS("*"))
 }
