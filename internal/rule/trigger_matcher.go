@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"sync"
 	"time"
 
 	"github.com/antonmedv/expr"
@@ -15,11 +16,38 @@ type TriggerMatcher struct {
 }
 
 type TriggerContext struct {
-	Group repository.MessageGroup
+	Helpers
+	Group           repository.MessageGroup
+	MessageCallback func() []repository.Message
+	messages        []repository.Message
+	once            sync.Once
 }
 
-func (tc TriggerContext) Now() time.Time {
+// NewTriggerContext create a new TriggerContext
+func NewTriggerContext(group repository.MessageGroup, messageCallback func() []repository.Message) TriggerContext {
+	return TriggerContext{Group: group, MessageCallback: messageCallback}
+}
+
+// Now return current time
+func (tc *TriggerContext) Now() time.Time {
 	return time.Now()
+}
+
+// ParseTime parse a string to time.Time
+func (tc *TriggerContext) ParseTime(layout string, value string) time.Time {
+	ts, _ := time.Parse(layout, value)
+	return ts
+}
+
+// Messages return all messages in group
+func (tc *TriggerContext) Messages() []repository.Message {
+	tc.once.Do(func() {
+		if tc.MessageCallback != nil {
+			tc.messages = tc.MessageCallback()
+		}
+	})
+
+	return tc.messages
 }
 
 // NewTriggerMatcher create a new TriggerMatcher

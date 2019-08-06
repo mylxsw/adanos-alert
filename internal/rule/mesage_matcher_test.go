@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type testCase struct {
+type messageMatcherTestCase struct {
 	Rule    string
 	Matched bool
 }
@@ -25,11 +25,11 @@ func TestMessageMatcher_Match(t *testing.T) {
 			"server":      "192.168.1.1",
 		},
 		Tags:      []string{"php", "nodejs"},
-		Origin:    "filebeat",
+		Origin:    "Filebeat",
 		CreatedAt: time.Now(),
 	}
 
-	var testcases = []testCase{
+	var testcases = []messageMatcherTestCase{
 		{Rule: `"php" in Tags`, Matched: true},
 		{Rule: `"java" in Tags`, Matched: false},
 		{Rule: `"nodejs" in Tags or "java" in Tags`, Matched: true},
@@ -44,6 +44,8 @@ func TestMessageMatcher_Match(t *testing.T) {
 		{Rule: `JsonGet("context.enterprise_id", "0") == "0"`, Matched: true},
 		{Rule: `Content startsWith "{"`, Matched: true},
 		{Rule: `Content endsWith "XX"`, Matched: false},
+		{Rule: `Upper(Meta["environment"]) == "DEV"`, Matched: true},
+		{Rule: `Lower(Origin) == "filebeat"`, Matched: true},
 	}
 
 	for _, tc := range testcases {
@@ -52,6 +54,8 @@ func TestMessageMatcher_Match(t *testing.T) {
 		matched, err := matcher.Match(msg)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.Matched, matched)
+
+		assert.Equal(t, tc.Rule, matcher.Rule().Rule)
 	}
 
 	_, err := rule.NewMessageMatcher(repository.Rule{Rule: `xxxxxxx`})

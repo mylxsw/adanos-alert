@@ -16,6 +16,11 @@ var InvalidReturnVal = errors.New("invalid return value: must be a bool value")
 // We will add some helper function to message
 type MessageWrap struct {
 	repository.Message
+	Helpers
+}
+
+func NewMessageWrap(message repository.Message) *MessageWrap {
+	return &MessageWrap{Message: message}
 }
 
 // JsonGet parse message.Content as a json string and return the string value for key
@@ -42,7 +47,7 @@ func NewMessageMatcher(rule repository.Rule) (*MessageMatcher, error) {
 
 // Match check whether the msg is match with the rule
 func (m *MessageMatcher) Match(msg repository.Message) (bool, error) {
-	rs, err := expr.Run(m.program, &MessageWrap{msg})
+	rs, err := expr.Run(m.program, NewMessageWrap(msg))
 	if err != nil {
 		return false, err
 	}

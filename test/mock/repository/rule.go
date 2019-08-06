@@ -21,6 +21,11 @@ func (r *RuleRepo) Add(rule repository.Rule) (id primitive.ObjectID, err error) 
 	rule.ID = primitive.NewObjectID()
 	rule.CreatedAt = time.Now()
 	rule.UpdatedAt = rule.CreatedAt
+	for i, tr := range rule.Triggers {
+		if tr.ID.IsZero() {
+			rule.Triggers[i].ID = primitive.NewObjectID()
+		}
+	}
 
 	r.Rules = append(r.Rules, rule)
 	return rule.ID, nil
