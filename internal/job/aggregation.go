@@ -1,6 +1,7 @@
 package job
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -25,43 +26,20 @@ func NewAggregationJob(app *container.Container) *AggregationJob {
 // 2. change the message groups that satisfied the conditions to pending status
 func (a *AggregationJob) Handle() {
 	log.Debug("aggregating messages...")
-	a.app.MustResolve(func(msgRepo repository.MessageRepo, ruleRepo repository.RuleRepo, groupRepo repository.MessageGroupRepo) {
-		// get all rules
-		rules, err := ruleRepo.Find(bson.M{"status": repository.RuleStatusEnabled})
-		if err != nil {
-			log.Errorf("aggregate message failed because rules query failed: %s", err)
-			return
-		}
 
-		// create matchers from rules
-		var matchers []*rule.MessageMatcher
-		if err := collection.MustNew(rules).Map(func(ru repository.Rule) *rule.MessageMatcher {
-			matcher, err := rule.NewMessageMatcher(ru)
-			if err != nil {
-				log.Errorf("invalid rule: %s", err)
-			}
-
-			return matcher
-		}).All(&matchers); err != nil {
-			log.Errorf("create message matchers failed: %s", err)
-			return
-		}
-
-		// traverse all ungrouped messages to group
-		if err := a.groupingMessages(msgRepo, groupRepo, matchers); err != nil {
-			log.Errorf("aggregate message failed: %s", err)
-			return
-		}
-
-		// change message group status to pending when it reach the aggregate condition
-		if err := a.pendingMessageGroup(groupRepo, msgRepo); err != nil {
-			log.Errorf("message group failed: %s", err)
-			return
-		}
-	})
+	// traverse all ungrouped messages to group
+	a.app.MustResolve(a.groupingMessages)
+	// change message group status to pending when it reach the aggregate condition
+	a.app.MustResolve(a.pendingMessageGroup)
 }
 
-func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupRepo repository.MessageGroupRepo, matchers []*rule.MessageMatcher) error {
+func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) error {
+	matchers, err := a.initializeMatchers(ruleRepo)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
 	collectingGroups := make(map[primitive.ObjectID]repository.MessageGroup)
 	return msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
 		for _, m := range matchers {
@@ -91,6 +69,29 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		msg.Status = repository.MessageStatusCanceled
 		return msgRepo.UpdateID(msg.ID, msg)
 	})
+}
+
+func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*rule.MessageMatcher, error) {
+	// get all rules
+	rules, err := ruleRepo.Find(bson.M{"status": repository.RuleStatusEnabled})
+	if err != nil {
+		return nil, fmt.Errorf("aggregate message failed because rules query failed: %s", err)
+	}
+
+	// create matchers from rules
+	var matchers []*rule.MessageMatcher
+	if err := collection.MustNew(rules).Map(func(ru repository.Rule) *rule.MessageMatcher {
+		matcher, err := rule.NewMessageMatcher(ru)
+		if err != nil {
+			log.Errorf("invalid rule: %s", err)
+		}
+
+		return matcher
+	}).All(&matchers); err != nil {
+		return nil, fmt.Errorf("create message matchers failed: %s", err)
+	}
+
+	return matchers, nil
 }
 
 func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) error {

@@ -24,7 +24,11 @@ type Rule struct {
 	Threshold int64 `bson:"threshold" json:"threshold"`
 	Priority  int64 `bson:"priority" json:"priority"`
 
-	Rule   string     `bson:"rule" json:"rule"`
+	Rule            string    `bson:"rule" json:"rule"`
+	Template        string    `bson:"template" json:"template"`
+	SummaryTemplate string    `bson:"summary_template" json:"summary_template"`
+	Triggers        []Trigger `bson:"triggers" json:"triggers"`
+
 	Status RuleStatus `bson:"status" json:"status"`
 
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
@@ -34,11 +38,13 @@ type Rule struct {
 // ToGroupRule convert Rule to MessageGroupRule
 func (rule Rule) ToGroupRule() MessageGroupRule {
 	return MessageGroupRule{
-		ID:        rule.ID,
-		Name:      rule.Name,
-		Interval:  rule.Interval,
-		Threshold: rule.Threshold,
-		Rule:      rule.Rule,
+		ID:              rule.ID,
+		Name:            rule.Name,
+		Interval:        rule.Interval,
+		Threshold:       rule.Threshold,
+		Rule:            rule.Rule,
+		Template:        rule.Template,
+		SummaryTemplate: rule.SummaryTemplate,
 	}
 }
 

@@ -6,6 +6,12 @@ LDFLAGS := "-s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)"
 run: build 
 	./build/debug/adanos-alert
 
+run-dashboard:
+	cd dashboard && npm run serve
+
+build-dashboard:
+	cd dashboard && yarn build
+
 build:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-alert cmd/adanos-alert/main.go
 

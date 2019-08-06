@@ -12,14 +12,14 @@ type ServiceProvider struct{}
 
 func (s ServiceProvider) Register(app *container.Container) {
 	app.MustSingleton(NewAggregationJob)
-	app.MustSingleton(NewAlertJob)
+	app.MustSingleton(NewTrigger)
 }
 
 func (s ServiceProvider) Boot(app *glacier.Glacier) {
 	app.PeriodJob(func(pj *period_job.Manager, cc *container.Container) {
-		cc.MustResolve(func(aggregationJob *AggregationJob, alertJob *AlertJob) {
+		cc.MustResolve(func(aggregationJob *AggregationJob, alertJob *TriggerJob) {
 			pj.Run("aggregation", aggregationJob, 30*time.Second)
-			pj.Run("alert", alertJob, 15*time.Second)
+			pj.Run("trigger", alertJob, 15*time.Second)
 		})
 	})
 }

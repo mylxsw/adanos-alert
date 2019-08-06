@@ -7,6 +7,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
+	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
 	"github.com/mylxsw/asteria/log"
@@ -54,6 +55,7 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
+	app.Provider(action.ServiceProvider{})
 	app.Provider(impl.ServiceProvider{})
 	app.Provider(api.ServiceProvider{})
 	app.Provider(job.ServiceProvider{})

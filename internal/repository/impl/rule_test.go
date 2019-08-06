@@ -37,6 +37,13 @@ func (r *RuleRepoTestSuite) TestRuleRepo() {
 			Threshold:   0,
 			Priority:    int64(i * 10),
 			Status:      repository.RuleStatusEnabled,
+			Triggers: []repository.Trigger{
+				{
+					PreCondition: "a == b",
+					Action:       "email",
+					Meta:         "",
+				},
+			},
 		})
 		r.NoError(err)
 		r.NotEmpty(id.String())
@@ -47,13 +54,20 @@ func (r *RuleRepoTestSuite) TestRuleRepo() {
 	rule, err := r.repo.Get(lastId)
 	r.NoError(err)
 	r.Equal("Test #9", rule.Name)
+	r.NotEmpty(rule.Triggers[0].ID.String())
 
 	rule.Threshold = 100
+	rule.Triggers = append(rule.Triggers, repository.Trigger{
+		PreCondition: "c == d",
+		Action:       "dingding",
+	})
 	r.NoError(r.repo.UpdateID(lastId, rule))
 
 	rule, err = r.repo.Get(lastId)
 	r.NoError(err)
 	r.EqualValues(100, rule.Threshold)
+	r.EqualValues(2, len(rule.Triggers))
+	r.NotEmpty(rule.Triggers[1].ID.String())
 
 	rules, err := r.repo.Find(bson.M{})
 	r.NoError(err)

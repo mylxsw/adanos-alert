@@ -23,6 +23,12 @@ func (r RuleRepo) Add(rule repository.Rule) (id primitive.ObjectID, err error) {
 	rule.CreatedAt = time.Now()
 	rule.UpdatedAt = rule.CreatedAt
 
+	for i, t := range rule.Triggers {
+		if t.ID.IsZero() {
+			rule.Triggers[i].ID = primitive.NewObjectID()
+		}
+	}
+
 	rs, err := r.col.InsertOne(context.TODO(), rule)
 	if err != nil {
 		return
@@ -75,6 +81,12 @@ func (r RuleRepo) Traverse(filter bson.M, cb func(rule repository.Rule) error) e
 }
 
 func (r RuleRepo) UpdateID(id primitive.ObjectID, rule repository.Rule) error {
+	for i, t := range rule.Triggers {
+		if t.ID.IsZero() {
+			rule.Triggers[i].ID = primitive.NewObjectID()
+		}
+	}
+
 	_, err := r.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, rule)
 	return err
 }
