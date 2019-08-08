@@ -1,11 +1,11 @@
-package rule_test
+package matcher_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/internal/rule"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -23,7 +23,7 @@ func TestTriggerMatcher(t *testing.T) {
 		MessageCount: 10,
 		CreatedAt:    currentTs,
 	}
-	triggerCtx := rule.NewTriggerContext(grp, func() []repository.Message {
+	triggerCtx := matcher.NewTriggerContext(grp, func() []repository.Message {
 		return []repository.Message{
 			{
 				Content: "Hello, world",
@@ -58,16 +58,16 @@ func TestTriggerMatcher(t *testing.T) {
 	}
 
 	for _, ts := range testcases {
-		matcher, err := rule.NewTriggerMatcher(repository.Trigger{PreCondition: ts.Cond,})
+		mt, err := matcher.NewTriggerMatcher(repository.Trigger{PreCondition: ts.Cond,})
 		assert.NoError(t, err)
 
-		matched, err := matcher.Match(triggerCtx)
+		matched, err := mt.Match(triggerCtx)
 		assert.NoError(t, err)
 		assert.Equal(t, ts.Matched, matched)
 
-		assert.Equal(t, ts.Cond, matcher.Trigger().PreCondition)
+		assert.Equal(t, ts.Cond, mt.Trigger().PreCondition)
 	}
 
-	_, err := rule.NewTriggerMatcher(repository.Trigger{PreCondition: "xxxxx"})
+	_, err := matcher.NewTriggerMatcher(repository.Trigger{PreCondition: "xxxxx"})
 	assert.Error(t, err)
 }

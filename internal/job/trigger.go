@@ -2,8 +2,8 @@ package job
 
 import (
 	"github.com/mylxsw/adanos-alert/internal/action"
+	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	matcher "github.com/mylxsw/adanos-alert/internal/rule"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/go-toolkit/container"
 	"go.mongodb.org/mongo-driver/bson"

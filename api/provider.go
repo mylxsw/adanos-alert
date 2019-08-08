@@ -11,4 +11,5 @@ func (s ServiceProvider) Register(app *container.Container) {}
 
 func (s ServiceProvider) Boot(app *glacier.Glacier) {
 	app.WebAppRouter(routers)
+	app.WebAppMuxRouter(graphqlRouters(app.Container()))
 }

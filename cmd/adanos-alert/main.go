@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
@@ -20,6 +21,9 @@ import (
 
 var Version string
 var GitCommit string
+
+// ConnectionTimeout is a timeout setting for mongodb connection
+const ConnectionTimeout = 5 * time.Second
 
 func main() {
 	app := glacier.Create(fmt.Sprintf("%s (%s)", Version, GitCommit))
@@ -45,8 +49,13 @@ func main() {
 		}
 	})
 
-	app.Singleton(func(conf *configs.Config) *mongo.Database {
-		conn, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(conf.MongoURI))
+	app.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
+		ctx, _ = context.WithTimeout(ctx, ConnectionTimeout)
+		conn, err := mongo.Connect(ctx, options.Client().
+			ApplyURI(conf.MongoURI).
+			SetServerSelectionTimeout(ConnectionTimeout).
+			SetConnectTimeout(ConnectionTimeout).
+			SetSocketTimeout(ConnectionTimeout))
 		if err != nil {
 			log.Errorf("connect to mongodb failed: %s", err)
 			return nil

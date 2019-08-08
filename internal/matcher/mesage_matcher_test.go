@@ -1,11 +1,11 @@
-package rule_test
+package matcher_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/internal/rule"
+	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -49,15 +49,15 @@ func TestMessageMatcher_Match(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		matcher, err := rule.NewMessageMatcher(repository.Rule{Rule: tc.Rule,})
+		mt, err := matcher.NewMessageMatcher(repository.Rule{Rule: tc.Rule,})
 		assert.NoError(t, err)
-		matched, err := matcher.Match(msg)
+		matched, err := mt.Match(msg)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.Matched, matched)
 
-		assert.Equal(t, tc.Rule, matcher.Rule().Rule)
+		assert.Equal(t, tc.Rule, mt.Rule().Rule)
 	}
 
-	_, err := rule.NewMessageMatcher(repository.Rule{Rule: `xxxxxxx`})
+	_, err := matcher.NewMessageMatcher(repository.Rule{Rule: `xxxxxxx`})
 	assert.Error(t, err)
 }

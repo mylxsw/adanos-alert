@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/internal/rule"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/go-toolkit/collection"
 	"github.com/mylxsw/go-toolkit/container"
@@ -71,7 +71,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 	})
 }
 
-func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*rule.MessageMatcher, error) {
+func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher, error) {
 	// get all rules
 	rules, err := ruleRepo.Find(bson.M{"status": repository.RuleStatusEnabled})
 	if err != nil {
@@ -79,9 +79,9 @@ func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*ru
 	}
 
 	// create matchers from rules
-	var matchers []*rule.MessageMatcher
-	if err := collection.MustNew(rules).Map(func(ru repository.Rule) *rule.MessageMatcher {
-		matcher, err := rule.NewMessageMatcher(ru)
+	var matchers []*matcher.MessageMatcher
+	if err := collection.MustNew(rules).Map(func(ru repository.Rule) *matcher.MessageMatcher {
+		matcher, err := matcher.NewMessageMatcher(ru)
 		if err != nil {
 			log.Errorf("invalid rule: %s", err)
 		}
