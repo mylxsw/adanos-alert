@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -28,15 +29,34 @@ type Rule struct {
 	Threshold int64 `json:"threshold"`
 	Priority  int64 `json:"priority"`
 
-	Rule            string    `json:"rule"`
-	Template        string    `json:"template"`
-	SummaryTemplate string    `json:"summary_template"`
-	Triggers        []Trigger `json:"triggers"`
+	Rule            string     `json:"rule"`
+	Template        string     `json:"template"`
+	SummaryTemplate string     `json:"summary_template"`
+	Triggers        []*Trigger `json:"triggers"`
 
 	Status repository.RuleStatus `json:"status"`
 
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	CreatedAt   string    `json:"created_at"`
+	UpdatedAt   string    `json:"updated_at"`
+	CreatedTime time.Time `json:"created_time"`
+}
+
+func (r Rule) TriggersResolver() ([]Trigger, error) {
+	return []Trigger{
+		{
+			ID:           "000001",
+			PreCondition: "a == b",
+		},
+		{
+			ID:           "000002",
+			PreCondition: "a == b and c == d",
+		},
+	}, nil
+}
+
+func (r Rule) CreatedTimeResolver() (string, error) {
+	log.Info("query created_time")
+	return r.CreatedTime.Format(time.RFC3339), nil
 }
 
 func RuleFromRepo(r repository.Rule) Rule {
@@ -52,8 +72,9 @@ func RuleFromRepo(r repository.Rule) Rule {
 		SummaryTemplate: r.SummaryTemplate,
 		Triggers:        TriggersFromRepos(r.Triggers),
 		Status:          r.Status,
-		CreatedAt:       r.CreatedAt,
-		UpdatedAt:       r.UpdatedAt,
+		CreatedAt:       r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       r.UpdatedAt.Format(time.RFC3339),
+		CreatedTime:     r.CreatedAt,
 	}
 }
 
@@ -68,6 +89,8 @@ func RulesFromRepos(rs []repository.Rule) []Rule {
 
 func RuleToRepo(r Rule) repository.Rule {
 	id, _ := primitive.ObjectIDFromHex(r.ID)
+	createdAt, _ := time.Parse(time.RFC3339, r.CreatedAt)
+	updatedAt, _ := time.Parse(time.RFC3339, r.UpdatedAt)
 	return repository.Rule{
 		ID:              id,
 		Name:            r.Name,
@@ -80,13 +103,13 @@ func RuleToRepo(r Rule) repository.Rule {
 		SummaryTemplate: r.SummaryTemplate,
 		Triggers:        TriggersToRepo(r.Triggers),
 		Status:          r.Status,
-		CreatedAt:       r.CreatedAt,
-		UpdatedAt:       r.UpdatedAt,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
 	}
 }
 
-func TriggerFromRepo(tr repository.Trigger) Trigger {
-	return Trigger{
+func TriggerFromRepo(tr repository.Trigger) *Trigger {
+	return &Trigger{
 		ID:           tr.ID.Hex(),
 		PreCondition: tr.PreCondition,
 		Action:       tr.Action,
@@ -97,8 +120,8 @@ func TriggerFromRepo(tr repository.Trigger) Trigger {
 	}
 }
 
-func TriggersFromRepos(trs []repository.Trigger) []Trigger {
-	triggers := make([]Trigger, len(trs))
+func TriggersFromRepos(trs []repository.Trigger) []*Trigger {
+	triggers := make([]*Trigger, len(trs))
 	for i, tr := range trs {
 		triggers[i] = TriggerFromRepo(tr)
 	}
@@ -119,10 +142,10 @@ func TriggerToRepo(tr Trigger) repository.Trigger {
 	}
 }
 
-func TriggersToRepo(trs []Trigger) []repository.Trigger {
+func TriggersToRepo(trs []*Trigger) []repository.Trigger {
 	var triggers = make([]repository.Trigger, len(trs))
 	for i, t := range trs {
-		triggers[i] = TriggerToRepo(t)
+		triggers[i] = TriggerToRepo(*t)
 	}
 
 	return triggers

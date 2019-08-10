@@ -14,11 +14,11 @@ var Int64 = graphql.NewScalar(graphql.ScalarConfig{
 	Serialize: func(value interface{}) interface{} {
 		return value.(int64)
 	},
-	// ParseValue parses GraphQL variables from `int64` to `Int64`
+	// ParseValue parses GraphQLBuilder variables from `int64` to `Int64`
 	ParseValue: func(value interface{}) interface{} {
 		return value.(int64)
 	},
-	// ParseLiteral parses GraphQL AST value to `Int64`
+	// ParseLiteral parses GraphQLBuilder AST value to `Int64`
 	ParseLiteral: func(valueAST ast.Value) interface{} {
 		switch valueAST := valueAST.(type) {
 		case *ast.IntValue:

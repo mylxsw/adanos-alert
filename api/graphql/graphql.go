@@ -1,9 +1,9 @@
 package graphql
 
 import (
-	"github.com/graphql-go/graphql"
+	lib "github.com/mylxsw/adanos-alert/pkg/graphql"
 )
 
 type Graphql interface {
-	Register(query *graphql.Object, mutation *graphql.Object)
+	Register(builder lib.GraphQL)
 }

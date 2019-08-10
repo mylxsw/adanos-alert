@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"github.com/graphql-go/graphql"
+	lib "github.com/mylxsw/adanos-alert/pkg/graphql"
 )
 
 type WelcomeObject struct {
@@ -12,23 +13,16 @@ func NewWelcomeObject() *WelcomeObject {
 	return &WelcomeObject{}
 }
 
-func (w *WelcomeObject) Register(query *graphql.Object, mutation *graphql.Object) {
-	query.AddFieldConfig("welcome", &graphql.Field{
-		Type: graphql.NewObject(graphql.ObjectConfig{
-			Name:   "WelcomeObject",
-			Fields: graphql.BindFields(WelcomeObject{}),
-		}),
-		Args: graphql.FieldConfigArgument{
-			"name": &graphql.ArgumentConfig{
-				Type:         graphql.String,
-				DefaultValue: "Graphql",
-			},
-		},
-		Resolve: w.Hello,
-	})
+func (w *WelcomeObject) Register(builder lib.GraphQL) {
+	builder.Query("welcome", w.Hello())
 }
 
-func (w *WelcomeObject) Hello(p graphql.ResolveParams) (interface{}, error) {
-	name := p.Args["name"].(string)
-	return WelcomeObject{Message: name}, nil
+func (w *WelcomeObject) Hello() *graphql.Field {
+	return lib.CreateField(
+		lib.Object(w),
+		lib.BindArgs(struct {Name string `json:"name"`}{}),
+		func(arg struct{ Name string `json:"name"` }) (interface{}, error) {
+			return WelcomeObject{Message: arg.Name}, nil
+		},
+	)
 }

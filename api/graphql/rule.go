@@ -1,6 +1,8 @@
 package graphql
 
 import (
+	"fmt"
+
 	"github.com/graphql-go/graphql"
 	"github.com/mylxsw/adanos-alert/api/view"
 	"github.com/mylxsw/adanos-alert/internal/matcher"
@@ -11,20 +13,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var ruleType = graphql.NewObject(graphql.ObjectConfig{
-	Name:   "Rule",
-	Fields: graphql.BindFields(view.Rule{}),
-})
+var ruleType = gql.Object(view.Rule{})
 
 type RuleObject struct {
 	cc *container.Container
 }
 
-func (r *RuleObject) Register(query *graphql.Object, mutation *graphql.Object) {
+func (r *RuleObject) Register(builder gql.GraphQL) {
 	r.cc.MustResolve(func(ruleRepo repository.RuleRepo) {
-		query.AddFieldConfig("rules", r.GetAllRules(ruleRepo))
-		mutation.AddFieldConfig("addRule", r.AddRule(ruleRepo))
-		mutation.AddFieldConfig("deleteRule", r.DeleteRule(ruleRepo))
+		builder.Query("rules", r.GetAllRules(ruleRepo))
+		builder.Mutation("addRule", r.AddRule(ruleRepo))
+		builder.Mutation("deleteRule", r.DeleteRule(ruleRepo))
 	})
 }
 
@@ -35,7 +34,7 @@ func NewRuleObject(cc *container.Container) *RuleObject {
 func (r *RuleObject) GetAllRules(ruleRepo repository.RuleRepo) *graphql.Field {
 	return gql.CreateField(
 		graphql.NewList(ruleType),
-		gql.BindArgs(struct{ ID string `json:"id"` }{}, "id"),
+		gql.BindArgs(struct{ ID string `json:"id"` }{}),
 		func(arg struct{ ID string `json:"id"` }) (interface{}, error) {
 			filter := bson.M{}
 
@@ -88,9 +87,13 @@ func (r *RuleObject) GetAllRules(ruleRepo repository.RuleRepo) *graphql.Field {
 // }
 
 func (r *RuleObject) AddRule(repo repository.RuleRepo) *graphql.Field {
+	args := gql.BindArgs(view.Rule{}, "name", "description", "interval", "threshold", "priority", "triggers", "rule", "template", "summary_template", "status")
+	for name, arg := range args {
+		fmt.Println(name, arg.Type, arg.Type.Name())
+	}
 	return gql.CreateField(
 		ruleType,
-		gql.BindArgs(view.Rule{}, "name", "description", "interval", "threshold", "priority", "rule", "template", "summary_template", "status"),
+		gql.BindArgs(view.Rule{}, "name", "description", "interval", "threshold", "priority", "triggers", "rule", "template", "summary_template", "status"),
 		func(rule view.Rule) (interface{}, error) {
 			value := view.RuleToRepo(rule)
 
@@ -168,7 +171,7 @@ func (r *RuleObject) AddRule(repo repository.RuleRepo) *graphql.Field {
 func (r *RuleObject) DeleteRule(repo repository.RuleRepo) *graphql.Field {
 	return gql.CreateField(
 		ruleType,
-		gql.BindArgs(struct{ ID string `json:"id"` }{}, "id"),
+		gql.BindArgs(struct{ ID string `json:"id"` }{}),
 		func(arg struct{ ID string `json:"id"` }) (interface{}, error) {
 			id, err := primitive.ObjectIDFromHex(arg.ID)
 			if err != nil {
