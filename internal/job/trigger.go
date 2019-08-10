@@ -5,7 +5,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/go-toolkit/container"
+	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

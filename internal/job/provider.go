@@ -3,8 +3,8 @@ package job
 import (
 	"time"
 
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
-	"github.com/mylxsw/go-toolkit/container"
 	"github.com/mylxsw/go-toolkit/period_job"
 )
 

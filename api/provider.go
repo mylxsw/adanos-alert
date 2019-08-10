@@ -1,8 +1,8 @@
 package api
 
 import (
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
-	"github.com/mylxsw/go-toolkit/container"
 )
 
 type ServiceProvider struct{}

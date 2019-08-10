@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/go-toolkit/collection"
+	"github.com/mylxsw/coll"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -86,7 +86,7 @@ func (m *MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gr
 }
 
 func (m *MessageGroupRepo) filter(filter bson.M) (groups []repository.MessageGroup) {
-	err := collection.MustNew(m.Groups).Filter(func(grp repository.MessageGroup) bool {
+	err := coll.MustNew(m.Groups).Filter(func(grp repository.MessageGroup) bool {
 		if status, ok := filter["status"]; ok && grp.Status != status {
 			return false
 		}

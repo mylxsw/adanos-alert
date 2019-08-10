@@ -1,0 +1,47 @@
+type Rule {
+    id: ID!
+    name: String!
+    description: String!
+    interval: Int!
+    threshold: Int!
+    priority: Int!
+    rule: String!
+    template: String!
+    summary_template: String!
+    triggers: [Trigger!]!
+    status: String!
+    created_at: String!
+    updated_at: String!
+}
+
+type Trigger {
+    id: ID!
+    pre_condition: String!
+    action: String!
+}
+
+type Query {
+    rules: [Rule!]!
+}
+
+input NewTrigger {
+    pre_condition: String!
+    action: String!
+}
+
+input NewRule {
+    name: String!
+    description: String
+    interval: Int!
+    threshold: Int!
+    priority: Int!
+    rule: String!
+    template: String
+    summary_template: String
+    triggers: [NewTrigger]
+    status: String
+}
+
+type Mutation {
+    addRule(rule: NewRule): Rule!
+}

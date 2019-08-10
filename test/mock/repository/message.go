@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/go-toolkit/collection"
+	"github.com/mylxsw/coll"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -78,7 +78,7 @@ func (m *MessageRepo) Count(filter bson.M) (int64, error) {
 }
 
 func (m *MessageRepo) filter(filter bson.M) (messages []repository.Message) {
-	err := collection.MustNew(m.Messages).Filter(func(msg repository.Message) bool {
+	err := coll.MustNew(m.Messages).Filter(func(msg repository.Message) bool {
 		if status, ok := filter["status"]; ok && msg.Status != status {
 			return false
 		}

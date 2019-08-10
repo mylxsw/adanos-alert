@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	mockAction "github.com/mylxsw/adanos-alert/test/mock/action"
 	mockRepo "github.com/mylxsw/adanos-alert/test/mock/repository"
-	"github.com/mylxsw/go-toolkit/container"
+	"github.com/mylxsw/container"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 )

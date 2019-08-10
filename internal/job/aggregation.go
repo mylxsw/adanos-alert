@@ -7,8 +7,8 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/go-toolkit/collection"
-	"github.com/mylxsw/go-toolkit/container"
+	"github.com/mylxsw/coll"
+	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -80,13 +80,13 @@ func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*ma
 
 	// create matchers from rules
 	var matchers []*matcher.MessageMatcher
-	if err := collection.MustNew(rules).Map(func(ru repository.Rule) *matcher.MessageMatcher {
-		matcher, err := matcher.NewMessageMatcher(ru)
+	if err := coll.MustNew(rules).Map(func(ru repository.Rule) *matcher.MessageMatcher {
+		mat, err := matcher.NewMessageMatcher(ru)
 		if err != nil {
 			log.Errorf("invalid rule: %s", err)
 		}
 
-		return matcher
+		return mat
 	}).All(&matchers); err != nil {
 		return nil, fmt.Errorf("create message matchers failed: %s", err)
 	}

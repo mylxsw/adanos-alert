@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/matcher"
+	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

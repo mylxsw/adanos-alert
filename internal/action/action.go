@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
-	"github.com/mylxsw/go-toolkit/container"
 )
 
 type Action interface {

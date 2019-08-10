@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/go-toolkit/collection"
+	"github.com/mylxsw/coll"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -61,7 +61,7 @@ func (r *RuleRepo) DeleteID(id primitive.ObjectID) error {
 }
 
 func (r *RuleRepo) filter(filter bson.M) (rules []repository.Rule) {
-	err := collection.MustNew(r.Rules).Filter(func(rule repository.Rule) bool {
+	err := coll.MustNew(r.Rules).Filter(func(rule repository.Rule) bool {
 		if status, ok := filter["status"]; ok && rule.Status != status {
 			return false
 		}
