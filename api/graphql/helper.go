@@ -7,7 +7,41 @@ import (
 	"github.com/mylxsw/coll"
 )
 
-func RuleToRepo(rule *NewRule) repository.Rule {
+func UserToRepo(original repository.User, user NewUser) repository.User {
+	var metas []repository.UserMeta
+	_ = coll.Map(user.Metas, &metas, func(meta *NewUserMeta) repository.UserMeta {
+		return repository.UserMeta{
+			Key:   meta.Key,
+			Value: meta.Value,
+		}
+	})
+
+	original.Name = user.Name
+	original.Metas = metas
+	original.Status = repository.UserStatus(user.Status)
+
+	return original
+}
+
+func RepoToUser(user repository.User) *User {
+	var metas []*UserMeta
+	_ = coll.Map(user.Metas, &metas, func(meta repository.UserMeta) *UserMeta {
+		return &UserMeta{
+			Key:   meta.Key,
+			Value: meta.Value,
+		}
+	})
+	return &User{
+		ID:        user.ID.Hex(),
+		Name:      user.Name,
+		Metas:     metas,
+		Status:    string(user.Status),
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func RuleToRepo(rule NewRule) repository.Rule {
 	var triggers []repository.Trigger
 	_ = coll.Map(rule.Triggers, &triggers, func(r *NewTrigger) repository.Trigger {
 		return repository.Trigger{

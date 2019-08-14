@@ -1,3 +1,22 @@
+type Query {
+    rules: [Rule!]!
+    rule(id: ID!): Rule
+
+    users(first: Int=0, limit: Int=20): UserPagination!
+    user(id: ID!): User
+}
+
+type Mutation {
+    addRule(rule: NewRule!): Rule!
+    updateRule(id: ID!, rule: NewRule!) :Rule!
+    deleteRule(id: ID!) :Rule!
+    addUser(user: NewUser!): User!
+    updateUser(id: ID!, user: NewUser!) :User!
+    deleteUser(id: ID!) :User!
+}
+
+#####################################################################
+
 type Rule {
     id: ID!
     name: String!
@@ -20,9 +39,27 @@ type Trigger {
     action: String!
 }
 
-type Query {
-    rules: [Rule!]!
+type User {
+    id: ID!
+    name: String!
+    metas: [UserMeta!]!
+    status: String!
+    created_at: String!
+    updated_at: String!
 }
+
+type UserMeta {
+    key: String!
+    value: String!
+}
+
+type UserPagination {
+    hasNext: Boolean!
+    users: [User!]!
+    cursor: Int!
+}
+
+####################################################################
 
 input NewTrigger {
     pre_condition: String!
@@ -42,6 +79,13 @@ input NewRule {
     status: String
 }
 
-type Mutation {
-    addRule(rule: NewRule): Rule!
+input NewUserMeta {
+    key: String!
+    value: String!
+}
+
+input NewUser {
+    name: String!
+    metas: [NewUserMeta!]!
+    status: String!
 }

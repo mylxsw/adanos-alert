@@ -20,6 +20,17 @@ type NewTrigger struct {
 	Action       string `json:"action"`
 }
 
+type NewUser struct {
+	Name   string         `json:"name"`
+	Metas  []*NewUserMeta `json:"metas"`
+	Status string         `json:"status"`
+}
+
+type NewUserMeta struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type Rule struct {
 	ID              string     `json:"id"`
 	Name            string     `json:"name"`
@@ -40,4 +51,24 @@ type Trigger struct {
 	ID           string `json:"id"`
 	PreCondition string `json:"pre_condition"`
 	Action       string `json:"action"`
+}
+
+type User struct {
+	ID        string      `json:"id"`
+	Name      string      `json:"name"`
+	Metas     []*UserMeta `json:"metas"`
+	Status    string      `json:"status"`
+	CreatedAt string      `json:"created_at"`
+	UpdatedAt string      `json:"updated_at"`
+}
+
+type UserMeta struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type UserPagination struct {
+	HasNext bool    `json:"hasNext"`
+	Users   []*User `json:"users"`
+	Cursor  int     `json:"cursor"`
 }
