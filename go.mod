@@ -3,28 +3,33 @@ module github.com/mylxsw/adanos-alert
 go 1.12
 
 require (
-	github.com/99designs/gqlgen v0.9.2
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonmedv/expr v0.0.0-20190722083458-9449c89f5e27
-	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23
+	github.com/buger/jsonparser v0.0.0-20191004114745-ee4c978eae7e
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/go-chi/chi v3.3.2+incompatible // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/graphql-go/graphql v0.7.8
-	github.com/graphql-go/handler v0.2.3
-	github.com/mylxsw/asteria v0.0.0-20190730075526-1867e6bc4dbe
+	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20190810122756-1fd99a90f7c6
-	github.com/mylxsw/glacier v0.0.0-20190810135133-1c05966febcd
-	github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9
-	github.com/mylxsw/hades v0.0.0-20190810133536-f14dbfdce5c6
-	github.com/stretchr/testify v1.3.0
+	github.com/mylxsw/glacier v0.0.0-20190916101037-6d7b39368699
+	github.com/mylxsw/go-toolkit v0.0.0-20190919070831-69b6f1e50428
+	github.com/mylxsw/hades v0.0.0-20190908103158-385ba1d43475
+	github.com/stretchr/testify v1.4.0
+	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
+	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
+	github.com/swaggo/swag v1.6.2
 	github.com/tidwall/pretty v1.0.0 // indirect
-	github.com/urfave/cli v1.21.0
-	github.com/vektah/gqlparser v1.1.2
+	github.com/urfave/cli v1.22.1
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.0.4
-	golang.org/x/tools v0.0.0-20190809145639-6d4652c779c4 // indirect
-	gopkg.in/ini.v1 v1.46.0 // indirect
+	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
+	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/tools v0.0.0-20191007185444-6536af71d98a // indirect
+	gopkg.in/yaml.v2 v2.2.4 // indirect
 )

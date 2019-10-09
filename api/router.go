@@ -1,14 +1,36 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/mylxsw/adanos-alert/api/controller"
+	"github.com/mylxsw/adanos-alert/configs"
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/hades"
 )
 
-func routers(router *hades.Router, mw hades.RequestMiddleware) {
+func routers(cc *container.Container) func(router *hades.Router, mw hades.RequestMiddleware) {
+	conf := cc.MustGet(&configs.Config{}).(*configs.Config)
+	return func(router *hades.Router, mw hades.RequestMiddleware) {
+		mws := make([]hades.HandlerDecorator, 0)
+		mws = append(mws, mw.AccessLog(), mw.CORS("*"), mw.JSONExceptionHandler())
+		if conf.APIToken != "" {
+			authMiddleware := mw.AuthHandler(func(typ string, credential string) error {
+				if typ != "Bearer" {
+					return errors.New("invalid auth type, only support Bearer")
+				}
 
-	router.Group("/", func(router *hades.Router) {
-		controller.NewWelcomeController().Register(router)
+				if credential != conf.APIToken {
+					return errors.New("token not match")
+				}
 
-	}, mw.AccessLog(), mw.JSONExceptionHandler(), mw.CORS("*"))
+				return nil
+			})
+
+			mws = append(mws, authMiddleware)
+		}
+		router.Group("/api", func(router *hades.Router) {
+			controller.NewWelcomeController(cc).Register(router)
+		}, mws...)
+	}
 }

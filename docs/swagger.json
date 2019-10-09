@@ -1,0 +1,44 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Adanos-alert is a alert manager with multi alert channel support",
+        "title": "Adanos-alert API",
+        "contact": {
+            "name": "mylxsw",
+            "url": "https://github.com/mylxsw/adanos-alert",
+            "email": "mylxsw@aicode.cc"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://raw.githubusercontent.com/mylxsw/adanos-alert/master/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:19999",
+    "basePath": "/api",
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "欢迎页面，API版本信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.WelcomeMessage"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.WelcomeMessage": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

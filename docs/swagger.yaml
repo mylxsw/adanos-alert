@@ -1,0 +1,29 @@
+basePath: /api
+definitions:
+  controller.WelcomeMessage:
+    properties:
+      version:
+        type: string
+    type: object
+host: localhost:19999
+info:
+  contact:
+    email: mylxsw@aicode.cc
+    name: mylxsw
+    url: https://github.com/mylxsw/adanos-alert
+  description: Adanos-alert is a alert manager with multi alert channel support
+  license:
+    name: MIT
+    url: https://raw.githubusercontent.com/mylxsw/adanos-alert/master/LICENSE
+  title: Adanos-alert API
+  version: "1.0"
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.WelcomeMessage'
+      summary: 欢迎页面，API版本信息
+swagger: "2.0"
