@@ -45,7 +45,13 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		for _, m := range matchers {
 			matched, err := m.Match(msg)
 			if err != nil {
-				return err
+				log.WithFields(log.Fields{
+					"msg_id":      msg.ID,
+					"msg_content": msg.Content,
+					"rule_id":     m.Rule().ID,
+					"err":         err.Error(),
+				}).Errorf("match message failed: %w", err)
+				continue
 			}
 
 			// if the message matched a rule, update message's group_id and skip to next message
@@ -53,20 +59,28 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 				if _, ok := collectingGroups[m.Rule().ID]; !ok {
 					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule())
 					if err != nil {
-						log.Errorf("create collecting group failed: %s", err)
+						log.WithFields(log.Fields{
+							"msg_id":      msg.ID,
+							"msg_content": msg.Content,
+							"rule_id":     m.Rule().ID,
+							"err":         err.Error(),
+						}).Errorf("create collecting group failed: %w", err)
 						return err
 					}
 
 					collectingGroups[m.Rule().ID] = grp
 				}
 
-				msg.GroupID = collectingGroups[m.Rule().ID].ID
+				msg.GroupID = append(msg.GroupID, collectingGroups[m.Rule().ID].ID)
 				msg.Status = repository.MessageStatusGrouped
-				return msgRepo.UpdateID(msg.ID, msg)
 			}
 		}
 
-		msg.Status = repository.MessageStatusCanceled
+		// if message not match any rules, set message as canceled
+		if msg.Status != repository.MessageStatusGrouped {
+			msg.Status = repository.MessageStatusCanceled
+		}
+
 		return msgRepo.UpdateID(msg.ID, msg)
 	})
 }
@@ -100,7 +114,7 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 			return nil
 		}
 
-		msgCount, err := msgRepo.Count(bson.M{"group_id": grp.ID})
+		msgCount, err := msgRepo.Count(bson.M{"group_ids": bson.M{"$in": grp.ID}})
 		if err != nil {
 			return err
 		}

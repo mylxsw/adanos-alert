@@ -34,8 +34,9 @@ func (s *MessageTestSuit) TestMessageCURD() {
 			"level":       "error",
 			"environment": "dev",
 		},
-		Tags:   []string{"test", "test2"},
-		Origin: "elasticsearch",
+		Tags:    []string{"test", "test2"},
+		Origin:  "elasticsearch",
+		GroupID: make([]primitive.ObjectID, 0),
 	}
 
 	id, err := s.repo.Add(msg)
@@ -63,11 +64,11 @@ func (s *MessageTestSuit) TestMessageCURD() {
 
 	groupId := primitive.NewObjectID()
 	s.NoError(s.repo.Traverse(bson.M{"meta.filename": "/var/log/message"}, func(msg repository.Message) error {
-		msg.GroupID = groupId
+		msg.GroupID = []primitive.ObjectID{groupId}
 		return s.repo.UpdateID(msg.ID, msg)
 	}))
 
-	msgs, err := s.repo.Find(bson.M{"group_id": primitive.NilObjectID})
+	msgs, err := s.repo.Find(bson.D{{"$or", bson.A{bson.M{"group_ids": nil}, bson.M{"group_ids": bson.M{"$size": 0}}}}})
 	s.NoError(err)
 	s.EqualValues(1, len(msgs))
 

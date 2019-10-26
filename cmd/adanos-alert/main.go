@@ -10,8 +10,8 @@ import (
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/job"
+	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
-	"github.com/mylxsw/asteria/formatter"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
@@ -45,32 +45,48 @@ func main() {
 		Value:  "adanos-alert",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:  "api_token",
-		Usage: "API Token for api access control",
-		Value: "",
-	}))
-	app.AddFlags(altsrc.NewBoolTFlag(cli.BoolTFlag{
-		Name:  "console_color",
-		Usage: "log colorful for console",
+		Name:   "api_token",
+		Usage:  "API Token for api access control",
+		EnvVar: "ADANOS_API_TOKEN",
+		Value:  "",
 	}))
 	app.AddFlags(altsrc.NewBoolFlag(cli.BoolFlag{
 		Name:  "use_local_dashboard",
 		Usage: "whether using local dashboard, this is used when development",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:  "aggregation_period",
-		Usage: "aggregation job execute period",
-		Value: "30s",
+		Name:   "aggregation_period",
+		Usage:  "aggregation job execute period",
+		EnvVar: "ADANOS_AGGREGATION_PERIOD",
+		Value:  "30s",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:  "action_trigger_period",
-		Usage: "action trigger job execute period",
-		Value: "15s",
+		Name:   "action_trigger_period",
+		Usage:  "action trigger job execute period",
+		EnvVar: "ADANOS_ACTION_TRIGGER_PERIOD",
+		Value:  "15s",
+	}))
+	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
+		Name:   "queue_job_max_retry_times",
+		Usage:  "set queue job max retry times",
+		EnvVar: "ADANOS_QUEUE_JOB_MAX_RETRY_TIMES",
+		Value:  3,
+	}))
+	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
+		Name:   "queue_worker_num",
+		Usage:  "set queue worker numbers",
+		EnvVar: "ADANOS_QUEUE_WORKER_NUM",
+		Value:  3,
 	}))
 
-	app.BeforeInitialize(func(c *cli.Context) error {
-		log.DefaultLogFormatter(formatter.NewDefaultFormatter(c.Bool("console_color")))
-		return nil
+	app.UseStackLogger(func(stackWriter *writer.StackWriter) {
+		stackWriter.PushWithLevels(writer.NewStdoutWriter())
+		stackWriter.PushWithLevels(
+			NewErrorCollectorWriter(),
+			level.Error,
+			level.Emergency,
+			level.Critical,
+		)
 	})
 
 	app.Singleton(func(c *cli.Context) *configs.Config {
@@ -87,13 +103,14 @@ func main() {
 		}
 
 		return &configs.Config{
-			MongoURI:            c.String("mongo_uri"),
-			MongoDB:             c.String("mongo_db"),
-			UseLocalDashboard:   c.Bool("use_local_dashboard"),
-			ConsoleColor:        c.Bool("console_color"),
-			APIToken:            c.String("api_token"),
-			AggregationPeriod:   aggregationPeriod,
-			ActionTriggerPeriod: actionTriggerPeriod,
+			MongoURI:              c.String("mongo_uri"),
+			MongoDB:               c.String("mongo_db"),
+			UseLocalDashboard:     c.Bool("use_local_dashboard"),
+			APIToken:              c.String("api_token"),
+			AggregationPeriod:     aggregationPeriod,
+			ActionTriggerPeriod:   actionTriggerPeriod,
+			QueueJobMaxRetryTimes: c.Int("queue_job_max_retry_times"),
+			QueueWorkerNum:        c.Int("queue_worker_num"),
 		}
 	})
 
@@ -113,17 +130,6 @@ func main() {
 	})
 
 	app.Main(func(conf *configs.Config) {
-		stackWriter := writer.NewStackWriter()
-		stackWriter.PushWithLevels(writer.NewStdoutWriter())
-		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(),
-			level.Error,
-			level.Emergency,
-			level.Critical,
-		)
-
-		log.All().LogWriter(stackWriter)
-
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
@@ -133,6 +139,7 @@ func main() {
 	app.Provider(impl.ServiceProvider{})
 	app.Provider(api.ServiceProvider{})
 	app.Provider(job.ServiceProvider{})
+	app.Provider(queue.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)

@@ -9,7 +9,7 @@ type WelcomeController struct {
 	cc *container.Container
 }
 
-func NewWelcomeController(cc *container.Container) Controller {
+func NewWelcomeController(cc *container.Container) hades.Controller {
 	return &WelcomeController{cc: cc}
 }
 
@@ -25,6 +25,6 @@ type WelcomeMessage struct {
 // @Summary 欢迎页面，API版本信息
 // @Success 200 {object} controller.WelcomeMessage
 // @Router / [get]
-func (w *WelcomeController) Home(ctx *hades.WebContext, req *hades.HttpRequest) WelcomeMessage {
+func (w *WelcomeController) Home(ctx hades.Context, req hades.Request) WelcomeMessage {
 	return WelcomeMessage{Version: w.cc.MustGet("version").(string)}
 }

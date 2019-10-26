@@ -35,15 +35,15 @@ func (m *MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err er
 	return msg, repository.ErrNotFound
 }
 
-func (m *MessageRepo) Find(filter bson.M) (messages []repository.Message, err error) {
+func (m *MessageRepo) Find(filter interface{}) (messages []repository.Message, err error) {
 	panic("implement me")
 }
 
-func (m *MessageRepo) Paginate(filter bson.M, offset, limit int64) (messages []repository.Message, next int64, err error) {
+func (m *MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Message, next int64, err error) {
 	panic("implement me")
 }
 
-func (m *MessageRepo) Delete(filter bson.M) error {
+func (m *MessageRepo) Delete(filter interface{}) error {
 	m.Messages = m.filter(filter)
 	return nil
 }
@@ -52,7 +52,7 @@ func (m *MessageRepo) DeleteID(id primitive.ObjectID) error {
 	return m.Delete(bson.M{"_id": id})
 }
 
-func (m *MessageRepo) Traverse(filter bson.M, cb func(msg repository.Message) error) error {
+func (m *MessageRepo) Traverse(filter interface{}, cb func(msg repository.Message) error) error {
 	for _, msg := range m.filter(filter) {
 		if err := cb(msg); err != nil {
 			return err
@@ -73,17 +73,17 @@ func (m *MessageRepo) UpdateID(id primitive.ObjectID, update repository.Message)
 	return nil
 }
 
-func (m *MessageRepo) Count(filter bson.M) (int64, error) {
+func (m *MessageRepo) Count(filter interface{}) (int64, error) {
 	return int64(len(m.filter(filter))), nil
 }
 
-func (m *MessageRepo) filter(filter bson.M) (messages []repository.Message) {
+func (m *MessageRepo) filter(filter interface{}) (messages []repository.Message) {
 	err := coll.MustNew(m.Messages).Filter(func(msg repository.Message) bool {
-		if status, ok := filter["status"]; ok && msg.Status != status {
+		if status, ok := filter.(bson.M)["status"]; ok && msg.Status != status {
 			return false
 		}
 
-		if id, ok := filter["_id"]; ok && id != msg.ID {
+		if id, ok := filter.(bson.M)["_id"]; ok && id != msg.ID {
 			return false
 		}
 

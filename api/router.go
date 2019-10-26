@@ -13,7 +13,7 @@ func routers(cc *container.Container) func(router *hades.Router, mw hades.Reques
 	conf := cc.MustGet(&configs.Config{}).(*configs.Config)
 	return func(router *hades.Router, mw hades.RequestMiddleware) {
 		mws := make([]hades.HandlerDecorator, 0)
-		mws = append(mws, mw.AccessLog(), mw.CORS("*"), mw.JSONExceptionHandler())
+		mws = append(mws, mw.AccessLog(), mw.CORS("*"))
 		if conf.APIToken != "" {
 			authMiddleware := mw.AuthHandler(func(typ string, credential string) error {
 				if typ != "Bearer" {
@@ -29,8 +29,11 @@ func routers(cc *container.Container) func(router *hades.Router, mw hades.Reques
 
 			mws = append(mws, authMiddleware)
 		}
-		router.Group("/api", func(router *hades.Router) {
-			controller.NewWelcomeController(cc).Register(router)
-		}, mws...)
+
+		router.WithMiddleware(mws...).Controllers(
+			"/api",
+			controller.NewWelcomeController(cc),
+			controller.NewMessageController(cc),
+		)
 	}
 }

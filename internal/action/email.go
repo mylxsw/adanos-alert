@@ -4,13 +4,15 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 )
 
-type EmailAction struct {}
-
-func NewEmailAction() *EmailAction {
-	return &EmailAction{}
+type EmailAction struct {
+	manager *Manager
 }
 
-func (e EmailAction) Handle(trigger repository.Trigger) error {
+func NewEmailAction(manager *Manager) *EmailAction {
+	return &EmailAction{manager:manager}
+}
+
+func (e EmailAction) Handle(trigger repository.Trigger, grp repository.MessageGroup) error {
 	panic("implement me")
 }
 

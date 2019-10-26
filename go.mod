@@ -12,12 +12,14 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/gorilla/mux v1.7.3
+	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
-	github.com/mylxsw/container v0.0.0-20190810122756-1fd99a90f7c6
-	github.com/mylxsw/glacier v0.0.0-20190916101037-6d7b39368699
+	github.com/mylxsw/container v0.0.0-20191022090726-425f1756accf
+	github.com/mylxsw/glacier v0.0.0-20191022103403-b8923fea418b
 	github.com/mylxsw/go-toolkit v0.0.0-20190919070831-69b6f1e50428
-	github.com/mylxsw/hades v0.0.0-20190908103158-385ba1d43475
+	github.com/mylxsw/hades v0.0.0-20191022102414-c812ba19d1d3
+	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
@@ -31,5 +33,4 @@ require (
 	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/tools v0.0.0-20191007185444-6536af71d98a // indirect
-	gopkg.in/yaml.v2 v2.2.4 // indirect
 )

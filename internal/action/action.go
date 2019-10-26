@@ -1,43 +1,98 @@
 package action
 
 import (
+	"encoding/json"
 	"sync"
 
+	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
 )
 
 type Action interface {
-	Handle(trigger repository.Trigger) error
+	Handle(trigger repository.Trigger, grp repository.MessageGroup) error
 }
 
-var actions = make(map[string]Action)
-var lock sync.RWMutex
+type Manager struct {
+	cc      *container.Container
+	lock    sync.RWMutex
+	actions map[string]Action
+}
 
-// Factory get a action by name
-func Factory(action string) Action {
-	lock.RLock()
-	defer lock.RUnlock()
+func NewManager(cc *container.Container) *Manager {
+	return &Manager{cc: cc, actions: make(map[string]Action)}
+}
 
-	return actions[action]
+func (manager *Manager) Resolve(f interface{}) error {
+	return manager.cc.ResolveWithError(f)
+}
+
+// Dispatch dispatch a action to queue
+func (manager *Manager) Dispatch(action string) Action {
+	return &QueueAction{
+		action:  action,
+		manager: manager,
+	}
+}
+
+// Run execute a action
+func (manager *Manager) Run(action string) Action {
+	manager.lock.RLock()
+	defer manager.lock.RUnlock()
+
+	return manager.actions[action]
 }
 
 // Register register a new action
-func Register(name string, action Action) {
-	lock.Lock()
-	defer lock.Unlock()
+func (manager *Manager) Register(name string, action Action) {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
 
-	actions[name] = action
+	manager.actions[name] = action
 }
 
-type ServiceProvider struct{}
+type QueueAction struct {
+	action  string
+	manager *Manager
+}
 
-func (s ServiceProvider) Register(app *container.Container) {}
+type Payload struct {
+	Action  string                  `json:"action"`
+	Trigger repository.Trigger      `json:"trigger"`
+	Group   repository.MessageGroup `json:"group"`
+}
 
-func (s ServiceProvider) Boot(app *glacier.Glacier) {
-	Register("http", NewHttpAction())
-	Register("dingding", NewDingdingAction())
-	Register("email", NewEmailAction())
-	Register("wechat", NewWechatAction())
+func (payload *Payload) Encode() []byte {
+	data, _ := json.Marshal(payload)
+	return data
+}
+
+func (payload *Payload) Decode(data []byte) error {
+	return json.Unmarshal(data, payload)
+}
+
+func (q *QueueAction) Handle(trigger repository.Trigger, grp repository.MessageGroup) error {
+	return q.manager.Resolve(func(queueManager queue.Manager) error {
+		payload := Payload{
+			Action:  q.action,
+			Trigger: trigger,
+			Group:   grp,
+		}
+
+		id, err := queueManager.Enqueue(repository.QueueItem{
+			Name:    "action",
+			Payload: string(payload.Encode()),
+		})
+		if err != nil {
+			return err
+		}
+
+		log.WithFields(log.Fields{
+			"action": q.action,
+			"id":     id,
+		}).Debug("enqueue a action to queue")
+
+		return nil
+	})
 }

@@ -15,7 +15,7 @@ type RuleRepo struct {
 	col *mongo.Collection
 }
 
-func NewRuleRepo(db *mongo.Database) *RuleRepo {
+func NewRuleRepo(db *mongo.Database) repository.RuleRepo {
 	return &RuleRepo{col: db.Collection("rule")}
 }
 

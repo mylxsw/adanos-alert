@@ -23,11 +23,15 @@ func (a TriggerJob) Handle() {
 	a.app.MustResolve(a.processMessageGroups)
 }
 
-func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) error {
+func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo, manager *action.Manager) error {
 	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusPending}, func(grp repository.MessageGroup) error {
 		rule, err := ruleRepo.Get(grp.Rule.ID)
 		if err != nil {
-			log.Errorf("rule not exist: %s", err)
+			log.WithFields(log.Fields{
+				"rule_id": grp.Rule.ID,
+				"grp_id":  grp.ID,
+				"err":     err.Error(),
+			}).Errorf("rule not exist: %w", err)
 			return err
 		}
 
@@ -44,18 +48,26 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 
 			tm, err := matcher.NewTriggerMatcher(trigger)
 			if err != nil {
-				log.Errorf("create matcher failed: %s", err)
+				log.WithFields(log.Fields{
+					"trigger_id": trigger.ID,
+					"rule_id":    rule.ID,
+					"grp_id":     grp.ID,
+				}).Errorf("create matcher failed: %w", err)
 				continue
 			}
 
 			matched, err := tm.Match(matcher.TriggerContext{Group: grp})
 			if err != nil {
-				log.Errorf("trigger matcher match failed: %s", err)
+				log.WithFields(log.Fields{
+					"trigger_id": trigger.ID,
+					"rule_id":    rule.ID,
+					"grp_id":     grp.ID,
+				}).Errorf("trigger matcher match failed: %s", err)
 				continue
 			}
 
 			if matched {
-				if err := action.Factory(trigger.Action).Handle(trigger); err != nil {
+				if err := manager.Dispatch(trigger.Action).Handle(trigger, grp); err != nil {
 					trigger.Status = repository.TriggerStatusFailed
 					trigger.FailedCount = trigger.FailedCount + 1
 					trigger.FailedReason = err.Error()

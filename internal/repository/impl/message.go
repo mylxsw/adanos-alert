@@ -42,7 +42,7 @@ func (m MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err err
 	return msg, err
 }
 
-func (m MessageRepo) Find(filter bson.M) (messages []repository.Message, err error) {
+func (m MessageRepo) Find(filter interface{}) (messages []repository.Message, err error) {
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
@@ -60,7 +60,7 @@ func (m MessageRepo) Find(filter bson.M) (messages []repository.Message, err err
 	return
 }
 
-func (m MessageRepo) Paginate(filter bson.M, offset, limit int64) (messages []repository.Message, next int64, err error) {
+func (m MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Message, next int64, err error) {
 	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetLimit(limit).SetSkip(offset))
 	if err != nil {
 		return
@@ -82,7 +82,7 @@ func (m MessageRepo) Paginate(filter bson.M, offset, limit int64) (messages []re
 	return messages, next, err
 }
 
-func (m MessageRepo) Delete(filter bson.M) error {
+func (m MessageRepo) Delete(filter interface{}) error {
 	_, err := m.col.DeleteMany(context.TODO(), filter)
 	return err
 }
@@ -91,7 +91,7 @@ func (m MessageRepo) DeleteID(id primitive.ObjectID) error {
 	return m.Delete(bson.M{"_id": id})
 }
 
-func (m MessageRepo) Traverse(filter bson.M, cb func(msg repository.Message) error) error {
+func (m MessageRepo) Traverse(filter interface{}, cb func(msg repository.Message) error) error {
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return err
@@ -116,6 +116,6 @@ func (m MessageRepo) UpdateID(id primitive.ObjectID, update repository.Message) 
 	return err
 }
 
-func (m MessageRepo) Count(filter bson.M) (int64, error) {
+func (m MessageRepo) Count(filter interface{}) (int64, error) {
 	return m.col.CountDocuments(context.TODO(), filter)
 }
