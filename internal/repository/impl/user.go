@@ -15,7 +15,7 @@ type UserRepo struct {
 	col *mongo.Collection
 }
 
-func NewUserRepo(db *mongo.Database) *UserRepo {
+func NewUserRepo(db *mongo.Database) repository.UserRepo {
 	return &UserRepo{col: db.Collection("user")}
 }
 

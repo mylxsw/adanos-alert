@@ -32,7 +32,7 @@ func (s ServiceProvider) Boot(app *glacier.Glacier) {
 				return errors.Wrap(err, "can not decode payload")
 			}
 
-			return manager.Run(payload.Action).Handle(payload.Trigger, payload.Group)
+			return manager.Run(payload.Action).Handle(payload.Rule, payload.Trigger, payload.Group)
 		})
 	})
 }
