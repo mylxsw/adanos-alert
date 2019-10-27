@@ -12,6 +12,6 @@ func NewHttpAction(manager *Manager) *HttpAction {
 	return &HttpAction{manager: manager}
 }
 
-func (act HttpAction) Handle(trigger repository.Trigger, grp repository.MessageGroup) error {
+func (act HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
 	panic("implement me")
 }

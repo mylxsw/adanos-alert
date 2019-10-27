@@ -1,0 +1,10 @@
+# Time: 190711 14:38:51
+# User@Host: mat_lifecycle[mat_lifecycle] @  [192.168.200.18]
+# Thread_id: 21960  Schema: mat_lifecycle  QC_hit: No
+# Query_time: 1.200693  Lock_time: 0.000117  Rows_sent: 0  Rows_examined: 1041475
+# Rows_affected: 0  Bytes_sent: 2753
+SET timestamp=1562826828;
+select child.*, parent.material_id as new_material_id,parent.material_ins_id as new_material_ins_id
+    from workflow_instance parent
+    join workflow_instance child on parent.id = child.parent_wf_inst_id
+    where child.material_ins_id  <>  parent.material_ins_id;

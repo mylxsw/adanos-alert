@@ -11,7 +11,7 @@ import (
 )
 
 type Action interface {
-	Handle(trigger repository.Trigger, grp repository.MessageGroup) error
+	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error
 }
 
 type Manager struct {
@@ -26,6 +26,10 @@ func NewManager(cc *container.Container) *Manager {
 
 func (manager *Manager) Resolve(f interface{}) error {
 	return manager.cc.ResolveWithError(f)
+}
+
+func (manager *Manager) MustResolve(f interface{}) {
+	manager.cc.MustResolve(f)
 }
 
 // Dispatch dispatch a action to queue
@@ -59,6 +63,7 @@ type QueueAction struct {
 
 type Payload struct {
 	Action  string                  `json:"action"`
+	Rule    repository.Rule         `json:"rule"`
 	Trigger repository.Trigger      `json:"trigger"`
 	Group   repository.MessageGroup `json:"group"`
 }
@@ -72,12 +77,13 @@ func (payload *Payload) Decode(data []byte) error {
 	return json.Unmarshal(data, payload)
 }
 
-func (q *QueueAction) Handle(trigger repository.Trigger, grp repository.MessageGroup) error {
+func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
 	return q.manager.Resolve(func(queueManager queue.Manager) error {
 		payload := Payload{
 			Action:  q.action,
 			Trigger: trigger,
 			Group:   grp,
+			Rule:    rule,
 		}
 
 		id, err := queueManager.Enqueue(repository.QueueItem{

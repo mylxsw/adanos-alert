@@ -26,6 +26,7 @@ require (
 	github.com/swaggo/swag v1.6.2
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/urfave/cli v1.22.1
+	github.com/vjeantet/grok v1.0.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.0.4

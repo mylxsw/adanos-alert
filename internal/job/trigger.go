@@ -67,7 +67,7 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 			}
 
 			if matched {
-				if err := manager.Dispatch(trigger.Action).Handle(trigger, grp); err != nil {
+				if err := manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
 					trigger.Status = repository.TriggerStatusFailed
 					trigger.FailedCount = trigger.FailedCount + 1
 					trigger.FailedReason = err.Error()

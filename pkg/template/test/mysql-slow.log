@@ -1,0 +1,6 @@
+# User@Host: core_message[core_message] @  [10.168.100.73]
+# Thread_id: 246214508  Schema: core_message  QC_hit: No
+# Query_time: 3.297862  Lock_time: 0.000059  Rows_sent: 1  Rows_examined: 1915
+use core_message;
+SET timestamp=1561533606;
+select count(*) as aggregate from `ms_sms_message_history` where exists (select * from `ms_sms_message` where `ms_sms_message_history`.`sms_id` = `ms_sms_message`.`id` and `phone` = '17623803369' and `created_at` >= '2019-06-26 00:00:00') and `channel_id` = 1;

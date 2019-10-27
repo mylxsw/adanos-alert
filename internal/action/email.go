@@ -12,7 +12,7 @@ func NewEmailAction(manager *Manager) *EmailAction {
 	return &EmailAction{manager:manager}
 }
 
-func (e EmailAction) Handle(trigger repository.Trigger, grp repository.MessageGroup) error {
+func (e EmailAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
 	panic("implement me")
 }
 
