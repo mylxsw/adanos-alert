@@ -22,7 +22,7 @@ func (s ServiceProvider) Boot(app *glacier.Glacier) {
 		manager.Register("email", NewEmailAction(manager))
 		manager.Register("wechat", NewWechatAction(manager))
 
-		queueManager.RegisterHandler("action", func(item repository.QueueItem) error {
+		queueManager.RegisterHandler("action", func(item repository.QueueJob) error {
 			var payload Payload
 			if err := payload.Decode([]byte(item.Payload)); err != nil {
 				log.WithFields(log.Fields{

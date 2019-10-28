@@ -91,7 +91,7 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 			Rule:    rule,
 		}
 
-		id, err := queueManager.Enqueue(repository.QueueItem{
+		id, err := queueManager.Enqueue(repository.QueueJob{
 			Name:    "action",
 			Payload: string(payload.Encode()),
 		})

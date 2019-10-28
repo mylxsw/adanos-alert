@@ -19,7 +19,7 @@ func NewQueueRepo(db *mongo.Database) repository.QueueRepo {
 	return &QueueRepo{col: db.Collection("queue")}
 }
 
-func (q *QueueRepo) Enqueue(item repository.QueueItem) (id primitive.ObjectID, err error) {
+func (q *QueueRepo) Enqueue(item repository.QueueJob) (id primitive.ObjectID, err error) {
 	if item.ID.IsZero() {
 		item.CreatedAt = time.Now()
 		item.UpdatedAt = item.CreatedAt
@@ -51,7 +51,7 @@ func (q *QueueRepo) Enqueue(item repository.QueueItem) (id primitive.ObjectID, e
 	return item.ID, nil
 }
 
-func (q *QueueRepo) Dequeue() (item repository.QueueItem, err error) {
+func (q *QueueRepo) Dequeue() (item repository.QueueJob, err error) {
 	rs := q.col.FindOneAndUpdate(
 		context.TODO(),
 		bson.M{"status": repository.QueueItemStatusWait, "next_execute_at": bson.M{"$lt": time.Now()}},
@@ -70,14 +70,21 @@ func (q *QueueRepo) Dequeue() (item repository.QueueItem, err error) {
 	return
 }
 
-func (q *QueueRepo) Paginate(filter bson.M, offset, limit int64) (items []repository.QueueItem, next int64, err error) {
-	cur, err := q.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit))
+func (q *QueueRepo) Paginate(filter bson.M, offset, limit int64) (items []repository.QueueJob, next int64, err error) {
+	cur, err := q.col.Find(
+		context.TODO(),
+		filter,
+		options.Find().
+			SetSkip(offset).
+			SetLimit(limit).
+			SetSort(bson.M{"next_execute_at": 1}),
+	)
 	if err != nil {
 		return
 	}
 
 	for cur.Next(context.TODO()) {
-		var item repository.QueueItem
+		var item repository.QueueJob
 		if err = cur.Decode(&item); err != nil {
 			return
 		}
@@ -101,9 +108,9 @@ func (q *QueueRepo) DeleteID(id primitive.ObjectID) error {
 	return q.Delete(bson.M{"_id": id})
 }
 
-func (q *QueueRepo) Get(id primitive.ObjectID) (repository.QueueItem, error) {
+func (q *QueueRepo) Get(id primitive.ObjectID) (repository.QueueJob, error) {
 	rs := q.col.FindOne(context.TODO(), bson.M{"_id": id})
-	var item repository.QueueItem
+	var item repository.QueueJob
 	if err := rs.Decode(&item); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return item, repository.ErrNotFound
@@ -118,12 +125,16 @@ func (q *QueueRepo) Count(filter bson.M) (int64, error) {
 	return q.col.CountDocuments(context.TODO(), filter)
 }
 
-func (q *QueueRepo) Update(filter bson.M, item repository.QueueItem) error {
+func (q *QueueRepo) Update(filter bson.M, item repository.QueueJob) error {
 	item.UpdatedAt = time.Now()
+	if item.NextExecuteAt.Before(item.UpdatedAt) {
+		item.NextExecuteAt = item.UpdatedAt
+	}
+
 	_, err := q.col.ReplaceOne(context.TODO(), filter, item)
 	return err
 }
 
-func (q *QueueRepo) UpdateID(id primitive.ObjectID, item repository.QueueItem) error {
-	return q.Update(bson.M{"_id": id}, item)
+func (q *QueueRepo) UpdateID(id primitive.ObjectID, jobItem repository.QueueJob) error {
+	return q.Update(bson.M{"_id": id}, jobItem)
 }

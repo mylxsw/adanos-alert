@@ -14,7 +14,7 @@ import (
 )
 
 type Manager interface {
-	Enqueue(item repository.QueueItem) (string, error)
+	Enqueue(item repository.QueueJob) (string, error)
 	StartWorker(ctx context.Context, workerID string)
 	Pause(pause bool)
 	Paused() bool
@@ -22,7 +22,7 @@ type Manager interface {
 	RegisterHandler(name string, handler Handler)
 }
 
-type Handler func(item repository.QueueItem) error
+type Handler func(item repository.QueueJob) error
 
 type Info struct {
 	StartAt        time.Time `json:"start_at"`
@@ -87,7 +87,7 @@ func (manager *queueManager) Pause(pause bool) {
 }
 
 // Enqueue add an item to queue
-func (manager *queueManager) Enqueue(item repository.QueueItem) (string, error) {
+func (manager *queueManager) Enqueue(item repository.QueueJob) (string, error) {
 	manager.lock.RLock()
 	defer manager.lock.RUnlock()
 
@@ -157,7 +157,7 @@ func (manager *queueManager) run(ctx context.Context) {
 	}
 }
 
-func (manager *queueManager) handle(ctx context.Context, item repository.QueueItem) {
+func (manager *queueManager) handle(ctx context.Context, item repository.QueueJob) {
 	manager.lock.RLock()
 	handler, ok := manager.handlers[item.Name]
 	manager.lock.RUnlock()
@@ -216,7 +216,7 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueIt
 }
 
 func eliminatePanic(cb Handler) Handler {
-	return func(item repository.QueueItem) (err error) {
+	return func(item repository.QueueJob) (err error) {
 		defer func() {
 			if err2 := recover(); err2 != nil {
 				err = fmt.Errorf("handler panic with: %v", err2)

@@ -32,7 +32,7 @@ func (q *QueueTestSuit) TestEnqueueDequeue() {
 	q.Equal(repository.ErrNotFound, err)
 
 	// test enqueue
-	item := repository.QueueItem{
+	item := repository.QueueJob{
 		Name:    "action",
 		Payload: "{}",
 	}
