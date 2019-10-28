@@ -17,16 +17,27 @@ type Manager interface {
 	Enqueue(item repository.QueueItem) (string, error)
 	StartWorker(ctx context.Context, workerID string)
 	Pause(pause bool)
+	Paused() bool
+	Info() Info
 	RegisterHandler(name string, handler Handler)
 }
 
 type Handler func(item repository.QueueItem) error
+
+type Info struct {
+	StartAt        time.Time `json:"start_at"`
+	WorkerNum      int       `json:"worker_num"`
+	ProcessedCount int64     `json:"processed_count"`
+	FailedCount    int64     `json:"failed_count"`
+}
 
 type queueManager struct {
 	lock     sync.RWMutex
 	cc       *container.Container
 	repo     repository.QueueRepo
 	handlers map[string]Handler
+
+	info Info
 
 	maxRetryTimes int
 	paused        bool
@@ -38,12 +49,25 @@ func NewManager(cc *container.Container) Manager {
 		cc:       cc,
 		paused:   true,
 		handlers: make(map[string]Handler),
+		info: Info{
+			StartAt:        time.Now(),
+			WorkerNum:      0,
+			ProcessedCount: 0,
+		},
 	}
 	cc.MustResolve(func(repo repository.QueueRepo, conf *configs.Config) {
 		manager.repo = repo
 		manager.maxRetryTimes = conf.QueueJobMaxRetryTimes
 	})
 	return &manager
+}
+
+// Info return queue runtime info
+func (manager *queueManager) Info() Info {
+	manager.lock.RLock()
+	defer manager.lock.RUnlock()
+
+	return manager.info
 }
 
 // RegisterHandler register a handler for job processing
@@ -81,8 +105,19 @@ func (manager *queueManager) Enqueue(item repository.QueueItem) (string, error) 
 
 // StartWorker start a worker
 func (manager *queueManager) StartWorker(ctx context.Context, workID string) {
+
+	manager.lock.Lock()
+	manager.info.WorkerNum += 1
+	manager.lock.Unlock()
+
 	log.Debugf("queue worker [%s] started", workID)
-	defer log.Debugf("queue worker [%s] stopped", workID)
+	defer func() {
+		manager.lock.Lock()
+		manager.info.WorkerNum -= 1
+		manager.lock.Unlock()
+
+		log.Debugf("queue worker [%s] stopped", workID)
+	}()
 
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
@@ -97,8 +132,8 @@ func (manager *queueManager) StartWorker(ctx context.Context, workID string) {
 	}
 }
 
-// isPaused whether the queue is paused
-func (manager *queueManager) isPaused() bool {
+// Paused whether the queue is paused
+func (manager *queueManager) Paused() bool {
 	manager.lock.RLock()
 	defer manager.lock.RUnlock()
 
@@ -106,13 +141,17 @@ func (manager *queueManager) isPaused() bool {
 }
 
 func (manager *queueManager) run(ctx context.Context) {
-	if manager.isPaused() {
+	if manager.Paused() {
 		return
 	}
 
 	for item, err := manager.repo.Dequeue(); err == nil; {
+		manager.lock.Lock()
+		manager.info.ProcessedCount += 1
+		manager.lock.Unlock()
+
 		manager.handle(ctx, item)
-		if manager.isPaused() {
+		if manager.Paused() {
 			return
 		}
 	}
@@ -136,6 +175,10 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueIt
 
 	// execute queue job handler
 	if err := eliminatePanic(handler)(item); err != nil {
+		manager.lock.Lock()
+		manager.info.FailedCount += 1
+		manager.lock.Unlock()
+
 		// if job failed, check execute times, if requeue times > max requeueTimes, set job as failed
 		// otherwise requeue it and try again latter
 		if item.RequeueTimes > manager.maxRetryTimes {

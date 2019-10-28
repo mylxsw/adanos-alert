@@ -34,6 +34,10 @@ func routers(cc *container.Container) func(router *hades.Router, mw hades.Reques
 			"/api",
 			controller.NewWelcomeController(cc),
 			controller.NewMessageController(cc),
+			controller.NewQueueController(cc),
+			controller.NewUserController(cc),
+			controller.NewGroupController(cc),
+			controller.NewRuleController(cc),
 		)
 	}
 }

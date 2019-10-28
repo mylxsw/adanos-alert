@@ -13,6 +13,8 @@ github.com/antlr/antlr4 v0.0.0-20190518164840-edae2a1c9b4b h1:IyTcB1l64U991qSZ0u
 github.com/antlr/antlr4 v0.0.0-20190518164840-edae2a1c9b4b/go.mod h1:T7PbCXFs94rrTttyxjbyT5+/1V8T2TYDejxUfHJjw1Y=
 github.com/antonmedv/expr v0.0.0-20190722083458-9449c89f5e27 h1:+XHz4sDUktbXjrW9SlnIyabDsOkdhhUgvrInjsWBW54=
 github.com/antonmedv/expr v0.0.0-20190722083458-9449c89f5e27/go.mod h1:UVdIWDgu0PlfPsjLBrjszJptS9Et9jK1aXR/9JE+LBQ=
+github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4B6AGu/h5Sxe66HYVdqdGu2l9Iebqhi/AEoA=
+github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 h1:D21IyuvjDCshj1/qq+pCNd3VZOAEI9jy6Bi131YlXgI=
 github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23/go.mod h1:bbYlZJ7hK1yFx9hf58LP0zeX7UjIGs20ufpu3evjr+s=
 github.com/buger/jsonparser v0.0.0-20191004114745-ee4c978eae7e h1:oJCXMss/3rg5F6Poy9wG3JQusc58Mzk5B9Z6wSnssNE=
@@ -100,6 +102,8 @@ github.com/mylxsw/glacier v0.0.0-20190916101037-6d7b39368699 h1:jWaOKY0o6wrEoCah
 github.com/mylxsw/glacier v0.0.0-20190916101037-6d7b39368699/go.mod h1:8RWGNKzQ6DIk2AnifICQhdeapZYRkmSoP0yv3kVu0Mo=
 github.com/mylxsw/glacier v0.0.0-20191022103403-b8923fea418b h1:3iLEA90GmVCVDbLt+BbtbsjVHM8YngiH0MOQ7TrCKU4=
 github.com/mylxsw/glacier v0.0.0-20191022103403-b8923fea418b/go.mod h1:h4qLgoj5NOG4AwXQO9gvddD5KAiMlTSNJNONXHBwunI=
+github.com/mylxsw/glacier v0.0.0-20191028021920-bfd1edf1dc1e h1:jBip+gvj7Bur+Tq63Duh8htKdtXU0sXcGMDz8IPDfWw=
+github.com/mylxsw/glacier v0.0.0-20191028021920-bfd1edf1dc1e/go.mod h1:h4qLgoj5NOG4AwXQO9gvddD5KAiMlTSNJNONXHBwunI=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9 h1:RgHkiDyU7XDmZqk0Cpqnfn2NmYpginMI69RX0BOzKis=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9/go.mod h1:s2TWTsAxqwsOr1+r19Fv7bVyLlsTZokRhNFOegKpLrE=
 github.com/mylxsw/go-toolkit v0.0.0-20190919070831-69b6f1e50428 h1:o3dalCkzhjT68fH/e9xahtRpiLJnhs4cRacrkCl96xY=
@@ -110,6 +114,8 @@ github.com/mylxsw/hades v0.0.0-20190908103158-385ba1d43475 h1:RvmNk1D/D6F/Ts+t+2
 github.com/mylxsw/hades v0.0.0-20190908103158-385ba1d43475/go.mod h1:w9ekIRDu0QvS10xbEeJiEkDsNa3OOV33dYBz1Mzx5nU=
 github.com/mylxsw/hades v0.0.0-20191022102414-c812ba19d1d3 h1:4UxnFrohUvmn+DamENMj6tpThMZY7WLUry54S9swf1g=
 github.com/mylxsw/hades v0.0.0-20191022102414-c812ba19d1d3/go.mod h1:wbRVmQL7e21irc1poKY2dRTE0hL+bG8mz5liuMTsKTs=
+github.com/mylxsw/hades v0.0.0-20191028074720-4c18fc2c307d h1:QwRG62/l8q1SZHEOqzp3IhWq/44B61N0qe9wD8g8Lq4=
+github.com/mylxsw/hades v0.0.0-20191028074720-4c18fc2c307d/go.mod h1:8gxcW4A9a3SueuQMcjbMRV5uQBcEY7tttQALWgZSwU8=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

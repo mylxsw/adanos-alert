@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const TriggerJobName = "trigger"
+
 type TriggerJob struct {
 	app *container.Container
 }
@@ -23,7 +25,7 @@ func (a TriggerJob) Handle() {
 	a.app.MustResolve(a.processMessageGroups)
 }
 
-func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo, manager *action.Manager) error {
+func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, messageRepo repository.MessageRepo, ruleRepo repository.RuleRepo, manager *action.Manager) error {
 	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusPending}, func(grp repository.MessageGroup) error {
 		rule, err := ruleRepo.Get(grp.Rule.ID)
 		if err != nil {
@@ -56,7 +58,17 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 				continue
 			}
 
-			matched, err := tm.Match(matcher.TriggerContext{Group: grp})
+			matched, err := tm.Match(matcher.NewTriggerContext(grp, func() []repository.Message {
+				messages, err := messageRepo.Find(bson.M{"group_ids": bson.M{"$in": grp.ID}})
+				if err != nil {
+					log.WithFields(log.Fields{
+						"err": err.Error(),
+						"grp": grp,
+					}).Errorf("trigger callback: fetch messages from group failed: %v", err)
+				}
+
+				return messages
+			}))
 			if err != nil {
 				log.WithFields(log.Fields{
 					"trigger_id": trigger.ID,

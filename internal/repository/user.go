@@ -15,8 +15,8 @@ const (
 )
 
 type UserMeta struct {
-	Key   string `bson:"key" json:"key"`
-	Value string `bson:"value" json:"value"`
+	Key   string `bson:"key" json:"key" schema:"key"`
+	Value string `bson:"value" json:"value" schema:"value"`
 }
 
 type User struct {

@@ -87,6 +87,8 @@ func (r RuleRepo) UpdateID(id primitive.ObjectID, rule repository.Rule) error {
 		}
 	}
 
+	rule.UpdatedAt = time.Now()
+
 	_, err := r.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, rule)
 	return err
 }

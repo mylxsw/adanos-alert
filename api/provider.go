@@ -33,9 +33,9 @@ func (s ServiceProvider) Boot(app *glacier.Glacier) {
 		app.WebAppRouter(routers(app.Container()))
 		app.WebAppMuxRouter(func(router *mux.Router) {
 			// Swagger doc
-			router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+			router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler).Name("swagger")
 			// Dashboard
-			router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(FS(conf.UseLocalDashboard))))
+			router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(FS(conf.UseLocalDashboard)))).Name("assets")
 		})
 	})
 }

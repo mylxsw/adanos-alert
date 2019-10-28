@@ -13,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const AggregationJobName = "aggregation"
+
 type AggregationJob struct {
 	app *container.Container
 }

@@ -22,6 +22,10 @@ func NewUserRepo(db *mongo.Database) repository.UserRepo {
 func (u UserRepo) Add(user repository.User) (id primitive.ObjectID, err error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
+	if user.Status == "" {
+		user.Status = repository.UserStatusEnabled
+	}
+
 	rs, err := u.col.InsertOne(context.TODO(), user)
 	if err != nil {
 		return
@@ -58,7 +62,7 @@ func (u UserRepo) Find(filter bson.M) (users []repository.User, err error) {
 }
 
 func (u UserRepo) Paginate(filter bson.M, offset, limit int64) (users []repository.User, next int64, err error) {
-	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit))
+	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return
 	}

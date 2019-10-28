@@ -17,6 +17,10 @@ type DingdingAction struct {
 	userRepo repository.UserRepo
 }
 
+func (d DingdingAction) Validate(meta string) error {
+	return nil
+}
+
 func NewDingdingAction(manager *Manager) *DingdingAction {
 	dingdingAction := DingdingAction{manager: manager}
 	manager.MustResolve(func(userRepo repository.UserRepo) {

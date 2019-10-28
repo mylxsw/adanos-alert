@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/action"
@@ -16,6 +17,7 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/hades"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -129,10 +131,14 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.Main(func(conf *configs.Config) {
+	app.Main(func(conf *configs.Config, router *mux.Router) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
+
+		for _, r := range hades.GetAllRoutes(router) {
+			log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
+		}
 	})
 
 	app.Provider(action.ServiceProvider{})

@@ -49,6 +49,12 @@ func (u *UserRepoTestSuite) TestUserRepo() {
 	u.NotEmpty(user2.CreatedAt)
 	u.NotEmpty(user2.UpdatedAt)
 
+	{
+		users, err := u.repo.Find(bson.M{"name": "Friday", "metas.value": "1111111111"})
+		u.NoError(err)
+		u.Len(users, 1)
+	}
+
 	// not found user
 	_, err = u.repo.Get(primitive.NewObjectID())
 	u.Error(err)

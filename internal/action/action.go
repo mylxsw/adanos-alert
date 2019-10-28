@@ -11,6 +11,7 @@ import (
 )
 
 type Action interface {
+	Validate(meta string) error
 	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error
 }
 
@@ -59,6 +60,10 @@ func (manager *Manager) Register(name string, action Action) {
 type QueueAction struct {
 	action  string
 	manager *Manager
+}
+
+func (q *QueueAction) Validate(meta string) error {
+	return nil
 }
 
 type Payload struct {

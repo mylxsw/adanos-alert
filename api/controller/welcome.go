@@ -14,7 +14,7 @@ func NewWelcomeController(cc *container.Container) hades.Controller {
 }
 
 func (w *WelcomeController) Register(router *hades.Router) {
-	router.Any("/", w.Home)
+	router.Any("/", w.Home).Name("welcome:home")
 }
 
 type WelcomeMessage struct {

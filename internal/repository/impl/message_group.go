@@ -57,7 +57,7 @@ func (m MessageGroupRepo) Find(filter bson.M) (grps []repository.MessageGroup, e
 }
 
 func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.MessageGroup, next int64, err error) {
-	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit))
+	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return
 	}

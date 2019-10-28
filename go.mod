@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonmedv/expr v0.0.0-20190722083458-9449c89f5e27
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v0.0.0-20191004114745-ee4c978eae7e
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible // indirect
@@ -16,9 +17,9 @@ require (
 	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20191022090726-425f1756accf
-	github.com/mylxsw/glacier v0.0.0-20191022103403-b8923fea418b
+	github.com/mylxsw/glacier v0.0.0-20191028021920-bfd1edf1dc1e
 	github.com/mylxsw/go-toolkit v0.0.0-20190919070831-69b6f1e50428
-	github.com/mylxsw/hades v0.0.0-20191022102414-c812ba19d1d3
+	github.com/mylxsw/hades v0.0.0-20191028074720-4c18fc2c307d
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
