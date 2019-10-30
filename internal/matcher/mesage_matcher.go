@@ -37,7 +37,12 @@ type MessageMatcher struct {
 // NewMessageMatcher create a new MessageMatcher
 // https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md
 func NewMessageMatcher(rule repository.Rule) (*MessageMatcher, error) {
-	program, err := expr.Compile(rule.Rule, expr.Env(&MessageWrap{}), expr.AsBool())
+	condition := rule.Rule
+	if condition == "" {
+		condition = "true"
+	}
+
+	program, err := expr.Compile(condition, expr.Env(&MessageWrap{}), expr.AsBool())
 	if err != nil {
 		return nil, err
 	}

@@ -5,14 +5,14 @@ import (
 )
 
 type WechatAction struct{
-	manager *Manager
+	manager Manager
 }
 
 func (w WechatAction) Validate(meta string) error {
 	panic("implement me")
 }
 
-func NewWechatAction(manager *Manager) *WechatAction {
+func NewWechatAction(manager Manager) *WechatAction {
 	return &WechatAction{manager:manager}
 }
 

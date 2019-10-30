@@ -25,7 +25,7 @@ func (a TriggerJob) Handle() {
 	a.app.MustResolve(a.processMessageGroups)
 }
 
-func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, messageRepo repository.MessageRepo, ruleRepo repository.RuleRepo, manager *action.Manager) error {
+func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, messageRepo repository.MessageRepo, ruleRepo repository.RuleRepo, manager action.Manager) error {
 	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusPending}, func(grp repository.MessageGroup) error {
 		rule, err := ruleRepo.Get(grp.Rule.ID)
 		if err != nil {
@@ -59,7 +59,7 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 			}
 
 			matched, err := tm.Match(matcher.NewTriggerContext(grp, func() []repository.Message {
-				messages, err := messageRepo.Find(bson.M{"group_ids": bson.M{"$in": grp.ID}})
+				messages, err := messageRepo.Find(bson.M{"group_ids": grp.ID})
 				if err != nil {
 					log.WithFields(log.Fields{
 						"err": err.Error(),
@@ -70,11 +70,6 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 				return messages
 			}))
 			if err != nil {
-				log.WithFields(log.Fields{
-					"trigger_id": trigger.ID,
-					"rule_id":    rule.ID,
-					"grp_id":     grp.ID,
-				}).Errorf("trigger matcher match failed: %s", err)
 				continue
 			}
 
@@ -92,6 +87,12 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 				if trigger.FailedCount > maxFailedCount {
 					maxFailedCount = trigger.FailedCount
 				}
+
+				log.WithFields(log.Fields{
+					"trigger_id": trigger.ID,
+					"status":     trigger.Status,
+					"grp_id":     grp.ID,
+				}).Debug("change trigger status")
 			}
 		}
 
@@ -104,8 +105,13 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 			grp.Status = repository.MessageGroupStatusOK
 		}
 
+		log.WithFields(log.Fields{
+			"grp_id": grp.ID,
+			"status": grp.Status,
+		}).Debug("change group status for triggers")
+
 		grp.Actions = mergeActions(grp.Actions, triggers)
-		return groupRepo.Update(grp.ID, grp)
+		return groupRepo.UpdateID(grp.ID, grp)
 	})
 }
 

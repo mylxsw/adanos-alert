@@ -47,7 +47,7 @@ type MessageGroupRepo interface {
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
 	Traverse(filter bson.M, cb func(grp MessageGroup) error) error
-	Update(id primitive.ObjectID, grp MessageGroup) error
+	UpdateID(id primitive.ObjectID, grp MessageGroup) error
 	Count(filter bson.M) (int64, error)
 
 	CollectingGroup(rule MessageGroupRule) (group MessageGroup, err error)

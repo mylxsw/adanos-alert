@@ -90,7 +90,7 @@ func (u *UserRepoTestSuite) TestUserRepo() {
 	u.EqualValues(0, next)
 	u.EqualValues(6, len(users))
 
-	// Update
+	// UpdateID
 	user.Name = "Saturday"
 	u.NoError(u.repo.Update(id, user))
 

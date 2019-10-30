@@ -56,8 +56,7 @@ type QueueJobsResp struct {
 }
 
 func (q *QueueController) Jobs(ctx hades.Context, repo repository.QueueRepo) (*QueueJobsResp, error) {
-	offset := ctx.Int64Input("offset", 0)
-	limit := ctx.Int64Input("limit", 10)
+	offset, limit := offsetAndLimit(ctx)
 
 	filter := bson.M{}
 

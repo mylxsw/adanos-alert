@@ -82,7 +82,7 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 
 	m.NoError(m.repo.Traverse(bson.M{"status": repository.MessageGroupStatusOK}, func(grp repository.MessageGroup) error {
 		grp.Status = repository.MessageGroupStatusFailed
-		return m.repo.Update(grp.ID, grp)
+		return m.repo.UpdateID(grp.ID, grp)
 	}))
 
 	count, err = m.repo.Count(bson.M{"status": repository.MessageGroupStatusFailed})

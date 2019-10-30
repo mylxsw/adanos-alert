@@ -18,7 +18,7 @@ const (
 )
 
 type QueueJob struct {
-	ID           primitive.ObjectID `bson:"_id" json:"id"`
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name         string             `bson:"name" json:"name"`
 	Payload      string             `bson:"payload" json:"payload"`
 	Status       QueueItemStatus    `bson:"status" json:"status"`

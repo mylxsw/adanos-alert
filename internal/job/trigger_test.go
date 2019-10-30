@@ -62,7 +62,7 @@ func (t *TriggerTestSuite) TestTriggerJobHandle() {
 
 		job.NewTrigger(t.app).Handle()
 
-		mockHttpAction := action.Manager("http").(*mockAction.HttpAction)
+		mockHttpAction := action.actionManager("http").(*mockAction.HttpAction)
 		fmt.Println(mockHttpAction.Histories)
 		// TODO assert
 

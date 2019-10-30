@@ -39,6 +39,7 @@ func (m MessageGroupRepo) Get(id primitive.ObjectID) (grp repository.MessageGrou
 }
 
 func (m MessageGroupRepo) Find(filter bson.M) (grps []repository.MessageGroup, err error) {
+	grps = make([]repository.MessageGroup, 0)
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
@@ -57,6 +58,7 @@ func (m MessageGroupRepo) Find(filter bson.M) (grps []repository.MessageGroup, e
 }
 
 func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.MessageGroup, next int64, err error) {
+	grps = make([]repository.MessageGroup, 0)
 	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return
@@ -98,7 +100,7 @@ func (m MessageGroupRepo) Traverse(filter bson.M, cb func(grp repository.Message
 	return nil
 }
 
-func (m MessageGroupRepo) Update(id primitive.ObjectID, grp repository.MessageGroup) error {
+func (m MessageGroupRepo) UpdateID(id primitive.ObjectID, grp repository.MessageGroup) error {
 	grp.UpdatedAt = time.Now()
 	_, err := m.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, grp)
 	return err
@@ -129,7 +131,7 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 	if err == nil && group.CreatedAt.IsZero() {
 		group.CreatedAt = time.Now()
 		group.UpdatedAt = group.CreatedAt
-		_ = m.Update(group.ID, group)
+		_ = m.UpdateID(group.ID, group)
 	}
 
 	return

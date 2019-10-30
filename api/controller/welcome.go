@@ -28,3 +28,17 @@ type WelcomeMessage struct {
 func (w *WelcomeController) Home(ctx hades.Context, req hades.Request) WelcomeMessage {
 	return WelcomeMessage{Version: w.cc.MustGet("version").(string)}
 }
+
+func offsetAndLimit(ctx hades.Context) (offset int64, limit int64) {
+	offset = ctx.Int64Input("offset", 0)
+	if offset < 0 {
+		offset = 0
+	}
+
+	limit = ctx.Int64Input("limit", 10)
+	if limit < 0 || limit > 1000 {
+		limit = 10
+	}
+
+	return
+}

@@ -44,6 +44,7 @@ func (u UserRepo) Get(id primitive.ObjectID) (user repository.User, err error) {
 }
 
 func (u UserRepo) Find(filter bson.M) (users []repository.User, err error) {
+	users = make([]repository.User, 0)
 	cur, err := u.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
@@ -62,6 +63,7 @@ func (u UserRepo) Find(filter bson.M) (users []repository.User, err error) {
 }
 
 func (u UserRepo) Paginate(filter bson.M, offset, limit int64) (users []repository.User, next int64, err error) {
+	users = make([]repository.User, 0)
 	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return

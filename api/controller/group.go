@@ -30,15 +30,15 @@ type GroupsResp struct {
 	Next   int64                     `json:"next"`
 }
 
+
+
 // Groups list all message groups
 // Arguments:
 //   - offset/limit
 //   - status
 //   - rule_id
 func (g GroupController) Groups(ctx hades.Context, groupRepo repository.MessageGroupRepo) (*GroupsResp, error) {
-	offset := ctx.Int64Input("offset", 0)
-	limit := ctx.Int64Input("limit", 10)
-
+	offset, limit := offsetAndLimit(ctx)
 	filter := bson.M{}
 
 	status := ctx.Input("status")
@@ -87,7 +87,7 @@ func (g GroupController) Group(
 	}
 
 	filter := messagesFilter(ctx)
-	filter["group_ids"] = bson.M{"$in": groupID}
+	filter["group_ids"] = groupID
 
 	messages, next, err := messageRepo.Paginate(filter, offset, limit)
 	if err != nil {

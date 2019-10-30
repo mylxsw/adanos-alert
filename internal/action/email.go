@@ -5,14 +5,14 @@ import (
 )
 
 type EmailAction struct {
-	manager *Manager
+	manager Manager
 }
 
 func (e EmailAction) Validate(meta string) error {
 	panic("implement me")
 }
 
-func NewEmailAction(manager *Manager) *EmailAction {
+func NewEmailAction(manager Manager) *EmailAction {
 	return &EmailAction{manager:manager}
 }
 

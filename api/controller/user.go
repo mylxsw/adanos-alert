@@ -105,8 +105,7 @@ func (u UserController) User(ctx hades.Context, userRepo repository.UserRepo) (*
 }
 
 func (u UserController) Users(ctx hades.Context, userRepo repository.UserRepo) hades.Response {
-	offset := ctx.Int64Input("offset", 0)
-	limit := ctx.Int64Input("limit", 10)
+	offset, limit := offsetAndLimit(ctx)
 
 	filter := bson.M{}
 

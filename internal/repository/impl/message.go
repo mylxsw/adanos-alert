@@ -43,6 +43,7 @@ func (m MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err err
 }
 
 func (m MessageRepo) Find(filter interface{}) (messages []repository.Message, err error) {
+	messages = make([]repository.Message, 0)
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
@@ -61,6 +62,7 @@ func (m MessageRepo) Find(filter interface{}) (messages []repository.Message, er
 }
 
 func (m MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Message, next int64, err error) {
+	messages = make([]repository.Message, 0)
 	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetLimit(limit).SetSkip(offset))
 	if err != nil {
 		return

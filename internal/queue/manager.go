@@ -145,7 +145,11 @@ func (manager *queueManager) run(ctx context.Context) {
 		return
 	}
 
-	for item, err := manager.repo.Dequeue(); err == nil; {
+	var item repository.QueueJob
+	var err error
+	item, err = manager.repo.Dequeue()
+
+	for err == nil {
 		manager.lock.Lock()
 		manager.info.ProcessedCount += 1
 		manager.lock.Unlock()
@@ -154,6 +158,8 @@ func (manager *queueManager) run(ctx context.Context) {
 		if manager.Paused() {
 			return
 		}
+
+		item, err = manager.repo.Dequeue()
 	}
 }
 

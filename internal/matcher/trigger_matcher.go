@@ -53,7 +53,12 @@ func (tc *TriggerContext) Messages() []repository.Message {
 // NewTriggerMatcher create a new TriggerMatcher
 // https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md
 func NewTriggerMatcher(trigger repository.Trigger) (*TriggerMatcher, error) {
-	program, err := expr.Compile(trigger.PreCondition, expr.Env(&TriggerContext{}), expr.AsBool())
+	condition := trigger.PreCondition
+	if condition == "" {
+		condition = "true"
+	}
+
+	program, err := expr.Compile(condition, expr.Env(&TriggerContext{}), expr.AsBool())
 	if err != nil {
 		return nil, err
 	}

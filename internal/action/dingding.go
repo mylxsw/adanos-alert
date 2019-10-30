@@ -13,7 +13,7 @@ import (
 )
 
 type DingdingAction struct {
-	manager  *Manager
+	manager  Manager
 	userRepo repository.UserRepo
 }
 
@@ -21,7 +21,7 @@ func (d DingdingAction) Validate(meta string) error {
 	return nil
 }
 
-func NewDingdingAction(manager *Manager) *DingdingAction {
+func NewDingdingAction(manager Manager) *DingdingAction {
 	dingdingAction := DingdingAction{manager: manager}
 	manager.MustResolve(func(userRepo repository.UserRepo) {
 		dingdingAction.userRepo = userRepo
@@ -39,7 +39,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 
 	res, err := template.Parse(rule.Template, payload)
 	if err != nil {
-		res = fmt.Sprintf("Template parse failed: %s", err)
+		res = fmt.Sprintf("template parse failed: %s", err)
 		log.WithFields(log.Fields{
 			"err":      err.Error(),
 			"template": rule.Template,

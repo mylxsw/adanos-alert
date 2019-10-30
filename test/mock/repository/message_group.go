@@ -52,7 +52,7 @@ func (m *MessageGroupRepo) Traverse(filter bson.M, cb func(grp repository.Messag
 	return nil
 }
 
-func (m *MessageGroupRepo) Update(id primitive.ObjectID, grp repository.MessageGroup) error {
+func (m *MessageGroupRepo) UpdateID(id primitive.ObjectID, grp repository.MessageGroup) error {
 	for i, g := range m.Groups {
 		if g.ID == id {
 			m.Groups[i] = grp

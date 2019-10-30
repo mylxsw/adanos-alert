@@ -29,7 +29,7 @@ func (m *MessageController) Register(router *hades.Router) {
 		router.Get("/", m.Messages).Name("messages:all")
 		router.Get("/{id}/", m.Message).Name("messages:one")
 
-		router.Post("/common/", m.AddCommonMessage).Name("messages:add:common")
+		router.Post("/", m.AddCommonMessage).Name("messages:add:common")
 		router.Post("/logstash/", m.AddLogstashMessage).Name("messages:add:logstash")
 		router.Post("/grafana/", m.AddGrafanaMessage).Name("messages:add:grafana")
 		router.Post("/prometheus/api/v1/alerts", m.AddPrometheusMessage).Name("messages:add:prometheus") // url 地址末尾不包含 "/"
@@ -81,14 +81,13 @@ func (m *MessageController) Count(ctx hades.Context, msgRepo repository.MessageR
 
 // MessagesResp is a response object for Messages API
 type MessagesResp struct {
-	Messages []repository.Message
-	Next     int64
+	Messages []repository.Message `json:"messages"`
+	Next     int64                `json:"next"`
 }
 
 // Messages return all messages
 func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.MessageRepo) (*MessagesResp, error) {
-	offset := ctx.Int64Input("offset", 0)
-	limit := ctx.Int64Input("limit", 10)
+	offset, limit := offsetAndLimit(ctx)
 
 	filter := messagesFilter(ctx)
 	groupIDHex := ctx.Input("group_id")
@@ -98,7 +97,7 @@ func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.Messa
 			return nil, hades.WrapJSONError(fmt.Errorf("invalid group_id: %w", err), http.StatusUnprocessableEntity)
 		}
 
-		filter["group_ids"] = bson.M{"$in": groupID}
+		filter["group_ids"] = groupID
 	}
 
 	messages, next, err := msgRepo.Paginate(filter, offset, limit)
@@ -142,7 +141,7 @@ func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repo
 	}
 
 	return ctx.JSON(hades.M{
-		"id": id.String(),
+		"id": id.Hex(),
 	})
 }
 
@@ -167,7 +166,7 @@ func (msg CommonMessage) ToRepo() repository.Message {
 func (m *MessageController) AddCommonMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
 	var commonMessage CommonMessage
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
-		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
+		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
 	return m.saveMessage(messageRepo, commonMessage, ctx)

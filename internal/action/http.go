@@ -2,20 +2,26 @@ package action
 
 import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 )
 
 type HttpAction struct {
-	manager *Manager
+	manager Manager
 }
 
 func (act HttpAction) Validate(meta string) error {
-	panic("implement me")
+	return nil
 }
 
-func NewHttpAction(manager *Manager) *HttpAction {
+func NewHttpAction(manager Manager) *HttpAction {
 	return &HttpAction{manager: manager}
 }
 
 func (act HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
-	panic("implement me")
+	log.WithFields(log.Fields{
+		"rule":    rule,
+		"trigger": trigger,
+		"grp":     grp,
+	}).Warningf("http action triggered")
+	return nil
 }

@@ -15,26 +15,34 @@ type Action interface {
 	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error
 }
 
-type Manager struct {
+type Manager interface {
+	Resolve(f interface{}) error
+	MustResolve(f interface{})
+	Dispatch(action string) Action
+	Run(action string) Action
+	Register(name string, action Action)
+}
+
+type actionManager struct {
 	cc      *container.Container
 	lock    sync.RWMutex
 	actions map[string]Action
 }
 
-func NewManager(cc *container.Container) *Manager {
-	return &Manager{cc: cc, actions: make(map[string]Action)}
+func NewManager(cc *container.Container) Manager {
+	return &actionManager{cc: cc, actions: make(map[string]Action)}
 }
 
-func (manager *Manager) Resolve(f interface{}) error {
+func (manager *actionManager) Resolve(f interface{}) error {
 	return manager.cc.ResolveWithError(f)
 }
 
-func (manager *Manager) MustResolve(f interface{}) {
+func (manager *actionManager) MustResolve(f interface{}) {
 	manager.cc.MustResolve(f)
 }
 
 // Dispatch dispatch a action to queue
-func (manager *Manager) Dispatch(action string) Action {
+func (manager *actionManager) Dispatch(action string) Action {
 	return &QueueAction{
 		action:  action,
 		manager: manager,
@@ -42,7 +50,7 @@ func (manager *Manager) Dispatch(action string) Action {
 }
 
 // Run execute a action
-func (manager *Manager) Run(action string) Action {
+func (manager *actionManager) Run(action string) Action {
 	manager.lock.RLock()
 	defer manager.lock.RUnlock()
 
@@ -50,7 +58,7 @@ func (manager *Manager) Run(action string) Action {
 }
 
 // Register register a new action
-func (manager *Manager) Register(name string, action Action) {
+func (manager *actionManager) Register(name string, action Action) {
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 
@@ -59,7 +67,7 @@ func (manager *Manager) Register(name string, action Action) {
 
 type QueueAction struct {
 	action  string
-	manager *Manager
+	manager Manager
 }
 
 func (q *QueueAction) Validate(meta string) error {

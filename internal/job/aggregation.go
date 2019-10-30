@@ -47,12 +47,6 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		for _, m := range matchers {
 			matched, err := m.Match(msg)
 			if err != nil {
-				log.WithFields(log.Fields{
-					"msg_id":      msg.ID,
-					"msg_content": msg.Content,
-					"rule_id":     m.Rule().ID,
-					"err":         err.Error(),
-				}).Errorf("match message failed: %w", err)
 				continue
 			}
 
@@ -62,11 +56,10 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule())
 					if err != nil {
 						log.WithFields(log.Fields{
-							"msg_id":      msg.ID,
-							"msg_content": msg.Content,
-							"rule_id":     m.Rule().ID,
-							"err":         err.Error(),
-						}).Errorf("create collecting group failed: %w", err)
+							"msg":  msg,
+							"rule": m.Rule(),
+							"err":  err.Error(),
+						}).Errorf("create collecting group failed: %v", err)
 						return err
 					}
 
@@ -82,6 +75,11 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		if msg.Status != repository.MessageStatusGrouped {
 			msg.Status = repository.MessageStatusCanceled
 		}
+
+		log.WithFields(log.Fields{
+			"msg_id": msg.ID.Hex(),
+			"status": msg.Status,
+		}).Debug("change message status")
 
 		return msgRepo.UpdateID(msg.ID, msg)
 	})
@@ -99,7 +97,7 @@ func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*ma
 	if err := coll.MustNew(rules).Map(func(ru repository.Rule) *matcher.MessageMatcher {
 		mat, err := matcher.NewMessageMatcher(ru)
 		if err != nil {
-			log.Errorf("invalid rule: %s", err)
+			log.Errorf("invalid rule: %v", err)
 		}
 
 		return mat
@@ -116,13 +114,22 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 			return nil
 		}
 
-		msgCount, err := msgRepo.Count(bson.M{"group_ids": bson.M{"$in": grp.ID}})
+		msgCount, err := msgRepo.Count(bson.M{"group_ids": grp.ID})
 		if err != nil {
-			return err
+			log.WithFields(log.Fields{
+				"grp": grp,
+				"err": err,
+			}).Errorf("query message count failed: %v", err)
 		}
 
 		grp.MessageCount = msgCount
 		grp.Status = repository.MessageGroupStatusPending
-		return groupRepo.Update(grp.ID, grp)
+
+		log.WithFields(log.Fields{
+			"grp_id": grp.ID.Hex(),
+			"status": grp.Status,
+		}).Debug("change group status")
+
+		return groupRepo.UpdateID(grp.ID, grp)
 	})
 }

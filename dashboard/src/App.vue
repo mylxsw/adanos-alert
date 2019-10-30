@@ -6,20 +6,20 @@
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <b-navbar-nav>
                     <b-nav-item to="/" exact>Groups</b-nav-item>
-                    <b-nav-item to="/ungrouped-messages" exact>Pending <b-badge variant="danger" v-if="ungroup_msg_count > 0">{{ ungroup_msg_count }}</b-badge></b-nav-item>
+                    <b-nav-item to="/pending-messages" exact>Pending <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
                     <b-nav-item to="/rules" exact>Rules</b-nav-item>
-                    <b-nav-item to="/dingding-tokens">Alerts</b-nav-item>
                     <b-nav-item to="/users">Users</b-nav-item>
                     <b-nav-item to="/queues">Queues</b-nav-item>
+                    <b-nav-item to="/settings">Settings</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
                     <li class="nav-item">
-                        <a href="http://git.yunsom.cn/golang/adanos" class="text-white">{{ adanos_version }}</a>
+                        <a href="https://github.com/mylxsw/adanos-alert" class="text-white">{{ version }}</a>
                     </li>
                 </ul>
             </b-collapse>
         </b-navbar>
-        <div class="adanos-main">
+        <div class="main-view">
             <router-view/>
         </div>
     </b-container>
@@ -28,18 +28,37 @@
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      ungroup_msg_count: 10,
-      adanos_version: 'v-0',
+    import axios from 'axios';
+
+    export default {
+        data() {
+            return {
+                version: 'v-0',
+                pending_message_count: 0,
+            }
+        },
+        mounted() {
+            axios.get('/api/').then(response => {
+                this.version = response.data.version;
+            });
+
+            axios.get('/api/messages-count/?status=pending').then(response => {
+                this.pending_message_count = response.data.count;
+            }).catch(error => {
+                this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
+                    title: 'ERROR',
+                    variant: 'danger'
+                });
+            });
+        },
+        beforeMount() {
+            axios.defaults.baseURL = this.$store.getters.serverUrl;
+            let token = this.$store.getters.token;
+            if (token !== "") {
+                axios.defaults.headers.common['Authorization'] = "Bearer " + token;
+            }
+        }
     }
-  },
-  mounted() {
-      this.ungroup_msg_count = 100;
-      this.adanos_version = 'v-1000101';
-  }
-}
 </script>
 
 <style>
@@ -47,7 +66,7 @@ export default {
         padding: 0;
     }
 
-    .adanos-main {
+    .main-view {
         padding: 15px;
     }
 </style>

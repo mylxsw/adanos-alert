@@ -43,6 +43,7 @@ func (r RuleRepo) Get(id primitive.ObjectID) (rule repository.Rule, err error) {
 }
 
 func (r RuleRepo) Find(filter bson.M) (rules []repository.Rule, err error) {
+	rules = make([]repository.Rule, 0)
 	cur, err := r.col.Find(context.TODO(), filter, options.Find().SetSort(bson.D{{Key: "priority", Value: -1}}))
 	if err != nil {
 		return

@@ -71,6 +71,7 @@ func (q *QueueRepo) Dequeue() (item repository.QueueJob, err error) {
 }
 
 func (q *QueueRepo) Paginate(filter bson.M, offset, limit int64) (items []repository.QueueJob, next int64, err error) {
+	items = make([]repository.QueueJob, 0)
 	cur, err := q.col.Find(
 		context.TODO(),
 		filter,
@@ -127,9 +128,6 @@ func (q *QueueRepo) Count(filter bson.M) (int64, error) {
 
 func (q *QueueRepo) Update(filter bson.M, item repository.QueueJob) error {
 	item.UpdatedAt = time.Now()
-	if item.NextExecuteAt.Before(item.UpdatedAt) {
-		item.NextExecuteAt = item.UpdatedAt
-	}
 
 	_, err := q.col.ReplaceOne(context.TODO(), filter, item)
 	return err

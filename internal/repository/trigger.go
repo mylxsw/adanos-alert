@@ -13,7 +13,7 @@ const (
 
 // Trigger is a action trigger for matched rules
 type Trigger struct {
-	ID           primitive.ObjectID   `bson:"_id" json:"id"`
+	ID           primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	PreCondition string               `bson:"pre_condition" json:"pre_condition"`
 	Action       string               `bson:"action" json:"action"`
 	Meta         string               `bson:"meta" json:"meta"`

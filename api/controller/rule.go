@@ -84,11 +84,13 @@ func (r RuleForm) Validate() error {
 	}
 
 	for i, tr := range r.Triggers {
-		_, err := matcher.NewTriggerMatcher(repository.Trigger{
-			PreCondition: tr.PreCondition,
-		})
-		if err != nil {
-			return fmt.Errorf("trigger #%d is invalid: %w", i, err)
+		if tr.PreCondition != "" {
+			_, err := matcher.NewTriggerMatcher(repository.Trigger{
+				PreCondition: tr.PreCondition,
+			})
+			if err != nil {
+				return fmt.Errorf("trigger #%d is invalid: %w", i, err)
+			}
 		}
 
 		for j, u := range tr.UserRefs {
@@ -112,7 +114,7 @@ func (r RuleForm) Validate() error {
 }
 
 // Add create a new rule
-func (r RuleController) Add(ctx hades.WebContext, repo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
+func (r RuleController) Add(ctx hades.Context, repo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
 	var ruleForm RuleForm
 	if err := ctx.Unmarshal(&ruleForm); err != nil {
 		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
@@ -162,7 +164,7 @@ func (r RuleController) Add(ctx hades.WebContext, repo repository.RuleRepo, mana
 	return &rule, nil
 }
 
-// Update replace one rule for specified id
+// UpdateID replace one rule for specified id
 func (r RuleController) Update(ctx hades.Context, ruleRepo repository.RuleRepo) (*repository.Rule, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
