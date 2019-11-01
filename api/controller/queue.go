@@ -7,6 +7,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/hades"
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,8 +38,10 @@ func (q *QueueController) Control(ctx hades.Context, manager queue.Manager) hade
 	switch op {
 	case "pause":
 		manager.Pause(true)
+		log.Info("queue paused")
 	case "continue":
 		manager.Pause(false)
+		log.Info("queue continued")
 	case "info":
 	default:
 		return ctx.JSONError("invalid op argument, not support", http.StatusUnprocessableEntity)

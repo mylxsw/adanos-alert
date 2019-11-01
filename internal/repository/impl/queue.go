@@ -78,7 +78,7 @@ func (q *QueueRepo) Paginate(filter bson.M, offset, limit int64) (items []reposi
 		options.Find().
 			SetSkip(offset).
 			SetLimit(limit).
-			SetSort(bson.M{"next_execute_at": 1}),
+			SetSort(bson.M{"next_execute_at":-1}),
 	)
 	if err != nil {
 		return

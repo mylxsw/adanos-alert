@@ -3,7 +3,7 @@
         <b-col>
             <b-table :items="messages" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
-                    {{ row.item.created_at }}
+                    <date-time :value="row.item.created_at"></date-time>
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
                 <template v-slot:cell(meta)="row">
@@ -34,7 +34,7 @@
     import axios from 'axios'
 
     export default {
-        name: 'PendingMessages',
+        name: 'Messages',
         data() {
             return {
                 messages: [],
@@ -46,14 +46,19 @@
                     {key: 'meta', label: '元信息'},
                     {key: 'tags', label: '标签'},
                     {key: 'origin', label: '来源'},
-                    {key: 'group_ids', label: '分组'},
                     {key: 'status', label: '状态'}
                 ],
             };
         },
         methods: {
             loadMore() {
-                axios.get('/api/messages/?status=&offset=' + this.nextOffset).then(response => {
+                axios.get('/api/messages/', {
+                    params: {
+                        next: this.nextOffset,
+                        status: this.$route.query.status !== undefined ? this.$route.query.status : null,
+                        group_id: this.$route.query.group_id !== undefined ? this.$route.query.group_id : null,
+                    },
+                }).then(response => {
                     this.messages = response.data.messages;
                     this.nextOffset = response.data.next;
                     this.isBusy = false;

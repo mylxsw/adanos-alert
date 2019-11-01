@@ -3,7 +3,7 @@
         <b-col>
             <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
-                    {{ row.item.updated_at }}
+                    <date-time :value="row.item.updated_at"></date-time>
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
                 <template v-slot:cell(actions)="row">
@@ -13,9 +13,22 @@
                         </b-list-group-item>
                     </b-list-group>
                 </template>
+                <template v-slot:cell(status)="row">
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中</b-badge>
+                    <b-badge v-if="row.item.status === 'pending'" variant="info">准备</b-badge>
+                    <b-badge v-if="row.item.status === 'ok'" variant="success">完成</b-badge>
+                    <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
+                    <b-badge v-if="row.item.status === 'canceled'" variant="warning">已取消</b-badge>
+                </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
+                </template>
+                <template v-slot:cell(operations)="row">
+                    <b-button-group>
+                        <b-button size="sm" variant="info" :to="{path:'/messages', query: {group_id: row.item.id}}">查看</b-button>
+                        <b-button size="sm" variant="danger" >删除</b-button>
+                    </b-button-group>
                 </template>
             </b-table>
         </b-col>
@@ -23,7 +36,7 @@
 </template>
 
 <script>
-    import axios from 'axios'
+    import axios from 'axios';
 
     export default {
         name: 'Groups',

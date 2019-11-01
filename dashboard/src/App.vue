@@ -6,7 +6,7 @@
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <b-navbar-nav>
                     <b-nav-item to="/" exact>Groups</b-nav-item>
-                    <b-nav-item to="/pending-messages" exact>Pending <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
+                    <b-nav-item :to="{path:'/messages', query: {status: 'pending'}}" exact>Pending <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
                     <b-nav-item to="/rules" exact>Rules</b-nav-item>
                     <b-nav-item to="/users">Users</b-nav-item>
                     <b-nav-item to="/queues">Queues</b-nav-item>
