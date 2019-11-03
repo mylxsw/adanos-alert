@@ -9,7 +9,7 @@
                     <b-nav-item :to="{path:'/messages', query: {status: 'pending'}}" exact>Pending <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
                     <b-nav-item to="/rules" exact>Rules</b-nav-item>
                     <b-nav-item to="/users">Users</b-nav-item>
-                    <b-nav-item to="/queues">Queues</b-nav-item>
+                    <b-nav-item to="/queues">Jobs</b-nav-item>
                     <b-nav-item to="/settings">Settings</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">

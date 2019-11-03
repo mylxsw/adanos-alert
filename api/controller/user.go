@@ -25,6 +25,7 @@ func (u UserController) Register(router *hades.Router) {
 	router.Group("/users/", func(router *hades.Router) {
 		router.Get("/", u.Users).Name("users:all")
 		router.Post("/", u.Add).Name("users:add")
+		router.Post("/{id}/", u.Update).Name("users:update")
 		router.Get("/{id}/", u.User).Name("users:one")
 		router.Delete("/{id}/", u.Delete).Name("users:delete")
 	})
@@ -71,6 +72,35 @@ func (u UserController) Add(ctx hades.Context, userRepo repository.UserRepo) (*r
 
 	user, err := userRepo.Get(id)
 	if err != nil {
+		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+	}
+
+	return &user, nil
+}
+
+func (u UserController) Update(ctx hades.Context, userRepo repository.UserRepo) (*repository.User, error) {
+	userID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return nil, hades.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
+	}
+
+	var userForm UserForm
+	if err := ctx.Unmarshal(&userForm); err != nil {
+		return nil, hades.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
+	}
+
+	ctx.Validate(userForm, true)
+
+	user, err := userRepo.Get(userID)
+	if err != nil {
+		return nil, hades.WrapJSONError(err, http.StatusNotFound)
+	}
+
+	user.Name = userForm.Name
+	user.Metas = userForm.Metas
+	user.Status = repository.UserStatus(userForm.Status)
+
+	if err := userRepo.Update(userID, user); err != nil {
 		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
 	}
 

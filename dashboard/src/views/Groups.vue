@@ -27,7 +27,6 @@
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
                         <b-button size="sm" variant="info" :to="{path:'/messages', query: {group_id: row.item.id}}">查看</b-button>
-                        <b-button size="sm" variant="danger" >删除</b-button>
                     </b-button-group>
                 </template>
             </b-table>

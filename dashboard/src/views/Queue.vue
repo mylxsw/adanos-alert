@@ -28,6 +28,11 @@
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
                 </template>
+                <template v-slot:cell(operations)="row">
+                    <b-button-group>
+                        <b-button size="sm" variant="danger" @click="delete_job(row.index, row.item.id)">删除</b-button>
+                    </b-button-group>
+                </template>
             </b-table>
             <paginator :per_page="10" :cur="cur" :next="next" path="/queues" :query="this.$route.query"></paginator>
         </b-col>
@@ -67,6 +72,27 @@
             };
         },
         methods: {
+            delete_job(index, id) {
+                let self = this;
+                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                    if (value !== true) {
+                        return;
+                    }
+
+                    axios.delete('/api/queue/jobs/' + id + '/').then(() => {
+                        self.jobs.splice(index, 1);
+                        this.$bvToast.toast('操作成功', {
+                            title: 'OK',
+                            variant: 'success',
+                        });
+                    }).catch(error => {
+                        this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
+                            title: 'ERROR',
+                            variant: 'danger'
+                        });
+                    });
+                });
+            },
             pause_queue() {
                 this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
                     if (value !== true) {return;}

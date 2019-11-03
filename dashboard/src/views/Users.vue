@@ -1,6 +1,9 @@
 <template>
     <b-row class="mb-5">
         <b-col>
+            <b-btn-group class="mb-3">
+                <b-button to="/users/add" variant="primary">新增用户</b-button>
+            </b-btn-group>
             <b-table :items="users" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(name)="row">
                     {{ row.item.name }}
@@ -50,7 +53,7 @@
                 fields: [
                     {key: 'name', label: '用户名'},
                     {key: 'metas', label: '基本信息'},
-                    {key: 'status', label: '状态'},
+                    // {key: 'status', label: '状态'},
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}
                 ],
