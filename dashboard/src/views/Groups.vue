@@ -31,6 +31,7 @@
                     </b-button-group>
                 </template>
             </b-table>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/"></paginator>
         </b-col>
     </b-row>
 </template>
@@ -43,7 +44,8 @@
         data() {
             return {
                 groups: [],
-                nextOffset: -1,
+                cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
+                next: -1,
                 isBusy: true,
                 fields: [
                     {key: 'id', label: '序号'},
@@ -67,10 +69,10 @@
 
                 return (time_sec / 60 / 60).toFixed(1) + " h"
             },
-            loadMore() {
-                axios.get('/api/groups/?offset=' + this.nextOffset).then(response => {
+            reload() {
+                axios.get('/api/groups/?offset=' + this.cur).then(response => {
                     this.groups = response.data.groups;
-                    this.nextOffset = response.data.next;
+                    this.next = response.data.next;
                     this.isBusy = false;
                 }).catch(error => {
                     this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
@@ -81,7 +83,7 @@
             }
         },
         mounted() {
-            this.loadMore();
+            this.reload();
         }
     }
 </script>

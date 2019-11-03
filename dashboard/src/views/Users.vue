@@ -24,7 +24,14 @@
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
                 </template>
+                <template v-slot:cell(operations)="row">
+                    <b-button-group>
+                        <b-button size="sm" variant="info" :to="{path:'/users/' + row.item.id + '/edit'}">编辑</b-button>
+                        <b-button size="sm" variant="danger" @click="delete_user(row.index, row.item.id)">删除</b-button>
+                    </b-button-group>
+                </template>
             </b-table>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/users" :query="{}"></paginator>
         </b-col>
     </b-row>
 </template>
@@ -37,6 +44,7 @@
         data() {
             return {
                 users: [],
+                cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
                 isBusy: true,
                 fields: [
@@ -49,8 +57,29 @@
             };
         },
         methods: {
+            delete_user(index, id) {
+                let self = this;
+                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                    if (value !== true) {
+                        return;
+                    }
+
+                    axios.delete('/api/users/' + id + '/').then(() => {
+                        self.users.splice(index, 1);
+                        this.$bvToast.toast('操作成功', {
+                            title: 'OK',
+                            variant: 'success',
+                        });
+                    }).catch(error => {
+                        this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
+                            title: 'ERROR',
+                            variant: 'danger'
+                        });
+                    });
+                });
+            },
             reload() {
-                axios.get('/api/users/?next=' + this.next).then(response => {
+                axios.get('/api/users/?offset=' + this.cur).then(response => {
                     this.users = response.data.users;
                     this.next = response.data.next;
                     this.isBusy = false;

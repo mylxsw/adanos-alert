@@ -1,10 +1,12 @@
 package job
 
 import (
+	"fmt"
+
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
-	"github.com/mylxsw/glacier/period_job"
+	"github.com/mylxsw/glacier/cron"
 )
 
 type ServiceProvider struct{}
@@ -15,10 +17,10 @@ func (s ServiceProvider) Register(app *container.Container) {
 }
 
 func (s ServiceProvider) Boot(app *glacier.Glacier) {
-	app.PeriodJob(func(pj period_job.Manager, cc *container.Container) {
-		cc.MustResolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob) {
-			pj.Run(AggregationJobName, aggregationJob, conf.AggregationPeriod)
-			pj.Run(TriggerJobName, alertJob, conf.ActionTriggerPeriod)
+	app.Cron(func(cr cron.Manager, cc *container.Container) error {
+		return cc.Resolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob) {
+			_ = cr.Add(AggregationJobName, fmt.Sprintf("@every %s", conf.AggregationPeriod), aggregationJob.Handle)
+			_ = cr.Add(TriggerJobName, fmt.Sprintf("@every %s", conf.ActionTriggerPeriod), alertJob.Handle)
 		})
 	})
 }

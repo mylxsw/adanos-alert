@@ -29,6 +29,7 @@
                     <strong> Loading...</strong>
                 </template>
             </b-table>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/queues" :query="this.$route.query"></paginator>
         </b-col>
     </b-row>
 </template>
@@ -41,6 +42,7 @@
         data() {
             return {
                 jobs: [],
+                cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
                 isBusy: true,
                 queue_info: {
@@ -86,7 +88,7 @@
                 this.queue_paused = paused;
             },
             loadMore() {
-                axios.get('/api/queue/jobs/?offset=' + this.next).then(response => {
+                axios.get('/api/queue/jobs/?offset=' + this.cur).then(response => {
                     this.jobs = response.data.jobs;
                     this.next = response.data.next;
                     this.isBusy = false;

@@ -26,7 +26,7 @@ func (u UserController) Register(router *hades.Router) {
 		router.Get("/", u.Users).Name("users:all")
 		router.Post("/", u.Add).Name("users:add")
 		router.Get("/{id}/", u.User).Name("users:one")
-		router.Delete("/{id}/", u.User).Name("users:delete")
+		router.Delete("/{id}/", u.Delete).Name("users:delete")
 	})
 }
 

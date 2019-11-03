@@ -20,4 +20,5 @@ type KVRepo interface {
 	Get(key string) (pair KV, err error)
 	Remove(key string) (removeCount int64, err error)
 	All(filter bson.M) (pairs []KV, err error)
+	GC() error
 }

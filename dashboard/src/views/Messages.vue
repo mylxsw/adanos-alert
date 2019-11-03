@@ -26,6 +26,7 @@
                     <strong> Loading...</strong>
                 </template>
             </b-table>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/messages" :query="this.$route.query"></paginator>
         </b-col>
     </b-row>
 </template>
@@ -38,7 +39,8 @@
         data() {
             return {
                 messages: [],
-                nextOffset: -1,
+                cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
+                next: -1,
                 isBusy: true,
                 fields: [
                     {key: 'id', label: '序号'},
@@ -54,13 +56,13 @@
             loadMore() {
                 axios.get('/api/messages/', {
                     params: {
-                        next: this.nextOffset,
+                        offset: this.cur,
                         status: this.$route.query.status !== undefined ? this.$route.query.status : null,
                         group_id: this.$route.query.group_id !== undefined ? this.$route.query.group_id : null,
                     },
                 }).then(response => {
                     this.messages = response.data.messages;
-                    this.nextOffset = response.data.next;
+                    this.next = response.data.next;
                     this.isBusy = false;
                 }).catch(error => {
                     this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {

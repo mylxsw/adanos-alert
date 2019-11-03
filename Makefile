@@ -21,8 +21,7 @@ build-release:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o build/release/adanos-alert-linux cmd/adanos-alert/main.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags $(LDFLAGS) -o build/release/adanos-alert-arm cmd/adanos-alert/main.go
 
-
-static-gen:
+static-gen: build-dashboard
 	esc -pkg api -o api/static.go -prefix=dashboard/dist dashboard/dist
 
 doc-gen:

@@ -12,10 +12,12 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/queue"
+	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/hades"
 	"github.com/urfave/cli"
@@ -81,10 +83,10 @@ func main() {
 		Value:  3,
 	}))
 
-	app.UseStackLogger(func(stackWriter *writer.StackWriter) {
+	app.UseStackLogger(func(cc *container.Container, stackWriter *writer.StackWriter) {
 		stackWriter.PushWithLevels(writer.NewStdoutWriter())
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(),
+			NewErrorCollectorWriter(cc),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -152,15 +154,26 @@ func main() {
 	}
 }
 
-type ErrorCollectorWriter struct{}
+type ErrorCollectorWriter struct {
+	cc *container.Container
+}
 
-func NewErrorCollectorWriter() *ErrorCollectorWriter {
-	return &ErrorCollectorWriter{}
+func NewErrorCollectorWriter(cc *container.Container) *ErrorCollectorWriter {
+	return &ErrorCollectorWriter{cc: cc}
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
+	return e.cc.ResolveWithError(func(msgRepo repository.MessageRepo) error {
+		_, err := msgRepo.Add(repository.Message{
+			Content: message,
+			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module,},
+			Tags:    []string{"internal-error"},
+			Origin:  "internal",
+		})
+
+		return err
+	})
 	// return e.errorStore.Record(strings.ReplaceAll(message, "\n", color.TextWrap(color.Green, "↙")))
-	return nil
 }
 
 func (e *ErrorCollectorWriter) ReOpen() error {

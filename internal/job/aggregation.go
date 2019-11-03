@@ -27,8 +27,6 @@ func NewAggregationJob(app *container.Container) *AggregationJob {
 // 1. message grouping, delivery all ungrouped messages to message group
 // 2. change the message groups that satisfied the conditions to pending status
 func (a *AggregationJob) Handle() {
-	log.Debug("aggregating messages...")
-
 	// traverse all ungrouped messages to group
 	a.app.MustResolve(a.groupingMessages)
 	// change message group status to pending when it reach the aggregate condition
