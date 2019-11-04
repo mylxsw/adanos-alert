@@ -18,6 +18,7 @@ func (s ServiceProvider) Register(app *container.Container) {
 	app.MustSingleton(NewUserRepo)
 	app.MustSingleton(NewRuleRepo)
 	app.MustSingleton(NewQueueRepo)
+	app.MustSingleton(NewTemplateRepo)
 }
 
 func (s ServiceProvider) Boot(app *glacier.Glacier) {

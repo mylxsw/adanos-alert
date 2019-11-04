@@ -10,6 +10,7 @@
                     <b-nav-item to="/rules" exact>Rules</b-nav-item>
                     <b-nav-item to="/users">Users</b-nav-item>
                     <b-nav-item to="/queues">Jobs</b-nav-item>
+                    <b-nav-item to="/templates">Templates</b-nav-item>
                     <b-nav-item to="/settings">Settings</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
@@ -42,14 +43,17 @@
                 this.version = response.data.version;
             });
 
-            axios.get('/api/messages-count/?status=pending').then(response => {
-                this.pending_message_count = response.data.count;
-            }).catch(error => {
-                this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                    title: 'ERROR',
-                    variant: 'danger'
+            let self = this;
+            let updatePendingMessageCount = function () {
+                axios.get('/api/messages-count/?status=pending').then(response => {
+                    self.pending_message_count = response.data.count;
+                }).catch(error => {
+                    self.ToastError(error);
                 });
-            });
+            };
+
+            updatePendingMessageCount();
+            window.setInterval(updatePendingMessageCount, 30000);
         },
         beforeMount() {
             axios.defaults.baseURL = this.$store.getters.serverUrl;

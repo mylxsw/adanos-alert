@@ -6,6 +6,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/container"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -23,7 +24,7 @@ func TestTriggerMatcher(t *testing.T) {
 		MessageCount: 10,
 		CreatedAt:    currentTs,
 	}
-	triggerCtx := matcher.NewTriggerContext(grp, func() []repository.Message {
+	triggerCtx := matcher.NewTriggerContext(container.New(), repository.Trigger{}, grp, func() []repository.Message {
 		return []repository.Message{
 			{
 				Content: "Hello, world",

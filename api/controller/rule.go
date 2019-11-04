@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -20,12 +20,12 @@ type RuleController struct {
 	cc *container.Container
 }
 
-func NewRuleController(cc *container.Container) hades.Controller {
+func NewRuleController(cc *container.Container) web.Controller {
 	return &RuleController{cc: cc}
 }
 
-func (r RuleController) Register(router *hades.Router) {
-	router.Group("/rules/", func(router *hades.Router) {
+func (r RuleController) Register(router *web.Router) {
+	router.Group("/rules/", func(router *web.Router) {
 		router.Post("/", r.Add).Name("rules:add")
 		router.Get("/", r.Rules).Name("rules:all")
 		router.Get("/{id}/", r.Rule).Name("rules:one")
@@ -33,7 +33,7 @@ func (r RuleController) Register(router *hades.Router) {
 		router.Delete("/{id}/", r.Delete).Name("rules:delete")
 	})
 
-	router.Group("/rules-test/", func(router *hades.Router) {
+	router.Group("/rules-test/", func(router *web.Router) {
 		router.Post("/rule-message/", r.TestMessageMatch).Name("rules:test:rule-message")
 	})
 }
@@ -64,7 +64,7 @@ type RuleForm struct {
 	actionManager action.Manager
 }
 
-// Validate implement hades.Validator interface
+// Validate implement web.Validator interface
 func (r RuleForm) Validate() error {
 	if r.Name == "" {
 		return errors.New("name is required")
@@ -114,10 +114,10 @@ func (r RuleForm) Validate() error {
 }
 
 // Add create a new rule
-func (r RuleController) Add(ctx hades.Context, repo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
+func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
 	var ruleForm RuleForm
 	if err := ctx.Unmarshal(&ruleForm); err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
 	ruleForm.actionManager = manager
@@ -153,34 +153,35 @@ func (r RuleController) Add(ctx hades.Context, repo repository.RuleRepo, manager
 		Status:          repository.RuleStatus(ruleForm.Status),
 	})
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	rule, err := repo.Get(ruleID)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &rule, nil
 }
 
 // UpdateID replace one rule for specified id
-func (r RuleController) Update(ctx hades.Context, ruleRepo repository.RuleRepo) (*repository.Rule, error) {
+func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
 	var ruleForm RuleForm
 	if err := ctx.Unmarshal(&ruleForm); err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
+	ruleForm.actionManager = manager
 	ctx.Validate(ruleForm, true)
 
 	original, err := ruleRepo.Get(id)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	triggers := make([]repository.Trigger, 0)
@@ -216,12 +217,12 @@ func (r RuleController) Update(ctx hades.Context, ruleRepo repository.RuleRepo) 
 		CreatedAt:       original.CreatedAt,
 		UpdatedAt:       original.CreatedAt,
 	}); err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	rule, err := ruleRepo.Get(id)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &rule, nil
@@ -230,7 +231,7 @@ func (r RuleController) Update(ctx hades.Context, ruleRepo repository.RuleRepo) 
 type RulesResp []repository.Rule
 
 // Rules return all rules
-func (r RuleController) Rules(ctx hades.Context, ruleRepo repository.RuleRepo) (RulesResp, error) {
+func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo) (RulesResp, error) {
 	filter := bson.M{}
 
 	name := ctx.Input("name")
@@ -245,39 +246,39 @@ func (r RuleController) Rules(ctx hades.Context, ruleRepo repository.RuleRepo) (
 
 	rules, err := ruleRepo.Find(filter)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return rules, nil
 }
 
 // Rule return one rule
-func (r RuleController) Rule(ctx hades.Context, ruleRepo repository.RuleRepo) (*repository.Rule, error) {
+func (r RuleController) Rule(ctx web.Context, ruleRepo repository.RuleRepo) (*repository.Rule, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
 	rule, err := ruleRepo.Get(id)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &rule, nil
 }
 
 // Delete delete a rule
-func (r RuleController) Delete(ctx hades.Context, repo repository.RuleRepo) error {
+func (r RuleController) Delete(ctx web.Context, repo repository.RuleRepo) error {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
 	return repo.DeleteID(id)
 }
 
 // TestMessageMatch test if the message and rule can be matched
-func (r RuleController) TestMessageMatch(ctx hades.Context) hades.Response {
+func (r RuleController) TestMessageMatch(ctx web.Context) web.Response {
 	rule := ctx.Input("rule")
 	message := ctx.Input("message")
 

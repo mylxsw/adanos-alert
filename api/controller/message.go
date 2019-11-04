@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -20,12 +20,12 @@ type MessageController struct {
 	cc *container.Container
 }
 
-func NewMessageController(cc *container.Container) hades.Controller {
+func NewMessageController(cc *container.Container) web.Controller {
 	return &MessageController{cc: cc}
 }
 
-func (m *MessageController) Register(router *hades.Router) {
-	router.Group("/messages", func(router *hades.Router) {
+func (m *MessageController) Register(router *web.Router) {
+	router.Group("/messages", func(router *web.Router) {
 		router.Get("/", m.Messages).Name("messages:all")
 		router.Get("/{id}/", m.Message).Name("messages:one")
 
@@ -37,13 +37,13 @@ func (m *MessageController) Register(router *hades.Router) {
 		router.Post("/openfalcon/im/", m.AddOpenFalconMessage).Name("messages:add:openfalcon")
 	})
 
-	router.Group("/messages-count/", func(router *hades.Router) {
+	router.Group("/messages-count/", func(router *web.Router) {
 		router.Get("/", m.Count).Name("messages:count")
 	})
 }
 
 // messagesFilter some query conditions for messages
-func messagesFilter(ctx hades.Context) bson.M {
+func messagesFilter(ctx web.Context) bson.M {
 	filter := bson.M{}
 
 	meta := ctx.Input("meta")
@@ -67,14 +67,14 @@ func messagesFilter(ctx hades.Context) bson.M {
 }
 
 // Count return message count for your conditions
-func (m *MessageController) Count(ctx hades.Context, msgRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) Count(ctx web.Context, msgRepo repository.MessageRepo) web.Response {
 	filter := messagesFilter(ctx)
 	msgCount, err := msgRepo.Count(filter)
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return ctx.JSON(hades.M{
+	return ctx.JSON(web.M{
 		"count": msgCount,
 	})
 }
@@ -86,7 +86,7 @@ type MessagesResp struct {
 }
 
 // Messages return all messages
-func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.MessageRepo) (*MessagesResp, error) {
+func (m *MessageController) Messages(ctx web.Context, msgRepo repository.MessageRepo) (*MessagesResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 
 	filter := messagesFilter(ctx)
@@ -94,7 +94,7 @@ func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.Messa
 	if groupIDHex != "" {
 		groupID, err := primitive.ObjectIDFromHex(groupIDHex)
 		if err != nil {
-			return nil, hades.WrapJSONError(fmt.Errorf("invalid group_id: %w", err), http.StatusUnprocessableEntity)
+			return nil, web.WrapJSONError(fmt.Errorf("invalid group_id: %w", err), http.StatusUnprocessableEntity)
 		}
 
 		filter["group_ids"] = groupID
@@ -102,7 +102,7 @@ func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.Messa
 
 	messages, next, err := msgRepo.Paginate(filter, offset, limit)
 	if err != nil {
-		return nil, hades.WrapJSONError(fmt.Errorf("query failed: %v", err), http.StatusInternalServerError)
+		return nil, web.WrapJSONError(fmt.Errorf("query failed: %v", err), http.StatusInternalServerError)
 	}
 
 	return &MessagesResp{
@@ -112,16 +112,16 @@ func (m *MessageController) Messages(ctx hades.Context, msgRepo repository.Messa
 }
 
 // Message return one message
-func (m *MessageController) Message(ctx hades.Context, msgRepo repository.MessageRepo) (*repository.Message, error) {
+func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageRepo) (*repository.Message, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return nil, hades.WrapJSONError(fmt.Errorf("invalid id: %w", err), http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(fmt.Errorf("invalid id: %w", err), http.StatusUnprocessableEntity)
 	}
 
 	message, err := msgRepo.Get(id)
 	if err != nil {
 		if err == repository.ErrNotFound {
-			return nil, hades.WrapJSONError(fmt.Errorf("no such message: %w", err), http.StatusNotFound)
+			return nil, web.WrapJSONError(fmt.Errorf("no such message: %w", err), http.StatusNotFound)
 		}
 
 		return nil, err
@@ -134,13 +134,13 @@ type RepoMessage interface {
 	ToRepo() repository.Message
 }
 
-func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage RepoMessage, ctx hades.Context) hades.Response {
+func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage RepoMessage, ctx web.Context) web.Response {
 	id, err := messageRepo.Add(repoMessage.ToRepo())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return ctx.JSON(hades.M{
+	return ctx.JSON(web.M{
 		"id": id.Hex(),
 	})
 }
@@ -163,7 +163,7 @@ func (msg CommonMessage) ToRepo() repository.Message {
 	}
 }
 
-func (m *MessageController) AddCommonMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddCommonMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	var commonMessage CommonMessage
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -174,7 +174,7 @@ func (m *MessageController) AddCommonMessage(ctx hades.Context, messageRepo repo
 
 // Add logstash message
 
-func (m *MessageController) AddLogstashMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddLogstashMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	flattenJson, err := flatten.FlattenString(string(ctx.Request().Body()), "", flatten.DotStyle)
 	if err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid json: %s", err), http.StatusUnprocessableEntity)
@@ -231,7 +231,7 @@ type GrafanaEvalMatch struct {
 	Tags   map[string]string
 }
 
-func (m *MessageController) AddGrafanaMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddGrafanaMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	var grafanaMessage GrafanaMessage
 	if err := ctx.Unmarshal(&grafanaMessage); err != nil {
 		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
@@ -267,7 +267,7 @@ func (pm PrometheusMessage) ToRepo() repository.Message {
 	}
 }
 
-func (m *MessageController) AddPrometheusMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddPrometheusMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	var prometheusMessage PrometheusMessage
 	if err := ctx.Unmarshal(&prometheusMessage); err != nil {
 		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
@@ -320,7 +320,7 @@ func (pam PrometheusAlertMessage) ToRepo() repository.Message {
 	}
 }
 
-func (m *MessageController) AddPrometheusAlertMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	var prometheusMessage PrometheusAlertMessage
 	if err := ctx.Unmarshal(&prometheusMessage); err != nil {
 		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
@@ -337,7 +337,7 @@ func (m *MessageController) AddPrometheusAlertMessage(ctx hades.Context, message
 
 // add open-falcon message
 
-func (m *MessageController) AddOpenFalconMessage(ctx hades.Context, messageRepo repository.MessageRepo) hades.Response {
+func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	tos := ctx.Input("tos")
 	content := ctx.Input("content")
 

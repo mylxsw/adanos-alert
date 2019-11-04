@@ -64,15 +64,9 @@
 
                     axios.delete('/api/rules/' + id + '/').then(() => {
                         self.rules.splice(index, 1);
-                        this.$bvToast.toast('操作成功', {
-                            title: 'OK',
-                            variant: 'success',
-                        });
+                        this.SuccessBox('操作成功');
                     }).catch(error => {
-                        this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                            title: 'ERROR',
-                            variant: 'danger'
-                        });
+                        this.ErrorBox(error);
                     });
                 });
             },
@@ -81,10 +75,7 @@
                     this.rules = response.data;
                     this.isBusy = false;
                 }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                    this.ToastError(error);
                 });
             }
         },

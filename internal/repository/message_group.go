@@ -50,5 +50,7 @@ type MessageGroupRepo interface {
 	UpdateID(id primitive.ObjectID, grp MessageGroup) error
 	Count(filter bson.M) (int64, error)
 
+	// LastGroup get last group which match the filter in messageGroups
+	LastGroup(filter bson.M) (grp MessageGroup, err error)
 	CollectingGroup(rule MessageGroupRule) (group MessageGroup, err error)
 }

@@ -20,8 +20,6 @@ func NewTrigger(app *container.Container) *TriggerJob {
 }
 
 func (a TriggerJob) Handle() {
-	log.Debug("trigger actions...")
-
 	a.app.MustResolve(a.processMessageGroups)
 }
 
@@ -58,7 +56,7 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 				continue
 			}
 
-			matched, err := tm.Match(matcher.NewTriggerContext(grp, func() []repository.Message {
+			matched, err := tm.Match(matcher.NewTriggerContext(a.app, trigger, grp, func() []repository.Message {
 				messages, err := messageRepo.Find(bson.M{"group_ids": grp.ID})
 				if err != nil {
 					log.WithFields(log.Fields{

@@ -3,8 +3,10 @@
         <b-col>
             <div class="mb-3">
                 <b-button size="sm" :variant="queue_btn" class="float-right" @click="pause_queue()">{{ queue_action }}</b-button>
-
-                当前状态：<span v-html="queue_status"></span>，Workers: {{ queue_info.worker_num }}，已处理：{{ queue_info.processed_count }}，失败：{{ queue_info.failed_count }}
+                当前状态：<span v-html="queue_status"></span>，
+                Workers: <b>{{ queue_info.worker_num }}</b>，
+                已处理：<b class="text-success">{{ queue_info.processed_count }}</b>，
+                失败：<b class="text-danger">{{ queue_info.failed_count }}</b>
             </div>
             <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
@@ -81,15 +83,9 @@
 
                     axios.delete('/api/queue/jobs/' + id + '/').then(() => {
                         self.jobs.splice(index, 1);
-                        this.$bvToast.toast('操作成功', {
-                            title: 'OK',
-                            variant: 'success',
-                        });
+                        this.SuccessBox('操作成功');
                     }).catch(error => {
-                        this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                            title: 'ERROR',
-                            variant: 'danger'
-                        });
+                        this.ErrorBox(error);
                     });
                 });
             },
@@ -97,13 +93,10 @@
                 this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
                     if (value !== true) {return;}
                     axios.post('/api/queue/control/', {op: this.queue_paused ? 'continue' : 'pause'}).then(resp => {
-                        this.$bvToast.toast('操作成功', {
-                            title: 'OK',
-                            variant: 'success',
-                        });
+                        this.SuccessBox('操作成功');
                         this.updateControlStatus(resp.data.paused);
                         this.queue_info = resp.data.info;
-                    });
+                    }).catch(error => {this.ErrorBox(error)});
                 });
 
             },
@@ -119,20 +112,14 @@
                     this.next = response.data.next;
                     this.isBusy = false;
                 }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                    this.ToastError(error)
                 });
 
                 axios.post('/api/queue/control/', {op: 'info'}).then(response => {
                     this.updateControlStatus(response.data.paused);
                     this.queue_info = response.data.info;
                 }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                    this.ToastError(error)
                 });
             }
         },

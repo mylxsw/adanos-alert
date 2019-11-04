@@ -5,7 +5,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -14,12 +14,12 @@ type GroupController struct {
 	cc *container.Container
 }
 
-func NewGroupController(cc *container.Container) hades.Controller {
+func NewGroupController(cc *container.Container) web.Controller {
 	return &GroupController{cc: cc}
 }
 
-func (g GroupController) Register(router *hades.Router) {
-	router.Group("/groups/", func(router *hades.Router) {
+func (g GroupController) Register(router *web.Router) {
+	router.Group("/groups/", func(router *web.Router) {
 		router.Get("/", g.Groups).Name("groups:all")
 		router.Get("/{id}/", g.Group).Name("groups:one")
 	})
@@ -30,14 +30,12 @@ type GroupsResp struct {
 	Next   int64                     `json:"next"`
 }
 
-
-
 // Groups list all message groups
 // Arguments:
 //   - offset/limit
 //   - status
 //   - rule_id
-func (g GroupController) Groups(ctx hades.Context, groupRepo repository.MessageGroupRepo) (*GroupsResp, error) {
+func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGroupRepo) (*GroupsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 	filter := bson.M{}
 
@@ -53,7 +51,7 @@ func (g GroupController) Groups(ctx hades.Context, groupRepo repository.MessageG
 
 	grps, next, err := groupRepo.Paginate(filter, offset, limit)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &GroupsResp{
@@ -69,7 +67,7 @@ type GroupResp struct {
 }
 
 func (g GroupController) Group(
-	ctx hades.Context,
+	ctx web.Context,
 	groupRepo repository.MessageGroupRepo,
 	messageRepo repository.MessageRepo,
 ) (*GroupResp, error) {
@@ -78,12 +76,12 @@ func (g GroupController) Group(
 
 	groupID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
 
 	grp, err := groupRepo.Get(groupID)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	filter := messagesFilter(ctx)
@@ -91,7 +89,7 @@ func (g GroupController) Group(
 
 	messages, next, err := messageRepo.Paginate(filter, offset, limit)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &GroupResp{

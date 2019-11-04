@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -19,7 +20,7 @@ import (
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,7 +34,7 @@ var GitCommit string
 const ConnectionTimeout = 5 * time.Second
 
 func main() {
-	app := glacier.Create(fmt.Sprintf("%s (%s)", Version, GitCommit))
+	app := glacier.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
 	app.WithHttpServer(":19999")
 
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
@@ -133,12 +134,21 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
+	app.BeforeInitialize(func(c *cli.Context) error {
+		// disable logs for cron
+		log.Module("glacier.cron").LogLevel(level.Warning)
+		return nil
+	}).WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
+		log.Errorf("Stack: %s", debug.Stack())
+		return nil
+	})
+
 	app.Main(func(conf *configs.Config, router *mux.Router) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
 
-		for _, r := range hades.GetAllRoutes(router) {
+		for _, r := range web.GetAllRoutes(router) {
 			log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
 		}
 	})

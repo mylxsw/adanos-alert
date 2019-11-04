@@ -32,11 +32,8 @@
             updateBrowserSetting() {
                 this.$store.commit('updateServerUrl', this.server_url);
                 this.$store.commit('updateToken', this.token);
-                this.$bvToast.toast('Successful， Please refresh your web page', {
-                    title: 'OK',
-                    variant: 'success'
-                });
 
+                this.SuccessBox('Successful， Please refresh your web page');
                 this.refreshBrowserSetting();
             },
             refreshBrowserSetting() {

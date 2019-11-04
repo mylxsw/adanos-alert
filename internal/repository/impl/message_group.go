@@ -136,3 +136,12 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 
 	return
 }
+
+func (m MessageGroupRepo) LastGroup(filter bson.M) (grp repository.MessageGroup, err error) {
+	rs := m.col.FindOne(context.TODO(), filter, options.FindOne().SetSort(bson.M{"updated_at": -1}))
+	err = rs.Decode(&grp)
+	if err == mongo.ErrNoDocuments {
+		err = repository.ErrNotFound
+	}
+	return grp, err
+}

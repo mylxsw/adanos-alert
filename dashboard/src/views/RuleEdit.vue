@@ -28,6 +28,9 @@
 
                 <b-card-group class="mb-3">
                     <b-card header="规则">
+                        <b-btn-group class="mb-2">
+                            <b-btn variant="light" v-b-modal.match_rule_selector>插入模板</b-btn>
+                        </b-btn-group>
                         <b-form-textarea id="rule" rows="5" v-model="form.rule"
                                          placeholder="输入规则，必须返回布尔值"></b-form-textarea>
                         <small class="form-text text-muted">
@@ -39,6 +42,9 @@
 
                 <b-card-group class="mb-3">
                     <b-card header="模板">
+                        <b-btn-group class="mb-2">
+                            <b-btn variant="light" v-b-modal.template_selector>插入模板</b-btn>
+                        </b-btn-group>
                         <b-form-textarea id="template" rows="5" v-model="form.template"
                                          placeholder="输入模板"></b-form-textarea>
                         <small class="form-text text-muted">
@@ -50,10 +56,40 @@
                 <b-card-group class="mb-3">
                     <b-card header="动作">
                         <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
-                        <b-card class="mb-3" v-bind:key="i" v-for="(trigger, i) in form.triggers">
-                            {{ trigger }}
+                        <b-card :header="trigger.id" border-variant="dark" header-bg-variant="dark"
+                                header-text-variant="white" class="mb-3" v-bind:key="i"
+                                v-for="(trigger, i) in form.triggers">
+                            <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
+                                          :label-for="'trigger_pre_condition_' + i">
+                                <b-btn-group class="mb-2">
+                                    <b-btn variant="light">插入模板</b-btn>
+                                </b-btn-group>
+                                <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
+                                                 placeholder="默认为 true （全部匹配）"></b-form-textarea>
+                            </b-form-group>
+                            <b-form-group label-cols="2" :id="'trigger_action_' + i" label="动作"
+                                          :label-for="'trigger_action_' + i">
+                                <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
+                                               :options="action_options"></b-form-select>
+                            </b-form-group>
+                            <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
+                                          :label-for="'trigger_meta_' + i">
+                                <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta"></b-form-input>
+                            </b-form-group>
 
-                            <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除</b-btn>
+                            <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
+                                <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
+                                               class="mb-3">
+                                    <b-form-select v-model="trigger.user_refs[index]"
+                                                   :options="user_options"></b-form-select>
+                                    <b-input-group-append>
+                                        <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                    </b-input-group-append>
+                                </b-input-group>
+                            </b-form-group>
+
+                            <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
                         </b-card>
                     </b-card>
                 </b-card-group>
@@ -61,6 +97,25 @@
                 <b-button type="submit" variant="primary" class="mr-2">保存</b-button>
                 <b-button to="/rules">返回</b-button>
             </b-form>
+
+            <b-modal id="match_rule_selector" title="模板选择" hide-footer size="xl">
+                <b-table :items="templates.match_rule" :fields="template_fields">
+                    <template v-slot:cell(operations)="row">
+                        <b-button-group>
+                            <b-button size="sm" variant="info" @click="applyTemplateForMatchRule(row.item.content)">选中</b-button>
+                        </b-button-group>
+                    </template>
+                </b-table>
+            </b-modal>
+            <b-modal id="template_selector" title="模板选择" hide-footer size="xl">
+                <b-table :items="templates.template" :fields="template_fields">
+                    <template v-slot:cell(operations)="row">
+                        <b-button-group>
+                            <b-button size="sm" variant="info" @click="applyTemplateForTemplate(row.item.content)">选中</b-button>
+                        </b-button-group>
+                    </template>
+                </b-table>
+            </b-modal>
         </b-col>
     </b-row>
 </template>
@@ -81,12 +136,54 @@
                     triggers: [],
                     status: true,
                 },
-                properties: ['phone', 'email',]
+                properties: ['phone', 'email',],
+                action_options: [
+                    {value: 'dingding', text: '钉钉'},
+                    {value: 'http', text: 'HTTP'},
+                    {value: 'email', text: '邮件'},
+                    {value: 'wechat', text: '微信'},
+                    {value: 'sms', text: '短信'},
+                    {value: 'phone_call', text: '电话'},
+                ],
+                user_options: [],
+                template_fields: [
+                    {key: 'name', label: '名称'},
+                    {key: 'description', label: '说明'},
+                    {key: 'content', label: '模板内容'},
+                    {key: 'operations', label: '操作'},
+                ],
+                templates: {
+                    match_rule: [],
+                    trigger_rule: [],
+                    template: [],
+                }
             };
         },
         methods: {
+            applyTemplateForTemplate(template) {
+                if (this.form.template.trim() === '') {
+                    this.form.template = template;
+                } else {
+                    this.form.template += '\n' + template;
+                }
+                this.$bvModal.hide('template_selector');
+            },
+            applyTemplateForMatchRule(template) {
+                if (this.form.rule.trim() === '') {
+                    this.form.rule = template;
+                } else {
+                    this.form.rule += ' and ' + template;
+                }
+                this.$bvModal.hide('match_rule_selector');
+            },
+            userAdd(triggerIndex) {
+                this.form.triggers[triggerIndex].user_refs.push('');
+            },
+            userDelete(triggerIndex, index) {
+                this.form.triggers[triggerIndex].user_refs.splice(index, 1);
+            },
             triggerAdd() {
-                this.form.triggers.push({pre_condition: '', action: '', meta: '', id: '', user_refs: []});
+                this.form.triggers.push({pre_condition: '', action: 'dingding', meta: '', id: '', user_refs: []});
             },
             triggerDelete(index) {
                 this.form.triggers.splice(index, 1);
@@ -101,19 +198,11 @@
                 }
 
                 axios.post(url, this.createRequest()).then(() => {
-                    this.$bvModal.msgBoxOk('操作成功', {
-                        centered: true,
-                        okVariant: 'success',
-                        headerClass: 'p-2 border-bottom-0',
-                        footerClass: 'p-2 border-top-0',
-                    }).then(() => {
+                    this.SuccessBox('操作成功', () => {
                         window.location.reload(true);
                     });
-                }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                }).catch((error) => {
+                    this.ErrorBox(error)
                 });
             },
             createRequest() {
@@ -139,13 +228,25 @@
                     this.form.template = response.data.template;
                     this.form.triggers = response.data.triggers;
                     this.form.status = response.data.status === 'enabled';
-                }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                }).catch((error) => {
+                    this.ToastError(error)
                 });
             }
+
+            axios.all([
+                axios.get('/api/users-helper/names/'),
+                axios.get('/api/templates/'),
+            ]).then(axios.spread((usersResp, templateResp) => {
+                this.user_options = usersResp.data.map((val) => {
+                    return {value: val.id, text: val.name}
+                });
+
+                for (let i in templateResp.data) {
+                    this.templates[templateResp.data[i].type].push(templateResp.data[i]);
+                }
+            })).catch((error) => {
+                this.ToastError(error)
+            });
         }
     }
 </script>

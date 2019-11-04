@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -18,12 +18,12 @@ type QueueController struct {
 	cc *container.Container
 }
 
-func NewQueueController(cc *container.Container) hades.Controller {
+func NewQueueController(cc *container.Container) web.Controller {
 	return &QueueController{cc: cc}
 }
 
-func (q *QueueController) Register(router *hades.Router) {
-	router.Group("/queue/", func(router *hades.Router) {
+func (q *QueueController) Register(router *web.Router) {
+	router.Group("/queue/", func(router *web.Router) {
 		router.Post("/control/", q.Control).Name("queue:control")
 		router.Get("/jobs/", q.Jobs).Name("queue:jobs:all")
 		router.Delete("/jobs/{id}/", q.Delete).Name("queue:jobs:delete")
@@ -33,7 +33,7 @@ func (q *QueueController) Register(router *hades.Router) {
 
 // Control controls the queue behaviors
 // Args: op=pause/container/info
-func (q *QueueController) Control(ctx hades.Context, manager queue.Manager) hades.Response {
+func (q *QueueController) Control(ctx web.Context, manager queue.Manager) web.Response {
 	op := ctx.Input("op")
 	switch op {
 	case "pause":
@@ -47,7 +47,7 @@ func (q *QueueController) Control(ctx hades.Context, manager queue.Manager) hade
 		return ctx.JSONError("invalid op argument, not support", http.StatusUnprocessableEntity)
 	}
 
-	return ctx.JSON(hades.M{
+	return ctx.JSON(web.M{
 		"paused": manager.Paused(),
 		"info":   manager.Info(),
 	})
@@ -58,7 +58,7 @@ type QueueJobsResp struct {
 	Next int64                 `json:"next"`
 }
 
-func (q *QueueController) Jobs(ctx hades.Context, repo repository.QueueRepo) (*QueueJobsResp, error) {
+func (q *QueueController) Jobs(ctx web.Context, repo repository.QueueRepo) (*QueueJobsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 
 	filter := bson.M{}
@@ -70,7 +70,7 @@ func (q *QueueController) Jobs(ctx hades.Context, repo repository.QueueRepo) (*Q
 
 	jobs, next, err := repo.Paginate(filter, offset, limit)
 	if err != nil {
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &QueueJobsResp{
@@ -79,28 +79,28 @@ func (q *QueueController) Jobs(ctx hades.Context, repo repository.QueueRepo) (*Q
 	}, nil
 }
 
-func (q *QueueController) Job(ctx hades.Context, repo repository.QueueRepo) (*repository.QueueJob, error) {
+func (q *QueueController) Job(ctx web.Context, repo repository.QueueRepo) (*repository.QueueJob, error) {
 	jobID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return nil, hades.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
+		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
 	job, err := repo.Get(jobID)
 	if err != nil {
 		if err == repository.ErrNotFound {
-			return nil, hades.WrapJSONError(errors.New("no such job"), http.StatusNotFound)
+			return nil, web.WrapJSONError(errors.New("no such job"), http.StatusNotFound)
 		}
 
-		return nil, hades.WrapJSONError(err, http.StatusInternalServerError)
+		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
 	return &job, nil
 }
 
-func (q *QueueController) Delete(ctx hades.Context, repo repository.QueueRepo) error {
+func (q *QueueController) Delete(ctx web.Context, repo repository.QueueRepo) error {
 	jobID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
-		return hades.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
+		return web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
 	return repo.Delete(bson.M{

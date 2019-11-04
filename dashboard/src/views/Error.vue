@@ -33,10 +33,7 @@
 
                 fitAddon.fit();
             }).catch(error => {
-                this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                    title: 'ERROR',
-                    variant: 'danger'
-                });
+                this.ToastError(error)
             });
         }
     }

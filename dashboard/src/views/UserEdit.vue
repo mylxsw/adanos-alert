@@ -67,19 +67,11 @@
                 }
 
                 axios.post(url, this.createRequest()).then(() => {
-                    this.$bvModal.msgBoxOk('操作成功', {
-                        centered: true,
-                        okVariant: 'success',
-                        headerClass: 'p-2 border-bottom-0',
-                        footerClass: 'p-2 border-top-0',
-                    }).then(() => {
+                    this.SuccessBox('操作成功', () => {
                         window.location.reload(true);
-                    });
+                    })
                 }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                    this.ErrorBox(error)
                 });
             },
             createRequest() {
@@ -96,10 +88,7 @@
                 axios.get('/api/users/' + this.$route.params.id + '/').then(response => {
                     this.form = response.data;
                 }).catch(error => {
-                    this.$bvToast.toast(error.response !== undefined ? error.response.data.error : error.toString(), {
-                        title: 'ERROR',
-                        variant: 'danger'
-                    });
+                    this.ToastError(error);
                 });
             }
         }

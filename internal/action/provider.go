@@ -21,6 +21,8 @@ func (s ServiceProvider) Boot(app *glacier.Glacier) {
 		manager.Register("dingding", NewDingdingAction(manager))
 		manager.Register("email", NewEmailAction(manager))
 		manager.Register("wechat", NewWechatAction(manager))
+		manager.Register("phone_call", NewPhoneCallAction(manager))
+		manager.Register("sms", NewSmsAction(manager))
 
 		queueManager.RegisterHandler("action", func(item repository.QueueJob) error {
 			var payload Payload

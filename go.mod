@@ -18,11 +18,9 @@ require (
 	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20191022090726-425f1756accf
-	github.com/mylxsw/glacier v0.0.0-20191103052457-b9b35ec450e3
+	github.com/mylxsw/glacier v0.0.0-20191104060308-11af765794b1
 	github.com/mylxsw/go-toolkit v0.0.0-20191028015837-dd709ecbee89
-	github.com/mylxsw/hades v0.0.0-20191028074720-4c18fc2c307d
 	github.com/pkg/errors v0.8.1
-	github.com/robfig/cron v1.2.0
 	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e

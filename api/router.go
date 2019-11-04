@@ -6,13 +6,13 @@ import (
 	"github.com/mylxsw/adanos-alert/api/controller"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/hades"
+	"github.com/mylxsw/glacier/web"
 )
 
-func routers(cc *container.Container) func(router *hades.Router, mw hades.RequestMiddleware) {
+func routers(cc *container.Container) func(router *web.Router, mw web.RequestMiddleware) {
 	conf := cc.MustGet(&configs.Config{}).(*configs.Config)
-	return func(router *hades.Router, mw hades.RequestMiddleware) {
-		mws := make([]hades.HandlerDecorator, 0)
+	return func(router *web.Router, mw web.RequestMiddleware) {
+		mws := make([]web.HandlerDecorator, 0)
 		mws = append(mws, mw.AccessLog(), mw.CORS("*"))
 		if conf.APIToken != "" {
 			authMiddleware := mw.AuthHandler(func(typ string, credential string) error {
@@ -38,6 +38,7 @@ func routers(cc *container.Container) func(router *hades.Router, mw hades.Reques
 			controller.NewUserController(cc),
 			controller.NewGroupController(cc),
 			controller.NewRuleController(cc),
+			controller.NewTemplateController(cc),
 		)
 	}
 }
