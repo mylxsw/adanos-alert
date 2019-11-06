@@ -16,12 +16,16 @@
                         </b-list-group-item>
                     </b-list-group>
                 </template>
-                <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'enabled'" variant="success">启用</b-badge>
-                    <b-badge v-if="row.item.status === 'disabled'" variant="warning">禁用</b-badge>
+                <template v-slot:cell(type)="row">
+                    <b-badge v-if="row.item.type === 'match_rule'" variant="success">分组匹配规则</b-badge>
+                    <b-badge v-if="row.item.type === 'template'" variant="info">分组展示模板</b-badge>
+                    <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">动作触发规则</b-badge>
                 </template>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
+                </template>
+                <template v-slot:cell(content)="row">
+                    <code>{{ row.item.content }}</code>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -48,9 +52,10 @@
                 templates: [],
                 isBusy: true,
                 fields: [
+                    {key: 'type', label: '类型'},
                     {key: 'name', label: '名称'},
                     {key: 'description', label: '说明'},
-                    // {key: 'status', label: '状态'},
+                    {key: 'content', label: '模板内容'},
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}
                 ],

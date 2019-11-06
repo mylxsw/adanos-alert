@@ -10,6 +10,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/array"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
@@ -127,7 +128,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 	for _, t := range ruleForm.Triggers {
 
 		users := make([]primitive.ObjectID, 0)
-		for _, u := range t.UserRefs {
+		for _, u := range array.StringUnique(t.UserRefs) {
 			uid, err := primitive.ObjectIDFromHex(u)
 			if err == nil {
 				users = append(users, uid)
@@ -187,7 +188,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 	triggers := make([]repository.Trigger, 0)
 	for _, t := range ruleForm.Triggers {
 		users := make([]primitive.ObjectID, 0)
-		for _, u := range t.UserRefs {
+		for _, u := range array.StringUnique(t.UserRefs) {
 			uid, err := primitive.ObjectIDFromHex(u)
 			if err == nil {
 				users = append(users, uid)
@@ -228,10 +229,13 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 	return &rule, nil
 }
 
-type RulesResp []repository.Rule
+type RulesResp struct {
+	Rules []repository.Rule `json:"rules"`
+	Users map[string]string `json:"users"`
+}
 
 // Rules return all rules
-func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo) (RulesResp, error) {
+func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, userRepo repository.UserRepo) (*RulesResp, error) {
 	filter := bson.M{}
 
 	name := ctx.Input("name")
@@ -244,12 +248,38 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo) (Ru
 		filter["status"] = status
 	}
 
+	userIDStr := ctx.Input("user_id")
+	if userIDStr != "" {
+		userID, err := primitive.ObjectIDFromHex(userIDStr)
+		if err != nil {
+			return nil, web.WrapJSONError(fmt.Errorf("invalid argument: user_id"), http.StatusUnprocessableEntity)
+		}
+
+		filter["triggers.user_refs"] = userID
+	}
+
 	rules, err := ruleRepo.Find(filter)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	return rules, nil
+	userIDs := make([]primitive.ObjectID, 0)
+	for _, rule := range rules {
+		for _, act := range rule.Triggers {
+			userIDs = append(userIDs, act.UserRefs...)
+		}
+	}
+
+	users, _ := userRepo.Find(bson.M{"_id": bson.M{"$in": userIDs}})
+	userRefs := make(map[string]string)
+	for _, u := range users {
+		userRefs[u.ID.Hex()] = u.Name
+	}
+
+	return &RulesResp{
+		Rules: rules,
+		Users: userRefs,
+	}, nil
 }
 
 // Rule return one rule

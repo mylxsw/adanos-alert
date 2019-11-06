@@ -27,6 +27,7 @@ func (g GroupController) Register(router *web.Router) {
 
 type GroupsResp struct {
 	Groups []repository.MessageGroup `json:"groups"`
+	Users  map[string]string         `json:"users"`
 	Next   int64                     `json:"next"`
 }
 
@@ -35,7 +36,7 @@ type GroupsResp struct {
 //   - offset/limit
 //   - status
 //   - rule_id
-func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGroupRepo) (*GroupsResp, error) {
+func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 	filter := bson.M{}
 
@@ -54,8 +55,22 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
+	userIDs := make([]primitive.ObjectID, 0)
+	for _, grp := range grps {
+		for _, act := range grp.Actions {
+			userIDs = append(userIDs, act.UserRefs...)
+		}
+	}
+
+	users, _ := userRepo.Find(bson.M{"_id": bson.M{"$in": userIDs}})
+	userRefs := make(map[string]string)
+	for _, u := range users {
+		userRefs[u.ID.Hex()] = u.Name
+	}
+
 	return &GroupsResp{
 		Groups: grps,
+		Users:  userRefs,
 		Next:   next,
 	}, nil
 }

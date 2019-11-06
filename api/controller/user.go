@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -39,6 +40,17 @@ type UserForm struct {
 	Name   string                `json:"name"`
 	Metas  []repository.UserMeta `json:"metas"`
 	Status string                `json:"status"`
+}
+
+func (userForm UserForm) GetMetas() []repository.UserMeta {
+	results := make([]repository.UserMeta, 0)
+	for _, v := range userForm.Metas {
+		if strings.TrimSpace(v.Key) != "" {
+			results = append(results, v)
+		}
+	}
+
+	return results
 }
 
 func (userForm UserForm) Validate() error {
@@ -90,7 +102,7 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*rep
 
 	id, err := userRepo.Add(repository.User{
 		Name:   userForm.Name,
-		Metas:  userForm.Metas,
+		Metas:  userForm.GetMetas(),
 		Status: repository.UserStatus(userForm.Status),
 	})
 	if err != nil {
@@ -128,7 +140,7 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*
 	}
 
 	user.Name = userForm.Name
-	user.Metas = userForm.Metas
+	user.Metas = userForm.GetMetas()
 	user.Status = repository.UserStatus(userForm.Status)
 
 	if err := userRepo.Update(userID, user); err != nil {

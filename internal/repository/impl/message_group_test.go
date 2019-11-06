@@ -95,8 +95,6 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 		Name:        "test",
 		Description: "test rule",
 		Interval:    30,
-		Threshold:   0,
-		Priority:    100,
 		Rule:        `"php" in Tags`,
 		Status:      repository.RuleStatusEnabled,
 		CreatedAt:   time.Now(),
@@ -107,7 +105,6 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	m.Equal(rule.ID, groupRule.ID)
 	m.Equal(rule.Name, groupRule.Name)
 	m.Equal(rule.Interval, groupRule.Interval)
-	m.Equal(rule.Threshold, groupRule.Threshold)
 	m.Equal(rule.Rule, groupRule.Rule)
 
 	collectingGroup, err := m.repo.CollectingGroup(groupRule)

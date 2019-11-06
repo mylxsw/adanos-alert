@@ -19,6 +19,10 @@
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
                 </template>
+                <template v-slot:cell(requeue_times)="row">
+                    <b class="text-danger" v-if="row.item.requeue_times > 0">{{ row.item.requeue_times }}</b>
+                    <b v-else>{{ row.item.requeue_times }}</b>
+                </template>
                 <template v-slot:cell(status)="row">
                     <b-badge v-if="row.item.status === 'wait'" variant="info">等待</b-badge>
                     <b-badge v-if="row.item.status === 'running'" variant="dark">执行中</b-badge>
@@ -30,8 +34,16 @@
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
                 </template>
+                <template v-slot:row-details="row">
+                    <b-card>
+                        <b-card-text>
+                            <code><pre class="text-danger">{{ JSON.stringify(row.item.payload, null, 4) }}</pre></code>
+                        </b-card-text>
+                    </b-card>
+                </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
+                        <b-button size="sm" variant="info" @click.stop="row.toggleDetails" v-model="row.detailsShowing">Payload</b-button>
                         <b-button size="sm" variant="danger" @click="delete_job(row.index, row.item.id)">删除</b-button>
                     </b-button-group>
                 </template>
@@ -63,7 +75,7 @@
                 queue_action: "启动",
                 queue_btn: "success",
                 fields: [
-                    {key: 'id', label: '序号'},
+                    {key: 'id', label: '时间/ID'},
                     {key: 'name', label: '类型'},
                     {key: 'requeue_times', label: '重试次数'},
                     {key: 'next_execute_at', label: '最早执行时间'},
@@ -109,6 +121,9 @@
             loadMore() {
                 axios.get('/api/queue/jobs/?offset=' + this.cur).then(response => {
                     this.jobs = response.data.jobs;
+                    for (let i in this.jobs) {
+                        this.jobs[i].payload = JSON.parse(this.jobs[i].payload);
+                    }
                     this.next = response.data.next;
                     this.isBusy = false;
                 }).catch(error => {

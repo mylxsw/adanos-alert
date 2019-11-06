@@ -21,7 +21,6 @@ type MessageGroupRule struct {
 	ID              primitive.ObjectID `bson:"_id" json:"id"`
 	Name            string             `bson:"name" json:"name"`
 	Interval        int64              `bson:"interval" json:"interval"`
-	Threshold       int64              `bson:"threshold" json:"threshold"`
 	Rule            string             `bson:"rule" json:"rule"`
 	Template        string             `bson:"template" json:"template"`
 	SummaryTemplate string             `bson:"summary_template" json:"summary_template"`

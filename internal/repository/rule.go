@@ -21,8 +21,6 @@ type Rule struct {
 	Description string             `bson:"description" json:"description"`
 
 	Interval  int64 `bson:"interval" json:"interval"`
-	Threshold int64 `bson:"threshold" json:"threshold"`
-	Priority  int64 `bson:"priority" json:"priority"`
 
 	Rule            string    `bson:"rule" json:"rule"`
 	Template        string    `bson:"template" json:"template"`
@@ -41,7 +39,6 @@ func (rule Rule) ToGroupRule() MessageGroupRule {
 		ID:              rule.ID,
 		Name:            rule.Name,
 		Interval:        rule.Interval,
-		Threshold:       rule.Threshold,
 		Rule:            rule.Rule,
 		Template:        rule.Template,
 		SummaryTemplate: rule.SummaryTemplate,

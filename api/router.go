@@ -40,5 +40,10 @@ func routers(cc *container.Container) func(router *web.Router, mw web.RequestMid
 			controller.NewRuleController(cc),
 			controller.NewTemplateController(cc),
 		)
+
+		router.WithMiddleware(mws...).Controllers(
+			"/ui",
+			controller.NewPublicController(cc),
+		)
 	}
 }

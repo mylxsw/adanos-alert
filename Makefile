@@ -14,6 +14,7 @@ build-dashboard:
 
 build:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-alert cmd/adanos-alert/main.go
+	cp api/view/*.html build/debug/
 
 build-release:
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags $(LDFLAGS) -o build/release/adanos-alert-darwin cmd/adanos-alert/main.go

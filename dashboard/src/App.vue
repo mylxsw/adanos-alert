@@ -1,17 +1,17 @@
 <template>
   <div id="app">
     <b-container fluid>
-        <b-navbar type="dark" toggleable="md" variant="primary" class="mb-3" sticky>
+        <b-navbar type="dark" toggleable="md" variant="dark" class="mb-3" sticky>
             <b-navbar-brand href="/">Adanos</b-navbar-brand>
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <b-navbar-nav>
-                    <b-nav-item to="/" exact>Groups</b-nav-item>
-                    <b-nav-item :to="{path:'/messages', query: {status: 'pending'}}" exact>Pending <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
-                    <b-nav-item to="/rules" exact>Rules</b-nav-item>
-                    <b-nav-item to="/users">Users</b-nav-item>
-                    <b-nav-item to="/queues">Jobs</b-nav-item>
-                    <b-nav-item to="/templates">Templates</b-nav-item>
-                    <b-nav-item to="/settings">Settings</b-nav-item>
+                    <b-nav-item to="/" exact>分组</b-nav-item>
+                    <b-nav-item :to="{path:'/messages', query: {status: 'pending,canceled'}}" exact>待处理 <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
+                    <b-nav-item to="/rules" exact>规则</b-nav-item>
+                    <b-nav-item to="/users">用户</b-nav-item>
+                    <b-nav-item to="/queues">队列</b-nav-item>
+                    <b-nav-item to="/templates">模板</b-nav-item>
+                    <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
                     <li class="nav-item">

@@ -6,11 +6,22 @@ import './plugins/bootstrap-vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 import DateTime from "./components/DateTime";
 import Paginator from "./components/Paginator";
+import MessageCard from "./components/MessageCard";
+
+library.add(faExternalLinkAlt);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.component('DateTime', DateTime);
+Vue.component('MessageCard', MessageCard)
 Vue.component('Paginator', Paginator);
+
 Vue.config.productionTip = false;
 
 /**

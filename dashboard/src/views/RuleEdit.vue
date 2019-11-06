@@ -30,6 +30,7 @@
                     <b-card header="规则">
                         <b-btn-group class="mb-2">
                             <b-btn variant="light" v-b-modal.match_rule_selector>插入模板</b-btn>
+                            <b-btn variant="light" @click="rule_help = !rule_help">帮助</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="rule" rows="5" v-model="form.rule"
                                          placeholder="输入规则，必须返回布尔值"></b-form-textarea>
@@ -37,19 +38,22 @@
                             语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
                                     target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                         </small>
+                        <MatchRuleHelp v-if="rule_help"></MatchRuleHelp>
                     </b-card>
                 </b-card-group>
 
                 <b-card-group class="mb-3">
-                    <b-card header="模板">
+                    <b-card header="展示模板">
                         <b-btn-group class="mb-2">
                             <b-btn variant="light" v-b-modal.template_selector>插入模板</b-btn>
+                            <b-btn variant="light" @click="template_help = !template_help">帮助</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="template" rows="5" v-model="form.template"
                                          placeholder="输入模板"></b-form-textarea>
                         <small class="form-text text-muted">
-                            ...
+                            语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
                         </small>
+                        <TemplateHelp v-if="template_help"></TemplateHelp>
                     </b-card>
                 </b-card-group>
 
@@ -62,10 +66,16 @@
                             <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
                                           :label-for="'trigger_pre_condition_' + i">
                                 <b-btn-group class="mb-2">
-                                    <b-btn variant="light">插入模板</b-btn>
+                                    <b-btn variant="light" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
+                                    <b-btn variant="light" @click="toggleHelp(trigger)">帮助</b-btn>
                                 </b-btn-group>
                                 <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
                                                  placeholder="默认为 true （全部匹配）"></b-form-textarea>
+                                <small class="form-text text-muted">
+                                    语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                            target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                </small>
+                                <TriggerHelp class="mt-2" v-if="trigger.help"></TriggerHelp>
                             </b-form-group>
                             <b-form-group label-cols="2" :id="'trigger_action_' + i" label="动作"
                                           :label-for="'trigger_action_' + i">
@@ -98,8 +108,11 @@
                 <b-button to="/rules">返回</b-button>
             </b-form>
 
-            <b-modal id="match_rule_selector" title="模板选择" hide-footer size="xl">
+            <b-modal id="match_rule_selector" title="选择分组匹配规则模板" hide-footer size="xl">
                 <b-table :items="templates.match_rule" :fields="template_fields">
+                    <template v-slot:cell(content)="row">
+                        <code>{{ row.item.content }}</code>
+                    </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForMatchRule(row.item.content)">选中</b-button>
@@ -107,11 +120,26 @@
                     </template>
                 </b-table>
             </b-modal>
-            <b-modal id="template_selector" title="模板选择" hide-footer size="xl">
+            <b-modal id="template_selector" title="选择分组展示模板" hide-footer size="xl">
                 <b-table :items="templates.template" :fields="template_fields">
+                    <template v-slot:cell(content)="row">
+                        <code>{{ row.item.content }}</code>
+                    </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForTemplate(row.item.content)">选中</b-button>
+                        </b-button-group>
+                    </template>
+                </b-table>
+            </b-modal>
+            <b-modal id="trigger_rule_selector" title="选择动作触发规则模板" hide-footer size="xl">
+                <b-table :items="templates.trigger_rule" :fields="template_fields">
+                    <template v-slot:cell(content)="row">
+                        <code>{{ row.item.content }}</code>
+                    </template>
+                    <template v-slot:cell(operations)="row">
+                        <b-button-group>
+                            <b-button size="sm" variant="info" @click="applyTemplateForTriggerRule(row.item.content)">选中</b-button>
                         </b-button-group>
                     </template>
                 </b-table>
@@ -122,9 +150,13 @@
 
 <script>
     import axios from 'axios';
+    import MatchRuleHelp from "../components/MatchRuleHelp";
+    import TemplateHelp from "../components/TemplateHelp";
+    import TriggerHelp from "../components/TriggerHelp";
 
     export default {
         name: 'RuleEdit',
+        components: {TriggerHelp, TemplateHelp, MatchRuleHelp},
         data() {
             return {
                 form: {
@@ -136,6 +168,8 @@
                     triggers: [],
                     status: true,
                 },
+                rule_help: false,
+                template_help: false,
                 properties: ['phone', 'email',],
                 action_options: [
                     {value: 'dingding', text: '钉钉'},
@@ -156,10 +190,38 @@
                     match_rule: [],
                     trigger_rule: [],
                     template: [],
-                }
+                },
+                currentTriggerRuleId: -1,
             };
         },
         methods: {
+            toggleHelp(trigger) {
+                trigger.help = !trigger.help;
+            },
+            /**
+             * 打开动作触发规则模板选择对话框
+             * @param index
+             */
+            openTriggerRuleTemplateSelector(index) {
+                this.currentTriggerRuleId = index;
+                this.$root.$emit('bv::show::modal', "trigger_rule_selector");
+            },
+            /**
+             * 动作触发规则模板选择
+             * @param template
+             */
+            applyTemplateForTriggerRule(template) {
+                if (this.form.triggers[this.currentTriggerRuleId].pre_condition.trim() === '') {
+                    this.form.triggers[this.currentTriggerRuleId].pre_condition = template;
+                } else {
+                    this.form.triggers[this.currentTriggerRuleId].pre_condition += ' and ' + template;
+                }
+                this.$bvModal.hide('trigger_rule_selector');
+            },
+            /**
+             * 展示模板选择
+             * @param template
+             */
             applyTemplateForTemplate(template) {
                 if (this.form.template.trim() === '') {
                     this.form.template = template;
@@ -168,6 +230,10 @@
                 }
                 this.$bvModal.hide('template_selector');
             },
+            /**
+             * 分组匹配规则模板选择
+             * @param template
+             */
             applyTemplateForMatchRule(template) {
                 if (this.form.rule.trim() === '') {
                     this.form.rule = template;
@@ -176,18 +242,35 @@
                 }
                 this.$bvModal.hide('match_rule_selector');
             },
+            /**
+             * 为动作添加用户
+             */
             userAdd(triggerIndex) {
                 this.form.triggers[triggerIndex].user_refs.push('');
             },
+            /**
+             * 为动作移除用户
+             */
             userDelete(triggerIndex, index) {
                 this.form.triggers[triggerIndex].user_refs.splice(index, 1);
             },
+            /**
+             * 添加动作
+             */
             triggerAdd() {
-                this.form.triggers.push({pre_condition: '', action: 'dingding', meta: '', id: '', user_refs: []});
+                this.form.triggers.push({pre_condition: '', action: 'dingding', meta: '', id: '', user_refs: [], help: false});
             },
+            /**
+             * 删除动作
+             * @param index
+             */
             triggerDelete(index) {
                 this.form.triggers.splice(index, 1);
             },
+            /**
+             * 保存
+             * @param evt
+             */
             onSubmit(evt) {
                 evt.preventDefault();
                 let url;
@@ -205,6 +288,9 @@
                     this.ErrorBox(error)
                 });
             },
+            /**
+             * 创建请求对象
+             */
             createRequest() {
                 let requestData = {};
                 requestData.name = this.form.name;
@@ -226,13 +312,20 @@
                     this.form.interval = response.data.interval / 60;
                     this.form.rule = response.data.rule;
                     this.form.template = response.data.template;
-                    this.form.triggers = response.data.triggers;
+
+                    for (let i in response.data.triggers) {
+                        let trigger = response.data.triggers[i];
+                        trigger.help = false;
+                        this.form.triggers.push(trigger);
+                    }
+
                     this.form.status = response.data.status === 'enabled';
                 }).catch((error) => {
                     this.ToastError(error)
                 });
             }
 
+            // 加载辅助元素
             axios.all([
                 axios.get('/api/users-helper/names/'),
                 axios.get('/api/templates/'),

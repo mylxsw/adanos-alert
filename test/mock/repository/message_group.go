@@ -13,6 +13,10 @@ type MessageGroupRepo struct {
 	Groups []repository.MessageGroup
 }
 
+func (m *MessageGroupRepo) LastGroup(filter bson.M) (grp repository.MessageGroup, err error) {
+	panic("implement me")
+}
+
 func NewMessageGroupRepo() repository.MessageGroupRepo {
 	return &MessageGroupRepo{Groups: make([]repository.MessageGroup, 0),}
 }

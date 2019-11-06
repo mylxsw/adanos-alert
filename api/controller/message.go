@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jeremywohl/flatten"
@@ -50,9 +51,14 @@ func messagesFilter(ctx web.Context) bson.M {
 	if meta != "" {
 		filter["meta.value"] = meta
 	}
-	tag := ctx.Input("tag")
-	if tag != "" {
-		filter["tag"] = bson.M{"$in": tag}
+	tags := ctx.Input("tags")
+	if tags != "" {
+		tt := strings.Split(tags, ",")
+		if len(tt) == 1 {
+			filter["tag"] = tags
+		} else {
+			filter["tag"] = bson.M{"$in": tt}
+		}
 	}
 	origin := ctx.Input("origin")
 	if origin != "" {
@@ -60,7 +66,12 @@ func messagesFilter(ctx web.Context) bson.M {
 	}
 	status := ctx.Input("status")
 	if status != "" {
-		filter["status"] = status
+		ss := strings.Split(status, ",")
+		if len(ss) == 1 {
+			filter["status"] = status
+		} else {
+			filter["status"] = bson.M{"$in": ss}
+		}
 	}
 
 	return filter

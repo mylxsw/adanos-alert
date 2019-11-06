@@ -8,6 +8,10 @@ type HttpAction struct {
 	Histories []repository.Trigger
 }
 
+func (h *HttpAction) Validate(meta string) error {
+	return nil
+}
+
 func NewHttpAction() *HttpAction {
 	return &HttpAction{Histories: make([]repository.Trigger, 0)}
 }
