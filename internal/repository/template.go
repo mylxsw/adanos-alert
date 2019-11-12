@@ -21,7 +21,7 @@ type Template struct {
 	Description string             `bson:"description" json:"description"`
 	Content     string             `bson:"content" json:"content"`
 	Type        TemplateType       `bson:"type" json:"type"`
-	Belong
+	Predefined  bool               `bson:"predefined" json:"predefined"`
 
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
