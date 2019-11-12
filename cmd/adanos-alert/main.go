@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
+	"github.com/mylxsw/adanos-alert/migrate"
 	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/queue"
@@ -158,6 +159,7 @@ func main() {
 	app.Provider(api.ServiceProvider{})
 	app.Provider(job.ServiceProvider{})
 	app.Provider(queue.ServiceProvider{})
+	app.Provider(migrate.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)

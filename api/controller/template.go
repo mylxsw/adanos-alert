@@ -132,6 +132,10 @@ func (t *TemplateController) Update(ctx web.Context, repo repository.TemplateRep
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
+	if template.Predefined {
+		return nil, web.WrapJSONError(errors.New("predefined template is readonly"), http.StatusUnprocessableEntity)
+	}
+
 	template.Name = templateForm.Name
 	template.Description = templateForm.Description
 	template.Content = templateForm.Content
@@ -148,6 +152,19 @@ func (t *TemplateController) Delete(ctx web.Context, repo repository.TemplateRep
 	templateID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
+	}
+
+	template, err := repo.Get(templateID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			return web.WrapJSONError(err, http.StatusNotFound)
+		}
+
+		return web.WrapJSONError(err, http.StatusInternalServerError)
+	}
+
+	if template.Predefined {
+		return web.WrapJSONError(errors.New("predefined template is readonly"), http.StatusUnprocessableEntity)
 	}
 
 	if err := repo.DeleteID(templateID); err != nil {

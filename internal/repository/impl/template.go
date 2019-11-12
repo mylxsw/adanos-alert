@@ -42,7 +42,7 @@ func (t TemplateRepo) Get(id primitive.ObjectID) (temp repository.Template, err 
 
 func (t TemplateRepo) Find(filter bson.M) (templates []repository.Template, err error) {
 	templates = make([]repository.Template, 0)
-	cur, err := t.col.Find(context.TODO(), filter)
+	cur, err := t.col.Find(context.TODO(), filter, options.Find().SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return
 	}
