@@ -32,6 +32,9 @@
                             <b-btn variant="light" v-b-modal.match_rule_selector>插入模板</b-btn>
                             <b-btn variant="light" @click="rule_help = !rule_help">帮助</b-btn>
                         </b-btn-group>
+                        <b-btn-group class="mb-2 float-right">
+                            <b-btn variant="primary" class="float-right" @click="checkRule()">检查</b-btn>
+                        </b-btn-group>
                         <b-form-textarea id="rule" rows="5" v-model="form.rule"
                                          placeholder="输入规则，必须返回布尔值"></b-form-textarea>
                         <small class="form-text text-muted">
@@ -47,6 +50,9 @@
                         <b-btn-group class="mb-2">
                             <b-btn variant="light" v-b-modal.template_selector>插入模板</b-btn>
                             <b-btn variant="light" @click="template_help = !template_help">帮助</b-btn>
+                        </b-btn-group>
+                        <b-btn-group class="mb-2 float-right">
+                            <b-btn variant="primary" class="float-right" @click="checkTemplate()">检查</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="template" rows="5" v-model="form.template"
                                          placeholder="输入模板"></b-form-textarea>
@@ -69,11 +75,16 @@
                                     <b-btn variant="light" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
                                     <b-btn variant="light" @click="toggleHelp(trigger)">帮助</b-btn>
                                 </b-btn-group>
+                                <b-btn-group class="mb-2 float-right">
+                                    <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查
+                                    </b-btn>
+                                </b-btn-group>
                                 <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
                                                  placeholder="默认为 true （全部匹配）"></b-form-textarea>
                                 <small class="form-text text-muted">
-                                    语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                            target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                    语法参考 <a
+                                        href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                        target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                                 </small>
                                 <TriggerHelp class="mt-2" v-if="trigger.help"></TriggerHelp>
                             </b-form-group>
@@ -115,7 +126,8 @@
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
-                            <b-button size="sm" variant="info" @click="applyTemplateForMatchRule(row.item.content)">选中</b-button>
+                            <b-button size="sm" variant="info" @click="applyTemplateForMatchRule(row.item.content)">选中
+                            </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
@@ -127,7 +139,8 @@
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
-                            <b-button size="sm" variant="info" @click="applyTemplateForTemplate(row.item.content)">选中</b-button>
+                            <b-button size="sm" variant="info" @click="applyTemplateForTemplate(row.item.content)">选中
+                            </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
@@ -139,7 +152,9 @@
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
-                            <b-button size="sm" variant="info" @click="applyTemplateForTriggerRule(row.item.content)">选中</b-button>
+                            <b-button size="sm" variant="info" @click="applyTemplateForTriggerRule(row.item.content)">
+                                选中
+                            </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
@@ -195,6 +210,58 @@
             };
         },
         methods: {
+            /**
+             * 检查匹配规则是否合法
+             */
+            checkRule() {
+                if (this.form.rule.trim() === '') {
+                    this.ErrorBox('规则为空，无需检查');
+                    return;
+                }
+
+                this.sendCheckRequest('match_rule', this.form.rule.trim());
+            },
+
+            checkTriggerRule(trigger) {
+                let rule = trigger.pre_condition.trim();
+                if (rule === '') {
+                    this.ErrorBox('动作触发条件为空，无需检查');
+                    return;
+                }
+
+                this.sendCheckRequest('trigger_rule', rule)
+            },
+
+            /**
+             * 检查模板是否合法
+             */
+            checkTemplate() {
+                if (this.form.template.trim() === '') {
+                    this.ErrorBox('展示模板为空，无需检查');
+                    return;
+                }
+
+                this.sendCheckRequest('template', this.form.template.trim());
+            },
+
+            /**
+             * 发送规则检查请求
+             */
+            sendCheckRequest(type, content) {
+                axios.post('/api/rules-test/rule-check/' + type + '/', {content: content}).then(resp => {
+                    if (resp.data.error === null || resp.data.error === "") {
+                        this.SuccessBox('检查通过');
+                    } else {
+                        this.ErrorBox('检查不通过：' + resp.data.error);
+                    }
+                }).catch(error => {
+                    this.ErrorBox(error);
+                });
+            },
+
+            /**
+             * 展开帮助信息
+             */
             toggleHelp(trigger) {
                 trigger.help = !trigger.help;
             },
@@ -258,7 +325,14 @@
              * 添加动作
              */
             triggerAdd() {
-                this.form.triggers.push({pre_condition: '', action: 'dingding', meta: '', id: '', user_refs: [], help: false});
+                this.form.triggers.push({
+                    pre_condition: '',
+                    action: 'dingding',
+                    meta: '',
+                    id: '',
+                    user_refs: [],
+                    help: false
+                });
             },
             /**
              * 删除动作

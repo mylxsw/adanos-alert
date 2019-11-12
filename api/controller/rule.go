@@ -11,6 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/array"
+	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,6 +37,7 @@ func (r RuleController) Register(router *web.Router) {
 
 	router.Group("/rules-test/", func(router *web.Router) {
 		router.Post("/rule-message/", r.TestMessageMatch).Name("rules:test:rule-message")
+		router.Post("/rule-check/{type}/", r.Check).Name("rules:test:check")
 	})
 }
 
@@ -112,6 +114,25 @@ func (r RuleForm) Validate() error {
 	}
 
 	return nil
+}
+
+// Check validate the rule
+func (r RuleController) Check(ctx web.Context) web.Response {
+	content := ctx.Input("content")
+
+	var err error
+	switch repository.TemplateType(ctx.PathVar("type")) {
+	case repository.TemplateTypeMatchRule:
+		_, err = matcher.NewMessageMatcher(repository.Rule{Rule: content})
+	case repository.TemplateTypeTriggerRule:
+		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
+	case repository.TemplateTypeTemplate:
+		_, err = template.CreateParser(content)
+	}
+
+	return ctx.JSON(web.M{
+		"error": err,
+	})
 }
 
 // Add create a new rule

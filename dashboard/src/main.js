@@ -65,6 +65,7 @@ Vue.prototype.ErrorBox = function (message, cb) {
     cb = cb || function () {};
     this.$bvModal.msgBoxOk(this.ParseError(message), {
         centered: true,
+        title:'出错了',
         okVariant: 'danger',
         headerClass: 'p-2 border-bottom-0',
         footerClass: 'p-2 border-top-0',

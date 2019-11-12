@@ -16,7 +16,18 @@ import (
 	"github.com/vjeantet/grok"
 )
 
+// Parse parse template with data to html
 func Parse(templateStr string, data interface{}) (string, error) {
+	var buffer bytes.Buffer
+	if err := template.Must(CreateParser(templateStr)).Execute(&buffer, data); err != nil {
+		return "", err
+	}
+
+	return buffer.String(), nil
+}
+
+// CreateParse create a template parser
+func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":         cutOff,
 		"implode":        strings.Join,
@@ -38,12 +49,8 @@ func Parse(templateStr string, data interface{}) (string, error) {
 		"mysql_slowlog":  parseMySQLSlowlog,
 		"open_falcon_im": ParseOpenFalconImMessage,
 	}
-	var buffer bytes.Buffer
-	if err := template.Must(template.New("").Funcs(funcMap).Parse(templateStr)).Execute(&buffer, data); err != nil {
-		return "", err
-	}
 
-	return buffer.String(), nil
+	return template.New("").Funcs(funcMap).Parse(templateStr)
 }
 
 // parseMySQLSlowlog 解析mysql慢查询日志
