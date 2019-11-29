@@ -15,6 +15,8 @@ type Config struct {
 	ActionTriggerPeriod   time.Duration `json:"action_trigger_period"`
 	QueueJobMaxRetryTimes int           `json:"queue_job_max_retry_times"`
 	QueueWorkerNum        int           `json:"queue_worker_num"`
+
+	Migrate bool `json:"migrate"`
 }
 
 func (conf *Config) Serialize() string {

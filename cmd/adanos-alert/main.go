@@ -60,6 +60,10 @@ func main() {
 		Name:  "use_local_dashboard",
 		Usage: "whether using local dashboard, this is used when development",
 	}))
+	app.AddFlags(altsrc.NewBoolFlag(cli.BoolFlag{
+		Name:  "enable_migrate",
+		Usage: "whether enable database migrate when app run",
+	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "aggregation_period",
 		Usage:  "aggregation job execute period",
@@ -117,6 +121,7 @@ func main() {
 			ActionTriggerPeriod:   actionTriggerPeriod,
 			QueueJobMaxRetryTimes: c.Int("queue_job_max_retry_times"),
 			QueueWorkerNum:        c.Int("queue_worker_num"),
+			Migrate:               c.Bool("enable_migrate"),
 		}
 	})
 

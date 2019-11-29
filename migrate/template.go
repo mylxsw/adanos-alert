@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,7 +28,11 @@ var predefinedTemplates = []repository.Template{
 	},
 }
 
-func initPredefinedTemplates(repo repository.TemplateRepo) {
+func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo) {
+	if !conf.Migrate {
+		return
+	}
+	
 	for _, t := range predefinedTemplates {
 		t.Predefined = true
 		temps, err := repo.Find(bson.M{"name": t.Name, "predefined": true})
