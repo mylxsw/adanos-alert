@@ -4,9 +4,19 @@
             <b-form @submit="onSubmit">
                 <b-card-group class="mb-3">
                     <b-card header="基本">
+                        <b-form-group label-cols="2" id="email" label="邮箱账号*" label-for="email_input">
+                            <b-form-input id="email_input" type="email" v-model="form.email" required
+                                          placeholder="输入邮箱帐号"></b-form-input>
+                        </b-form-group>
+
                         <b-form-group label-cols="2" id="username" label="姓名*" label-for="username_input">
                             <b-form-input id="username_input" type="text" v-model="form.name" required
                                           placeholder="输入用户姓名"></b-form-input>
+                        </b-form-group>
+
+                        <b-form-group label-cols="2" id="phone" label="手机号码" label-for="phone_input">
+                            <b-form-input id="phone_input" type="text" v-model="form.phone"
+                                          placeholder="输入手机号码"></b-form-input>
                         </b-form-group>
 
                         <b-form-group label-cols="2" label="属性">
@@ -44,10 +54,12 @@
             return {
                 form: {
                     name: '',
+                    email: '',
+                    phone: '',
                     metas: [],
                     status: 'enabled',
                 },
-                properties: ['phone', 'email',]
+                properties: ['department', 'qq', 'wechat',]
             };
         },
         methods: {
@@ -77,6 +89,8 @@
             createRequest() {
                 let requestData = {};
                 requestData.name = this.form.name;
+                requestData.email = this.form.email;
+                requestData.phone = this.form.phone;
                 requestData.metas = this.form.metas;
                 requestData.status = this.form.status;
 

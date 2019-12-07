@@ -43,6 +43,15 @@ func (u UserRepo) Get(id primitive.ObjectID) (user repository.User, err error) {
 	return
 }
 
+func (u UserRepo) GetByEmail(email string) (user repository.User, err error) {
+	err = u.col.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		err = repository.ErrNotFound
+	}
+
+	return
+}
+
 func (u UserRepo) Find(filter bson.M) (users []repository.User, err error) {
 	users = make([]repository.User, 0)
 	cur, err := u.col.Find(context.TODO(), filter)

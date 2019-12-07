@@ -57,6 +57,10 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			}).Errorf("load user from repo failed: %s", err)
 		} else {
 			if err := coll.MustNew(users).Filter(func(user repository.User) bool {
+				if user.Phone != "" {
+					return true
+				}
+
 				for _, m := range user.Metas {
 					if strings.ToLower(m.Key) == "phone" {
 						return true
@@ -65,6 +69,10 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 
 				return false
 			}).Map(func(user repository.User) string {
+				if user.Phone != "" {
+					return user.Phone
+				}
+
 				for _, m := range user.Metas {
 					if strings.ToLower(m.Key) == "phone" {
 						return m.Value

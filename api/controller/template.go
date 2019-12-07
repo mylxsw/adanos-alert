@@ -67,7 +67,7 @@ type TemplateForm struct {
 	Type        string `json:"type"`
 }
 
-func (t TemplateForm) Validate() error {
+func (t TemplateForm) Validate(req web.Request) error {
 	if t.Name == "" {
 		return errors.New("invalid argument: name is required")
 	}

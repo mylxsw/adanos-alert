@@ -19,6 +19,8 @@ github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 h1:D21IyuvjDCshj1
 github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23/go.mod h1:bbYlZJ7hK1yFx9hf58LP0zeX7UjIGs20ufpu3evjr+s=
 github.com/buger/jsonparser v0.0.0-20191004114745-ee4c978eae7e h1:oJCXMss/3rg5F6Poy9wG3JQusc58Mzk5B9Z6wSnssNE=
 github.com/buger/jsonparser v0.0.0-20191004114745-ee4c978eae7e/go.mod h1:errmMKH8tTB49UR2A8C8DPYkyudelsYJwJFaZHQ6ik8=
+github.com/buger/jsonparser v0.0.0-20191204142016-1a29609e0929 h1:MW/JDk68Rny52yI0M0N+P8lySNgB+NhpI/uAmhgOhUM=
+github.com/buger/jsonparser v0.0.0-20191204142016-1a29609e0929/go.mod h1:tgcrVJ81GPSF0mz+0nu1Xaz0fazGPrmmJfJtxjbHhUQ=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
 github.com/cpuguy83/go-md2man/v2 v2.0.0 h1:EoUDS0afbrsXAZ9YQ9jdu/mZ2sXgT1/2yyNng4PGlyM=
 github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
@@ -100,6 +102,12 @@ github.com/mylxsw/glacier v0.0.0-20191104060308-11af765794b1 h1:XgwcRFZIVR7ZHXsm
 github.com/mylxsw/glacier v0.0.0-20191104060308-11af765794b1/go.mod h1:+YyCNGzYioUp7u8Hpx8Z6jHmKe86mQ8J5ScyjPGIzAg=
 github.com/mylxsw/glacier v0.0.0-20191128065920-ed80075e640d h1:e2tONt29dsHgIi/VEpVAONcV6oMT0nFhgPutygpsqJc=
 github.com/mylxsw/glacier v0.0.0-20191128065920-ed80075e640d/go.mod h1:EaSmuux9JH46uBfmDNMzlTfhcul9DNJpETE+VDX0kEE=
+github.com/mylxsw/glacier v0.0.0-20191207072341-c49699518989 h1:2RWQmBACLqBgFBZLJNVXPVYvYhIXggn7qVePsc7bTzQ=
+github.com/mylxsw/glacier v0.0.0-20191207072341-c49699518989/go.mod h1:EaSmuux9JH46uBfmDNMzlTfhcul9DNJpETE+VDX0kEE=
+github.com/mylxsw/glacier v0.0.0-20191207072601-2678a6a066a4 h1:865Z3FoDe60bteAP8sx3EzCRAYalTAB9OwUZvyFMIzU=
+github.com/mylxsw/glacier v0.0.0-20191207072601-2678a6a066a4/go.mod h1:EaSmuux9JH46uBfmDNMzlTfhcul9DNJpETE+VDX0kEE=
+github.com/mylxsw/glacier v0.0.0-20191207100126-936552ec2a5f h1:oWbhPEUhpgaiVDv8nlJ7Q9eKsZNgqGmOHT/hZpN0N/k=
+github.com/mylxsw/glacier v0.0.0-20191207100126-936552ec2a5f/go.mod h1:EaSmuux9JH46uBfmDNMzlTfhcul9DNJpETE+VDX0kEE=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9 h1:RgHkiDyU7XDmZqk0Cpqnfn2NmYpginMI69RX0BOzKis=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9/go.mod h1:s2TWTsAxqwsOr1+r19Fv7bVyLlsTZokRhNFOegKpLrE=
 github.com/mylxsw/go-toolkit v0.0.0-20191028015837-dd709ecbee89 h1:QCEZbLeX3le3MAD7rZOeZjrp5NBIYLukyq8sYGja7NM=

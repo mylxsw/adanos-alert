@@ -37,12 +37,17 @@ func (u UserController) Register(router *web.Router) {
 }
 
 type UserForm struct {
+	userRepo repository.UserRepo
+	update   bool
+
 	Name   string                `json:"name"`
+	Email  string                `json:"email"`
+	Phone  string                `json:"phone"`
 	Metas  []repository.UserMeta `json:"metas"`
 	Status string                `json:"status"`
 }
 
-func (userForm UserForm) GetMetas() []repository.UserMeta {
+func (userForm *UserForm) GetMetas() []repository.UserMeta {
 	results := make([]repository.UserMeta, 0)
 	for _, v := range userForm.Metas {
 		if strings.TrimSpace(v.Key) != "" {
@@ -53,9 +58,18 @@ func (userForm UserForm) GetMetas() []repository.UserMeta {
 	return results
 }
 
-func (userForm UserForm) Validate() error {
+func (userForm *UserForm) Init(repo repository.UserRepo, update bool) {
+	userForm.userRepo = repo
+	userForm.update = update
+}
+
+func (userForm *UserForm) Validate(req web.Request) error {
 	if userForm.Name == "" {
 		return errors.New("invalid argument: name is required")
+	}
+
+	if !govalidator.IsEmail(userForm.Email) {
+		return errors.New("invalid argument: email address is not valid")
 	}
 
 	if userForm.Status != "" && !govalidator.IsIn(
@@ -66,6 +80,31 @@ func (userForm UserForm) Validate() error {
 		return errors.New("invalid argument: status must be enabled/disabled")
 	}
 
+	if userForm.userRepo == nil {
+		return nil
+	}
+
+	if err := userForm.verifyUserExists(req); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (userForm *UserForm) verifyUserExists(req web.Request) error {
+	user, err := userForm.userRepo.GetByEmail(userForm.Email)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			return nil
+		}
+
+		return fmt.Errorf("internal server error: query user by email faild: %v", err)
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(req.PathVar("id"))
+	if !userForm.update || user.ID.Hex() != userID.Hex() {
+		return errors.New("invalid argument: the user with this email address already exists")
+	}
 	return nil
 }
 
@@ -93,15 +132,18 @@ func (u UserController) UserNames(ctx web.Context, userRepo repository.UserRepo)
 }
 
 func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*repository.User, error) {
-	var userForm UserForm
+	var userForm *UserForm
 	if err := ctx.Unmarshal(&userForm); err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
+	userForm.Init(userRepo, false)
 	ctx.Validate(userForm, true)
 
 	id, err := userRepo.Add(repository.User{
 		Name:   userForm.Name,
+		Email:  userForm.Email,
+		Phone:  userForm.Phone,
 		Metas:  userForm.GetMetas(),
 		Status: repository.UserStatus(userForm.Status),
 	})
@@ -123,11 +165,12 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
-	var userForm UserForm
+	var userForm *UserForm
 	if err := ctx.Unmarshal(&userForm); err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
+	userForm.Init(userRepo, true)
 	ctx.Validate(userForm, true)
 
 	user, err := userRepo.Get(userID)
@@ -140,6 +183,8 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*
 	}
 
 	user.Name = userForm.Name
+	user.Email = userForm.Email
+	user.Phone = userForm.Phone
 	user.Metas = userForm.GetMetas()
 	user.Status = repository.UserStatus(userForm.Status)
 
@@ -185,6 +230,16 @@ func (u UserController) Users(ctx web.Context, userRepo repository.UserRepo) web
 	name := ctx.Input("name")
 	if name != "" {
 		filter["name"] = name
+	}
+
+	email := ctx.Input("email")
+	if email != "" {
+		filter["email"] = email
+	}
+
+	phone := ctx.Input("phone")
+	if phone != "" {
+		filter["phone"] = phone
 	}
 
 	status := ctx.Input("status")

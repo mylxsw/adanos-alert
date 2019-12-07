@@ -68,7 +68,7 @@ type RuleForm struct {
 }
 
 // Validate implement web.Validator interface
-func (r RuleForm) Validate() error {
+func (r RuleForm) Validate(req web.Request) error {
 	if r.Name == "" {
 		return errors.New("name is required")
 	}

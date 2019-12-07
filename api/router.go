@@ -15,7 +15,7 @@ func routers(cc *container.Container) func(router *web.Router, mw web.RequestMid
 		mws := make([]web.HandlerDecorator, 0)
 		mws = append(mws, mw.AccessLog(), mw.CORS("*"))
 		if conf.APIToken != "" {
-			authMiddleware := mw.AuthHandler(func(typ string, credential string) error {
+			authMiddleware := mw.AuthHandler(func(ctx web.Context, typ string, credential string) error {
 				if typ != "Bearer" {
 					return errors.New("invalid auth type, only support Bearer")
 				}

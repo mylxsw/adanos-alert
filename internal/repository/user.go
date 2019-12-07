@@ -22,7 +22,10 @@ type UserMeta struct {
 type User struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
-	Name  string     `bson:"name" json:"name"`
+	Name  string `bson:"name" json:"name"`
+	Email string `bson:"email" json:"email"`
+	Phone string `bson:"phone" json:"phone"`
+
 	Metas []UserMeta `bson:"metas" json:"metas"`
 
 	Status UserStatus `bson:"status" json:"status"`
@@ -34,6 +37,7 @@ type User struct {
 type UserRepo interface {
 	Add(user User) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (user User, err error)
+	GetByEmail(email string) (user User, err error)
 	Find(filter bson.M) (users []User, err error)
 	Paginate(filter bson.M, offset, limit int64) (users []User, next int64, err error)
 	DeleteID(id primitive.ObjectID) error

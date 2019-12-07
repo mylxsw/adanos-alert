@@ -53,6 +53,8 @@
                 isBusy: true,
                 fields: [
                     {key: 'name', label: '用户名/ID'},
+                    {key: 'email', label: '邮箱账号'},
+                    {key: 'phone', label: '手机号码'},
                     {key: 'metas', label: '属性'},
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}

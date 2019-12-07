@@ -21,6 +21,7 @@ import (
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/starter/application"
 	"github.com/mylxsw/glacier/web"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
@@ -28,16 +29,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Version string
-var GitCommit string
+var Version = "1.0"
+var GitCommit = "5dbef13fb456f51a5d29464d"
 
 // ConnectionTimeout is a timeout setting for mongodb connection
 const ConnectionTimeout = 5 * time.Second
 
 func main() {
-	app := glacier.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
-	app.WithHttpServer(":19999")
-
+	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_uri",
 		Usage:  "Mongodb connection uri",
@@ -89,7 +88,10 @@ func main() {
 		Value:  3,
 	}))
 
-	app.UseStackLogger(func(cc *container.Container, stackWriter *writer.StackWriter) {
+	gl := app.Glacier()
+
+	gl.WithHttpServer(":19999")
+	gl.UseStackLogger(func(cc *container.Container, stackWriter *writer.StackWriter) {
 		stackWriter.PushWithLevels(writer.NewStdoutWriter())
 		stackWriter.PushWithLevels(
 			NewErrorCollectorWriter(cc),
@@ -99,7 +101,7 @@ func main() {
 		)
 	})
 
-	app.Singleton(func(c *cli.Context) *configs.Config {
+	gl.Singleton(func(c glacier.FlagContext) *configs.Config {
 		aggregationPeriod, err := time.ParseDuration(c.String("aggregation_period"))
 		if err != nil {
 			log.Warningf("invalid argument [aggregation_period: %s], using default value", c.String("aggregation_period"))
@@ -125,7 +127,7 @@ func main() {
 		}
 	})
 
-	app.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
+	gl.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
 		ctx, _ = context.WithTimeout(ctx, ConnectionTimeout)
 		conn, err := mongo.Connect(ctx, options.Client().
 			ApplyURI(conf.MongoURI).
@@ -140,7 +142,7 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.BeforeInitialize(func(c *cli.Context) error {
+	gl.BeforeInitialize(func(c glacier.FlagContext) error {
 		// disable logs for cron
 		log.Module("glacier.cron").LogLevel(level.Warning)
 		return nil
@@ -149,7 +151,7 @@ func main() {
 		return nil
 	})
 
-	app.Main(func(conf *configs.Config, router *mux.Router) {
+	gl.Main(func(conf *configs.Config, router *mux.Router) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
@@ -159,12 +161,12 @@ func main() {
 		}
 	})
 
-	app.Provider(action.ServiceProvider{})
-	app.Provider(impl.ServiceProvider{})
-	app.Provider(api.ServiceProvider{})
-	app.Provider(job.ServiceProvider{})
-	app.Provider(queue.ServiceProvider{})
-	app.Provider(migrate.ServiceProvider{})
+	gl.Provider(action.ServiceProvider{})
+	gl.Provider(impl.ServiceProvider{})
+	gl.Provider(api.ServiceProvider{})
+	gl.Provider(job.ServiceProvider{})
+	gl.Provider(queue.ServiceProvider{})
+	gl.Provider(migrate.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
