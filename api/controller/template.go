@@ -74,9 +74,7 @@ func (t TemplateForm) Validate(req web.Request) error {
 
 	if !govalidator.IsIn(
 		t.Type,
-		string(repository.TemplateTypeMatchRule),
-		string(repository.TemplateTypeTriggerRule),
-		string(repository.TemplateTypeTemplate),
+		repository.AllTemplateTypes()...,
 	) {
 		return errors.New("invalid argument: type")
 	}

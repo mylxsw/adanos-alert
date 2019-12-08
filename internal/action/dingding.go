@@ -1,6 +1,8 @@
 package action
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -17,7 +19,22 @@ type DingdingAction struct {
 	userRepo repository.UserRepo
 }
 
+type DingdingMeta struct {
+	Template string `json:"template"`
+	Token    string `json:"token"`
+	Secret   string `json:"secret"`
+}
+
 func (d DingdingAction) Validate(meta string) error {
+	var dingdingMeta DingdingMeta
+	if err := json.Unmarshal([]byte(meta), dingdingMeta); err != nil {
+		return err
+	}
+
+	if dingdingMeta.Token == "" {
+		return errors.New("dingding token required")
+	}
+
 	return nil
 }
 
@@ -37,7 +54,17 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		Group:   grp,
 	}
 
-	res, err := template.Parse(rule.Template, payload)
+	var meta DingdingMeta
+	if err := json.Unmarshal([]byte(trigger.Meta), meta); err != nil {
+		return fmt.Errorf("parse dingding meta failed: %v", err)
+	}
+
+	summaryTemplate := rule.Template
+	if strings.TrimSpace(meta.Template) != "" {
+		summaryTemplate = meta.Template
+	}
+
+	res, err := template.Parse(summaryTemplate, payload)
 	if err != nil {
 		res = fmt.Sprintf("template parse failed: %s", err)
 		log.WithFields(log.Fields{
@@ -90,7 +117,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 	}
 
 	msg := dingding.NewMarkdownMessage(rule.Name, res, mobiles)
-	if err := dingding.NewDingding(trigger.Meta).Send(msg); err != nil {
+	if err := dingding.NewDingding(meta.Token, meta.Secret).Send(msg); err != nil {
 		log.WithFields(log.Fields{
 			"title":   rule.Name,
 			"content": res,

@@ -20,6 +20,7 @@
                     <b-badge v-if="row.item.type === 'match_rule'" variant="success">分组匹配规则</b-badge>
                     <b-badge v-if="row.item.type === 'template'" variant="info">分组展示模板</b-badge>
                     <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">动作触发规则</b-badge>
+                    <b-badge v-if="row.item.type === 'template_dingding'" variant="info">钉钉通知模板</b-badge>
                 </template>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>

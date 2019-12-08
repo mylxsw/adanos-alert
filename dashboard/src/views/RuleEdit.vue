@@ -6,18 +6,18 @@
                     <b-card header="基本">
                         <b-form-group label-cols="2" id="rule_name" label="名称*" label-for="name_input">
                             <b-form-input id="name_input" type="text" v-model="form.name" required
-                                          placeholder="输入规则名称"></b-form-input>
+                                          placeholder="输入规则名称"/>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="rule_description" label="描述" label-for="description_input">
                             <b-form-textarea id="description_input" placeholder="输入规则描述"
-                                             v-model="form.description"></b-form-textarea>
+                                             v-model="form.description"/>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="rule_interval" label="报警周期*" label-for="rule_interval_input"
                                       :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
                             <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
-                                          v-model="form.interval" required></b-form-input>
+                                          v-model="form.interval" required/>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
@@ -29,37 +29,37 @@
                 <b-card-group class="mb-3">
                     <b-card header="规则">
                         <b-btn-group class="mb-2">
-                            <b-btn variant="light" v-b-modal.match_rule_selector>插入模板</b-btn>
-                            <b-btn variant="light" @click="rule_help = !rule_help">帮助</b-btn>
+                            <b-btn variant="warning" v-b-modal.match_rule_selector>插入模板</b-btn>
+                            <b-btn variant="dark" @click="rule_help = !rule_help">帮助</b-btn>
                         </b-btn-group>
                         <b-btn-group class="mb-2 float-right">
-                            <b-btn variant="primary" class="float-right" @click="checkRule()">检查</b-btn>
+                            <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="rule" rows="5" v-model="form.rule"
-                                         placeholder="输入规则，必须返回布尔值"></b-form-textarea>
+                                         placeholder="输入规则，必须返回布尔值"/>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
                                     target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                         </small>
-                        <MatchRuleHelp v-if="rule_help"></MatchRuleHelp>
+                        <MatchRuleHelp v-if="rule_help"/>
                     </b-card>
                 </b-card-group>
 
                 <b-card-group class="mb-3">
                     <b-card header="展示模板">
                         <b-btn-group class="mb-2">
-                            <b-btn variant="light" v-b-modal.template_selector>插入模板</b-btn>
-                            <b-btn variant="light" @click="template_help = !template_help">帮助</b-btn>
+                            <b-btn variant="warning" v-b-modal.template_selector>插入模板</b-btn>
+                            <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
                         </b-btn-group>
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkTemplate()">检查</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="template" rows="5" v-model="form.template"
-                                         placeholder="输入模板"></b-form-textarea>
+                                         placeholder="输入模板"/>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
                         </small>
-                        <TemplateHelp v-if="template_help"></TemplateHelp>
+                        <TemplateHelp v-if="template_help"/>
                     </b-card>
                 </b-card-group>
 
@@ -72,38 +72,82 @@
                             <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
                                           :label-for="'trigger_pre_condition_' + i">
                                 <b-btn-group class="mb-2">
-                                    <b-btn variant="light" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
-                                    <b-btn variant="light" @click="toggleHelp(trigger)">帮助</b-btn>
+                                    <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
+                                    <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
                                 </b-btn-group>
                                 <b-btn-group class="mb-2 float-right">
                                     <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查
                                     </b-btn>
                                 </b-btn-group>
                                 <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
-                                                 placeholder="默认为 true （全部匹配）"></b-form-textarea>
+                                                 placeholder="默认为 true （全部匹配）"/>
                                 <small class="form-text text-muted">
                                     语法参考 <a
                                         href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
                                         target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                                 </small>
-                                <TriggerHelp class="mt-2" v-if="trigger.help"></TriggerHelp>
+                                <TriggerHelp class="mt-2" v-if="trigger.help"/>
                             </b-form-group>
                             <b-form-group label-cols="2" :id="'trigger_action_' + i" label="动作"
                                           :label-for="'trigger_action_' + i">
                                 <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
-                                               :options="action_options"></b-form-select>
+                                               :options="action_options"/>
                             </b-form-group>
-                            <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
-                                          :label-for="'trigger_meta_' + i">
-                                <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta"></b-form-input>
-                            </b-form-group>
+                            <div v-if="trigger.action === 'dingding'" class="trigger_dynamic_area">
+                                <b-form-group label-cols="2" :id="'trigger_meta_token_' + i" label="Token"
+                                              :label-for="'trigger_meta_token_' + i">
+                                    <b-form-input :id="'trigger_meta_token_' + i"
+                                                  v-model="trigger.meta_arr.token" placeholder="钉钉机器人 Token"/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_meta_secret_' + i" label="Secret"
+                                              :label-for="'trigger_meta_secret_' + i">
+                                    <b-form-input :id="'trigger_meta_secret_' + i"
+                                                  v-model="trigger.meta_arr.secret" placeholder="钉钉机器人密钥，用于消息签名"/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
+                                              :label-for="'trigger_meta_template_' + i">
+                                    <b-btn-group class="mb-2">
+                                        <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                        <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
+                                    </b-btn-group>
+                                    <b-btn-group class="mb-2 float-right">
+                                        <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                    </b-btn-group>
+                                    <b-form-textarea :id="'trigger_meta_template_' + i" rows="5"
+                                                     v-model="trigger.meta_arr.template" placeholder="默认使用分组展示模板"/>
+                                    <small class="form-text text-muted">
+                                        语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
+                                    </small>
+                                    <TemplateHelp v-if="trigger.template_help"/>
+                                </b-form-group>
+                            </div>
+                            <div v-else-if="trigger.action === 'phone_call_aliyun'" class="trigger_dynamic_area">
+                                <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
+                                              :label-for="'trigger_meta_template_id_' + i">
+                                    <b-form-input :id="'trigger_meta_template_id_' + i"
+                                                  v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID"/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知内容"
+                                              :label-for="'trigger_meta_content_' + i">
+                                    <b-form-textarea :id="'trigger_meta_content_' + i"
+                                                     v-model="trigger.meta_arr.content" placeholder="通知内容，必须是JSON格式，包含模板变量及内容"/>
+                                </b-form-group>
+                            </div>
+                            <div class="trigger_dynamic_area" v-else>
+                                <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
+                                              :label-for="'trigger_meta_' + i" >
+                                    <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
+                                </b-form-group>
+                            </div>
 
-                            <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
+
+                            <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
+                                          v-if="['dingding', 'email', 'phone_call', 'sms', 'wechat'].indexOf(trigger.action) !== -1">
                                 <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
                                 <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
                                                class="mb-3">
                                     <b-form-select v-model="trigger.user_refs[index]"
-                                                   :options="user_options"></b-form-select>
+                                                   :options="user_options"/>
                                     <b-input-group-append>
                                         <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
                                     </b-input-group-append>
@@ -159,6 +203,20 @@
                     </template>
                 </b-table>
             </b-modal>
+            <b-modal id="template_dingding_selector" title="选择钉钉通知模板" hide-footer size="xl">
+                <b-table :items="templates.template_dingding" :fields="template_fields">
+                    <template v-slot:cell(content)="row">
+                        <code>{{ row.item.content }}</code>
+                    </template>
+                    <template v-slot:cell(operations)="row">
+                        <b-button-group>
+                            <b-button size="sm" variant="info" @click="applyTemplateForDingding(row.item.content)">
+                                选中
+                            </b-button>
+                        </b-button-group>
+                    </template>
+                </b-table>
+            </b-modal>
         </b-col>
     </b-row>
 </template>
@@ -191,8 +249,9 @@
                     {value: 'http', text: 'HTTP'},
                     {value: 'email', text: '邮件'},
                     {value: 'wechat', text: '微信'},
-                    {value: 'sms', text: '短信'},
-                    {value: 'phone_call', text: '电话'},
+                    {value: 'sms_aliyun', text: '阿里云短信'},
+                    {value: 'sms_yunxin', text: '网易云信'},
+                    {value: 'phone_call_aliyun', text: '阿里云语音通知'},
                 ],
                 user_options: [],
                 template_fields: [
@@ -205,6 +264,7 @@
                     match_rule: [],
                     trigger_rule: [],
                     template: [],
+                    template_dingding: [],
                 },
                 currentTriggerRuleId: -1,
             };
@@ -235,13 +295,13 @@
             /**
              * 检查模板是否合法
              */
-            checkTemplate() {
-                if (this.form.template.trim() === '') {
-                    this.ErrorBox('展示模板为空，无需检查');
+            checkTemplate(template) {
+                if (template.trim() === '') {
+                    this.ErrorBox('模板为空，无需检查');
                     return;
                 }
 
-                this.sendCheckRequest('template', this.form.template.trim());
+                this.sendCheckRequest('template',  template.trim());
             },
 
             /**
@@ -274,6 +334,13 @@
                 this.$root.$emit('bv::show::modal', "trigger_rule_selector");
             },
             /**
+             * 打开钉钉模板选择页面
+             */
+            openDingdingTemplateSelector(index) {
+                this.currentTriggerRuleId = index;
+                this.$root.$emit('bv::show::modal', "template_dingding_selector");
+            },
+            /**
              * 动作触发规则模板选择
              * @param template
              */
@@ -284,6 +351,17 @@
                     this.form.triggers[this.currentTriggerRuleId].pre_condition += ' and ' + template;
                 }
                 this.$bvModal.hide('trigger_rule_selector');
+            },
+            /**
+             * 钉钉模板选择
+             */
+            applyTemplateForDingding(template) {
+                if (this.form.triggers[this.currentTriggerRuleId].meta_arr.template.trim() === '') {
+                    this.form.triggers[this.currentTriggerRuleId].meta_arr.template = template;
+                } else {
+                    this.form.triggers[this.currentTriggerRuleId].meta_arr.template += '\n' + template;
+                }
+                this.$bvModal.hide('template_dingding_selector');
             },
             /**
              * 展示模板选择
@@ -329,6 +407,7 @@
                     pre_condition: '',
                     action: 'dingding',
                     meta: '',
+                    meta_arr: {},
                     id: '',
                     user_refs: [],
                     help: false
@@ -372,7 +451,10 @@
                 requestData.interval = this.form.interval * 60;
                 requestData.rule = this.form.rule;
                 requestData.template = this.form.template;
-                requestData.triggers = this.form.triggers;
+                requestData.triggers = this.form.triggers.map(function (value) {
+                    value.meta = JSON.stringify(value.meta_arr);
+                    return value;
+                });
                 requestData.status = this.form.status ? 'enabled' : 'disabled';
 
                 return requestData;
@@ -390,6 +472,14 @@
                     for (let i in response.data.triggers) {
                         let trigger = response.data.triggers[i];
                         trigger.help = false;
+                        trigger.template_help = false;
+                        trigger.meta_arr = {};
+
+                        try {
+                            trigger.meta_arr = JSON.parse(trigger.meta);
+                        } catch (e) {
+                        }
+
                         this.form.triggers.push(trigger);
                     }
 
@@ -421,5 +511,12 @@
 <style>
     .adanos-input-box {
         max-width: 1000px;
+    }
+    .trigger_dynamic_area {
+        border: 1px dashed #ffc107;
+        padding: 10px 10px 10px 30px;
+        background-color: #fff7e1;
+        border-radius: .25em;
+        margin-bottom: 10px;
     }
 </style>

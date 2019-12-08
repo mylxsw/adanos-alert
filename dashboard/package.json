@@ -13,6 +13,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.8",
     "bootstrap-vue": "^2.0.0",
     "core-js": "^2.6.5",
+    "markdown-it": "^10.0.0",
     "moment": "^2.24.0",
     "vue": "^2.6.10",
     "vue-codemirror-lite": "^1.0.4",

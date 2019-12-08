@@ -51,6 +51,7 @@
                     {value: 'match_rule', text: '分组匹配规则'},
                     {value: 'template', text: '分组展示模板'},
                     {value: 'trigger_rule', text: '动作触发规则'},
+                    {value: 'template_dingding', text: '钉钉通知模板'},
                 ],
             };
         },

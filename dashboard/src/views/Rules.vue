@@ -79,7 +79,8 @@
                     'email': '邮件通知',
                     'phone_call': '电话通知',
                     'wechat': '微信通知',
-                    'sms': '短信通知',
+                    'sms_aliyun': '阿里云短信',
+                    'sms_yunxin': '网易云信',
                     'http': 'HTTP',
                 };
 

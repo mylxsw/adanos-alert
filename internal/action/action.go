@@ -71,7 +71,7 @@ type QueueAction struct {
 }
 
 func (q *QueueAction) Validate(meta string) error {
-	return nil
+	return q.manager.Run(q.action).Validate(meta)
 }
 
 type Payload struct {

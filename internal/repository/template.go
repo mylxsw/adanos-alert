@@ -10,10 +10,20 @@ import (
 type TemplateType string
 
 const (
-	TemplateTypeMatchRule   TemplateType = "match_rule"
-	TemplateTypeTemplate    TemplateType = "template"
-	TemplateTypeTriggerRule TemplateType = "trigger_rule"
+	TemplateTypeMatchRule        TemplateType = "match_rule"
+	TemplateTypeTemplate         TemplateType = "template"
+	TemplateTypeTriggerRule      TemplateType = "trigger_rule"
+	TemplateTypeDingdingTemplate TemplateType = "template_dingding"
 )
+
+func AllTemplateTypes() []string {
+	return []string{
+		string(TemplateTypeMatchRule),
+		string(TemplateTypeTriggerRule),
+		string(TemplateTypeTemplate),
+		string(TemplateTypeDingdingTemplate),
+	}
+}
 
 type Template struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`

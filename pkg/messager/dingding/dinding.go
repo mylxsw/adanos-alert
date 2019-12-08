@@ -2,10 +2,16 @@ package dingding
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"time"
 )
 
 // DingdingMessage is a message holds all informations for a dingding sender
@@ -65,10 +71,11 @@ type MessageAtSomebody struct {
 type Dingding struct {
 	Endpoint string
 	Token    string
+	Secret   string
 }
 
-func NewDingding(token string) *Dingding {
-	return &Dingding{Endpoint: "https://oapi.dingtalk.com/robot/send?access_token=", Token: token}
+func NewDingding(token string, secret string) *Dingding {
+	return &Dingding{Endpoint: "https://oapi.dingtalk.com/robot/send", Token: token, Secret: secret}
 }
 
 type Message interface {
@@ -82,7 +89,20 @@ type dingResponse struct {
 }
 
 func (ding *Dingding) Send(msg Message) error {
-	url := ding.Endpoint + ding.Token
+
+	v := url.Values{}
+	v.Add("access_token", ding.Token)
+
+	if ding.Secret != "" {
+		timestamp := time.Now().UnixNano() / 1e6
+		hash := hmac.New(sha256.New, []byte(ding.Secret))
+		_, _ = io.WriteString(hash, fmt.Sprintf("%d\n%s", timestamp, ding.Secret))
+
+		v.Add("timestamp", fmt.Sprintf("%d", timestamp))
+		v.Add("sign", base64.StdEncoding.EncodeToString(hash.Sum(nil)))
+	}
+
+	endpointURL := ding.Endpoint + "?" + v.Encode()
 
 	msgEncoded, err := msg.Encode()
 	if err != nil {
@@ -90,7 +110,7 @@ func (ding *Dingding) Send(msg Message) error {
 	}
 
 	reader := bytes.NewReader(msgEncoded)
-	request, err := http.NewRequest("POST", url, reader)
+	request, err := http.NewRequest("POST", endpointURL, reader)
 	if err != nil {
 		return fmt.Errorf("dingding create request failed: %w", err)
 	}
