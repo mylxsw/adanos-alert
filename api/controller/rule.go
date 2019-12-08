@@ -19,10 +19,10 @@ import (
 )
 
 type RuleController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewRuleController(cc *container.Container) web.Controller {
+func NewRuleController(cc container.Container) web.Controller {
 	return &RuleController{cc: cc}
 }
 

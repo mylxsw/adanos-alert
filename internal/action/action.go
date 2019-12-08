@@ -24,12 +24,12 @@ type Manager interface {
 }
 
 type actionManager struct {
-	cc      *container.Container
+	cc      container.Container
 	lock    sync.RWMutex
 	actions map[string]Action
 }
 
-func NewManager(cc *container.Container) Manager {
+func NewManager(cc container.Container) Manager {
 	return &actionManager{cc: cc, actions: make(map[string]Action)}
 }
 

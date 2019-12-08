@@ -27,11 +27,11 @@ type TriggerContext struct {
 	messageCallbackOnce sync.Once
 	messages            []repository.Message
 
-	cc *container.Container
+	cc container.Container
 }
 
 // NewTriggerContext create a new TriggerContext
-func NewTriggerContext(cc *container.Container, trigger repository.Trigger, group repository.MessageGroup, messageCallback func() []repository.Message) TriggerContext {
+func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.MessageGroup, messageCallback func() []repository.Message) TriggerContext {
 	return TriggerContext{cc: cc, Trigger: trigger, Group: group, MessageCallback: messageCallback}
 }
 

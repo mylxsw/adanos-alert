@@ -16,10 +16,10 @@ import (
 const AggregationJobName = "aggregation"
 
 type AggregationJob struct {
-	app *container.Container
+	app container.Container
 }
 
-func NewAggregationJob(app *container.Container) *AggregationJob {
+func NewAggregationJob(app container.Container) *AggregationJob {
 	return &AggregationJob{app: app}
 }
 

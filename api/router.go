@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/glacier/web"
 )
 
-func routers(cc *container.Container) func(router *web.Router, mw web.RequestMiddleware) {
+func routers(cc container.Container) func(router *web.Router, mw web.RequestMiddleware) {
 	conf := cc.MustGet(&configs.Config{}).(*configs.Config)
 	return func(router *web.Router, mw web.RequestMiddleware) {
 		mws := make([]web.HandlerDecorator, 0)

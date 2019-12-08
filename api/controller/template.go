@@ -14,10 +14,10 @@ import (
 )
 
 type TemplateController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewTemplateController(cc *container.Container) web.Controller {
+func NewTemplateController(cc container.Container) web.Controller {
 	return &TemplateController{cc: cc}
 }
 

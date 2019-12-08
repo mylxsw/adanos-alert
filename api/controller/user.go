@@ -15,10 +15,10 @@ import (
 )
 
 type UserController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewUserController(cc *container.Container) web.Controller {
+func NewUserController(cc container.Container) web.Controller {
 	return &UserController{cc: cc}
 }
 

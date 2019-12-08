@@ -12,10 +12,10 @@ import (
 )
 
 type PublicController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewPublicController(cc *container.Container) web.Controller {
+func NewPublicController(cc container.Container) web.Controller {
 	return &PublicController{cc: cc}
 }
 

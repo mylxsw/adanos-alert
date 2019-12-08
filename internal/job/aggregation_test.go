@@ -16,7 +16,7 @@ import (
 
 type AggregationTestSuite struct {
 	suite.Suite
-	app *container.Container
+	app container.Container
 }
 
 func (a *AggregationTestSuite) SetupTest() {

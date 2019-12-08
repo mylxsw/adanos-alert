@@ -33,7 +33,7 @@ type Info struct {
 
 type queueManager struct {
 	lock     sync.RWMutex
-	cc       *container.Container
+	cc       container.Container
 	repo     repository.QueueRepo
 	handlers map[string]Handler
 
@@ -44,7 +44,7 @@ type queueManager struct {
 }
 
 // NewManager create a QueueManager
-func NewManager(cc *container.Container) Manager {
+func NewManager(cc container.Container) Manager {
 	manager := queueManager{
 		cc:       cc,
 		paused:   true,

@@ -12,10 +12,10 @@ import (
 const TriggerJobName = "trigger"
 
 type TriggerJob struct {
-	app *container.Container
+	app container.Container
 }
 
-func NewTrigger(app *container.Container) *TriggerJob {
+func NewTrigger(app container.Container) *TriggerJob {
 	return &TriggerJob{app: app}
 }
 

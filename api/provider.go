@@ -26,9 +26,9 @@ import (
 // @BasePath /api
 type ServiceProvider struct{}
 
-func (s ServiceProvider) Register(app *container.Container) {}
+func (s ServiceProvider) Register(app container.Container) {}
 
-func (s ServiceProvider) Boot(app *glacier.Glacier) {
+func (s ServiceProvider) Boot(app glacier.Glacier) {
 	app.MustResolve(func(conf *configs.Config) {
 		app.WebAppRouter(routers(app.Container()))
 		app.WebAppMuxRouter(func(router *mux.Router) {

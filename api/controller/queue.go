@@ -15,10 +15,10 @@ import (
 )
 
 type QueueController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewQueueController(cc *container.Container) web.Controller {
+func NewQueueController(cc container.Container) web.Controller {
 	return &QueueController{cc: cc}
 }
 

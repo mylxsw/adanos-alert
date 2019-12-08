@@ -18,10 +18,10 @@ import (
 )
 
 type MessageController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewMessageController(cc *container.Container) web.Controller {
+func NewMessageController(cc container.Container) web.Controller {
 	return &MessageController{cc: cc}
 }
 

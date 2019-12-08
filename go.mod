@@ -16,9 +16,9 @@ require (
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
-	github.com/mylxsw/container v0.0.0-20191022090726-425f1756accf
-	github.com/mylxsw/glacier v0.0.0-20191207100126-936552ec2a5f
-	github.com/mylxsw/go-toolkit v0.0.0-20191028015837-dd709ecbee89
+	github.com/mylxsw/container v0.0.0-20191208075953-c8ee6e3238cc
+	github.com/mylxsw/glacier v0.0.0-20191208081205-bc6dd7191bb4
+	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect

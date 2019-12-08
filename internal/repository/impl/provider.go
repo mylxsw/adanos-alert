@@ -10,7 +10,7 @@ import (
 
 type ServiceProvider struct{}
 
-func (s ServiceProvider) Register(app *container.Container) {
+func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewSequenceRepo)
 	app.MustSingleton(NewKVRepo)
 	app.MustSingleton(NewMessageRepo)
@@ -21,8 +21,8 @@ func (s ServiceProvider) Register(app *container.Container) {
 	app.MustSingleton(NewTemplateRepo)
 }
 
-func (s ServiceProvider) Boot(app *glacier.Glacier) {
-	app.Cron(func(cr cron.Manager, cc *container.Container) error {
+func (s ServiceProvider) Boot(app glacier.Glacier) {
+	app.Cron(func(cr cron.Manager, cc container.Container) error {
 		return cc.Resolve(func(repo repository.KVRepo) {
 			_ = cr.Add("kv_repository_gc", "@hourly", func() {
 				if err := repo.GC(); err != nil {

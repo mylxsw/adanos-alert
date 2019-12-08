@@ -91,7 +91,7 @@ func main() {
 	gl := app.Glacier()
 
 	gl.WithHttpServer(":19999")
-	gl.UseStackLogger(func(cc *container.Container, stackWriter *writer.StackWriter) {
+	gl.UseStackLogger(func(cc container.Container, stackWriter *writer.StackWriter) {
 		stackWriter.PushWithLevels(writer.NewStdoutWriter())
 		stackWriter.PushWithLevels(
 			NewErrorCollectorWriter(cc),
@@ -174,10 +174,10 @@ func main() {
 }
 
 type ErrorCollectorWriter struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewErrorCollectorWriter(cc *container.Container) *ErrorCollectorWriter {
+func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 	return &ErrorCollectorWriter{cc: cc}
 }
 

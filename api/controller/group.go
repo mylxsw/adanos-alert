@@ -11,10 +11,10 @@ import (
 )
 
 type GroupController struct {
-	cc *container.Container
+	cc container.Container
 }
 
-func NewGroupController(cc *container.Container) web.Controller {
+func NewGroupController(cc container.Container) web.Controller {
 	return &GroupController{cc: cc}
 }
 
