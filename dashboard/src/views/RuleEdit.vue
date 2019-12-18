@@ -142,7 +142,7 @@
 
 
                             <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
-                                          v-if="['dingding', 'email', 'phone_call', 'sms', 'wechat'].indexOf(trigger.action) !== -1">
+                                          v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
                                 <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
                                 <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
                                                class="mb-3">
