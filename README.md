@@ -9,3 +9,7 @@
 
 
 Adanos-alert is a alert manager with multi alert channel support
+
+## Dependency
+
+- esc: https://github.com/mjibson/esc

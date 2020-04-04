@@ -27,7 +27,7 @@ type DingdingMeta struct {
 
 func (d DingdingAction) Validate(meta string) error {
 	var dingdingMeta DingdingMeta
-	if err := json.Unmarshal([]byte(meta), dingdingMeta); err != nil {
+	if err := json.Unmarshal([]byte(meta), &dingdingMeta); err != nil {
 		return err
 	}
 
@@ -55,7 +55,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 	}
 
 	var meta DingdingMeta
-	if err := json.Unmarshal([]byte(trigger.Meta), meta); err != nil {
+	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {
 		return fmt.Errorf("parse dingding meta failed: %v", err)
 	}
 

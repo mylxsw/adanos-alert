@@ -10,17 +10,17 @@
         </template>
 
         <b-card-text>
-            <b-row style="max-width: 100rem;">
-                <b-col sm="1"><b class="text-black-50" style="border-bottom: 1px dashed black">标签</b></b-col>
-                <b-col sm="11" style="text-align: left"><b-badge v-for="(tag, index) in message.tags" :key="index" class="mr-1">{{ tag }}</b-badge></b-col>
+            <b-row style="max-width: 100rem;" class="adanos-meta-line">
+                <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">标签</b></b-col>
+                <b-col sm="9" style="text-align: left"><b-badge v-for="(tag, index) in message.tags" :key="index" class="mr-1">{{ tag }}</b-badge></b-col>
             </b-row>
-            <b-row style="max-width: 100rem;" class="mb-2">
-                <b-col sm="1"><b class="text-black-50" style="border-bottom: 1px dashed black">来源</b></b-col>
-                <b-col sm="11"><b-badge variant="light">{{ message.origin }}</b-badge></b-col>
+            <b-row style="max-width: 100rem;" class="mb-2 adanos-meta-line">
+                <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">来源</b></b-col>
+                <b-col sm="9"><b-badge variant="light">{{ message.origin }}</b-badge></b-col>
             </b-row>
-            <b-row v-for="(val, key) in message.meta" :key="key" style="max-width: 100rem;">
-                <b-col sm="1"><b class="text-dark" style="border-bottom: 1px dashed black">{{ key }}</b></b-col>
-                <b-col sm="11"><b-badge variant="light">{{ val }}</b-badge></b-col>
+            <b-row v-for="(val, key) in message.meta" :key="key" style="max-width: 100rem;" class="adanos-meta-line">
+                <b-col sm="3"><b class="text-dark" style="border-bottom: 1px dashed black">{{ key }}</b></b-col>
+                <b-col sm="9"><b-badge variant="light">{{ val }}</b-badge></b-col>
             </b-row>
         </b-card-text>
         <b-card-text>
@@ -48,5 +48,11 @@
 
     .adanos-code:hover {
         /*max-height: inherit;*/
+    }
+    .adanos-meta-line {
+        border-bottom: 1px solid #ffffff;
+    }
+    .adanos-meta-line:hover {
+        border-bottom: 1px dashed #ccc;
     }
 </style>

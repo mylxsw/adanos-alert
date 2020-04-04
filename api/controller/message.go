@@ -183,24 +183,29 @@ func (m *MessageController) AddCommonMessage(ctx web.Context, messageRepo reposi
 	return m.saveMessage(messageRepo, commonMessage, ctx)
 }
 
-// Add logstash message
-
+// AddLogstashMessage Add logstash message
 func (m *MessageController) AddLogstashMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	flattenJson, err := flatten.FlattenString(string(ctx.Request().Body()), "", flatten.DotStyle)
+	flattenJSON, err := flatten.FlattenString(string(ctx.Request().Body()), "", flatten.DotStyle)
 	if err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid json: %s", err), http.StatusUnprocessableEntity)
 	}
 
 	var meta repository.MessageMeta
-	if err := json.Unmarshal([]byte(flattenJson), &meta); err != nil {
+	if err := json.Unmarshal([]byte(flattenJSON), &meta); err != nil {
 		return ctx.JSONError(fmt.Sprintf("parse json failed: %s", err), http.StatusInternalServerError)
 	}
 
-	msg := meta["message"]
-	delete(meta, "message")
+	contentField := ctx.InputWithDefault("content-field", "message")
+
+	msg, ok := meta[contentField]
+	if ok {
+		delete(meta, contentField)
+	} else {
+		msg = "None"
+	}
 
 	return m.saveMessage(messageRepo, CommonMessage{
-		Content: msg,
+		Content: fmt.Sprintf("%v", msg),
 		Meta:    meta,
 		Tags:    nil,
 		Origin:  "logstash",

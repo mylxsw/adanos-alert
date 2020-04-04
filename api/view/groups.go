@@ -37,7 +37,6 @@ func fileGetContent(filename string) (string, error) {
 	return string(data), nil
 }
 
-
 // currentPath 获取当前工作目录
 func currentPath() string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -47,7 +46,6 @@ func currentPath() string {
 
 	return dir
 }
-
 
 var defaultMessageViewTemplate = `<html>
 <head>
@@ -87,6 +85,11 @@ var defaultMessageViewTemplate = `<html>
             color: #fff;
             background: #000;
         }
+        
+        .message-key {
+            min-width: 25%; 
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -104,12 +107,12 @@ var defaultMessageViewTemplate = `<html>
             <div class="panel-heading"><span class="panel-seq">#{{ $i }}</span> <b>{{ datetime $msg.CreatedAt }}</b></div>
             <div class="panel-body table-responsive">
                 <ul style="list-style: none;padding-left: 0;">
-                    <li><span style="min-width: 100px; display: inline-block"><b style="border-bottom: 1px dashed #000000;">标签：</b></span> {{ range $i, $m := $msg.Tags }}
+                    <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">标签：</b></span> {{ range $i, $m := $msg.Tags }}
                         <span class="label label-info">{{ $m }}</span>
                         {{ end }}</li>
-                    <li><span style="min-width: 100px; display: inline-block"><b style="border-bottom: 1px dashed #000000;">来源：</b></span> {{ $msg.Origin }}</li>
+                    <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">来源：</b></span> {{ $msg.Origin }}</li>
                     {{ range $i, $m := $msg.Meta }}
-                        <li><span style="min-width: 100px; display: inline-block"><b style="border-bottom: 1px dashed #000000;">{{ $i }} :</b></span> {{ $m }}</li>
+                        <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">{{ $i }} :</b></span> {{ $m }}</li>
                     {{ end }}
                 </ul>
                 {{ range $i, $m := json_flatten $msg.Content 2 }}

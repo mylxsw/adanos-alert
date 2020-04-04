@@ -52,7 +52,7 @@
                             <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
                         </b-btn-group>
                         <b-btn-group class="mb-2 float-right">
-                            <b-btn variant="primary" class="float-right" @click="checkTemplate()">检查</b-btn>
+                            <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查</b-btn>
                         </b-btn-group>
                         <b-form-textarea id="template" rows="5" v-model="form.template"
                                          placeholder="输入模板"/>

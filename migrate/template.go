@@ -10,8 +10,26 @@ import (
 var predefinedTemplates = []repository.Template{
 	{
 		Name:        "判断来源",
-		Description: "判断来源是否为某个值",
-		Content:     `Origin == "internal"`,
+		Description: "来源为 logstash",
+		Content:     `Origin == "logstash"`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
+		Name:        "判断Meta是否等于某个值",
+		Description: "判断日志类型为 nginx_access",
+		Content:     `Meta["log_type"] == "nginx_access"`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
+		Name:        "判断Meta是否在某个范围内",
+		Description: "日志级别为 ERROR 或 FATAL",
+		Content:     `Meta["log_level"] in ["ERROR", "FATAL"]`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
+		Name:        "判断是否包含标签",
+		Description: "包含名为 java 的标签",
+		Content:     `"java" in Tags`,
 		Type:        repository.TemplateTypeMatchRule,
 	},
 	{
@@ -21,9 +39,15 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
-		Name:        "测试模板",
-		Description: "测试展示模板",
-		Content:     `Hello, Action={{ .Action }}, Group.MessageCount={{ .Group.MessageCount }}`,
+		Name:        "展示概要信息",
+		Description: "展示分组的概要信息",
+		Content:     `当前通知方式 {{ .Action }}, 当前分组包含的消息数量 {{ .Group.MessageCount }}，触发的规则名称 {{ .Rule.Name }}  ({{ .Rule.Rule }})`,
+		Type:        repository.TemplateTypeTemplate,
+	},
+	{
+		Name:        "Markdown 报警信息概要（钉钉）",
+		Description: "Markdown 展示报警信息概要",
+		Content:     `当前通知方式 {{ .Action }}, 当前分组包含的消息数量 {{ .Group.MessageCount }}，触发的规则名称 {{ .Rule.Name }}  ({{ .Rule.Rule }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 }
@@ -32,7 +56,7 @@ func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo)
 	if !conf.Migrate {
 		return
 	}
-	
+
 	for _, t := range predefinedTemplates {
 		t.Predefined = true
 		temps, err := repo.Find(bson.M{"name": t.Name, "predefined": true})

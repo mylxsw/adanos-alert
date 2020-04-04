@@ -4,7 +4,7 @@ DIR := $(shell pwd)
 LDFLAGS := "-s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)"
 
 run: build 
-	./build/debug/adanos-alert
+	./build/debug/adanos-alert --enable_migrate
 
 run-dashboard:
 	cd dashboard && npm run serve
