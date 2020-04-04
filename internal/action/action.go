@@ -8,6 +8,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Action interface {
@@ -75,10 +76,33 @@ func (q *QueueAction) Validate(meta string) error {
 }
 
 type Payload struct {
+	msgRepo repository.MessageRepo
 	Action  string                  `json:"action"`
 	Rule    repository.Rule         `json:"rule"`
 	Trigger repository.Trigger      `json:"trigger"`
 	Group   repository.MessageGroup `json:"group"`
+}
+
+// Init initialize a payload
+func (payload *Payload) Init(manager Manager) {
+	manager.MustResolve(func(msgRepo repository.MessageRepo) {
+		payload.msgRepo = msgRepo
+	})
+}
+
+// Messages get messages for group
+func (payload *Payload) Messages(limit int64) []repository.Message {
+	messages, _, err := payload.msgRepo.Paginate(bson.M{"group_ids": payload.Group.ID}, 0, limit)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"group_id": payload.Group.ID,
+			"limit":    limit,
+			"error":    err,
+		}).Errorf("query messages failed for template: %v", err)
+		return []repository.Message{}
+	}
+
+	return messages
 }
 
 func (payload *Payload) Encode() []byte {

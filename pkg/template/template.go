@@ -31,6 +31,7 @@ func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":         cutOff,
 		"implode":        strings.Join,
+		"explode":        strings.Split,
 		"ident":          leftIdent,
 		"json":           jsonFormatter,
 		"datetime":       datetimeFormat,

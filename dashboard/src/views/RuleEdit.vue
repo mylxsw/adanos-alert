@@ -407,7 +407,7 @@
                     pre_condition: '',
                     action: 'dingding',
                     meta: '',
-                    meta_arr: {},
+                    meta_arr: {template: ''},
                     id: '',
                     user_refs: [],
                     help: false
@@ -478,6 +478,8 @@
                         try {
                             trigger.meta_arr = JSON.parse(trigger.meta);
                         } catch (e) {
+                            // eslint-disable-next-line no-console
+                            console.log(e);
                         }
 
                         this.form.triggers.push(trigger);

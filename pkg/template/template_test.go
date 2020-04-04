@@ -1,7 +1,7 @@
 package template
 
-
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -33,6 +33,37 @@ create mode 100644 storage/model.go
 create mode 100644 storage/sequence.go
 create mode 100644 storage/user.go
 create mode 100644 web/message.go`
+
+type testParseData struct {
+	Name string
+	Age  int
+}
+
+func (data testParseData) Strings(ele string) []string {
+	return []string{fmt.Sprintf("name=%s", data.Name), fmt.Sprintf("age=%d", data.Age), ele}
+}
+
+func TestParse(t *testing.T) {
+	{
+		parsed, err := Parse(`{{ range $i, $msg := (explode .Name " ") }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		if err != nil {
+			t.Errorf("test parse template failed: %v", err)
+		}
+
+		if parsed != " - 普罗米  - 修斯 " {
+			t.Error("test failed")
+		}
+	}
+
+	{
+		parsed, err := Parse(`{{ range $i, $msg := .Strings "last element" }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		if err != nil {
+			t.Errorf("test parse template failed: %v", err)
+		}
+
+		fmt.Println(parsed)
+	}
+}
 
 func TestCutOffFunc(t *testing.T) {
 	if len(cutOff(40, content)) > 40 {
@@ -114,7 +145,6 @@ func TestJsonGets(t *testing.T) {
 	if pkgJSON.Gets("msg,message", "", jsonContent2) != "sms_send_failed" {
 		t.Errorf("test failed")
 	}
-
 
 }
 

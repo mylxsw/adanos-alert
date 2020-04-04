@@ -47,12 +47,13 @@ func NewDingdingAction(manager Manager) *DingdingAction {
 }
 
 func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
-	payload := Payload{
+	payload := &Payload{
 		Action:  "dingding",
 		Rule:    rule,
 		Trigger: trigger,
 		Group:   grp,
 	}
+	payload.Init(d.manager)
 
 	var meta DingdingMeta
 	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {

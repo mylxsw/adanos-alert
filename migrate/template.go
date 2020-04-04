@@ -47,7 +47,17 @@ var predefinedTemplates = []repository.Template{
 	{
 		Name:        "Markdown 报警信息概要（钉钉）",
 		Description: "Markdown 展示报警信息概要",
-		Content:     `当前通知方式 {{ .Action }}, 当前分组包含的消息数量 {{ .Group.MessageCount }}，触发的规则名称 {{ .Rule.Name }}  ({{ .Rule.Rule }})`,
+		Content:     `## {{ .Rule.Name }} ({{ .Group.MessageCount }})
+
+序号: {{ .Group.ID.Hex }}
+
+规则: {{ .Group.Rule.ID.Hex }}
+
+{{ range $i, $msg := .Messages 4 }}- 来源：**{{ $msg.Origin }}**，标签：{{ $msg.Tags  }}
+
+{{ cutoff 400 $msg.Content | ident "    > " }}
+
+{{ end }}`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 }
