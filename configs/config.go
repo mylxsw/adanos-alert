@@ -6,6 +6,8 @@ import (
 )
 
 type Config struct {
+	PreviewURL string `json:"preview_url"`
+
 	MongoURI          string `json:"mongo_uri"`
 	MongoDB           string `json:"mongo_db"`
 	APIToken          string `json:"api_token"`

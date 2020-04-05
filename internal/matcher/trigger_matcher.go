@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// MessageMatcher is a matcher for trigger
+// TriggerMatcher is a matcher for trigger
 type TriggerMatcher struct {
 	program *vm.Program
 	trigger repository.Trigger
@@ -31,8 +31,8 @@ type TriggerContext struct {
 }
 
 // NewTriggerContext create a new TriggerContext
-func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.MessageGroup, messageCallback func() []repository.Message) TriggerContext {
-	return TriggerContext{cc: cc, Trigger: trigger, Group: group, MessageCallback: messageCallback}
+func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.MessageGroup, messageCallback func() []repository.Message) *TriggerContext {
+	return &TriggerContext{cc: cc, Trigger: trigger, Group: group, MessageCallback: messageCallback}
 }
 
 // Now return current time
@@ -82,7 +82,7 @@ func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerSta
 	return triggeredTimes
 }
 
-// LastTriggerGroup get last triggeredGroup
+// LastTriggeredGroup get last triggeredGroup
 func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.MessageGroup {
 	var lastTriggeredGroup repository.MessageGroup
 	tc.cc.MustResolve(func(groupRepo repository.MessageGroupRepo) {
@@ -124,8 +124,8 @@ func NewTriggerMatcher(trigger repository.Trigger) (*TriggerMatcher, error) {
 }
 
 // Match check whether the msg is match with the rule
-func (m *TriggerMatcher) Match(triggerCtx TriggerContext) (bool, error) {
-	rs, err := expr.Run(m.program, &triggerCtx)
+func (m *TriggerMatcher) Match(triggerCtx *TriggerContext) (bool, error) {
+	rs, err := expr.Run(m.program, triggerCtx)
 	if err != nil {
 		return false, err
 	}

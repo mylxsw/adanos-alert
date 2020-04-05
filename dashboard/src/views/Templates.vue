@@ -6,8 +6,8 @@
             </b-btn-group>
             <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(name)="row">
-                    {{ row.item.name }}
-                    <p><b>{{ row.item.id }}</b></p>
+                    <b>{{ row.item.name }}</b>
+                    <p><i>{{ row.item.description }}</i></p>
                 </template>
                 <template v-slot:cell(metas)="row">
                     <b-list-group>
@@ -26,7 +26,7 @@
                     <date-time :value="row.item.updated_at"></date-time>
                 </template>
                 <template v-slot:cell(content)="row">
-                    <code>{{ row.item.content }}</code>
+                    <code class="adanos-pre-fold">{{ row.item.content }}</code>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -36,8 +36,16 @@
                     <b-button-group>
                         <b-button v-if="!row.item.predefined" size="sm" variant="info" :to="{path:'/templates/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button v-if="!row.item.predefined" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">删除</b-button>
-                        <b-button v-if="row.item.predefined" size="sm" disabled>预置模板</b-button>
+                        <b-button v-if="row.item.predefined" size="sm" disabled>预置</b-button>
+                        <b-button size="sm" @click="row.toggleDetails" class="mr-2">
+                            {{ row.detailsShowing ? '隐藏' : '显示' }}详情
+                        </b-button>
                     </b-button-group>
+                </template>
+                <template v-slot:row-details="row">
+                    <b-card>
+                        <pre><code class="adanos-colorful-code">{{ row.item.content }}</code></pre>
+                    </b-card>
                 </template>
             </b-table>
         </b-col>
@@ -56,7 +64,6 @@
                 fields: [
                     {key: 'type', label: '类型'},
                     {key: 'name', label: '名称'},
-                    {key: 'description', label: '说明'},
                     {key: 'content', label: '模板内容'},
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}

@@ -43,6 +43,15 @@ func (m MarkdownMessage) Encode() ([]byte, error) {
 
 // NewMarkdownMessage create a new MarkdownMessage
 func NewMarkdownMessage(title string, body string, mobiles []string) MarkdownMessage {
+	if len(mobiles) > 0 {
+		var atSomeone = ""
+		for _, mobile := range mobiles {
+			atSomeone += fmt.Sprintf("@%s ", mobile)
+		}
+
+		body += "\n\n" + atSomeone
+	}
+
 	return MarkdownMessage{
 		Type: "markdown",
 		Markdown: MarkdownMessageBody{

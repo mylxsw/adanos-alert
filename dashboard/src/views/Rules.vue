@@ -10,25 +10,25 @@
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
                 <template v-slot:cell(rule)="row">
-                    <p v-if="row.item.description !== ''"><small>// {{ row.item.description }}</small></p>
+                    <p><small>// 报警周期为 <code><b>{{ row.item.interval }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
                     <p><code>{{ row.item.rule }}</code></p>
                 </template>
                 <template v-slot:cell(interval)="row">
                     {{ row.item.interval / 60 }}
                 </template>
-                <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'enabled'" variant="success">已启用</b-badge>
-                    <b-badge v-if="row.item.status === 'disabled'" variant="danger">已禁用</b-badge>
-                </template>
                 <template v-slot:cell(triggers)="row">
                     <b-list-group>
                         <b-list-group-item v-for="(trigger, index) in row.item.triggers" :key="index">
-                            <code>{{ trigger.pre_condition || 'true' }}</code> <b class="text-success"> | </b> {{
+                            <code>{{ trigger.name == "" || trigger.name == undefined ? (trigger.pre_condition || 'true') : trigger.name }}</code> <b class="text-success"> | </b> {{
                             formatAction(trigger.action) }} <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>
                 </template>
                 <template v-slot:cell(updated_at)="row">
+                    <p>
+                        <b-badge v-if="row.item.status === 'enabled'" variant="success">已启用</b-badge>
+                        <b-badge v-if="row.item.status === 'disabled'" variant="danger">已禁用</b-badge>
+                    </p>
                     <date-time :value="row.item.updated_at"></date-time>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
@@ -59,10 +59,8 @@
                 fields: [
                     {key: 'name', label: '规则名称/ID'},
                     {key: 'rule', label: '规则'},
-                    {key: 'interval', label: '周期(分钟/次)'},
                     {key: 'triggers', label: '动作'},
-                    {key: 'status', label: '状态'},
-                    {key: 'updated_at', label: '最后更新'},
+                    {key: 'updated_at', label: '状态/最后更新'},
                     {key: 'operations', label: '操作'}
                 ],
             };

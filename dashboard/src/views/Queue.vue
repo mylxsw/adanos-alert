@@ -36,7 +36,7 @@
                 </template>
                 <template v-slot:row-details="row">
                     <b-card>
-                        <b-card-text>
+                        <b-card-text class="text-break">
                             <code><pre class="text-danger">{{ JSON.stringify(row.item.payload, null, 4) }}</pre></code>
                         </b-card-text>
                     </b-card>

@@ -38,6 +38,12 @@ const ConnectionTimeout = 5 * time.Second
 func main() {
 	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "preview_url",
+		Usage:  "Alert preview page url",
+		EnvVar: "ADANOS_PREVIEW_URL",
+		Value:  "http://localhost:19999/ui/groups/%s.html",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_uri",
 		Usage:  "Mongodb connection uri",
 		EnvVar: "MONGODB_HOST",
@@ -124,6 +130,7 @@ func main() {
 			QueueJobMaxRetryTimes: c.Int("queue_job_max_retry_times"),
 			QueueWorkerNum:        c.Int("queue_worker_num"),
 			Migrate:               c.Bool("enable_migrate"),
+			PreviewURL:            c.String("preview_url"),
 		}
 	})
 
@@ -185,7 +192,7 @@ func (e *ErrorCollectorWriter) Write(le level.Level, module string, message stri
 	return e.cc.ResolveWithError(func(msgRepo repository.MessageRepo) error {
 		_, err := msgRepo.Add(repository.Message{
 			Content: message,
-			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module,},
+			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module},
 			Tags:    []string{"internal-error"},
 			Origin:  "internal",
 		})

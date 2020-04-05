@@ -28,6 +28,8 @@
 
                 <b-card-group class="mb-3">
                     <b-card header="规则">
+                        <p class="text-muted">分组匹配规则，作用于单条 message，用于判断该 message 是否与当前规则匹配。
+                            <br />如果 message 没有匹配任何规则，将会被标记为 <code>已取消</code>。</p>
                         <b-btn-group class="mb-2">
                             <b-btn variant="warning" v-b-modal.match_rule_selector>插入模板</b-btn>
                             <b-btn variant="dark" @click="rule_help = !rule_help">帮助</b-btn>
@@ -35,7 +37,7 @@
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
                         </b-btn-group>
-                        <b-form-textarea id="rule" rows="5" v-model="form.rule"
+                        <b-form-textarea id="rule" rows="5" v-model="form.rule" class="adanos-code-textarea  text-monospace"
                                          placeholder="输入规则，必须返回布尔值"/>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -47,6 +49,7 @@
 
                 <b-card-group class="mb-3">
                     <b-card header="展示模板">
+                        <p class="text-muted">展示模板，用于各通知方式的默认展示模板，Adanos 会按照该模板将分组信息发送给接收人。</p>
                         <b-btn-group class="mb-2">
                             <b-btn variant="warning" v-b-modal.template_selector>插入模板</b-btn>
                             <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
@@ -54,7 +57,7 @@
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查</b-btn>
                         </b-btn-group>
-                        <b-form-textarea id="template" rows="5" v-model="form.template"
+                        <b-form-textarea id="template" rows="5" v-model="form.template" class="adanos-code-textarea  text-monospace"
                                          placeholder="输入模板"/>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
@@ -65,10 +68,13 @@
 
                 <b-card-group class="mb-3">
                     <b-card header="动作">
-                        <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
+                        <p class="text-muted">分组达到报警周期后，会按照这里的规则来将分组信息通知给对应的通道。</p>
                         <b-card :header="trigger.id" border-variant="dark" header-bg-variant="dark"
                                 header-text-variant="white" class="mb-3" v-bind:key="i"
                                 v-for="(trigger, i) in form.triggers">
+                            <b-form-group label-cols="2" :id="'trigger_' + i" label="名称" :label-for="'trigger_name' + i">
+                                <b-form-input :id="'trigger_name_' + i" v-model="trigger.name" placeholder="动作名称，可选"/>
+                            </b-form-group>
                             <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
                                           :label-for="'trigger_pre_condition_' + i">
                                 <b-btn-group class="mb-2">
@@ -80,7 +86,7 @@
                                     </b-btn>
                                 </b-btn-group>
                                 <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
-                                                 placeholder="默认为 true （全部匹配）"/>
+                                                 class="adanos-code-textarea  text-monospace" placeholder="默认为 true （全部匹配）"/>
                                 <small class="form-text text-muted">
                                     语法参考 <a
                                         href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -113,7 +119,7 @@
                                     <b-btn-group class="mb-2 float-right">
                                         <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
                                     </b-btn-group>
-                                    <b-form-textarea :id="'trigger_meta_template_' + i" rows="5"
+                                    <b-form-textarea :id="'trigger_meta_template_' + i" rows="5" class="adanos-code-textarea  text-monospace"
                                                      v-model="trigger.meta_arr.template" placeholder="默认使用分组展示模板"/>
                                     <small class="form-text text-muted">
                                         语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
@@ -129,7 +135,7 @@
                                 </b-form-group>
                                 <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知内容"
                                               :label-for="'trigger_meta_content_' + i">
-                                    <b-form-textarea :id="'trigger_meta_content_' + i"
+                                    <b-form-textarea :id="'trigger_meta_content_' + i" class="adanos-code-textarea  text-monospace"
                                                      v-model="trigger.meta_arr.content" placeholder="通知内容，必须是JSON格式，包含模板变量及内容"/>
                                 </b-form-group>
                             </div>
@@ -156,6 +162,7 @@
 
                             <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
                         </b-card>
+                        <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
                     </b-card>
                 </b-card-group>
 
@@ -164,54 +171,103 @@
             </b-form>
 
             <b-modal id="match_rule_selector" title="选择分组匹配规则模板" hide-footer size="xl">
-                <b-table :items="templates.match_rule" :fields="template_fields">
+                <b-table sticky-header="500px" responsive :items="templates.match_rule" :fields="template_fields">
                     <template v-slot:cell(content)="row">
-                        <code>{{ row.item.content }}</code>
+                        <code class="adanos-pre-fold">{{ row.item.content }}</code>
+                    </template>
+                    <template v-slot:cell(name)="row">
+                        <b>{{ row.item.name }}</b>
+                        <p class="adanos-description">{{ row.item.description }}</p>
+                    </template>
+                    <template v-slot:row-details="row">
+                        <b-card>
+                            <pre><code class="adanos-colorful-code">{{ row.item.content }}</code></pre>
+                        </b-card>
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForMatchRule(row.item.content)">选中
+                            </b-button>
+                            <b-button size="sm" @click="row.toggleDetails" class="mr-2">
+                                {{ row.detailsShowing ? '隐藏' : '显示' }}详情
                             </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
             </b-modal>
             <b-modal id="template_selector" title="选择分组展示模板" hide-footer size="xl">
-                <b-table :items="templates.template" :fields="template_fields">
+                <b-table sticky-header="500px" responsive :items="templates.template" :fields="template_fields">
                     <template v-slot:cell(content)="row">
-                        <code>{{ row.item.content }}</code>
+                        <code class="adanos-pre-fold">{{ row.item.content }}</code>
+                        
+                    </template>
+                    <template v-slot:cell(name)="row">
+                        <b>{{ row.item.name }}</b>
+                        <p class="adanos-description">{{ row.item.description }}</p>
+                    </template>
+                    <template v-slot:row-details="row">
+                        <b-card>
+                            <pre><code class="adanos-colorful-code">{{ row.item.content }}</code></pre>
+                        </b-card>
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForTemplate(row.item.content)">选中
+                            </b-button>
+                            <b-button size="sm" @click="row.toggleDetails" class="mr-2">
+                                {{ row.detailsShowing ? '隐藏' : '显示' }}详情
                             </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
             </b-modal>
             <b-modal id="trigger_rule_selector" title="选择动作触发规则模板" hide-footer size="xl">
-                <b-table :items="templates.trigger_rule" :fields="template_fields">
+                <b-table sticky-header="500px" responsive :items="templates.trigger_rule" :fields="template_fields">
                     <template v-slot:cell(content)="row">
-                        <code>{{ row.item.content }}</code>
+                        <code class="adanos-pre-fold">{{ row.item.content }}</code>
+                    </template>
+                    <template v-slot:row-details="row">
+                        <b-card>
+                            <pre><code class="adanos-colorful-code">{{ row.item.content }}</code></pre>
+                        </b-card>
+                    </template>
+                    <template v-slot:cell(name)="row">
+                        <b>{{ row.item.name }}</b>
+                        <p class="adanos-description">{{ row.item.description }}</p>
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForTriggerRule(row.item.content)">
                                 选中
                             </b-button>
+                            <b-button size="sm" @click="row.toggleDetails" class="mr-2">
+                                {{ row.detailsShowing ? '隐藏' : '显示' }}详情
+                            </b-button>
                         </b-button-group>
                     </template>
                 </b-table>
             </b-modal>
             <b-modal id="template_dingding_selector" title="选择钉钉通知模板" hide-footer size="xl">
-                <b-table :items="templates.template_dingding" :fields="template_fields">
+                <b-table sticky-header="500px" responsive :items="templates.template_dingding.concat(templates.template)" :fields="template_fields">
                     <template v-slot:cell(content)="row">
-                        <code>{{ row.item.content }}</code>
+                        <code class="adanos-pre-fold">{{ row.item.content }}</code>
+                    </template>
+                    <template v-slot:row-details="row">
+                        <b-card>
+                            <pre><code class="adanos-colorful-code">{{ row.item.content }}</code></pre>
+                        </b-card>
+                    </template>
+                    <template v-slot:cell(name)="row">
+                        <b>{{ row.item.name }}</b>
+                        <p class="adanos-description">{{ row.item.description }}</p>
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
                             <b-button size="sm" variant="info" @click="applyTemplateForDingding(row.item.content)">
                                 选中
+                            </b-button>
+                            <b-button size="sm" @click="row.toggleDetails" class="mr-2">
+                                {{ row.detailsShowing ? '隐藏' : '显示' }}详情
                             </b-button>
                         </b-button-group>
                     </template>
@@ -256,9 +312,8 @@
                 user_options: [],
                 template_fields: [
                     {key: 'name', label: '名称'},
-                    {key: 'description', label: '说明'},
                     {key: 'content', label: '模板内容'},
-                    {key: 'operations', label: '操作'},
+                    {key: 'operations', label: '操作', stickyColumn: true},
                 ],
                 templates: {
                     match_rule: [],
@@ -404,6 +459,7 @@
              */
             triggerAdd() {
                 this.form.triggers.push({
+                    name: '',
                     pre_condition: '',
                     action: 'dingding',
                     meta: '',
@@ -481,6 +537,10 @@
                             // eslint-disable-next-line no-console
                             console.log(e);
                         }
+                        
+                        if (trigger.meta_arr.template == undefined) {
+                            trigger.meta_arr.template = "";
+                        }
 
                         this.form.triggers.push(trigger);
                     }
@@ -520,5 +580,23 @@
         background-color: #fff7e1;
         border-radius: .25em;
         margin-bottom: 10px;
+    }
+    .adanos-pre-fold {
+        width: 300px;
+        height: 45px;
+        overflow: hidden;
+        display: inline-block;
+        font-size: 70%;
+    }
+    .adanos-colorful-code {
+        color: #e83e8c;
+        font-size: 80%;
+    }
+    .adanos-description {
+        font-size: 90%;
+        font-style: italic;
+    }
+    .adanos-code-textarea  text-monospace {
+        font-size: 85%;
     }
 </style>

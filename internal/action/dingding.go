@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/messager/dingding"
 	"github.com/mylxsw/adanos-alert/pkg/template"
@@ -54,6 +55,12 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		Group:   grp,
 	}
 	payload.Init(d.manager)
+
+	d.manager.MustResolve(func(conf *configs.Config) {
+		if conf.PreviewURL != "" {
+			payload.PreviewURL = fmt.Sprintf(conf.PreviewURL, grp.ID.Hex())
+		}
+	})
 
 	var meta DingdingMeta
 	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {

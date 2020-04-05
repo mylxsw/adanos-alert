@@ -45,19 +45,23 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
-		Name:        "Markdown 报警信息概要（钉钉）",
-		Description: "Markdown 展示报警信息概要",
-		Content:     `## {{ .Rule.Name }} ({{ .Group.MessageCount }})
-
-序号: {{ .Group.ID.Hex }}
-
-规则: {{ .Group.Rule.ID.Hex }}
+		Name:        "报警信息列表",
+		Description: "展示报警信息列表",
+		Content: `## {{ .Rule.Name }}
 
 {{ range $i, $msg := .Messages 4 }}- 来源：**{{ $msg.Origin }}**，标签：{{ $msg.Tags  }}
 
 {{ cutoff 400 $msg.Content | ident "    > " }}
 
-{{ end }}`,
+{{ end }}
+
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Type: repository.TemplateTypeTemplate,
+	},
+	{
+		Name:        "报警详情链接",
+		Description: "报警详细信息链接地址",
+		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 }

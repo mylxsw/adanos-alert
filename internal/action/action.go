@@ -76,11 +76,12 @@ func (q *QueueAction) Validate(meta string) error {
 }
 
 type Payload struct {
-	msgRepo repository.MessageRepo
-	Action  string                  `json:"action"`
-	Rule    repository.Rule         `json:"rule"`
-	Trigger repository.Trigger      `json:"trigger"`
-	Group   repository.MessageGroup `json:"group"`
+	msgRepo    repository.MessageRepo
+	Action     string                  `json:"action"`
+	Rule       repository.Rule         `json:"rule"`
+	Trigger    repository.Trigger      `json:"trigger"`
+	Group      repository.MessageGroup `json:"group"`
+	PreviewURL string                  `json:"preview_url"`
 }
 
 // Init initialize a payload

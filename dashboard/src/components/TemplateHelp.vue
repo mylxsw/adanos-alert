@@ -12,4 +12,8 @@
 
 <style scoped>
 
+.adanos-help {
+    font-size: 80%;
+}
+
 </style>

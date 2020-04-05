@@ -4,7 +4,8 @@ go 1.12
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/antonmedv/expr v0.0.0-20190722083458-9449c89f5e27
+	github.com/antlr/antlr4 v0.0.0-20190518164840-edae2a1c9b4b // indirect
+	github.com/antonmedv/expr v1.8.2
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v0.0.0-20191204142016-1a29609e0929
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
@@ -20,7 +21,7 @@ require (
 	github.com/mylxsw/glacier v0.0.0-20191208081205-bc6dd7191bb4
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/pkg/errors v0.8.1
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
 	github.com/swaggo/swag v1.6.2

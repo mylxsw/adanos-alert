@@ -44,6 +44,7 @@ func (r RuleController) Register(router *web.Router) {
 // RuleTriggerForm is a form object using to hold a trigger
 type RuleTriggerForm struct {
 	ID           string   `json:"id"`
+	Name         string   `json:"name"`
 	PreCondition string   `json:"pre_condition"`
 	Action       string   `json:"action"`
 	Meta         string   `json:"meta"`
@@ -157,6 +158,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		}
 
 		triggers = append(triggers, repository.Trigger{
+			Name:         t.Name,
 			PreCondition: t.PreCondition,
 			Action:       t.Action,
 			Meta:         t.Meta,
@@ -186,7 +188,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 	return &rule, nil
 }
 
-// UpdateID replace one rule for specified id
+// Update replace one rule for specified id
 func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
@@ -219,6 +221,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		triggerID, _ := primitive.ObjectIDFromHex(t.ID)
 		triggers = append(triggers, repository.Trigger{
 			ID:           triggerID,
+			Name:         t.Name,
 			PreCondition: t.PreCondition,
 			Action:       t.Action,
 			Meta:         t.Meta,

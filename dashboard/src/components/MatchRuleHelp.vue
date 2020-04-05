@@ -1,8 +1,8 @@
 <template>
-    <b-card-body>
-        <li>JsonGet(key string, defaultValue string) string</li>
-        <li>Upper(val string) string</li>
-        <li>Lower(val string) string</li>
+    <b-card-body class="adanos-help">
+        <li><code>JsonGet(key string, defaultValue string) string</code> 将消息体作为json解析，获取指定的key</li>
+        <li><code>Upper(val string) string</code> 字符串转大写</li>
+        <li><code>Lower(val string) string</code> 字符串转小写</li>
     </b-card-body>
 </template>
 
@@ -13,5 +13,7 @@
 </script>
 
 <style scoped>
-
+.adanos-help {
+    font-size: 80%;
+}
 </style>
