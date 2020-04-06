@@ -13,3 +13,11 @@ Adanos-alert is a alert manager with multi alert channel support
 ## Dependency
 
 - esc: https://github.com/mjibson/esc
+
+## Preview
+
+![](https://ssl.aicode.cc/markdown/20200406223929.png)
+
+![](https://ssl.aicode.cc/markdown/20200406224209.png)
+
+![](https://ssl.aicode.cc/markdown/20200406224319.png)
