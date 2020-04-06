@@ -207,3 +207,18 @@ User: {{ $slog.user }}
 		}
 	}
 }
+
+func TestStringMask(t *testing.T) {
+	testCases := map[string]string{
+		"abcdefg":                  "*******",
+		"5e8af5bb09d64979185635bf": "5e8af5************5635bf",
+		"4dcd69cf0c98b6d4357e77b7150e56b32ab13afe461839e8934527db36b21091": "4dcd69****************************************************b21091",
+	}
+
+	for k, v := range testCases {
+		masked := StringMask(k, 6)
+		if masked != v {
+			t.Errorf("test failed")
+		}
+	}
+}

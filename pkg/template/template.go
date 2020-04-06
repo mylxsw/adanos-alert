@@ -49,6 +49,7 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"integer":        toInteger,
 		"mysql_slowlog":  parseMySQLSlowlog,
 		"open_falcon_im": ParseOpenFalconImMessage,
+		"string_mask":    StringMask,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -84,6 +85,11 @@ func leftIdent(ident string, message string) string {
 	}, "").(string)
 
 	return strings.Trim(result, "\n")
+}
+
+// JSONBeauty format content as json beauty
+func JSONBeauty(content string) string {
+	return jsonFormatter(content)
 }
 
 // json格式化输出
@@ -154,4 +160,19 @@ func toInteger(str string) int {
 	}
 
 	return val
+}
+
+// StringMask create a mask for string
+func StringMask(content string, left int) string {
+	return stringMask(content, left)
+}
+
+// stringMask create a mask for string
+func stringMask(content string, left int) string {
+	size := len(content)
+	if size < 16 {
+		return strings.Repeat("*", size)
+	}
+
+	return content[:left] + strings.Repeat("*", size-left*2) + content[size-left:]
 }

@@ -36,9 +36,7 @@
                 </template>
                 <template v-slot:row-details="row">
                     <b-card>
-                        <b-card-text class="text-break">
-                            <code><pre class="text-danger">{{ JSON.stringify(row.item.payload, null, 4) }}</pre></code>
-                        </b-card-text>
+                        <code><pre class="text-danger adanos-code">{{ JSON.stringify(row.item.payload, null, 4) }}</pre></code>
                     </b-card>
                 </template>
                 <template v-slot:cell(operations)="row">
@@ -143,3 +141,11 @@
         }
     }
 </script>
+
+<style scoped>
+    .adanos-code {
+        white-space: pre-wrap!important;
+        word-wrap: break-word!important;
+        *white-space:normal!important;
+    }
+</style>

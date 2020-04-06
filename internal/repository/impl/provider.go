@@ -19,6 +19,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewRuleRepo)
 	app.MustSingleton(NewQueueRepo)
 	app.MustSingleton(NewTemplateRepo)
+	app.MustSingleton(NewDingdingRobotRepo)
 }
 
 func (s ServiceProvider) Boot(app glacier.Glacier) {

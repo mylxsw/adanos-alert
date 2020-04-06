@@ -39,6 +39,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 			controller.NewGroupController(cc),
 			controller.NewRuleController(cc),
 			controller.NewTemplateController(cc),
+			controller.NewDingdingRobotController(cc),
 		)
 
 		router.WithMiddleware(mws...).Controllers(

@@ -79,7 +79,7 @@ func main() {
 		Name:   "action_trigger_period",
 		Usage:  "action trigger job execute period",
 		EnvVar: "ADANOS_ACTION_TRIGGER_PERIOD",
-		Value:  "15s",
+		Value:  "10s",
 	}))
 	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
 		Name:   "queue_job_max_retry_times",

@@ -182,13 +182,19 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 	// execute queue job handler
 	if err := eliminatePanic(handler)(item); err != nil {
 		manager.lock.Lock()
-		manager.info.FailedCount += 1
+		manager.info.FailedCount++
 		manager.lock.Unlock()
 
 		// if job failed, check execute times, if requeue times > max requeueTimes, set job as failed
 		// otherwise requeue it and try again latter
 		if item.RequeueTimes > manager.maxRetryTimes {
 			item.Status = repository.QueueItemStatusFailed
+
+			log.WithFields(log.Fields{
+				"item":     item,
+				"last_err": err,
+			}).Errorf("job execute failed after max retry times")
+
 			if err := manager.repo.UpdateID(item.ID, item); err != nil {
 				log.WithFields(log.Fields{
 					"err":  err.Error(),

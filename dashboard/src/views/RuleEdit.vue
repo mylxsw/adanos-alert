@@ -100,15 +100,8 @@
                                                :options="action_options"/>
                             </b-form-group>
                             <div v-if="trigger.action === 'dingding'" class="trigger_dynamic_area">
-                                <b-form-group label-cols="2" :id="'trigger_meta_token_' + i" label="Token"
-                                              :label-for="'trigger_meta_token_' + i">
-                                    <b-form-input :id="'trigger_meta_token_' + i"
-                                                  v-model="trigger.meta_arr.token" placeholder="钉钉机器人 Token"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" :id="'trigger_meta_secret_' + i" label="Secret"
-                                              :label-for="'trigger_meta_secret_' + i">
-                                    <b-form-input :id="'trigger_meta_secret_' + i"
-                                                  v-model="trigger.meta_arr.secret" placeholder="钉钉机器人密钥，用于消息签名"/>
+                                <b-form-group  label-cols="2" label="机器人" :label-for="'trigger_meta_robot_' + i">
+                                    <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id" :options="robot_options" />
                                 </b-form-group>
                                 <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
                                               :label-for="'trigger_meta_template_' + i">
@@ -310,6 +303,7 @@
                     {value: 'phone_call_aliyun', text: '阿里云语音通知'},
                 ],
                 user_options: [],
+                robot_options: [],
                 template_fields: [
                     {key: 'name', label: '名称'},
                     {key: 'content', label: '模板内容'},
@@ -463,7 +457,7 @@
                     pre_condition: '',
                     action: 'dingding',
                     meta: '',
-                    meta_arr: {template: ''},
+                    meta_arr: {template: '', robot_id: null},
                     id: '',
                     user_refs: [],
                     help: false
@@ -555,7 +549,8 @@
             axios.all([
                 axios.get('/api/users-helper/names/'),
                 axios.get('/api/templates/'),
-            ]).then(axios.spread((usersResp, templateResp) => {
+                axios.get('/api/dingding-robots-helper/names/'),
+            ]).then(axios.spread((usersResp, templateResp, robotsResp) => {
                 this.user_options = usersResp.data.map((val) => {
                     return {value: val.id, text: val.name}
                 });
@@ -563,6 +558,10 @@
                 for (let i in templateResp.data) {
                     this.templates[templateResp.data[i].type].push(templateResp.data[i]);
                 }
+
+                this.robot_options = robotsResp.data.map((val) => {
+                    return {value: val.id, text: val.name}
+                });
             })).catch((error) => {
                 this.ToastError(error)
             });

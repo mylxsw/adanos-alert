@@ -2,8 +2,10 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,9 +28,14 @@ func (g GroupController) Register(router *web.Router) {
 }
 
 type GroupsResp struct {
-	Groups []repository.MessageGroup `json:"groups"`
-	Users  map[string]string         `json:"users"`
-	Next   int64                     `json:"next"`
+	Groups []GroupsGroupResp `json:"groups"`
+	Users  map[string]string `json:"users"`
+	Next   int64             `json:"next"`
+}
+
+type GroupsGroupResp struct {
+	repository.MessageGroup
+	CollectTimeRemain int64 `json:"collect_time_remain"`
 }
 
 // Groups list all message groups
@@ -68,8 +75,17 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 		userRefs[u.ID.Hex()] = u.Name
 	}
 
+	groups := make([]GroupsGroupResp, len(grps))
+	for i, grp := range grps {
+		var timeRemain int64 = 0
+		if grp.Status == repository.MessageGroupStatusCollecting {
+			timeRemain = grp.CreatedAt.Unix() + grp.Rule.Interval - time.Now().Unix()
+		}
+		groups[i] = GroupsGroupResp{MessageGroup: grp, CollectTimeRemain: timeRemain}
+	}
+
 	return &GroupsResp{
-		Groups: grps,
+		Groups: groups,
 		Users:  userRefs,
 		Next:   next,
 	}, nil
@@ -105,6 +121,10 @@ func (g GroupController) Group(
 	messages, next, err := messageRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
+	}
+
+	for i, m := range messages {
+		messages[i].Content = template.JSONBeauty(m.Content)
 	}
 
 	return &GroupResp{

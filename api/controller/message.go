@@ -116,6 +116,10 @@ func (m *MessageController) Messages(ctx web.Context, msgRepo repository.Message
 		return nil, web.WrapJSONError(fmt.Errorf("query failed: %v", err), http.StatusInternalServerError)
 	}
 
+	for i, m := range messages {
+		messages[i].Content = template.JSONBeauty(m.Content)
+	}
+
 	return &MessagesResp{
 		Messages: messages,
 		Next:     next,
@@ -137,6 +141,8 @@ func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageR
 
 		return nil, err
 	}
+
+	message.Content = template.JSONBeauty(message.Content)
 
 	return &message, nil
 }

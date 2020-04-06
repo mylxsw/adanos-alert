@@ -36,7 +36,7 @@
             message: Object
         },
         methods: {
-
+            
         }
     }
 </script>
@@ -44,11 +44,11 @@
 <style scoped>
     .adanos-code {
         max-height: 100rem;
+        white-space: pre-wrap!important;
+        word-wrap: break-word!important;
+        *white-space:normal!important;
     }
 
-    .adanos-code:hover {
-        /*max-height: inherit;*/
-    }
     .adanos-meta-line {
         border-bottom: 1px solid #ffffff;
     }

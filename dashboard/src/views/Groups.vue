@@ -21,7 +21,7 @@
                     </b-link>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中</b-badge>
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中（剩余 {{ row.item.collect_time_remain > 0 ? time_remain(row.item.collect_time_remain) : '-' }}）</b-badge>
                     <b-badge v-if="row.item.status === 'pending'" variant="info">准备</b-badge>
                     <b-badge v-if="row.item.status === 'ok'" variant="success">完成</b-badge>
                     <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
