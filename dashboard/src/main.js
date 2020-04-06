@@ -12,6 +12,7 @@ import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import DateTime from "./components/DateTime";
+import HumanTime from "./components/HumanTime";
 import Paginator from "./components/Paginator";
 import MessageCard from "./components/MessageCard";
 
@@ -19,6 +20,7 @@ library.add(faExternalLinkAlt);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.component('DateTime', DateTime);
+Vue.component('HumanTime', HumanTime);
 Vue.component('MessageCard', MessageCard)
 Vue.component('Paginator', Paginator);
 

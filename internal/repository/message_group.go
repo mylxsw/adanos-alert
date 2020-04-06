@@ -27,7 +27,8 @@ type MessageGroupRule struct {
 }
 
 type MessageGroup struct {
-	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	ID     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	SeqNum int64              `bson:"seq_num" json:"seq_num"`
 
 	MessageCount int64            `bson:"message_count" json:"message_count"`
 	Rule         MessageGroupRule `bson:"rule" json:"rule"`

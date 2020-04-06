@@ -1,7 +1,7 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3" :message="message"></MessageCard>
+            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3" :message="message" :message_index="index"></MessageCard>
             <b-card v-if="messages.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
             </b-card>

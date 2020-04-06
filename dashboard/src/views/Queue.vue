@@ -24,7 +24,10 @@
                     <b v-else>{{ row.item.requeue_times }}</b>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'wait'" variant="info">等待</b-badge>
+                    <b-badge v-if="row.item.status === 'wait'" variant="info">等待
+                        <span v-if="row.item.execute_time_remain > 0">（剩余 <human-time :value="row.item.execute_time_remain"></human-time>）</span>
+                        <span v-else>（就绪）</span>
+                    </b-badge>
                     <b-badge v-if="row.item.status === 'running'" variant="dark">执行中</b-badge>
                     <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
                     <b-badge v-if="row.item.status === 'succeed'" variant="success">成功</b-badge>

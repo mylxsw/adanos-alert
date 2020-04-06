@@ -3,6 +3,7 @@
         <b-col>
             <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
+                    <b-badge class="mr-2" variant="dark">{{ row.item.seq_num }}</b-badge>
                     <date-time :value="row.item.updated_at"></date-time>
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
@@ -21,7 +22,10 @@
                     </b-link>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中（剩余 {{ row.item.collect_time_remain > 0 ? time_remain(row.item.collect_time_remain) : '-' }}）</b-badge>
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中
+                        <span v-if="row.item.collect_time_remain > 0">剩余 <human-time :value="row.item.collect_time_remain"></human-time></span>
+                        <span v-else>收集完成</span>
+                    </b-badge>
                     <b-badge v-if="row.item.status === 'pending'" variant="info">准备</b-badge>
                     <b-badge v-if="row.item.status === 'ok'" variant="success">完成</b-badge>
                     <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
@@ -82,17 +86,6 @@
                 };
 
                 return actions[action];
-            },
-            time_remain(time_sec) {
-                if (time_sec < 60) {
-                    return time_sec + " s"
-                }
-
-                if (time_sec < 3600) {
-                    return (time_sec / 60).toFixed(1) + " m"
-                }
-
-                return (time_sec / 60 / 60).toFixed(1) + " h"
             },
             reload() {
                 axios.get('/api/groups/?offset=' + this.cur).then(response => {

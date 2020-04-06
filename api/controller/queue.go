@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -54,8 +55,13 @@ func (q *QueueController) Control(ctx web.Context, manager queue.Manager) web.Re
 }
 
 type QueueJobsResp struct {
-	Jobs []repository.QueueJob `json:"jobs"`
-	Next int64                 `json:"next"`
+	Jobs []QueueJob `json:"jobs"`
+	Next int64      `json:"next"`
+}
+
+type QueueJob struct {
+	repository.QueueJob
+	ExecuteTimeRemain int64 `json:"execute_time_remain"`
 }
 
 func (q *QueueController) Jobs(ctx web.Context, repo repository.QueueRepo) (*QueueJobsResp, error) {
@@ -73,13 +79,18 @@ func (q *QueueController) Jobs(ctx web.Context, repo repository.QueueRepo) (*Que
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
+	queueJobs := make([]QueueJob, len(jobs))
+	for i, job := range jobs {
+		queueJobs[i] = QueueJob{QueueJob: job, ExecuteTimeRemain: job.NextExecuteAt.Unix() - time.Now().Unix()}
+	}
+
 	return &QueueJobsResp{
-		Jobs: jobs,
+		Jobs: queueJobs,
 		Next: next,
 	}, nil
 }
 
-func (q *QueueController) Job(ctx web.Context, repo repository.QueueRepo) (*repository.QueueJob, error) {
+func (q *QueueController) Job(ctx web.Context, repo repository.QueueRepo) (*QueueJob, error) {
 	jobID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -94,7 +105,7 @@ func (q *QueueController) Job(ctx web.Context, repo repository.QueueRepo) (*repo
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	return &job, nil
+	return &QueueJob{QueueJob: job, ExecuteTimeRemain: job.NextExecuteAt.Unix() - time.Now().Unix()}, nil
 }
 
 func (q *QueueController) Delete(ctx web.Context, repo repository.QueueRepo) error {

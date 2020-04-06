@@ -12,16 +12,22 @@ import (
 )
 
 type MessageGroupRepo struct {
-	col *mongo.Collection
+	col     *mongo.Collection
+	seqRepo repository.SequenceRepo
 }
 
-func NewMessageGroupRepo(db *mongo.Database) repository.MessageGroupRepo {
-	return &MessageGroupRepo{col: db.Collection("message_group")}
+func NewMessageGroupRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageGroupRepo {
+	return &MessageGroupRepo{col: db.Collection("message_group"), seqRepo: seqRepo}
 }
 
 func (m MessageGroupRepo) Add(grp repository.MessageGroup) (id primitive.ObjectID, err error) {
 	grp.CreatedAt = time.Now()
 	grp.UpdatedAt = grp.CreatedAt
+	seq, err := m.seqRepo.Next("group_seq")
+	if err == nil {
+		grp.SeqNum = seq.Value
+	}
+
 	rs, err := m.col.InsertOne(context.TODO(), grp)
 	if err != nil {
 		return
@@ -131,6 +137,11 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 	if err == nil && group.CreatedAt.IsZero() {
 		group.CreatedAt = time.Now()
 		group.UpdatedAt = group.CreatedAt
+		seq, err := m.seqRepo.Next("group_seq")
+		if err == nil {
+			group.SeqNum = seq.Value
+		}
+
 		_ = m.UpdateID(group.ID, group)
 	}
 

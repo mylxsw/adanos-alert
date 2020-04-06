@@ -1,7 +1,10 @@
 <template>
     <b-card :header-bg-variant="message.status === 'canceled' ? 'warning': ''">
         <template v-slot:header>
-            <b title="创建时间"><date-time :value="message.created_at"></date-time></b>
+            <b title="创建时间">
+                <b-badge v-if="message_index != null" class="mr-2" variant="primary"># {{ message_index }}</b-badge>
+                <date-time :value="message.created_at"></date-time>
+            </b>
             <div class="float-right" title="状态">
                 <b-badge v-if="message.status === 'pending'" variant="dark">准备中</b-badge>
                 <b-badge v-if="message.status === 'grouped'" variant="success">已分组</b-badge>
@@ -33,7 +36,8 @@
     export default {
         name: 'MessageCard',
         props: {
-            message: Object
+            message: Object,
+            message_index: Number,
         },
         methods: {
             
