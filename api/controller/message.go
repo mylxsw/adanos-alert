@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
@@ -51,27 +51,18 @@ func messagesFilter(ctx web.Context) bson.M {
 	if meta != "" {
 		filter["meta.value"] = meta
 	}
-	tags := ctx.Input("tags")
-	if tags != "" {
-		tt := strings.Split(tags, ",")
-		if len(tt) == 1 {
-			filter["tag"] = tags
-		} else {
-			filter["tag"] = bson.M{"$in": tt}
-		}
+	tags := template.StringTags(ctx.Input("tags"), ",")
+	if len(tags) > 0 {
+		filter["tags"] = bson.M{"$in": tags}
 	}
+
 	origin := ctx.Input("origin")
 	if origin != "" {
 		filter["origin"] = origin
 	}
-	status := ctx.Input("status")
-	if status != "" {
-		ss := strings.Split(status, ",")
-		if len(ss) == 1 {
-			filter["status"] = status
-		} else {
-			filter["status"] = bson.M{"$in": ss}
-		}
+	status := template.StringTags(ctx.Input("status"), ",")
+	if len(status) > 0 {
+		filter["status"] = bson.M{"$in": status}
 	}
 
 	return filter
@@ -94,6 +85,16 @@ func (m *MessageController) Count(ctx web.Context, msgRepo repository.MessageRep
 type MessagesResp struct {
 	Messages []repository.Message `json:"messages"`
 	Next     int64                `json:"next"`
+	Search   MessageSearch        `json:"search"`
+}
+
+// MessageSearch is search conditions for messages
+type MessageSearch struct {
+	Tags    []string `json:"tags"`
+	Meta    string   `json:"meta"`
+	Status  []string `json:"status"`
+	Origin  string   `json:"origin"`
+	GroupID string   `json:"group_id"`
 }
 
 // Messages return all messages
@@ -111,6 +112,8 @@ func (m *MessageController) Messages(ctx web.Context, msgRepo repository.Message
 		filter["group_ids"] = groupID
 	}
 
+	log.WithFields(log.Fields{"filter": filter}).Debug("messages filter")
+
 	messages, next, err := msgRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("query failed: %v", err), http.StatusInternalServerError)
@@ -123,6 +126,13 @@ func (m *MessageController) Messages(ctx web.Context, msgRepo repository.Message
 	return &MessagesResp{
 		Messages: messages,
 		Next:     next,
+		Search: MessageSearch{
+			Tags:    template.StringTags(ctx.Input("tags"), ","),
+			Meta:    ctx.Input("meta"),
+			Status:  template.StringTags(ctx.Input("status"), ","),
+			Origin:  ctx.Input("origin"),
+			GroupID: ctx.Input("group_id"),
+		},
 	}, nil
 }
 
@@ -222,11 +232,11 @@ func (m *MessageController) AddLogstashMessage(ctx web.Context, messageRepo repo
 
 type GrafanaMessage struct {
 	EvalMatches []GrafanaEvalMatch `json:"evalMatches"`
-	ImageUrl    string             `json:"imageUrl"`
+	ImageURL    string             `json:"imageUrl"`
 	Message     string             `json:"message"`
 	RuleID      int64              `json:"ruleId"`
 	RuleName    string             `json:"ruleName"`
-	RuleUrl     string             `json:"ruleUrl"`
+	RuleURL     string             `json:"ruleUrl"`
 	State       string             `json:"state"`
 	Title       string             `json:"title"`
 }

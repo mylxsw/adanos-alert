@@ -17,6 +17,7 @@ const (
 
 type Message struct {
 	ID        primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	SeqNum    int64                `bson:"seq_num" json:"seq_num"`
 	Content   string               `bson:"content" json:"content"`
 	Meta      MessageMeta          `bson:"meta" json:"meta"`
 	Tags      []string             `bson:"tags" json:"tags"`

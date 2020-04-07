@@ -222,3 +222,18 @@ func TestStringMask(t *testing.T) {
 		}
 	}
 }
+
+func TestStringTags(t *testing.T) {
+	var testCase = map[string]int{
+		"a,b,c,": 3,
+		"a,,b,c": 3,
+		" ":      0,
+		"":       0,
+	}
+
+	for k, v := range testCase {
+		if len(StringTags(k, ",")) != v {
+			t.Error("test failed")
+		}
+	}
+}

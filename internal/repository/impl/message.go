@@ -12,17 +12,23 @@ import (
 )
 
 type MessageRepo struct {
-	col *mongo.Collection
+	col     *mongo.Collection
+	seqRepo repository.SequenceRepo
 }
 
-func NewMessageRepo(db *mongo.Database) repository.MessageRepo {
-	return &MessageRepo{col: db.Collection("message")}
+func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageRepo {
+	return &MessageRepo{col: db.Collection("message"), seqRepo: seqRepo}
 }
 
 func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
 	msg.CreatedAt = time.Now()
 	if msg.Status == "" {
 		msg.Status = repository.MessageStatusPending
+	}
+
+	seq, err := m.seqRepo.Next("message_seq")
+	if err == nil {
+		msg.SeqNum = seq.Value
 	}
 
 	rs, err := m.col.InsertOne(context.TODO(), msg)

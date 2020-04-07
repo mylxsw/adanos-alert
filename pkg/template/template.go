@@ -50,9 +50,24 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"mysql_slowlog":  parseMySQLSlowlog,
 		"open_falcon_im": ParseOpenFalconImMessage,
 		"string_mask":    StringMask,
+		"string_tags":    StringTags,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
+}
+
+// StringTags split tags string to array
+func StringTags(tags string, sep string) []string {
+	if tags == "" {
+		return []string{}
+	}
+
+	var result []string
+	_ = coll.Filter(strings.Split(tags, sep), &result, func(s string) bool {
+		return strings.TrimSpace(s) != ""
+	})
+
+	return result
 }
 
 // parseMySQLSlowlog 解析mysql慢查询日志

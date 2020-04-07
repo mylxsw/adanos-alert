@@ -2,7 +2,7 @@
     <b-card :header-bg-variant="message.status === 'canceled' ? 'warning': ''">
         <template v-slot:header>
             <b title="创建时间">
-                <b-badge v-if="message_index != null" class="mr-2" variant="primary"># {{ message_index }}</b-badge>
+                <b-badge v-if="message_index != null" class="mr-2" variant="primary"># {{ message.seq_num }}</b-badge>
                 <date-time :value="message.created_at"></date-time>
             </b>
             <div class="float-right" title="状态">
@@ -13,6 +13,12 @@
         </template>
 
         <b-card-text>
+            <b-row style="max-width: 100rem;" class="adanos-meta-line" v-if="message.group_ids != null && message.group_ids.length > 0">
+                <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">分组ID</b></b-col>
+                <b-col sm="9" style="text-align: left">
+                    <b-link v-for="(g, index) in message.group_ids" :key="index" class="mr-1" :to="{path:'/messages', query: {group_id: g}}">{{ g }}</b-link>
+                </b-col>
+            </b-row>
             <b-row style="max-width: 100rem;" class="adanos-meta-line">
                 <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">标签</b></b-col>
                 <b-col sm="9" style="text-align: left"><b-badge v-for="(tag, index) in message.tags" :key="index" class="mr-1">{{ tag }}</b-badge></b-col>

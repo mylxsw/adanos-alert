@@ -6,7 +6,7 @@
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <b-navbar-nav>
                     <b-nav-item to="/" exact>分组</b-nav-item>
-                    <b-nav-item :to="{path:'/messages', query: {status: 'pending,canceled'}}" exact>待处理 <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
+                    <b-nav-item :to="{path:'/messages', query: {status: null}}" exact>消息 <b-badge variant="danger" v-if="pending_message_count > 0">{{ pending_message_count }}</b-badge></b-nav-item>
                     <b-nav-item to="/rules" exact>规则</b-nav-item>
                     <b-nav-item to="/users">用户</b-nav-item>
                     <b-nav-item to="/dingding-robots">钉钉</b-nav-item>
