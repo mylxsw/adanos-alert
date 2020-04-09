@@ -17,11 +17,12 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/json-iterator/go v1.1.9 // indirect
-	github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999
+	github.com/mylxsw/asteria v0.0.0-20200409141532-2c5f290462b5
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20191208075953-c8ee6e3238cc
-	github.com/mylxsw/glacier v0.0.0-20200407134549-63b3263b907e
+	github.com/mylxsw/glacier v0.0.0-20200409141722-6bece225d812
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
+	github.com/mylxsw/graceful v0.0.0-20191128055330-290857a79dcc
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/stretchr/testify v1.5.1

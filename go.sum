@@ -106,6 +106,8 @@ github.com/mylxsw/asteria v0.0.0-20190730075526-1867e6bc4dbe h1:JNV6IpUt1FnPkGFP
 github.com/mylxsw/asteria v0.0.0-20190730075526-1867e6bc4dbe/go.mod h1:yKtYUYKkYe2xOB6qqHW+NnoHd6zBFRk72NS/8V/dgwk=
 github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999 h1:ADyZTez4D46rym0RyKWlIugoWcAK/5mOvCsbs0/eJuA=
 github.com/mylxsw/asteria v0.0.0-20190818103215-f64f703d8999/go.mod h1:v0FN8lOptbljEJBRtBrvompc+NyUpIR7Dcpg2f9823s=
+github.com/mylxsw/asteria v0.0.0-20200409141532-2c5f290462b5 h1:Vv4Km6skDC4Citl412HNAtRV2S5dfV8DmxYvcO85AZ0=
+github.com/mylxsw/asteria v0.0.0-20200409141532-2c5f290462b5/go.mod h1:v0FN8lOptbljEJBRtBrvompc+NyUpIR7Dcpg2f9823s=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8 h1:TtxSw54bx34zGgs7Y/VisH/sD5HOlopHbSavxTOzgko=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8/go.mod h1:Ugpjgv7bOSn1NXiPNHl92DdCGP2siWk50irFSyI+Hf8=
 github.com/mylxsw/container v0.0.0-20190810122756-1fd99a90f7c6 h1:wA8rXGj4ajvUHOPY3LHp1MQlB1v46J24PyaPG7MmxE8=
@@ -128,6 +130,8 @@ github.com/mylxsw/glacier v0.0.0-20191208081205-bc6dd7191bb4 h1:7HCqyAlFHupcMpH1
 github.com/mylxsw/glacier v0.0.0-20191208081205-bc6dd7191bb4/go.mod h1:jMYHyfrPOV+K+BmoY1NWd11Fc2vYhgCneytoAXaZ/3Y=
 github.com/mylxsw/glacier v0.0.0-20200407134549-63b3263b907e h1:bs4Ck3KK8NfSn688TeR61Ln1rhqUS1C7KzPUEfL1zDM=
 github.com/mylxsw/glacier v0.0.0-20200407134549-63b3263b907e/go.mod h1:jMYHyfrPOV+K+BmoY1NWd11Fc2vYhgCneytoAXaZ/3Y=
+github.com/mylxsw/glacier v0.0.0-20200409141722-6bece225d812 h1:LKSp8AQwZSVCTN3zDm+XplNpQT/hHj3xcDh/eEK8KgM=
+github.com/mylxsw/glacier v0.0.0-20200409141722-6bece225d812/go.mod h1:8Mi5lvJTqWkWwmPpBr9TK32xOUBPd2GXJ6N9+YgqXSE=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9 h1:RgHkiDyU7XDmZqk0Cpqnfn2NmYpginMI69RX0BOzKis=
 github.com/mylxsw/go-toolkit v0.0.0-20190810132703-486dd5ff72a9/go.mod h1:s2TWTsAxqwsOr1+r19Fv7bVyLlsTZokRhNFOegKpLrE=
 github.com/mylxsw/go-toolkit v0.0.0-20191028015837-dd709ecbee89 h1:QCEZbLeX3le3MAD7rZOeZjrp5NBIYLukyq8sYGja7NM=

@@ -3,6 +3,7 @@ package job
 import (
 	"fmt"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
@@ -86,6 +87,8 @@ func (d *DistributeLockManager) lock() error {
 	d.lockID = lock.LockID
 	d.locked = true
 
+	log.Debugf("got distribute lock, owner=%s", d.owner)
+
 	return nil
 }
 
@@ -93,13 +96,18 @@ func (d *DistributeLockManager) TryUnLock() error {
 	d.syncLock.Lock()
 	defer d.syncLock.Unlock()
 
-	if d.locked {
-		if err := d.lockRepo.UnLock(d.lockID); err != nil {
-			d.locked = false
-			d.lockID = primitive.NilObjectID
-			return err
-		}
+	if !d.locked {
+		return nil
 	}
+
+	if err := d.lockRepo.UnLock(d.lockID); err != nil {
+		return err
+	}
+
+	d.locked = false
+	d.lockID = primitive.NilObjectID
+
+	log.Debugf("distribute lock has been released")
 
 	return nil
 }

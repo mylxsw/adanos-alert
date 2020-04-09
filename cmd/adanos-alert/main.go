@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/mylxsw/graceful"
 	"os"
 	"runtime/debug"
 	"time"
@@ -159,7 +160,7 @@ func main() {
 		return nil
 	})
 
-	gl.Main(func(conf *configs.Config, router *mux.Router) {
+	gl.Main(func(conf *configs.Config, router *mux.Router, gf *graceful.Graceful) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
