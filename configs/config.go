@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	PreviewURL string `json:"preview_url"`
+	Listen     string `json:"listen"`
 
 	MongoURI          string `json:"mongo_uri"`
 	MongoDB           string `json:"mongo_db"`

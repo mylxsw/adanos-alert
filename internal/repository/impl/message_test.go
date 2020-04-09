@@ -13,18 +13,21 @@ import (
 
 type MessageTestSuit struct {
 	suite.Suite
-	repo repository.MessageRepo
+	repo    repository.MessageRepo
+	seqRepo repository.SequenceRepo
 }
 
 func (s *MessageTestSuit) SetupTest() {
 	db, err := Database()
 	s.NoError(err)
 
-	s.repo = impl.NewMessageRepo(db)
+	s.seqRepo = impl.NewSequenceRepo(db)
+	s.repo = impl.NewMessageRepo(db, s.seqRepo)
 }
 
 func (s *MessageTestSuit) TearDownTest() {
 	s.NoError(s.repo.Delete(bson.M{}))
+	s.NoError(s.seqRepo.Truncate("message_seq"))
 }
 
 func (s *MessageTestSuit) TestMessageCURD() {

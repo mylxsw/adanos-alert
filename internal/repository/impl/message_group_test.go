@@ -13,18 +13,21 @@ import (
 
 type MessageGroupRepoTestSuit struct {
 	suite.Suite
-	repo repository.MessageGroupRepo
+	repo    repository.MessageGroupRepo
+	seqRepo repository.SequenceRepo
 }
 
 func (m *MessageGroupRepoTestSuit) TearDownTest() {
 	m.NoError(m.repo.Delete(bson.M{}))
+	m.NoError(m.seqRepo.Truncate("group_seq"))
 }
 
 func (m *MessageGroupRepoTestSuit) SetupTest() {
 	db, err := Database()
 	m.NoError(err)
 
-	m.repo = impl.NewMessageGroupRepo(db)
+	m.seqRepo = impl.NewSequenceRepo(db)
+	m.repo = impl.NewMessageGroupRepo(db, m.seqRepo)
 }
 
 func (m *MessageGroupRepoTestSuit) TestMessageGroup() {

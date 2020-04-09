@@ -121,6 +121,7 @@ func main() {
 		}
 
 		return &configs.Config{
+			Listen:                c.String("listen"),
 			MongoURI:              c.String("mongo_uri"),
 			MongoDB:               c.String("mongo_db"),
 			UseLocalDashboard:     c.Bool("use_local_dashboard"),

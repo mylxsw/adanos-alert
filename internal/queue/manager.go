@@ -107,13 +107,13 @@ func (manager *queueManager) Enqueue(item repository.QueueJob) (string, error) {
 func (manager *queueManager) StartWorker(ctx context.Context, workID string) {
 
 	manager.lock.Lock()
-	manager.info.WorkerNum += 1
+	manager.info.WorkerNum++
 	manager.lock.Unlock()
 
 	log.Debugf("queue worker [%s] started", workID)
 	defer func() {
 		manager.lock.Lock()
-		manager.info.WorkerNum -= 1
+		manager.info.WorkerNum--
 		manager.lock.Unlock()
 
 		log.Debugf("queue worker [%s] stopped", workID)
@@ -151,7 +151,7 @@ func (manager *queueManager) run(ctx context.Context) {
 
 	for err == nil {
 		manager.lock.Lock()
-		manager.info.ProcessedCount += 1
+		manager.info.ProcessedCount++
 		manager.lock.Unlock()
 
 		manager.handle(ctx, item)
