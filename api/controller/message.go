@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jeremywohl/flatten"
@@ -49,8 +50,14 @@ func messagesFilter(ctx web.Context) bson.M {
 
 	meta := ctx.Input("meta")
 	if meta != "" {
-		filter["meta.value"] = meta
+		kv := strings.SplitN(meta, ":", 2)
+		if len(kv) == 1 {
+			filter["meta."+kv[0]] = bson.M{"$exists": true}
+		} else {
+			filter["meta."+kv[0]] = strings.TrimSpace(kv[1])
+		}
 	}
+
 	tags := template.StringTags(ctx.Input("tags"), ",")
 	if len(tags) > 0 {
 		filter["tags"] = bson.M{"$in": tags}

@@ -17,7 +17,8 @@ type MessageRepo struct {
 }
 
 func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageRepo {
-	return &MessageRepo{col: db.Collection("message"), seqRepo: seqRepo}
+	col := db.Collection("message")
+	return &MessageRepo{col: col, seqRepo: seqRepo}
 }
 
 func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {

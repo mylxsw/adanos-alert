@@ -10,7 +10,7 @@
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
                 <template v-slot:cell(metas)="row">
-                    <b-list-group>
+                    <b-list-group style="font-size: 90%">
                         <b-list-group-item v-for="(m, index) in row.item.metas" :key="index">
                             {{ m.key }} <b class="text-success">: </b> {{ m.value }}
                         </b-list-group-item>

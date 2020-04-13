@@ -33,9 +33,27 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeMatchRule,
 	},
 	{
+		Name:        "判断 message 内容是否匹配正则表达式",
+		Description: `message 以 "Error:" 开头`,
+		Content:     `Content matches "^Error:"`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
+		Name:        "判断 message 内容是否不包含字符串",
+		Description: `判断 message 中不包含 "关键词" 字符串`,
+		Content:     `not (Content contains "关键词")`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
 		Name:        "单位时间内触发次数判断",
 		Description: "30分钟内触发失败次数小于5次",
 		Content:     `TriggeredTimesInPeriod(30, "failed") < 5`,
+		Type:        repository.TemplateTypeTriggerRule,
+	},
+	{
+		Name:        "判断当前时间是否在 某个时间段",
+		Description: "每天晚上 10:00 到 次日早上 9:00",
+		Content:     `DailyTimeBetween("22:00", "9:00")`,
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{

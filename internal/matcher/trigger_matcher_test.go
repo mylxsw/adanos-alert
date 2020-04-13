@@ -59,7 +59,7 @@ func TestTriggerMatcher(t *testing.T) {
 	}
 
 	for _, ts := range testcases {
-		mt, err := matcher.NewTriggerMatcher(repository.Trigger{PreCondition: ts.Cond,})
+		mt, err := matcher.NewTriggerMatcher(repository.Trigger{PreCondition: ts.Cond})
 		assert.NoError(t, err)
 
 		matched, err := mt.Match(triggerCtx)
