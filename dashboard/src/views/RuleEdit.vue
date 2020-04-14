@@ -60,7 +60,7 @@
                         <b-form-textarea id="template" rows="5" v-model="form.template" class="adanos-code-textarea  text-monospace"
                                          placeholder="输入模板"/>
                         <small class="form-text text-muted">
-                            语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
+                            语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                         </small>
                         <TemplateHelp v-if="template_help"/>
                     </b-card>
@@ -115,7 +115,7 @@
                                     <b-form-textarea :id="'trigger_meta_template_' + i" rows="5" class="adanos-code-textarea  text-monospace"
                                                      v-model="trigger.meta_arr.template" placeholder="默认使用分组展示模板"/>
                                     <small class="form-text text-muted">
-                                        语法参考 <a href="https://golang.org/pkg/html/template/" target="_blank">https://golang.org/pkg/html/template/</a>
+                                        语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                                     </small>
                                     <TemplateHelp v-if="trigger.template_help"/>
                                 </b-form-group>

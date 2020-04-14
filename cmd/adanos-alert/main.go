@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/mylxsw/graceful"
 	"os"
 	"runtime/debug"
 	"time"
+
+	"github.com/mylxsw/graceful"
 
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
@@ -118,7 +119,7 @@ func main() {
 		actionTriggerPeriod, err := time.ParseDuration(c.String("action_trigger_period"))
 		if err != nil {
 			log.Warningf("invalid argument [action_trigger_period: %s], using default value", c.String("action_trigger_period"))
-			actionTriggerPeriod = 15 * time.Second
+			actionTriggerPeriod = 10 * time.Second
 		}
 
 		return &configs.Config{

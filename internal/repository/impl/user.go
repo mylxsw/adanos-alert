@@ -104,8 +104,17 @@ func (u UserRepo) Delete(filter bson.M) error {
 }
 
 func (u UserRepo) Update(id primitive.ObjectID, user repository.User) error {
+	old, err := u.Get(id)
+	if err != nil {
+		return err
+	}
+	user.CreatedAt = old.CreatedAt
 	user.UpdatedAt = time.Now()
-	_, err := u.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, user)
+	if user.Password == "" {
+		user.Password = old.Password
+	}
+
+	_, err = u.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, user)
 	return err
 }
 

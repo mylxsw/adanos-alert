@@ -40,9 +40,13 @@ type UserForm struct {
 	userRepo repository.UserRepo
 	update   bool
 
-	Name   string                `json:"name"`
-	Email  string                `json:"email"`
-	Phone  string                `json:"phone"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+
+	Password string `json:"password"`
+	Role     string `json:"role"`
+
 	Metas  []repository.UserMeta `json:"metas"`
 	Status string                `json:"status"`
 }
@@ -141,11 +145,13 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*rep
 	ctx.Validate(userForm, true)
 
 	id, err := userRepo.Add(repository.User{
-		Name:   userForm.Name,
-		Email:  userForm.Email,
-		Phone:  userForm.Phone,
-		Metas:  userForm.GetMetas(),
-		Status: repository.UserStatus(userForm.Status),
+		Name:     userForm.Name,
+		Email:    userForm.Email,
+		Phone:    userForm.Phone,
+		Password: userForm.Password,
+		Role:     userForm.Role,
+		Metas:    userForm.GetMetas(),
+		Status:   repository.UserStatus(userForm.Status),
 	})
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
@@ -185,8 +191,13 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*
 	user.Name = userForm.Name
 	user.Email = userForm.Email
 	user.Phone = userForm.Phone
+	user.Role = userForm.Role
 	user.Metas = userForm.GetMetas()
 	user.Status = repository.UserStatus(userForm.Status)
+
+	if user.Password != "" {
+		user.Password = userForm.Password
+	}
 
 	if err := userRepo.Update(userID, user); err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
@@ -218,6 +229,8 @@ func (u UserController) User(ctx web.Context, userRepo repository.UserRepo) (*re
 
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
+
+	user.Password = "********"
 
 	return &user, nil
 }
@@ -255,6 +268,10 @@ func (u UserController) Users(ctx web.Context, userRepo repository.UserRepo) web
 	users, next, err := userRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return ctx.JSONError(fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+	}
+
+	for k := range users {
+		users[k].Password = "********"
 	}
 
 	return ctx.JSON(web.M{
