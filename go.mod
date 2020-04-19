@@ -4,17 +4,16 @@ go 1.12
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/antlr/antlr4 v0.0.0-20190518164840-edae2a1c9b4b // indirect
 	github.com/antonmedv/expr v1.8.2
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v0.0.0-20200322175846-f7e751efca13
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/golang/protobuf v1.4.0
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/mylxsw/asteria v0.0.0-20200409141532-2c5f290462b5
@@ -39,5 +38,7 @@ require (
 	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/tools v0.0.0-20191007185444-6536af71d98a // indirect
+	google.golang.org/grpc v1.28.1
+	google.golang.org/protobuf v1.21.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

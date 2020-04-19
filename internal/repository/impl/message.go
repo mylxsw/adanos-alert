@@ -21,7 +21,7 @@ func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) reposit
 	return &MessageRepo{col: col, seqRepo: seqRepo}
 }
 
-func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
+func (m MessageRepo) AddWithContext(ctx context.Context, msg repository.Message) (id primitive.ObjectID, err error) {
 	msg.CreatedAt = time.Now()
 	if msg.Status == "" {
 		msg.Status = repository.MessageStatusPending
@@ -32,12 +32,16 @@ func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err err
 		msg.SeqNum = seq.Value
 	}
 
-	rs, err := m.col.InsertOne(context.TODO(), msg)
+	rs, err := m.col.InsertOne(ctx, msg)
 	if err != nil {
 		return id, err
 	}
 
 	return rs.InsertedID.(primitive.ObjectID), err
+}
+
+func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
+	return m.AddWithContext(context.TODO(), msg)
 }
 
 func (m MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err error) {

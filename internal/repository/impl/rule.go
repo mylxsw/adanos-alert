@@ -42,6 +42,29 @@ func (r RuleRepo) Get(id primitive.ObjectID) (rule repository.Rule, err error) {
 	return
 }
 
+func (r RuleRepo) Paginate(filter interface{}, offset, limit int64) (rules []repository.Rule, next int64, err error) {
+	rules = make([]repository.Rule, 0)
+	cur, err := r.col.Find(context.TODO(), filter, options.Find().SetLimit(limit).SetSort(bson.M{"created_at": -1}).SetSkip(offset))
+	if err != nil {
+		return
+	}
+
+	for cur.Next(context.TODO()) {
+		var rule repository.Rule
+		if err = cur.Decode(&rule); err != nil {
+			return
+		}
+
+		rules = append(rules, rule)
+	}
+
+	if int64(len(rules)) == limit {
+		next = offset + limit
+	}
+
+	return rules, next, err
+}
+
 func (r RuleRepo) Find(filter bson.M) (rules []repository.Rule, err error) {
 	rules = make([]repository.Rule, 0)
 	cur, err := r.col.Find(context.TODO(), filter, options.Find().SetSort(bson.D{{Key: "priority", Value: -1}}))

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package protocol;
+
+option go_package = "rpc/protocol";
+option java_package = "cc.aicode.adanos.protocol";
+
+service Message {
+    rpc Push (MessageRequest) returns (IDResponse) {}
+}
+
+message IDResponse {
+    string id = 1;
+}
+
+message MessageRequest {
+    string content = 1;
+    repeated string tags = 2;
+    string origin = 3;
+    map<string, string> meta = 4;
+}

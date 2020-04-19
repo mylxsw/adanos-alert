@@ -460,7 +460,8 @@
                     meta_arr: {template: '', robot_id: null},
                     id: '',
                     user_refs: [],
-                    help: false
+                    help: false,
+                    template_help: false,
                 });
             },
             /**

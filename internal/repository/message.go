@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,6 +29,7 @@ type Message struct {
 }
 
 type MessageRepo interface {
+	AddWithContext(ctx context.Context, msg Message) (id primitive.ObjectID, err error)
 	Add(msg Message) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (msg Message, err error)
 	Find(filter interface{}) (messages []Message, err error)

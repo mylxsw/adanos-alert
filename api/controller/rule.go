@@ -256,12 +256,20 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 type RulesResp struct {
 	Rules []repository.Rule `json:"rules"`
 	Users map[string]string `json:"users"`
+
+	Next   int64      `json:"next"`
+	Search RuleSearch `json:"search"`
+}
+
+type RuleSearch struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	UserID string `json:"user_id"`
 }
 
 // Rules return all rules
 func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, userRepo repository.UserRepo) (*RulesResp, error) {
 	filter := bson.M{}
-
 	name := ctx.Input("name")
 	if name != "" {
 		filter["name"] = name
@@ -282,7 +290,8 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 		filter["triggers.user_refs"] = userID
 	}
 
-	rules, err := ruleRepo.Find(filter)
+	offset, limit := offsetAndLimit(ctx)
+	rules, next, err := ruleRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
@@ -303,6 +312,12 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 	return &RulesResp{
 		Rules: rules,
 		Users: userRefs,
+		Next:  next,
+		Search: RuleSearch{
+			Name:   name,
+			Status: status,
+			UserID: userIDStr,
+		},
 	}, nil
 }
 

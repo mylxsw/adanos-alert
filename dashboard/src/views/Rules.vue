@@ -1,9 +1,16 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-btn-group class="mb-3">
-                <b-button to="/rules/add" variant="primary">新增规则</b-button>
-            </b-btn-group>
+            <b-card class="mb-2">
+                <b-card-text style="display: flex; justify-content:space-between">
+                    <b-form inline @submit="searchSubmit">
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="名称" v-model="search.name"></b-input>
+                        <b-form-select v-model="search.status" class="mb-2 mr-sm-2 mb-sm-0" placeholder="状态" :options="status_options"></b-form-select>
+                        <b-button variant="light" type="submit">搜索</b-button>
+                    </b-form>
+                    <b-button to="/rules/add" variant="primary" class="float-right">新增规则</b-button>
+                </b-card-text>
+            </b-card>
             <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(name)="row">
                     {{ row.item.name }}
@@ -42,6 +49,7 @@
                     </b-button-group>
                 </template>
             </b-table>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/rules" :query="this.$route.query"></paginator>
         </b-col>
     </b-row>
 </template>
@@ -53,6 +61,16 @@
         name: 'Rules',
         data() {
             return {
+                search: {
+                    name:  '',
+                    status: '',
+                    user_id: '',
+                },
+                status_options: [
+                    {value: null, text: '所有状态'},
+                    {value: 'enabled', text: '已启用'},
+                    {value: 'disabled', text: '已禁用'},
+                ],
                 rules: [],
                 userRefs: {},
                 isBusy: true,
@@ -63,7 +81,12 @@
                     {key: 'updated_at', label: '状态/最后更新'},
                     {key: 'operations', label: '操作'}
                 ],
+                cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
+                next: -1,
             };
+        },
+        watch: {
+            '$route': 'reload',
         },
         methods: {
             users(user_refs) {
@@ -99,15 +122,27 @@
                     });
                 });
             },
+            searchSubmit(evt) {
+                evt.preventDefault();
+                var query = this.search;
+                query.offset = 0;
+                this.$router.push({path: '/rules', query: query}).catch(err => {err});
+            },
             reload() {
+                var params = this.$route.query;
+                params.offset = this.cur;
+
                 axios.get('/api/rules/', {
-                    params: {
-                        "user_id": this.$route.query.user_id !== undefined ? this.$route.query.user_id : null,
-                    }
+                    params: params
                 }).then(response => {
                     this.rules = response.data.rules;
+                    this.next = response.data.next;
                     this.userRefs = response.data.users;
                     this.isBusy = false;
+
+                    this.search.name = response.data.search.name;
+                    this.search.status = response.data.search.status.length > 0 ? response.data.search.status : null;
+                    this.search.user_id = response.data.search.user_id;
                 }).catch(error => {
                     this.ToastError(error);
                 });

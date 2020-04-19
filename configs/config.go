@@ -2,12 +2,14 @@ package configs
 
 import (
 	"encoding/json"
+	"github.com/mylxsw/container"
 	"time"
 )
 
 type Config struct {
 	PreviewURL string `json:"preview_url"`
 	Listen     string `json:"listen"`
+	GRPCListen string `json:"grpc_listen"`
 
 	MongoURI          string `json:"mongo_uri"`
 	MongoDB           string `json:"mongo_db"`
@@ -18,6 +20,7 @@ type Config struct {
 	ActionTriggerPeriod   time.Duration `json:"action_trigger_period"`
 	QueueJobMaxRetryTimes int           `json:"queue_job_max_retry_times"`
 	QueueWorkerNum        int           `json:"queue_worker_num"`
+	QueryTimeout          time.Duration `json:"query_timeout"`
 
 	Migrate bool `json:"migrate"`
 }
@@ -25,4 +28,9 @@ type Config struct {
 func (conf *Config) Serialize() string {
 	rs, _ := json.Marshal(conf)
 	return string(rs)
+}
+
+// Get return config object from container
+func Get(cc container.Container) *Config {
+	return cc.MustGet(&Config{}).(*Config)
 }

@@ -48,6 +48,7 @@ func (rule Rule) ToGroupRule() MessageGroupRule {
 type RuleRepo interface {
 	Add(rule Rule) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (rule Rule, err error)
+	Paginate(filter interface{}, offset, limit int64) (rules []Rule, next int64, err error)
 	Find(filter bson.M) (rules []Rule, err error)
 	Traverse(filter bson.M, cb func(rule Rule) error) error
 	UpdateID(id primitive.ObjectID, rule Rule) error

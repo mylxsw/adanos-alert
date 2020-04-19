@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/mylxsw/adanos-alert/rpc"
 	"os"
 	"runtime/debug"
 	"time"
@@ -34,11 +35,13 @@ import (
 var Version = "1.0"
 var GitCommit = "5dbef13fb456f51a5d29464d"
 
-// ConnectionTimeout is a timeout setting for mongodb connection
-const ConnectionTimeout = 5 * time.Second
-
 func main() {
 	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "grpc_listen",
+		Usage: "GRPC Server listen address",
+		Value: ":19998",
+	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "preview_url",
 		Usage:  "Alert preview page url",
@@ -89,11 +92,18 @@ func main() {
 		EnvVar: "ADANOS_QUEUE_JOB_MAX_RETRY_TIMES",
 		Value:  3,
 	}))
+
 	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
 		Name:   "queue_worker_num",
 		Usage:  "set queue worker numbers",
 		EnvVar: "ADANOS_QUEUE_WORKER_NUM",
 		Value:  3,
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "query_timeout",
+		Usage:  "query timeout for backend service",
+		EnvVar: "ADANOS_QUERY_TIMEOUT",
+		Value:  "5s",
 	}))
 
 	gl := app.Glacier()
@@ -122,8 +132,15 @@ func main() {
 			actionTriggerPeriod = 10 * time.Second
 		}
 
+		queryTimeout, err := time.ParseDuration(c.String("query_timeout"))
+		if err != nil {
+			log.Warningf("invalid argument [query_timeout: %s], using default value", c.String("query_timeout"))
+			queryTimeout = 5 * time.Second
+		}
+
 		return &configs.Config{
 			Listen:                c.String("listen"),
+			GRPCListen:            c.String("grpc_listen"),
 			MongoURI:              c.String("mongo_uri"),
 			MongoDB:               c.String("mongo_db"),
 			UseLocalDashboard:     c.Bool("use_local_dashboard"),
@@ -132,18 +149,19 @@ func main() {
 			ActionTriggerPeriod:   actionTriggerPeriod,
 			QueueJobMaxRetryTimes: c.Int("queue_job_max_retry_times"),
 			QueueWorkerNum:        c.Int("queue_worker_num"),
+			QueryTimeout:          queryTimeout,
 			Migrate:               c.Bool("enable_migrate"),
 			PreviewURL:            c.String("preview_url"),
 		}
 	})
 
 	gl.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
-		ctx, _ = context.WithTimeout(ctx, ConnectionTimeout)
+		ctx, _ = context.WithTimeout(ctx, conf.QueryTimeout)
 		conn, err := mongo.Connect(ctx, options.Client().
 			ApplyURI(conf.MongoURI).
-			SetServerSelectionTimeout(ConnectionTimeout).
-			SetConnectTimeout(ConnectionTimeout).
-			SetSocketTimeout(ConnectionTimeout))
+			SetServerSelectionTimeout(conf.QueryTimeout).
+			SetConnectTimeout(conf.QueryTimeout).
+			SetSocketTimeout(conf.QueryTimeout))
 		if err != nil {
 			log.Errorf("connect to mongodb failed: %s", err)
 			return nil
@@ -177,6 +195,7 @@ func main() {
 	gl.Provider(job.ServiceProvider{})
 	gl.Provider(queue.ServiceProvider{})
 	gl.Provider(migrate.ServiceProvider{})
+	gl.Provider(rpc.Provider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)

@@ -28,10 +28,13 @@ build-release:
 static-gen: build-dashboard
 	esc -pkg api -o api/static.go -prefix=dashboard/dist dashboard/dist
 
+proto-build:
+	protoc --go_out=plugins=grpc:. rpc/protocol/*.proto
+
 doc-gen:
 	swag init -g api/provider.go
 
 clean:
 	rm -fr build/debug/adanos-alert build/release/adanos-alert*
 
-.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen
+.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build

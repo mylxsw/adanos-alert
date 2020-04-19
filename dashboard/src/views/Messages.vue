@@ -7,7 +7,7 @@
                         <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="来源" v-model="search.origin"></b-input>
                         <b-form-tags v-model="search.tags" class="mb-2 mr-sm-2 mb-sm-0" placeholder="标签"></b-form-tags>
                         <b-form-select v-model="search.status" class="mb-2 mr-sm-2 mb-sm-0" placeholder="状态" :options="status_options"></b-form-select>
-                        <b-button variant="primary" type="submit">搜索</b-button>
+                        <b-button variant="light" type="submit">搜索</b-button>
                     </b-form>   
                 </b-card-text>
             </b-card>
@@ -15,7 +15,7 @@
             <b-card v-if="messages.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
             </b-card>
-            <paginator :per_page="10" :cur="cur" :next="next" path="/messages" :query="this.$route.query"></paginator>
+            <paginator :per_page="2" :cur="cur" :next="next" path="/messages" :query="this.$route.query"></paginator>
         </b-col>
     </b-row>
 </template>
