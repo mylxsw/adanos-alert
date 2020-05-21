@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/mylxsw/adanos-alert/rpc"
 	"os"
 	"runtime/debug"
 	"time"
 
-	"github.com/mylxsw/graceful"
+	"github.com/mylxsw/adanos-alert/rpc"
+	"github.com/mylxsw/asteria/writer"
 
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
@@ -21,7 +21,6 @@ import (
 	"github.com/mylxsw/adanos-alert/migrate"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/glacier/starter/application"
@@ -106,20 +105,23 @@ func main() {
 		Value:  "5s",
 	}))
 
-	gl := app.Glacier()
+	app.WithHttpServer().TCPListenerAddr(":19999")
 
-	gl.WithHttpServer(":19999")
-	gl.UseStackLogger(func(cc container.Container, stackWriter *writer.StackWriter) {
+	app.BeforeServerStart(func(cc container.Container) error {
+		stackWriter := writer.NewStackWriter()
 		stackWriter.PushWithLevels(writer.NewStdoutWriter())
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(cc),
+			NewErrorCollectorWriter(app.Container()),
 			level.Error,
 			level.Emergency,
 			level.Critical,
 		)
+		log.All().LogWriter(stackWriter)
+
+		return nil
 	})
 
-	gl.Singleton(func(c glacier.FlagContext) *configs.Config {
+	app.Singleton(func(c glacier.FlagContext) *configs.Config {
 		aggregationPeriod, err := time.ParseDuration(c.String("aggregation_period"))
 		if err != nil {
 			log.Warningf("invalid argument [aggregation_period: %s], using default value", c.String("aggregation_period"))
@@ -155,7 +157,7 @@ func main() {
 		}
 	})
 
-	gl.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
+	app.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
 		ctx, _ = context.WithTimeout(ctx, conf.QueryTimeout)
 		conn, err := mongo.Connect(ctx, options.Client().
 			ApplyURI(conf.MongoURI).
@@ -170,16 +172,12 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	gl.BeforeInitialize(func(c glacier.FlagContext) error {
-		// disable logs for cron
-		log.Module("glacier.cron").LogLevel(level.Warning)
-		return nil
-	}).WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
+	app.WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
 		log.Errorf("Stack: %s", debug.Stack())
 		return nil
 	})
 
-	gl.Main(func(conf *configs.Config, router *mux.Router, gf *graceful.Graceful) {
+	app.Main(func(conf *configs.Config, router *mux.Router) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
@@ -189,13 +187,13 @@ func main() {
 		}
 	})
 
-	gl.Provider(action.ServiceProvider{})
-	gl.Provider(impl.ServiceProvider{})
-	gl.Provider(api.ServiceProvider{})
-	gl.Provider(job.ServiceProvider{})
-	gl.Provider(queue.ServiceProvider{})
-	gl.Provider(migrate.ServiceProvider{})
-	gl.Provider(rpc.Provider{})
+	app.Provider(action.ServiceProvider{})
+	app.Provider(impl.ServiceProvider{})
+	app.Provider(api.ServiceProvider{})
+	app.Provider(job.ServiceProvider{})
+	app.Provider(queue.ServiceProvider{})
+	app.Provider(migrate.ServiceProvider{})
+	app.Provider(rpc.Provider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)

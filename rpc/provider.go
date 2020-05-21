@@ -42,7 +42,7 @@ func (p Provider) Boot(app glacier.Glacier) {
 }
 
 func (p Provider) Daemon(_ context.Context, app glacier.Glacier) {
-	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf *graceful.Graceful) {
+	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf graceful.Graceful) {
 		listener, err := net.Listen("tcp", conf.GRPCListen)
 		if err != nil {
 			panic(fmt.Sprintf("can not create listener for grpc: %v", err))

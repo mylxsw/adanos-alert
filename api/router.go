@@ -5,6 +5,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/api/controller"
 	"github.com/mylxsw/adanos-alert/configs"
+	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 )
@@ -13,7 +14,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 	conf := cc.MustGet(&configs.Config{}).(*configs.Config)
 	return func(router *web.Router, mw web.RequestMiddleware) {
 		mws := make([]web.HandlerDecorator, 0)
-		mws = append(mws, mw.AccessLog(), mw.CORS("*"))
+		mws = append(mws, mw.AccessLog(log.Module("api")), mw.CORS("*"))
 		if conf.APIToken != "" {
 			authMiddleware := mw.AuthHandler(func(ctx web.Context, typ string, credential string) error {
 				if typ != "Bearer" {
