@@ -42,6 +42,11 @@ func main() {
 		Value: ":19998",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "grpc_token",
+		Usage: "GRPC Server token",
+		Value: "000000",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "preview_url",
 		Usage:  "Alert preview page url",
 		EnvVar: "ADANOS_PREVIEW_URL",
@@ -143,6 +148,7 @@ func main() {
 		return &configs.Config{
 			Listen:                c.String("listen"),
 			GRPCListen:            c.String("grpc_listen"),
+			GRPCToken:             c.String("grpc_token"),
 			MongoURI:              c.String("mongo_uri"),
 			MongoDB:               c.String("mongo_db"),
 			UseLocalDashboard:     c.Bool("use_local_dashboard"),

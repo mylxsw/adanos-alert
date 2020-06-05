@@ -2,18 +2,20 @@ package configs
 
 import (
 	"encoding/json"
-	"github.com/mylxsw/container"
 	"time"
+
+	"github.com/mylxsw/container"
 )
 
 type Config struct {
 	PreviewURL string `json:"preview_url"`
 	Listen     string `json:"listen"`
 	GRPCListen string `json:"grpc_listen"`
+	GRPCToken  string `json:"-"`
 
 	MongoURI          string `json:"mongo_uri"`
 	MongoDB           string `json:"mongo_db"`
-	APIToken          string `json:"api_token"`
+	APIToken          string `json:"-"`
 	UseLocalDashboard bool   `json:"use_local_dashboard"`
 
 	AggregationPeriod     time.Duration `json:"aggregation_period"`

@@ -1,15 +1,12 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 
-	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/misc"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
@@ -164,11 +161,7 @@ func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageR
 	return &message, nil
 }
 
-type RepoMessage interface {
-	ToRepo() repository.Message
-}
-
-func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage RepoMessage, ctx web.Context) web.Response {
+func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage misc.RepoMessage, ctx web.Context) web.Response {
 	id, err := messageRepo.Add(repoMessage.ToRepo())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
@@ -181,24 +174,8 @@ func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repo
 
 // Add common message
 
-type CommonMessage struct {
-	Content string                 `json:"content"`
-	Meta    repository.MessageMeta `json:"meta"`
-	Tags    []string               `json:"tags"`
-	Origin  string                 `json:"origin"`
-}
-
-func (msg CommonMessage) ToRepo() repository.Message {
-	return repository.Message{
-		Content: msg.Content,
-		Meta:    msg.Meta,
-		Tags:    msg.Tags,
-		Origin:  msg.Origin,
-	}
-}
-
 func (m *MessageController) AddCommonMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	var commonMessage CommonMessage
+	var commonMessage misc.CommonMessage
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
@@ -208,174 +185,45 @@ func (m *MessageController) AddCommonMessage(ctx web.Context, messageRepo reposi
 
 // AddLogstashMessage Add logstash message
 func (m *MessageController) AddLogstashMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	flattenJSON, err := flatten.FlattenString(string(ctx.Request().Body()), "", flatten.DotStyle)
+	commonMessage, err := misc.LogstashToCommonMessage(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
 	if err != nil {
-		return ctx.JSONError(fmt.Sprintf("invalid json: %s", err), http.StatusUnprocessableEntity)
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	var meta repository.MessageMeta
-	if err := json.Unmarshal([]byte(flattenJSON), &meta); err != nil {
-		return ctx.JSONError(fmt.Sprintf("parse json failed: %s", err), http.StatusInternalServerError)
-	}
-
-	contentField := ctx.InputWithDefault("content-field", "message")
-
-	msg, ok := meta[contentField]
-	if ok {
-		delete(meta, contentField)
-	} else {
-		msg = "None"
-	}
-
-	return m.saveMessage(messageRepo, CommonMessage{
-		Content: fmt.Sprintf("%v", msg),
-		Meta:    meta,
-		Tags:    nil,
-		Origin:  "logstash",
-	}, ctx)
+	return m.saveMessage(messageRepo, commonMessage, ctx)
 }
 
 // Add grafana message
-
-type GrafanaMessage struct {
-	EvalMatches []GrafanaEvalMatch `json:"evalMatches"`
-	ImageURL    string             `json:"imageUrl"`
-	Message     string             `json:"message"`
-	RuleID      int64              `json:"ruleId"`
-	RuleName    string             `json:"ruleName"`
-	RuleURL     string             `json:"ruleUrl"`
-	State       string             `json:"state"`
-	Title       string             `json:"title"`
-}
-
-func (g GrafanaMessage) ToRepo() repository.Message {
-	message, _ := json.Marshal(g)
-
-	return repository.Message{
-		Content: string(message),
-		Meta: repository.MessageMeta{
-			"rule_id":   strconv.Itoa(int(g.RuleID)),
-			"rule_name": g.RuleName,
-			"state":     g.State,
-			"title":     g.Title,
-		},
-		Tags:   nil,
-		Origin: "grafana",
-	}
-}
-
-type GrafanaEvalMatch struct {
-	Value  float64 `json:"value"`
-	Metric string  `json:"metric"`
-	Tags   map[string]string
-}
-
 func (m *MessageController) AddGrafanaMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	var grafanaMessage GrafanaMessage
-	if err := ctx.Unmarshal(&grafanaMessage); err != nil {
-		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
+	commonMessage, err := misc.GrafanaToCommonMessage(ctx.Request().Body())
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	repoMessage := grafanaMessage.ToRepo()
-	return m.saveMessage(messageRepo, CommonMessage{
-		Content: repoMessage.Content,
-		Meta:    repoMessage.Meta,
-		Tags:    repoMessage.Tags,
-		Origin:  repoMessage.Origin,
-	}, ctx)
+	return m.saveMessage(messageRepo, commonMessage, ctx)
 }
 
 // add prometheus alert message
-
-type PrometheusMessage struct {
-	Status       string                 `json:"status"`
-	Labels       repository.MessageMeta `json:"labels"`
-	Annotations  repository.MessageMeta `json:"annotations"`
-	StartsAt     time.Time              `json:"startsAt"`
-	EndsAt       time.Time              `json:"endsAt"`
-	GeneratorURL string                 `json:"generatorURL"`
-}
-
-func (pm PrometheusMessage) ToRepo() repository.Message {
-	data, _ := json.Marshal(pm)
-	return repository.Message{
-		Content: string(data),
-		Meta:    pm.Labels,
-		Tags:    nil,
-		Origin:  "prometheus",
-	}
-}
-
 func (m *MessageController) AddPrometheusMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	var prometheusMessage PrometheusMessage
-	if err := ctx.Unmarshal(&prometheusMessage); err != nil {
-		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
+	commonMessage, err := misc.PrometheusToCommonMessage(ctx.Request().Body())
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	repoMessage := prometheusMessage.ToRepo()
-	return m.saveMessage(messageRepo, CommonMessage{
-		Content: repoMessage.Content,
-		Meta:    repoMessage.Meta,
-		Tags:    repoMessage.Tags,
-		Origin:  repoMessage.Origin,
-	}, ctx)
+	return m.saveMessage(messageRepo, commonMessage, ctx)
 }
 
 // add prometheus-alert message
-
-type PrometheusAlertMessage struct {
-	Version  string `json:"version"`
-	GroupKey string `json:"groupKey"`
-
-	Receiver string              `json:"receiver"`
-	Status   string              `json:"status"`
-	Alerts   []PrometheusMessage `json:"alerts"`
-
-	GroupLabels       repository.MessageMeta `json:"groupLabels"`
-	CommonLabels      repository.MessageMeta `json:"commonLabels"`
-	CommonAnnotations repository.MessageMeta `json:"commonAnnotations"`
-
-	ExternalURL string `json:"externalURL"`
-}
-
-func (pam PrometheusAlertMessage) ToRepo() repository.Message {
-	meta := make(repository.MessageMeta)
-	for k, v := range pam.GroupLabels {
-		meta[k] = v
-	}
-
-	for k, v := range pam.CommonLabels {
-		meta[k] = v
-	}
-
-	meta["status"] = pam.Status
-
-	data, _ := json.Marshal(pam)
-	return repository.Message{
-		Content: string(data),
-		Meta:    meta,
-		Tags:    nil,
-		Origin:  "prometheus-alert",
-	}
-}
-
 func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	var prometheusMessage PrometheusAlertMessage
-	if err := ctx.Unmarshal(&prometheusMessage); err != nil {
-		return ctx.JSONError("invalid request", http.StatusUnprocessableEntity)
+	commonMessage, err := misc.PrometheusAlertToCommonMessage(ctx.Request().Body())
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	repoMessage := prometheusMessage.ToRepo()
-	return m.saveMessage(messageRepo, CommonMessage{
-		Content: repoMessage.Content,
-		Meta:    repoMessage.Meta,
-		Tags:    repoMessage.Tags,
-		Origin:  repoMessage.Origin,
-	}, ctx)
+	return m.saveMessage(messageRepo, commonMessage, ctx)
 }
 
 // add open-falcon message
-
 func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
 	tos := ctx.Input("tos")
 	content := ctx.Input("content")
@@ -384,19 +232,5 @@ func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageRepo re
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	meta := make(repository.MessageMeta)
-	im := template.ParseOpenFalconImMessage(content)
-	meta["status"] = im.Status
-	meta["priority"] = strconv.Itoa(im.Priority)
-	meta["endpoint"] = im.Endpoint
-	meta["current_step"] = strconv.Itoa(im.CurrentStep)
-	meta["body"] = im.Body
-	meta["format_time"] = im.FormatTime
-
-	return m.saveMessage(messageRepo, CommonMessage{
-		Content: content,
-		Meta:    meta,
-		Tags:    []string{tos},
-		Origin:  "open-falcon",
-	}, ctx)
+	return m.saveMessage(messageRepo, misc.OpenFalconToCommonMessage(tos, content), ctx)
 }

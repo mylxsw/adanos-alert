@@ -9,11 +9,17 @@ run: build
 run-only:
 	./build/debug/adanos-alert --enable_migrate --listen :19998
 
+run-agent: build-agent
+	./build/debug/adanos-agent
+
 run-dashboard:
 	cd dashboard && npm run serve
 
 build-dashboard:
 	cd dashboard && yarn build
+
+build-agent:
+	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-agent cmd/agent/main.go
 
 build:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-alert cmd/adanos-alert/main.go

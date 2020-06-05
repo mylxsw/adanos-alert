@@ -14,8 +14,5 @@ message IDResponse {
 }
 
 message MessageRequest {
-    string content = 1;
-    repeated string tags = 2;
-    string origin = 3;
-    map<string, string> meta = 4;
+    string data = 1;
 }

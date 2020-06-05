@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package protocol;
+
+option go_package = "rpc/protocol";
+option java_package = "cc.aicode.adanos.protocol";
+
+service Heartbeat {
+    rpc Ping (PingRequest) returns (PongResponse) {
+    }
+}
+
+message PingRequest {
+    int64 agentTs = 1;
+    string agent = 2;
+    string clientVersion = 3;
+}
+
+message PongResponse {
+    int64 serverTs = 1;
+    string serverVersion = 2;
+}
+
+

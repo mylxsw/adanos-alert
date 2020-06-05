@@ -3,6 +3,8 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -13,7 +15,6 @@ import (
 	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/graceful"
 	"google.golang.org/grpc"
-	"net"
 )
 
 type Provider struct{}
@@ -38,6 +39,7 @@ func (p Provider) Register(app container.Container) {
 func (p Provider) Boot(app glacier.Glacier) {
 	app.MustResolve(func(serv *grpc.Server) {
 		protocol.RegisterMessageServer(serv, NewMessageService(app.Container()))
+		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app.Container()))
 	})
 }
 

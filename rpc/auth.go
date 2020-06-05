@@ -23,7 +23,7 @@ func authFunc(cc container.Container, conf *configs.Config) func(ctx context.Con
 		}
 
 
-		if "000000" != token[0] {
+		if conf.GRPCToken != token[0] {
 			return ctx, status.Errorf(codes.Unauthenticated, "auth failed: token not match")
 		}
 

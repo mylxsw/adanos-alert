@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
+
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
-	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
 )
 
@@ -25,15 +27,12 @@ func NewMessageService(cc container.Container) *MessageService {
 
 // Push add a new message
 func (ms *MessageService) Push(ctx context.Context, request *protocol.MessageRequest) (*protocol.IDResponse, error) {
-	var meta repository.MessageMeta
-	_ = coll.Map(request.Meta, &meta, func(val string) interface{} { return val })
+	var commonMessage misc.CommonMessage
+	if err := json.Unmarshal([]byte(request.Data), &commonMessage); err != nil {
+		return nil, err
+	}
 
-	id, err := ms.msgRepo.AddWithContext(ctx, repository.Message{
-		Content: request.Content,
-		Meta:    meta,
-		Tags:    request.Tags,
-		Origin:  request.Origin,
-	})
+	id, err := ms.msgRepo.AddWithContext(ctx, commonMessage.ToRepo())
 	if err != nil {
 		return nil, err
 	}

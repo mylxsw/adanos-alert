@@ -15,13 +15,13 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
-	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/mylxsw/asteria v0.0.0-20200520022208-48f9ce0b961f
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
-	github.com/mylxsw/container v0.0.0-20200521105006-1091c6685128
-	github.com/mylxsw/glacier v0.0.0-20200521105532-31cd1b4fe9d5
+	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
+	github.com/mylxsw/glacier v0.0.0-20200605063614-87616319a1dc
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
-	github.com/mylxsw/graceful v0.0.0-20200521071307-30ef03ecf5a8
+	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/stretchr/testify v1.5.1
