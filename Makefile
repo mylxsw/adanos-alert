@@ -25,6 +25,9 @@ build:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-alert cmd/adanos-alert/main.go
 	cp api/view/*.html build/debug/
 
+build-proxy:
+	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-proxy cmd/proxy/main.go
+
 build-deploy-release: static-gen
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o .ansible/roles/server/files/adanos-alert-server cmd/adanos-alert/main.go
 
