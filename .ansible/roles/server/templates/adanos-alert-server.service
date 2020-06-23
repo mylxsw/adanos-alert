@@ -1,0 +1,12 @@
+[Unit]
+Description=adanos alert server
+
+[Service]
+Type=simple
+ExecStart=/usr/local/adanos-alert/bin/adanos-alert-server --conf /usr/local/adanos-alert/etc/server.yaml
+ExecStop=/bin/kill -INT $MAINPID
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

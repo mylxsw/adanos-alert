@@ -37,6 +37,11 @@ var GitCommit = "5dbef13fb456f51a5d29464d"
 func main() {
 	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "listen",
+		Usage: "http listen addr",
+		Value: "19999",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "grpc_listen",
 		Usage: "GRPC Server listen address",
 		Value: ":19998",

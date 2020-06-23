@@ -25,6 +25,12 @@ build:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-alert cmd/adanos-alert/main.go
 	cp api/view/*.html build/debug/
 
+build-deploy-release: static-gen
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o .ansible/roles/server/files/adanos-alert-server cmd/adanos-alert/main.go
+
+deploy-server: build-deploy-release
+	cd .ansible && ansible-playbook -i hosts playbook.yml --limit adanos-alert-server-prod
+
 build-release:
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags $(LDFLAGS) -o build/release/adanos-alert-darwin cmd/adanos-alert/main.go
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags $(LDFLAGS) -o build/release/adanos-alert.exe cmd/adanos-alert/main.go
@@ -43,4 +49,4 @@ doc-gen:
 clean:
 	rm -fr build/debug/adanos-alert build/release/adanos-alert*
 
-.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build
+.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build build-release-linux

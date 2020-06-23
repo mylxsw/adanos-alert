@@ -1,0 +1,10 @@
+---
+
+adanos_view_link: "http://localhost:19999/ui/group/%s.html"
+adanos_grpc_listen: ":19998"
+adanos_grpc_token: "000000"
+adanos_mongo_uri: "mongodb://localhost:27017"
+adanos_mongo_db: "adanos-alert"
+adanos_api_token: "6fc3dbce1b88491d1abc1479ce6d0496"
+adanos_enable_migrate: true
+adanos_listen: ":19999"

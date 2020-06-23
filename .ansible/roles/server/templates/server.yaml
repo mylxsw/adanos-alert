@@ -1,0 +1,9 @@
+
+preview_url: "{{ adanos_view_link }}"
+grpc_listen: "{{ adanos_grpc_listen }}"
+grpc_token: "{{ adanos_grpc_token }}"
+mongo_uri: "{{ adanos_mongo_uri }}"
+mongo_db: "{{ adanos_mongo_db }}"
+api_token: "{{ adanos_api_token }}"
+enable_migrate: {{ adanos_enable_migrate }}
+listen: "{{ adanos_listen }}"

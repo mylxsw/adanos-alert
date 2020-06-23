@@ -1,0 +1,6 @@
+[adanos-alert-server-prod:vars]
+adanos_api_token=3ab2041d1b71ae49fbe5e8140038c80b
+adanos_view_link=http://adanos.example.com/ui/group/%s.html
+
+[adanos-alert-server-prod]
+192.168.1.147
