@@ -20,7 +20,7 @@ func NewHeartbeatService(cc container.Container) *HeartbeatService {
 }
 
 func (h *HeartbeatService) Ping(ctx context.Context, request *protocol.PingRequest) (*protocol.PongResponse, error) {
-	log.Debugf("agent heartbeat received, ip=%s, version=%s, ts=%v", request.Agent, request.ClientVersion, request.AgentTs)
+	log.Debugf("agent heartbeat received, id=%s, ip=%s, version=%s, ts=%v", request.AgentID, request.AgentIP, request.ClientVersion, request.AgentTs)
 	return &protocol.PongResponse{
 		ServerTs:      time.Now().Unix(),
 		ServerVersion: h.cc.MustGet(glacier.VersionKey).(string),

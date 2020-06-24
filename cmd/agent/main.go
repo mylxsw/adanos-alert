@@ -101,9 +101,18 @@ func main() {
 		return nil
 	})
 
-	app.Main(func(conf *config.Config, router *mux.Router) {
+	app.Main(func(conf *config.Config, router *mux.Router, db *ledis.DB) {
+
+		agentID, err := db.Get([]byte("agent-id"))
+		if err != nil || agentID == nil {
+			_ = db.Set([]byte("agent-id"), []byte(misc.UUID()))
+
+			agentID, _ = db.Get([]byte("agent-id"))
+		}
+
 		log.WithFields(log.Fields{
-			"config": conf,
+			"config":   conf,
+			"agent_id": string(agentID),
 		}).Debug("configuration")
 
 		for _, r := range web.GetAllRoutes(router) {

@@ -21,7 +21,7 @@ func messageSyncJob(messageStore store.MessageStore, conf *config.Config, msgRPC
 		if err := sendToServer(message, msgRPCServer, conf); err != nil {
 			log.Warningf("消息同步失败，重新加入队列: %s", err)
 			if err := messageStore.Enqueue(message); err != nil {
-				log.Errorf("消息重新写入队列失败: %s, 消息内容：%s", err, message.Data)
+				log.Warningf("消息重新写入队列失败: %s, 消息内容：%s", err, message.Data)
 			}
 
 			// 如果写入出错，则休息1s，防止重试速度过快

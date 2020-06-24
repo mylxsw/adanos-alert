@@ -12,8 +12,9 @@ service Heartbeat {
 
 message PingRequest {
     int64 agentTs = 1;
-    string agent = 2;
-    string clientVersion = 3;
+    string agentIP = 2;
+    string agentID = 3;
+    string clientVersion = 4;
 }
 
 message PongResponse {
