@@ -14,6 +14,11 @@
                                              v-model="form.description"/>
                         </b-form-group>
 
+                        <b-form-group label-cols="2" id="rule_description" label="标签" label-for="tags_input">
+                            <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills separator=" "
+                                         v-model="form.tags"></b-form-tags>
+                        </b-form-group>
+
                         <b-form-group label-cols="2" id="rule_interval" label="报警周期*" label-for="rule_interval_input"
                                       :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
                             <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
@@ -284,6 +289,7 @@
                 form: {
                     name: '',
                     description: '',
+                    tags: [],
                     interval: 1,
                     rule: '',
                     template: '',
@@ -501,6 +507,7 @@
                 requestData.description = this.form.description;
                 requestData.interval = this.form.interval * 60;
                 requestData.rule = this.form.rule;
+                requestData.tags = this.form.tags;
                 requestData.template = this.form.template;
                 requestData.triggers = this.form.triggers.map(function (value) {
                     value.meta = JSON.stringify(value.meta_arr);
@@ -518,6 +525,7 @@
                     this.form.description = response.data.description;
                     this.form.interval = response.data.interval / 60;
                     this.form.rule = response.data.rule;
+                    this.form.tags = response.data.tags;
                     this.form.template = response.data.template;
 
                     for (let i in response.data.triggers) {
@@ -533,7 +541,7 @@
                             console.log(e);
                         }
                         
-                        if (trigger.meta_arr.template == undefined) {
+                        if (trigger.meta_arr.template === undefined) {
                             trigger.meta_arr.template = "";
                         }
 

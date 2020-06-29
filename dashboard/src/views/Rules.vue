@@ -13,8 +13,10 @@
             </b-card>
             <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(name)="row">
-                    {{ row.item.name }}
-                    <p><b>{{ row.item.id }}</b></p>
+                    <span v-b-tooltip.hover :title="row.item.id">{{ row.item.name }}</span>
+                    <p>
+                        <b-badge variant="primary" v-for="(tag, index) in row.item.tags" :key="index" class="mr-1" :to="'/rules?tag=' + tag">{{ tag }}</b-badge>
+                    </p>
                 </template>
                 <template v-slot:cell(rule)="row">
                     <p><small>// 报警周期为 <code><b>{{ row.item.interval }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
@@ -26,7 +28,8 @@
                 <template v-slot:cell(triggers)="row">
                     <b-list-group>
                         <b-list-group-item v-for="(trigger, index) in row.item.triggers" :key="index">
-                            <code>{{ trigger.name == "" || trigger.name == undefined ? (trigger.pre_condition || 'true') : trigger.name }}</code> <b class="text-success"> | </b> {{
+                            <code>{{ trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition ||
+                                'true') : trigger.name }}</code> <b class="text-success"> | </b> {{
                             formatAction(trigger.action) }} <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>

@@ -53,8 +53,9 @@ type RuleTriggerForm struct {
 
 // RuleForm is a form object using create or update rule
 type RuleForm struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
 
 	Interval int64 `json:"interval"`
 
@@ -169,6 +170,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 	ruleID, err := repo.Add(repository.Rule{
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
+		Tags:            ruleForm.Tags,
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
@@ -233,6 +235,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		ID:              original.ID,
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
+		Tags:            ruleForm.Tags,
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
@@ -278,6 +281,11 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 	status := ctx.Input("status")
 	if status != "" {
 		filter["status"] = status
+	}
+
+	tag := ctx.Input("tag")
+	if tag != "" {
+		filter["tags"] = tag
 	}
 
 	userIDStr := ctx.Input("user_id")

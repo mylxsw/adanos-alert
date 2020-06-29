@@ -11,7 +11,7 @@
                     <b-list-group style="font-size: 80%">
                         <b-list-group-item v-for="(act, index) in row.item.actions" :key="index" :variant="act.trigger_status === 'ok' ? 'success': 'danger'">
                             <code>{{ act.pre_condition || '全部' }}</code> <b class="text-dark"> | </b>
-                            {{ act.name != '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
+                            {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>
                 </template>

@@ -19,8 +19,9 @@ type Rule struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
+	Tags        []string           `bson:"tags" json:"tags"`
 
-	Interval  int64 `bson:"interval" json:"interval"`
+	Interval int64 `bson:"interval" json:"interval"`
 
 	Rule            string    `bson:"rule" json:"rule"`
 	Template        string    `bson:"template" json:"template"`
