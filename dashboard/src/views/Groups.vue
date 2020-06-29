@@ -88,7 +88,11 @@
                 return actions[action];
             },
             reload() {
-                axios.get('/api/groups/?offset=' + this.cur).then(response => {
+                let params = this.$route.query;
+                params.offset = this.cur;
+                axios.get('/api/groups/', {
+                    params: params,
+                }).then(response => {
                     this.groups = response.data.groups;
                     this.userRefs = response.data.users;
                     this.next = response.data.next;

@@ -43,6 +43,7 @@ type GroupsGroupResp struct {
 //   - offset/limit
 //   - status
 //   - rule_id
+//   - user_id
 func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 	filter := bson.M{}
@@ -55,6 +56,11 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 	ruleID, err := primitive.ObjectIDFromHex(ctx.Input("rule_id"))
 	if err == nil {
 		filter["rule._id"] = ruleID
+	}
+
+	userID, err := primitive.ObjectIDFromHex(ctx.Input("user_id"))
+	if err == nil {
+		filter["actions.user_refs"] = userID
 	}
 
 	grps, next, err := groupRepo.Paginate(filter, offset, limit)

@@ -29,6 +29,7 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
+                        <b-button size="sm" variant="success" :to="{path:'/', query:{user_id: row.item.id}}">报警</b-button>
                         <b-button size="sm" variant="dark" :to="{path:'/rules', query:{user_id: row.item.id}}">规则</b-button>
                         <b-button size="sm" variant="info" :to="{path:'/users/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button size="sm" variant="danger" @click="delete_user(row.index, row.item.id)">删除</b-button>
