@@ -2,21 +2,14 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/connector"
 	"github.com/mylxsw/asteria/log"
-	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
 
@@ -66,13 +59,13 @@ func main() {
 				adanosServers = append(adanosServers, "http://localhost:19999")
 			}
 
-			return sendMessage(
-				message,
+			return connector.Send(
+				adanosServers,
+				c.String("adanos-token"),
 				createMessageMeta(c.StringSlice("meta")),
 				c.StringSlice("tag"),
 				c.String("origin"),
-				adanosServers,
-				c.String("adanos-token"),
+				message,
 			)
 		},
 	}
@@ -96,61 +89,6 @@ func createMessageMeta(meta []string) repository.MessageMeta {
 		}
 	}
 	return metas
-}
-
-func sendMessage(message string, metas repository.MessageMeta, tags []string, origin string, adanosServers []string, adanosToken string) error {
-	commonMessage := misc.CommonMessage{
-		Content: message,
-		Meta:    metas,
-		Tags:    tags,
-		Origin:  origin,
-	}
-	data, _ := json.Marshal(commonMessage)
-
-	var err error
-	for _, s := range adanosServers {
-		if err = sendMessageToServer(commonMessage, data, s, adanosToken); err == nil {
-			break
-		}
-
-		log.Warningf("send to server %s failed: %v", s, err)
-	}
-
-	return err
-}
-
-func sendMessageToServer(commonMessage misc.CommonMessage, data []byte, adanosServer, adanosToken string) error {
-	reqURL := fmt.Sprintf("%s/api/messages/", strings.TrimRight(adanosServer, "/"))
-
-	log.WithFields(log.Fields{
-		"message": commonMessage,
-	}).Debugf("request: %v", reqURL)
-
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-
-	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx, "POST", reqURL, bytes.NewReader(data))
-	if err != nil {
-		return errors.Wrap(err, "create request failed")
-	}
-
-	if adanosToken != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", adanosToken))
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "request failed")
-	}
-	defer resp.Body.Close()
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return errors.Wrap(err, "read response body failed")
-	}
-
-	log.Debugf("response: %v", string(respBody))
-	return nil
 }
 
 func readStdin(maxLines int) string {
