@@ -10,14 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/pkg/errors"
 )
 
 // Send send a message to adanos servers
-func Send(servers []string, token string, meta repository.MessageMeta, tags []string, origin string, message string) error {
+func Send(servers []string, token string, meta map[string]interface{}, tags []string, origin string, message string) error {
 	commonMessage := misc.CommonMessage{
 		Content: message,
 		Meta:    meta,
