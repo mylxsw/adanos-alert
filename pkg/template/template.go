@@ -38,6 +38,7 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"datetime_noloc": datetimeFormatNoLoc,
 		"json_get":       pkgJSON.Get,
 		"json_gets":      pkgJSON.Gets,
+		"json_array":     pkgJSON.GetArray,
 		"json_flatten":   jsonFlatten,
 		"starts_with":    startsWith,
 		"ends_with":      endsWith,

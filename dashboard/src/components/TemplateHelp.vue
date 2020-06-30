@@ -11,6 +11,7 @@
                 <li><code>datetime_noloc(datetime time.Time) string</code> 时间格式化展示为 2006-01-02 15:04:05 格式，默认时区</li>
                 <li><code>json_get(key string, defaultValue string, body string) string</code> 将 body 解析为 json，然后获取 key 的值，失败返回 defaultValue</li>
                 <li><code>json_gets(key string, defaultValue string, body string) string</code> 将 body 解析为 json，然后获取 key 的值(可以使用逗号分割多个key作为备选)，失败返回 defaultValue</li>
+                <li><code>json_array(key string, body string) []string</code> 将 body 解析为 json，然后获取 key 的值（数组值）</li>
                 <li><code>json_flatten(body string, maxLevel int) []jsonutils.KvPair</code> 将 body 解析为 json，然后转换为键值对返回</li>
                 <li><code>starts_with(haystack string, needles ...string) bool</code> 判断 haystack 是否以 needles 开头</li>
                 <li><code>ends_with(haystack string, needles ...string) bool</code> 判断 haystack 是否以 needles 结尾</li>

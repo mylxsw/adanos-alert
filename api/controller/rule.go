@@ -132,8 +132,12 @@ func (r RuleController) Check(ctx web.Context) web.Response {
 		_, err = template.CreateParser(content)
 	}
 
+	if err != nil {
+		return ctx.JSON(web.M{"error":err.Error()})
+	}
+
 	return ctx.JSON(web.M{
-		"error": err,
+		"error": nil,
 	})
 }
 

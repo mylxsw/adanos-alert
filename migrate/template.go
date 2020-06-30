@@ -82,6 +82,24 @@ var predefinedTemplates = []repository.Template{
 		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
+	{
+		Name:        "MySQL Guard - Deadlock Logs",
+		Description: "MySQL Guard 死锁日志",
+		Content:     `## {{ .Rule.Name }} ({{ .Group.MessageCount }})
+
+序号: {{ .Group.ID.Hex }}
+
+规则: {{ .Group.Rule.ID.Hex }}
+
+{{ range $i, $msg := .Messages 4 }}- {{ index $msg.Meta "db_host" }}:{{ index $msg.Meta "db_port" }}
+{{ range $j, $deadlock := json_array "context.deadlocks" $msg.Content }}
+{{ range $k, $info := json_array "Sections" $deadlock }}
+	{{ format "%v" $info }}
+{{ end }}{{ end }}{{ end }}
+
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Type:        repository.TemplateTypeTemplate,
+	},
 }
 
 func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo) {

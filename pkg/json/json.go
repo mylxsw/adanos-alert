@@ -22,6 +22,17 @@ func Gets(key string, defaultValue string, body string) string {
 	return defaultValue
 }
 
+// GetArray 从json提取array
+func GetArray(key string, body string) []string {
+	keys := strings.Split(key, ".")
+	results := make([]string, 0)
+	_, _ = jsonparser.ArrayEach([]byte(body), func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		results = append(results, string(value))
+	}, keys...)
+
+	return results
+}
+
 // Get 从json中提取单个值
 func Get(key string, defaultValue string, body string) string {
 	keys := strings.Split(key, ".")
