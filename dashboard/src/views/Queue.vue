@@ -79,7 +79,7 @@
                     {key: 'id', label: '时间/ID'},
                     {key: 'name', label: '类型'},
                     {key: 'requeue_times', label: '重试次数'},
-                    {key: 'next_execute_at', label: '最早执行时间'},
+                    {key: 'next_execute_at', label: '期望执行时间'},
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'status', label: '状态'},
                     {key: 'operations', label: '操作'}

@@ -35,6 +35,10 @@ func (r RuleController) Register(router *web.Router) {
 		router.Delete("/{id}/", r.Delete).Name("rules:delete")
 	})
 
+	router.Group("/rules-meta/", func(router *web.Router) {
+		router.Get("/tags/", r.Tags).Name("rules:meta:tags")
+	})
+
 	router.Group("/rules-test/", func(router *web.Router) {
 		router.Post("/rule-message/", r.TestMessageMatch).Name("rules:test:rule-message")
 		router.Post("/rule-check/{type}/", r.Check).Name("rules:test:check")
@@ -133,7 +137,7 @@ func (r RuleController) Check(ctx web.Context) web.Response {
 	}
 
 	if err != nil {
-		return ctx.JSON(web.M{"error":err.Error()})
+		return ctx.JSON(web.M{"error": err.Error()})
 	}
 
 	return ctx.JSON(web.M{
@@ -380,5 +384,17 @@ func (r RuleController) TestMessageMatch(ctx web.Context) web.Response {
 
 	return ctx.JSON(bson.M{
 		"matched": rs,
+	})
+}
+
+// Tags return all tags existed
+func (r RuleController) Tags(ctx web.Context, repo repository.RuleRepo) web.Response {
+	tags, err := repo.Tags()
+	if err != nil {
+		return ctx.JSONError(fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+	}
+
+	return ctx.JSON(web.M{
+		"tags": tags,
 	})
 }

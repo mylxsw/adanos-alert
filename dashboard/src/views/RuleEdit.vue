@@ -42,8 +42,7 @@
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
                         </b-btn-group>
-                        <b-form-textarea id="rule" rows="5" v-model="form.rule" class="adanos-code-textarea  text-monospace"
-                                         placeholder="输入规则，必须返回布尔值"/>
+                        <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea" :options="{smartIndent:true, lineNumbers: true, placeholder: '输入规则，必须返回布尔值', lineWrapping: true}"></codemirror>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
                                     target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
@@ -62,8 +61,7 @@
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查</b-btn>
                         </b-btn-group>
-                        <b-form-textarea id="template" rows="5" v-model="form.template" class="adanos-code-textarea  text-monospace"
-                                         placeholder="输入模板"/>
+                        <codemirror v-model="form.template" class="mt-3 adanos-code-textarea" :options="{mode: 'markdown', smartIndent:true, lineNumbers: true, placeholder: '输入模板', lineWrapping: true}"></codemirror>
                         <small class="form-text text-muted">
                             语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                         </small>
@@ -90,8 +88,9 @@
                                     <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查
                                     </b-btn>
                                 </b-btn-group>
-                                <b-form-textarea id="'trigger_pre_condition_' + i" v-model="trigger.pre_condition"
-                                                 class="adanos-code-textarea  text-monospace" placeholder="默认为 true （全部匹配）"/>
+                            </b-form-group>
+                            <b-form-group label-cols="2">
+                                <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea" :options="{smartIndent:true, lineNumbers: true, placeholder: '默认为 true （全部匹配）', lineWrapping: true}"></codemirror>
                                 <small class="form-text text-muted">
                                     语法参考 <a
                                         href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -117,8 +116,9 @@
                                     <b-btn-group class="mb-2 float-right">
                                         <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
                                     </b-btn-group>
-                                    <b-form-textarea :id="'trigger_meta_template_' + i" rows="5" class="adanos-code-textarea  text-monospace"
-                                                     v-model="trigger.meta_arr.template" placeholder="默认使用分组展示模板"/>
+                                </b-form-group>
+                                <b-form-group>
+                                    <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="{mode: 'markdown', smartIndent:true, lineNumbers: true, placeholder: '默认使用分组展示模板', lineWrapping: true}"></codemirror>
                                     <small class="form-text text-muted">
                                         语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                                     </small>
@@ -281,9 +281,15 @@
     import TemplateHelp from "../components/TemplateHelp";
     import TriggerHelp from "../components/TriggerHelp";
 
+    import {codemirror} from 'vue-codemirror-lite';
+    import 'codemirror/addon/display/placeholder.js';
+
+    require('codemirror/mode/go/go');
+    require('codemirror/mode/markdown/markdown');
+
     export default {
         name: 'RuleEdit',
-        components: {TriggerHelp, TemplateHelp, MatchRuleHelp},
+        components: {TriggerHelp, TemplateHelp, MatchRuleHelp, codemirror},
         data() {
             return {
                 form: {
@@ -519,8 +525,12 @@
             },
         },
         mounted() {
-            if (this.$route.params.id !== undefined) {
-                axios.get('/api/rules/' + this.$route.params.id + '/').then(response => {
+            if (this.$route.params.id !== undefined || this.$route.query.copy_from !== undefined) {
+                let ruleId = this.$route.params.id;
+                if (this.$route.query.copy_from !== undefined) {
+                    ruleId = this.$route.query.copy_from;
+                }
+                axios.get('/api/rules/' + ruleId + '/').then(response => {
                     this.form.name = response.data.name;
                     this.form.description = response.data.description;
                     this.form.interval = response.data.interval / 60;
@@ -604,7 +614,8 @@
         font-size: 90%;
         font-style: italic;
     }
-    .adanos-code-textarea  .text-monospace {
-        font-size: 85%;
+    .adanos-code-textarea {
+        font-size: 14px;
     }
+    .CodeMirror pre.CodeMirror-placeholder { color: #999; }
 </style>

@@ -4,6 +4,10 @@
             <b-form @submit="onSubmit">
                 <b-card-group class="mb-3">
                     <b-card header="基本">
+                        <b-form-group label-cols="2" id="template_type" label="类型" label-for="template_type_input">
+                            <b-form-select id="template_type_input" v-model="form.type"
+                                           :options="type_options"></b-form-select>
+                        </b-form-group>
                         <b-form-group label-cols="2" id="templatename" label="模板名称*" label-for="templatename_input">
                             <b-form-input id="templatename_input" type="text" v-model="form.name" required
                                           placeholder="输入模板名称"></b-form-input>
@@ -16,13 +20,7 @@
 
                         <b-form-group label-cols="2" id="template_content" label="内容"
                                       label-for="template_content_input">
-                            <b-form-textarea id="template_content_input" rows="5" v-model="form.content"
-                                             placeholder="输入模板内容"></b-form-textarea>
-                        </b-form-group>
-
-                        <b-form-group label-cols="2" id="template_type" label="类型" label-for="template_type_input">
-                            <b-form-select id="template_type_input" v-model="form.type"
-                                           :options="type_options"></b-form-select>
+                            <codemirror v-model="form.content" class="mt-3 adanos-code-textarea" :options="{mode: (form.type === 'template' || form.type === 'template_dingding') ? 'markdown':'go',smartIndent:true, lineNumbers: true, placeholder: '输入模板内容', lineWrapping: true}"></codemirror>
                         </b-form-group>
                     </b-card>
                 </b-card-group>
@@ -37,8 +35,15 @@
 <script>
     import axios from 'axios'
 
+    import {codemirror} from 'vue-codemirror-lite';
+    import 'codemirror/addon/display/placeholder.js';
+
+    require('codemirror/mode/go/go');
+    require('codemirror/mode/markdown/markdown');
+
     export default {
         name: 'TemplateEdit',
+        components: {codemirror},
         data() {
             return {
                 form: {

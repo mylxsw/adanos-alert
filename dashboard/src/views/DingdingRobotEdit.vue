@@ -45,7 +45,7 @@
                     name: '',
                     description: '',
                     token: '',
-                    secret: [],
+                    secret: '',
                 },
             };
         },

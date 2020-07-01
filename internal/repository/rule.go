@@ -14,6 +14,11 @@ const (
 	RuleStatusDisabled RuleStatus = "disabled"
 )
 
+type Tag struct {
+	Name  string `bson:"_id" json:"name"`
+	Count int64  `bson:"count" json:"count"`
+}
+
 // Rule is a rule definition
 type Rule struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -56,4 +61,5 @@ type RuleRepo interface {
 	Count(filter bson.M) (int64, error)
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
+	Tags() ([]Tag, error)
 }

@@ -19,6 +19,32 @@ func NewRuleRepo(db *mongo.Database) repository.RuleRepo {
 	return &RuleRepo{col: db.Collection("rule")}
 }
 
+func (r RuleRepo) Tags() ([]repository.Tag, error) {
+	aggregate, err := r.col.Aggregate(context.TODO(), mongo.Pipeline{
+		bson.D{{"$unwind", "$tags"}},
+		bson.D{{"$group", bson.M{
+			"_id":   "$tags",
+			"count": bson.M{"$sum": 1},
+		}}},
+		bson.D{{"$sort", bson.M{"_id": -1}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]repository.Tag, 0)
+	for aggregate.Next(context.TODO()) {
+		var tag repository.Tag
+		if err := aggregate.Decode(&tag); err != nil {
+			return nil, err
+		}
+
+		tags = append(tags, tag)
+	}
+
+	return tags, nil
+}
+
 func (r RuleRepo) Add(rule repository.Rule) (id primitive.ObjectID, err error) {
 	rule.CreatedAt = time.Now()
 	rule.UpdatedAt = rule.CreatedAt

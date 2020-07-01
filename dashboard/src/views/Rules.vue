@@ -10,12 +10,16 @@
                     </b-form>
                     <b-button to="/rules/add" variant="primary" class="float-right">新增规则</b-button>
                 </b-card-text>
+                <b-card-text>
+                    <b-badge :variant="$route.query.tag === undefined ? 'primary':''" class="mr-1" :to="'/rules'">全部</b-badge>
+                    <b-badge :variant="$route.query.tag === tag.name ? 'primary': ''" v-for="(tag, index) in tags" :key="index" class="mr-1" :to="'/rules?tag=' + tag.name">{{ tag.name }}({{ tag.count }})</b-badge>
+                </b-card-text>
             </b-card>
             <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(name)="row">
                     <span v-b-tooltip.hover :title="row.item.id">{{ row.item.name }}</span>
                     <p>
-                        <b-badge variant="primary" v-for="(tag, index) in row.item.tags" :key="index" class="mr-1" :to="'/rules?tag=' + tag">{{ tag }}</b-badge>
+                        <b-badge :variant="$route.query.tag === tag ? 'primary': 'info'" v-for="(tag, index) in row.item.tags" :key="index" class="mr-1" :to="'/rules?tag=' + tag">{{ tag }}</b-badge>
                     </p>
                 </template>
                 <template v-slot:cell(rule)="row">
@@ -47,6 +51,7 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
+                        <b-button size="sm" variant="warning" :to="{path:'/rules/add', query: {copy_from: row.item.id}}" target="_blank">复制</b-button>
                         <b-button size="sm" variant="info" :to="{path:'/rules/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button size="sm" variant="danger" @click="delete_rule(row.index, row.item.id)">删除</b-button>
                     </b-button-group>
@@ -86,6 +91,7 @@
                 ],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
+                tags: [],
             };
         },
         watch: {
@@ -146,6 +152,12 @@
                     this.search.name = response.data.search.name;
                     this.search.status = response.data.search.status.length > 0 ? response.data.search.status : null;
                     this.search.user_id = response.data.search.user_id;
+                }).catch(error => {
+                    this.ToastError(error);
+                });
+
+                axios.get('/api/rules-meta/tags/').then(response => {
+                    this.tags = response.data.tags;
                 }).catch(error => {
                     this.ToastError(error);
                 });
