@@ -19,7 +19,7 @@
                     </p>
                 </template>
                 <template v-slot:cell(rule)="row">
-                    <p><small>// 报警周期为 <code><b>{{ row.item.interval }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
+                    <p><small>// 报警周期为 <code><b>{{ row.item.interval / 60 }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
                     <p><code>{{ row.item.rule }}</code></p>
                 </template>
                 <template v-slot:cell(interval)="row">

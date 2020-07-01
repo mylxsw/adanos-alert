@@ -14,14 +14,14 @@
                                              v-model="form.description"/>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="rule_description" label="标签" label-for="tags_input">
+                        <b-form-group label-cols="2" id="rule_tags" label="标签" label-for="tags_input">
                             <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills separator=" "
                                          v-model="form.tags"></b-form-tags>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="rule_interval" label="报警周期*" label-for="rule_interval_input"
                                       :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
-                            <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
+                            <b-form-input id="rule_interval_input" type="range" min="1" max="1440" step="5"
                                           v-model="form.interval" required/>
                         </b-form-group>
 
@@ -604,7 +604,7 @@
         font-size: 90%;
         font-style: italic;
     }
-    .adanos-code-textarea  text-monospace {
+    .adanos-code-textarea  .text-monospace {
         font-size: 85%;
     }
 </style>

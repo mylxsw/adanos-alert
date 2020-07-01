@@ -87,13 +87,13 @@ func main() {
 		Name:   "aggregation_period",
 		Usage:  "aggregation job execute period",
 		EnvVar: "ADANOS_AGGREGATION_PERIOD",
-		Value:  "30s",
+		Value:  "10s",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "action_trigger_period",
 		Usage:  "action trigger job execute period",
 		EnvVar: "ADANOS_ACTION_TRIGGER_PERIOD",
-		Value:  "10s",
+		Value:  "5s",
 	}))
 	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
 		Name:   "queue_job_max_retry_times",
