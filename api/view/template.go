@@ -1,4 +1,7 @@
-<html>
+package view
+
+
+var defaultMessageViewTemplate = `<html>
 <head>
     <title>{{ .Group.Rule.Name }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -87,4 +90,4 @@
     });
 </script>
 </body>
-</html>
+</html>`

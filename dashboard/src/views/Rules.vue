@@ -15,7 +15,7 @@
                     <b-badge :variant="$route.query.tag === tag.name ? 'primary': ''" v-for="(tag, index) in tags" :key="index" class="mr-1" :to="'/rules?tag=' + tag.name">{{ tag.name }}({{ tag.count }})</b-badge>
                 </b-card-text>
             </b-card>
-            <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty responsive="true">
                 <template v-slot:cell(name)="row">
                     <span v-b-tooltip.hover :title="row.item.id">{{ row.item.name }}</span>
                     <p>
@@ -23,8 +23,8 @@
                     </p>
                 </template>
                 <template v-slot:cell(rule)="row">
-                    <p><small>// 报警周期为 <code><b>{{ row.item.interval / 60 }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
-                    <p><code>{{ row.item.rule }}</code></p>
+                    <p><small>报警周期为 <code><b>{{ row.item.interval / 60 }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
+                    <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule"><code>{{ row.item.rule }}</code></p>
                 </template>
                 <template v-slot:cell(interval)="row">
                     {{ row.item.interval / 60 }}
@@ -168,3 +168,13 @@
         }
     }
 </script>
+
+<style scoped>
+    .adanos-pre-fold {
+        width: 300px;
+        max-height: 45px;
+        overflow: hidden;
+        display: inline-block;
+        font-size: 70%;
+    }
+</style>

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -130,6 +131,20 @@ func datetimeFormat(datetime time.Time) string {
 	return datetime.In(loc).Format("2006-01-02 15:04:05")
 }
 
+type KvPairs []jsonutils.KvPair
+
+func (k KvPairs) Len() int {
+	return len(k)
+}
+
+func (k KvPairs) Less(i, j int) bool {
+	return k[i].Key < k[j].Key
+}
+
+func (k KvPairs) Swap(i, j int) {
+	k[i], k[j] = k[j], k[i]
+}
+
 // jsonFlatten json转换为kv pairs
 func jsonFlatten(body string, maxLevel int) []jsonutils.KvPair {
 	defer func() {
@@ -143,7 +158,10 @@ func jsonFlatten(body string, maxLevel int) []jsonutils.KvPair {
 		return make([]jsonutils.KvPair, 0)
 	}
 
-	return ju.ToKvPairsArray()
+	kvPairs := ju.ToKvPairsArray()
+	sort.Sort(KvPairs(kvPairs))
+
+	return kvPairs
 }
 
 // startsWith 判断是字符串开始

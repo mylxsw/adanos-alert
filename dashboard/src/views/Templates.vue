@@ -101,3 +101,13 @@
         }
     }
 </script>
+
+<style scoped>
+    .adanos-pre-fold {
+        width: 300px;
+        height: 45px;
+        overflow: hidden;
+        display: inline-block;
+        font-size: 70%;
+    }
+</style>
