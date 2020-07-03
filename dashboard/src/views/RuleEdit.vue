@@ -22,7 +22,7 @@
 
                         <b-form-group label-cols="2" id="rule_interval" label="报警周期*" label-for="rule_interval_input"
                                       :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
-                            <b-form-input id="rule_interval_input" type="range" min="1" max="1440" step="5"
+                            <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
                                           v-model="form.interval" required/>
                         </b-form-group>
 
@@ -723,7 +723,6 @@
                 let requestData = {};
                 requestData.name = this.form.name;
                 requestData.description = this.form.description;
-                requestData.interval = this.form.interval * 60;
                 requestData.rule = this.form.rule;
                 requestData.tags = this.form.tags;
                 requestData.template = this.form.template;
@@ -732,6 +731,12 @@
                     return value;
                 });
                 requestData.status = this.form.status ? 'enabled' : 'disabled';
+
+                if (this.form.interval <= 0) {
+                    requestData.interval = 60;
+                } else {
+                    requestData.interval = this.form.interval * 60;
+                }
 
                 return requestData;
             },

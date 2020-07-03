@@ -14,6 +14,7 @@ const (
 	MessageStatusPending  MessageStatus = "pending"
 	MessageStatusGrouped  MessageStatus = "grouped"
 	MessageStatusCanceled MessageStatus = "canceled"
+	MessageStatusExpired  MessageStatus = "expired"
 )
 
 type Message struct {

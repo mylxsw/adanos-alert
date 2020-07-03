@@ -8,7 +8,8 @@
             <div class="float-right" title="状态">
                 <b-badge v-if="message.status === 'pending'" variant="dark">准备中</b-badge>
                 <b-badge v-if="message.status === 'grouped'" variant="success">已分组</b-badge>
-                <b-badge v-if="message.status === 'canceled'" variant="danger">已取消</b-badge>
+                <b-badge v-if="message.status === 'canceled'" variant="danger">无规则，已取消</b-badge>
+                <b-badge v-if="message.status === 'expired'" variant="warning">匹配规则，已过期</b-badge>
             </div>
         </template>
 

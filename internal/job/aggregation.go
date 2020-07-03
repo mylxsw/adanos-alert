@@ -41,7 +41,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 	}
 
 	collectingGroups := make(map[primitive.ObjectID]repository.MessageGroup)
-	return msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
+	err = msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
 		for _, m := range matchers {
 			matched, err := m.Match(msg)
 			if err != nil {
@@ -78,6 +78,27 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 			"msg_id": msg.ID.Hex(),
 			"status": msg.Status,
 		}).Debug("change message status")
+
+		return msgRepo.UpdateID(msg.ID, msg)
+	})
+	if err != nil {
+		return err
+	}
+
+	// 将能够与规则匹配的 Canceled 的 message 转换为 Expired
+	return msgRepo.Traverse(bson.M{"status": repository.MessageStatusCanceled}, func(msg repository.Message) error {
+		for _, m := range matchers {
+			matched, err := m.Match(msg)
+			if err != nil {
+				continue
+			}
+
+			// if the message matched a rule, update message's group_id and skip to next message
+			if matched {
+				msg.Status = repository.MessageStatusExpired
+				break
+			}
+		}
 
 		return msgRepo.UpdateID(msg.ID, msg)
 	})

@@ -37,7 +37,8 @@
                     {value: null, text: '所有状态'},
                     {value: 'pending', text: '准备中'},
                     {value: 'grouped', text: '已分组'},
-                    {value: 'canceled', text: '已取消'},
+                    {value: 'canceled', text: '无规则，已取消'},
+                    {value: 'expired', text: '匹配规则，已过期'},
                 ],
                 messages: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
@@ -77,7 +78,7 @@
                     this.search.origin = response.data.search.origin;
                     this.search.tags = response.data.search.tags;
                     this.search.meta = response.data.search.meta;
-                    this.search.status = response.data.search.status.length == 0 ? null : response.data.search.status[0];
+                    this.search.status = response.data.search.status.length === 0 ? null : response.data.search.status[0];
 
                     this.isBusy = false;
                 }).catch(error => {
