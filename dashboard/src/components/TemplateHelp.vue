@@ -79,6 +79,7 @@ Group: {
                         <li><code>open_falcon_im(msg string) OpenFalconIM</code> 解析 OpenFalcon 消息格式 </li>
                         <li><code>string_mask(content string, left int) string</code> 在左右两侧只保留 left 个字符，中间所有字符替换为 * </li>
                         <li><code>string_tags(tags string, sep string) []string</code> 将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除 </li>
+                        <li><code>remove_empty_line(content string) string</code> 移除字符串中的空行</li>
                     </ul>
                 </li>
             </ul>

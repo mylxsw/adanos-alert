@@ -73,6 +73,8 @@ var predefinedTemplates = []repository.Template{
 
 {{ end }}
 
+---
+
 [共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type: repository.TemplateTypeTemplate,
 	},
@@ -96,6 +98,8 @@ var predefinedTemplates = []repository.Template{
 {{ range $k, $info := json_array "Sections" $deadlock }}
 	{{ format "%v" $info }}
 {{ end }}{{ end }}{{ end }}
+
+---
 
 [共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,

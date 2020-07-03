@@ -43,7 +43,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 			controller.NewDingdingRobotController(cc),
 		)
 
-		router.WithMiddleware(mws...).Controllers(
+		router.WithMiddleware(mw.AccessLog(log.Module("api")), mw.CORS("*")).Controllers(
 			"/ui",
 			controller.NewPublicController(cc),
 		)

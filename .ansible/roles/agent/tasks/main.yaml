@@ -1,0 +1,60 @@
+---
+- name: create user adanos
+  user:
+    name: adanos
+    shell: /sbin/nologin
+    state: present
+
+- name: create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    follow: true
+  with_items:
+    - /usr/local/adanos-alert-agent/bin
+    - /usr/local/adanos-alert-agent/etc
+
+- name: create work directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: adanos
+    follow: true
+  with_items:
+    - /usr/local/adanos-alert-agent/data
+
+- name: install adanos-alert-agent
+  copy:
+    src: adanos-alert-agent
+    dest: /usr/local/adanos-alert-agent/bin/adanos-alert-agent
+    mode: 0755
+  tags:
+    - install_adanos_agent_bin
+    - install_adanos_agent
+
+- name: copy adanos-alert-agent config files
+  template:
+    src: agent.yaml
+    dest: /usr/local/adanos-alert-agent/etc/agent.yaml
+  tags:
+    - copy_adanos_agent_config
+    - install_adanos_agent
+
+- name: copy systemd file for adanos agent
+  template:
+    src: adanos-alert-agent.service
+    dest: /usr/lib/systemd/system/adanos-alert-agent.service
+  tags:
+    - create_adanos_agent_systemd
+    - install_adanos_agent
+
+- name: reload adanos agent service
+  systemd:
+    name: adanos-alert-agent
+    daemon_reload: true
+    enabled: yes
+    state: restarted
+  tags:
+    - restart_adanos_agent_service
+    - install_adanos_agent

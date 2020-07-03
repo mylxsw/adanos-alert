@@ -3,3 +3,4 @@
 - hosts: adanos-alert-server-prod
   roles:
     - server
+    - agent

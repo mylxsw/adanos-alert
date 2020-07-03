@@ -237,3 +237,15 @@ func TestStringTags(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveEmptyLine(t *testing.T) {
+	var original = `Hello, world
+Are you ready?
+
+Nice!          
+        
+What are you doing?`
+
+	result := RemoveEmptyLine(original)
+	fmt.Println(result)
+}

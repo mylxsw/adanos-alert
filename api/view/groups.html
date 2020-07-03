@@ -37,17 +37,27 @@
             background: #000;
         }
 
-        .message-key {
-            min-width: 25%; 
-            display: inline-block;
+        .alert-body {
+            padding: 10px;
+            margin: -15px;
+            border-top: 1px solid #ccc;
+            background: #fcf8e3;
         }
+
+        .meta {
+            margin: -15px -15px 0;
+        }
+        .meta li:hover {
+            background: #ffc107;
+        }
+
     </style>
 </head>
 
 <body>
 <div class="container-fluid" style="max-width: 1000px">
-    <h2>{{ .Group.Rule.Name }}</h2>
-    <div class="alert alert-warning" role="alert">
+    <h2>{{ .Group.UpdatedAt | datetime }} - {{ .Group.Rule.Name }}</h2>
+    <div class="alert alert-info" role="alert">
         <p>ID：{{ .Group.ID.Hex }}</p>
         <p>规则ID：{{ .Group.Rule.ID.Hex }}</p>
         <p>规则：{{ .Group.Rule.Rule }}</p>
@@ -57,24 +67,41 @@
         <div class="panel panel-default">
             <div class="panel-heading"><span class="panel-seq">#{{ $i }}</span> <b>{{ datetime $msg.CreatedAt }}</b></div>
             <div class="panel-body table-responsive">
-                <ul style="list-style: none;padding-left: 0;">
-                    <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">标签：</b></span> {{ range $i, $m := $msg.Tags }}
-                            <span class="label label-info">{{ $m }}</span>
-                        {{ end }}</li>
-                    <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">来源：</b></span> {{ $msg.Origin }}</li>
-                    {{ range $i, $m := $msg.Meta }}
-                        <li><span class="message-key"><b style="border-bottom: 1px dashed #000000;">{{ $i }} :</b></span> {{ $m }}</li>
+                <div class="meta">
+                    <table class="table table-striped">
+                        {{ if len $msg.Tags | gt 0 }}
+                            <tr>
+                                <th>标签</th>
+                                <td>
+                                    {{ range $i, $m := $msg.Tags }}
+                                        <span class="label label-info">{{ $m }}</span>
+                                    {{ end }}
+                                </td>
+                            </tr>
+                        {{ end }}
+                        <tr>
+                            <th>来源</th>
+                            <td>{{ $msg.Origin }}</td>
+                        </tr>
+                        {{ range $i, $m := $msg.Meta }}
+                            <tr>
+                                <th>{{ $i }}</th>
+                                <td><pre style="margin: 0; padding: 0; line-height: 1.5;">{{ format "%v" $m | remove_empty_line }}</pre></td>
+                            </tr>
+                        {{ end }}
+                    </table>
+                </div>
+                <div class="alert-body">
+                    {{ range $i, $m := json_flatten $msg.Content 3 }}
+                        <div class="json-line">
+                            <span class="json-key">{{ $m.Key }}</span>
+                            <pre class="json-value">{{ if eq $m.Key "stack" }}{{ range $j, $k := json_flatten $m.Value 1 }}
+                                    {{ $k.Key }} : {{ $k.Value }}{{ end }}{{ else }}{{ $m.Value }}{{ end }}</pre>
+                        </div>
+                    {{ else }}
+                        <pre>{{ json $msg.Content }}</pre>
                     {{ end }}
-                </ul>
-                {{ range $i, $m := json_flatten $msg.Content 3 }}
-                    <div class="json-line">
-                        <span class="json-key">{{ $m.Key }}</span>
-                        <pre class="json-value">{{ if eq $m.Key "stack" }}{{ range $j, $k := json_flatten $m.Value 1 }}
-                                {{ $k.Key }} : {{ $k.Value }}{{ end }}{{ else }}{{ $m.Value }}{{ end }}</pre>
-                    </div>
-                {{ else }}
-                    <pre>{{ json $msg.Content }}</pre>
-                {{ end }}
+                </div>
             </div>
         </div>
     {{ end }}

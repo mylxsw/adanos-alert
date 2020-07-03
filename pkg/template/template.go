@@ -30,29 +30,30 @@ func Parse(templateStr string, data interface{}) (string, error) {
 // CreateParse create a template parser
 func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":         cutOff,
-		"implode":        strings.Join,
-		"explode":        strings.Split,
-		"ident":          leftIdent,
-		"json":           jsonFormatter,
-		"datetime":       datetimeFormat,
-		"datetime_noloc": datetimeFormatNoLoc,
-		"json_get":       pkgJSON.Get,
-		"json_gets":      pkgJSON.Gets,
-		"json_array":     pkgJSON.GetArray,
-		"json_flatten":   jsonFlatten,
-		"starts_with":    startsWith,
-		"ends_with":      endsWith,
-		"trim":           strings.Trim,
-		"trim_right":     strings.TrimRight,
-		"trim_left":      strings.TrimLeft,
-		"trim_space":     strings.TrimSpace,
-		"format":         fmt.Sprintf,
-		"integer":        toInteger,
-		"mysql_slowlog":  parseMySQLSlowlog,
-		"open_falcon_im": ParseOpenFalconImMessage,
-		"string_mask":    StringMask,
-		"string_tags":    StringTags,
+		"cutoff":            cutOff,
+		"implode":           strings.Join,
+		"explode":           strings.Split,
+		"ident":             leftIdent,
+		"json":              jsonFormatter,
+		"datetime":          datetimeFormat,
+		"datetime_noloc":    datetimeFormatNoLoc,
+		"json_get":          pkgJSON.Get,
+		"json_gets":         pkgJSON.Gets,
+		"json_array":        pkgJSON.GetArray,
+		"json_flatten":      jsonFlatten,
+		"starts_with":       startsWith,
+		"ends_with":         endsWith,
+		"trim":              strings.Trim,
+		"trim_right":        strings.TrimRight,
+		"trim_left":         strings.TrimLeft,
+		"trim_space":        strings.TrimSpace,
+		"format":            fmt.Sprintf,
+		"integer":           toInteger,
+		"mysql_slowlog":     parseMySQLSlowlog,
+		"open_falcon_im":    ParseOpenFalconImMessage,
+		"string_mask":       StringMask,
+		"string_tags":       StringTags,
+		"remove_empty_line": RemoveEmptyLine,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -209,4 +210,21 @@ func stringMask(content string, left int) string {
 	}
 
 	return content[:left] + strings.Repeat("*", size-left*2) + content[size-left:]
+}
+
+// RemoveEmptyLine 从字符串中移除空行
+func RemoveEmptyLine(content string) string {
+	return strings.Trim(
+		coll.MustNew(strings.Split(content, "\n")).
+			Map(func(line string) string {
+				return strings.TrimRight(line, " ")
+			}).
+			Filter(func(line string) bool {
+				return line != ""
+			}).
+			Reduce(func(carry string, item string) string {
+				return fmt.Sprintf("%s\n%s", carry, item)
+			}, "").(string),
+		"\n",
+	)
 }

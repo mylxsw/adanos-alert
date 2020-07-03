@@ -29,7 +29,7 @@
             </b-row>
             <b-row v-for="(val, key) in message.meta" :key="key" style="max-width: 100rem;" class="adanos-meta-line">
                 <b-col sm="3"><b class="text-dark" style="border-bottom: 1px dashed black">{{ key }}</b></b-col>
-                <b-col sm="9"><b-badge variant="light">{{ val }}</b-badge></b-col>
+                <b-col sm="9"><pre class="adanos-code"><code>{{ val }}</code></pre></b-col>
             </b-row>
         </b-card-text>
         <b-card-text>
@@ -57,12 +57,15 @@
         white-space: pre-wrap!important;
         word-wrap: break-word!important;
         *white-space:normal!important;
+
+        margin-bottom: 0;
+        font-size: 80%;
     }
 
     .adanos-meta-line {
         border-bottom: 1px solid #ffffff;
     }
-    .adanos-meta-line:hover {
-        border-bottom: 1px dashed #ccc;
+    .adanos-meta-line:hover  {
+        background: #ffc107;
     }
 </style>

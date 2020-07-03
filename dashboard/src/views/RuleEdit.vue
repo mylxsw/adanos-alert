@@ -43,10 +43,12 @@
                         <b-btn-group class="mb-2 float-right">
                             <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
                         </b-btn-group>
-                        <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
+                        <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea"
+                                    :options="options.group_match_rule"></codemirror>
                         <small class="form-text text-muted">
-                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                    target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                            语法提示 <code>Alt+/</code>，语法参考 <a
+                                href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                         </small>
                         <MatchRuleHelp v-if="rule_help"/>
                     </b-card>
@@ -63,9 +65,11 @@
                             <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查
                             </b-btn>
                         </b-btn-group>
-                        <codemirror v-model="form.template" class="mt-3 adanos-code-textarea" :options="options.template"></codemirror>
+                        <codemirror v-model="form.template" class="mt-3 adanos-code-textarea"
+                                    :options="options.template"></codemirror>
                         <small class="form-text text-muted">
-                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
+                                                            target="_blank">https://golang.org/pkg/text/template/</a>
                         </small>
                         <TemplateHelp v-if="template_help"/>
                     </b-card>
@@ -93,7 +97,8 @@
                                 </b-btn-group>
                             </b-form-group>
                             <b-form-group label-cols="2">
-                                <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea" :options="options.trigger_rule"></codemirror>
+                                <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
+                                            :options="options.trigger_rule"></codemirror>
                                 <small class="form-text text-muted">
                                     语法提示 <code>Alt+/</code>，语法参考 <a
                                         href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -126,9 +131,11 @@
                                     </b-btn-group>
                                 </b-form-group>
                                 <b-form-group>
-                                    <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
+                                    <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea"
+                                                :options="options.ding_template"></codemirror>
                                     <small class="form-text text-muted">
-                                        语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                                        语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
+                                                                        target="_blank">https://golang.org/pkg/text/template/</a>
                                     </small>
                                     <TemplateHelp v-if="trigger.template_help"/>
                                 </b-form-group>
@@ -305,20 +312,43 @@
         let sources = [];
         switch (editor.options.hintOptions.adanosType) {
             case 'GroupMatchRule':
-                sources.push('Content', 'Meta[""]', 'Tags[0]', 'Origin');
+                sources.push(
+                    {text: 'Content', displayText: 'Content |  消息内容，字符串格式'},
+                    {text: 'Meta[""]', displayText: 'Meta |  字段，字典类型'},
+                    {text: 'Tags[0]', displayText: 'Tags |  字段，数组类型'},
+                    {text: 'Origin', displayText: 'Origin |  消息来源，字符串'},
+                );
                 break;
             case 'TriggerMatchRule':
                 sources.push('Group', 'Group.ID', 'Group.SeqNum', 'Group.MessageCount', 'Group.Rule', 'Group.Rule.ID', 'Group.Rule.Name', 'Group.Rule.Interval', 'Group.Rule.Rule', 'Group.Rule.Template')
 
-                sources.push('Messages()')
-                sources.push('MessagesMatchRegexCount(REGEX)')
-                sources.push('MessagesWithMetaCount(KEY, VALUE)')
-                sources.push('MessagesWithTagsCount(TAG)')
-                sources.push('TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)')
-                sources.push('LastTriggeredGroup(TRIGGER_STATUS)')
+                sources.push({text: 'Messages()', displayText: 'Messages() []repository.Message | 获取分组中所有的 Messages'})
+                sources.push({
+                    text: 'MessagesMatchRegexCount(REGEX)',
+                    displayText: 'MessagesMatchRegexCount(regex string) int64  | 获取匹配指定正则表达式的 message 数量'
+                })
+                sources.push({
+                    text: 'MessagesWithMetaCount(KEY, VALUE)',
+                    displayText: 'MessagesWithMetaCount(key, value string) int64  | 获取 meta 匹配指定 key=value 的 message 数量'
+                })
+                sources.push({
+                    text: 'MessagesWithTagsCount(TAG)',
+                    displayText: 'MessagesWithTagsCount(tags string) int64  | 获取拥有指定 tag 的 message 数量，多个 tag 使用英文逗号分隔'
+                })
+                sources.push({text: 'TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)', displayText: 'TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 当前规则在指定时间范围内，状态为 triggerStatus 的触发次数'})
+                sources.push({text: 'LastTriggeredGroup(TRIGGER_STATUS)', displayText: 'LastTriggeredGroup(triggerStatus string) repository.MessageGroup 最后一次触发该规则的状态为 triggerStatus 的分组'})
 
-                sources.push('collecting', 'pending', 'ok', 'failed', 'canceled');
-                sources.push('2006-01-02T15:04:05Z07:00', 'RFC3339');
+                sources.push(
+                    {text: 'collecting', displayText: 'collecting  | TriggerStatus：collecting'},
+                    {text: 'pending', displayText: 'pending | TriggerStatus：pending'},
+                    {text: 'ok', displayText: 'ok | TriggerStatus：ok'},
+                    {text: 'failed', displayText: 'failed | TriggerStatus：failed'},
+                    {text: 'canceled', displayText: 'canceled | TriggerStatus：canceled'}
+                );
+                sources.push(
+                    {text: '2006-01-02T15:04:05Z07:00', displayText: '2006-01-02T15:04:05Z07:00  | 时间格式'},
+                    {text: 'RFC3339', displayText: 'RFC3339  | 时间格式'}
+                );
                 break;
             case 'Template':
                 break;
@@ -328,45 +358,68 @@
         }
 
         if (editor.options.hintOptions.adanosType === 'GroupMatchRule' || editor.options.hintOptions.adanosType === 'TriggerMatchRule') {
-            sources.push('matches', 'contains', 'startsWith', 'endsWith');
-            sources.push('in', 'not in', 'or', 'and');
-            sources.push('len', 'all', 'none', 'any', 'one', 'filter', 'map', 'count');
+            sources.push(
+                {text: 'matches', displayText: '"foo" matches "^b.+" 正则匹配'},
+                {text: 'contains', displayText: 'contains | 字符串包含'},
+                {text: 'startsWith', displayText: 'startsWith | 前缀匹配'},
+                {text: 'endsWith', displayText: 'endsWith | 后缀匹配'},
+            );
+            sources.push(
+                {text: 'in', displayText: 'user.Group in ["human_resources", "marketing"] | 包含'},
+                {text: 'not in', displayText: 'user.Group not in ["human_resources", "marketing"] | 不包含'},
+                {text: 'or', displayText: 'or | 或者'},
+                {text: 'and', displayText: 'and | 同时'},
+            );
+            sources.push(
+                {text: 'len', displayText: 'len | length of array, map or string'},
+                {text: 'all', displayText: 'all | will return true if all element satisfies the predicate'},
+                {text: 'none', displayText: 'none | will return true if all element does NOT satisfies the predicate'},
+                {text: 'any', displayText: 'any | will return true if any element satisfies the predicate'},
+                {text: 'one', displayText: 'one | will return true if exactly ONE element satisfies the predicate'},
+                {text: 'filter', displayText: 'filter | filter array by the predicate'},
+                {text: 'map', displayText: 'map | map all items with the closure'},
+                {text: 'count', displayText: 'count | returns number of elements what satisfies the predicate'},
+            );
 
-            sources.push('JsonGet(KEY, DEFAULT)')
-            sources.push('Upper(KEY, DEFAULT)')
-            sources.push('Lower(KEY, DEFAULT)')
-            sources.push('Now()')
-            sources.push('ParseTime(LAYOUT, VALUE)')
-            sources.push('DailyTimeBetween(START_TIME_STR, END_TIME_STR)')
+            sources.push({text: 'JsonGet(KEY, DEFAULT)', displayText: 'JsonGet(key string, defaultValue string) string  | 将消息体作为json解析，获取指定的key'})
+            sources.push({text: 'Upper(KEY, DEFAULT)', displayText: 'Upper(val string) string  | 字符串转大写'})
+            sources.push({text: 'Lower(KEY, DEFAULT)', displayText: 'Lower(val string) string  | 字符串转小写'})
+            sources.push({text: 'Now()', displayText: 'Now() time.Time  | 当前时间'})
+            sources.push({text: 'ParseTime(LAYOUT, VALUE)', displayText: 'ParseTime(layout string, value string) time.Time | 时间字符串转时间对象'})
+            sources.push({text: 'DailyTimeBetween(START_TIME_STR, END_TIME_STR)', displayText: 'DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04'})
         } else {
-            sources.push('{{ }}')
-            sources.push('{{ range $i, $msg := ARRAY }}')
-            sources.push('{{ if pipeline }} T1 {{ else if pipeline }} T2 {{ else }} T3 {{ end }}')
-            sources.push('[]()');
+            sources.push({text: '.Messages MESSAGE_COUNT', displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'})
 
-            sources.push('cut_off MAX_LENGTH STR')
-            sources.push('implode ELEMENT_ARR ","')
-            sources.push('explode STR ","')
-            sources.push('ident "IDENT_STR" STR')
-            sources.push('json JSONSTR')
-            sources.push('datetime DATETIME')
-            sources.push('datetime_noloc DATETIME')
-            sources.push('json_get "KEY" "DEFAULT" JSONSTR')
-            sources.push('json_gets "KEY" "DEFAULT" JSONSTR')
-            sources.push('json_array "KEY" JSONSTR')
-            sources.push('json_flatten JSONSTR MAX_LEVEL')
-            sources.push('starts_with STR "START_STR"')
-            sources.push('ends_with STR "START_END"')
-            sources.push('trim STR "CUTSTR"')
-            sources.push('trim_left STR "CUTSTR"')
-            sources.push('trim_right STR "CUTSTR"')
-            sources.push('trim_space STR')
-            sources.push('format "FORMAT" VAL')
-            sources.push('integer STR')
-            sources.push('mysql_slowlog STR')
-            sources.push('open_falcon_im STR')
-            sources.push('string_mask STR LEFT')
-            sources.push('string_tags TAG_STR SEPARATOR')
+            sources.push({text: '{{ }}', displayText: '{{ }} |  Golang 代码块'})
+            sources.push({text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}', displayText: '{{ range }}  | Golang 遍历对象'})
+            sources.push({text: '{{ if pipeline }}\n T1 \n{{ else if pipeline }}\n T2 \n{{ else }}\n T3 \n{{ end }}', displayText: '{{ if }} |  Golang 分支条件'})
+            sources.push({text: '[]()', displayText: 'Markdown 连接地址'});
+            sources.push({text: 'index MAP_VAR "KEY"', displayText: 'index $msg.Meta "message.message" | 从 Map 中获取某个 Key 的值'})
+
+            sources.push({text: 'cut_off MAX_LENGTH STR', displayText: 'cut_off(maxLen int, val string) string  |  字符串截断'})
+            sources.push({text: 'implode ELEMENT_ARR ","', displayText: 'implode(elems []string, sep string) string  |  字符串数组拼接'})
+            sources.push({text: 'explode STR ","', displayText: 'explode(s, sep string) []string  |  字符串分隔成数组'})
+            sources.push({text: 'ident "IDENT_STR" STR', displayText: 'ident(ident string, message string) string  |  多行字符串统一缩进'})
+            sources.push({text: 'json JSONSTR', displayText: 'json(content string) string  |  JSON 字符串格式化'})
+            sources.push({text: 'datetime DATETIME', displayText: 'datetime(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，时区选择北京/重庆'})
+            sources.push({text: 'datetime_noloc DATETIME', displayText: 'datetime_noloc(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，默认时区'})
+            sources.push({text: 'json_get "KEY" "DEFAULT" JSONSTR', displayText: 'json_get(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值，失败返回 defaultValue'})
+            sources.push({text: 'json_gets "KEY" "DEFAULT" JSONSTR', displayText: 'json_gets(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值(可以使用逗号分割多个key作为备选)，失败返回 defaultValue'})
+            sources.push({text: 'json_array "KEY" JSONSTR', displayText: 'json_array(key string, body string) []string  |  将 body 解析为 json，然后获取 key 的值（数组值）'})
+            sources.push({text: 'json_flatten JSONSTR MAX_LEVEL', displayText: 'json_flatten(body string, maxLevel int) []jsonutils.KvPair  |  将 body 解析为 json，然后转换为键值对返回'})
+            sources.push({text: 'starts_with STR "START_STR"', displayText: 'starts_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 开头'})
+            sources.push({text: 'ends_with STR "START_END"', displayText: 'ends_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 结尾'})
+            sources.push({text: 'trim STR "CUTSTR"', displayText: 'trim(s string, cutset string) string  |  去掉字符串 s 两边的 cutset 字符'})
+            sources.push({text: 'trim_left STR "CUTSTR"', displayText: 'trim_left(s string, cutset string) string  |  去掉字符串 s 左侧的 cutset 字符'})
+            sources.push({text: 'trim_right STR "CUTSTR"', displayText: 'trim_right(s string, cutset string) string  |  去掉字符串 s 右侧的 cutset 字符'})
+            sources.push({text: 'trim_space STR', displayText: 'trim_space(s string) string  |  去掉字符串 s 两边的空格'})
+            sources.push({text: 'format "FORMAT" VAL', displayText: 'format(format string, a ...interface{}) string  |  格式化展示，调用 fmt.Sprintf'})
+            sources.push({text: 'integer STR', displayText: 'integer(str string) int  |  字符串转整数 '})
+            sources.push({text: 'mysql_slowlog STR', displayText: 'mysql_slowlog(slowlog string) map[string]string  |  解析 MySQL 慢查询日志为 map'})
+            sources.push({text: 'open_falcon_im STR', displayText: 'open_falcon_im(msg string) OpenFalconIM  |  解析 OpenFalcon 消息格式'})
+            sources.push({text: 'string_mask STR LEFT', displayText: 'string_mask(content string, left int) string  |  在左右两侧只保留 left 个字符，中间所有字符替换为 *'})
+            sources.push({text: 'string_tags TAG_STR SEPARATOR', displayText: 'string_tags(tags string, sep string) []string  |  将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除'})
+            sources.push({text: 'remove_empty_line STR', displayText: 'remove_empty_line(content string) string | 移除字符串中的空行'})
         }
 
         var cur = editor.getCursor();
@@ -390,7 +443,11 @@
             list = sources;
         } else {
             for (let s in sources) {
-                if (sources[s].indexOf(search) >= 0) {
+                let str = sources[s];
+                if (typeof str !== "string") {
+                    str = str.text;
+                }
+                if (str.indexOf(search) >= 0) {
                     list.push(sources[s]);
                 }
             }

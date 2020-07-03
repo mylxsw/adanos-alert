@@ -33,6 +33,7 @@ build-proxy:
 
 build-deploy-release: static-gen
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o .ansible/roles/server/files/adanos-alert-server cmd/server/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $(LDFLAGS) -o .ansible/roles/agent/files/adanos-alert-agent cmd/agent/main.go
 
 deploy-server: build-deploy-release
 	cd .ansible && ansible-playbook -i hosts playbook.yml --limit adanos-alert-server-prod
