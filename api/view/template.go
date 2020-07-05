@@ -54,6 +54,10 @@ var defaultMessageViewTemplate = `<html>
             background: #ffc107;
         }
 
+        .paginator {
+            margin: 20px 0;
+        }
+
     </style>
 </head>
 
@@ -66,21 +70,30 @@ var defaultMessageViewTemplate = `<html>
         <p>规则：{{ .Group.Rule.Rule }}</p>
         <p>数量：{{ .MessageCount }}</p>
     </div>
+    <div class="paginator">
+        {{ if .HasPrev }}
+            <a class="btn btn-info" href="{{ .Path }}?offset={{ .PrevOffset }}" role="button">上一页</a>
+        {{ end }}
+
+        {{ if .HasNext }}
+            <a class="btn btn-primary" href="{{ .Path }}?offset={{ .Next }}" role="button">下一页</a>
+        {{ end }}
+    </div>
     {{ range $i, $msg := .Messages }}
         <div class="panel panel-default">
-            <div class="panel-heading"><span class="panel-seq">#{{ $i }}</span> <b>{{ datetime $msg.CreatedAt }}</b></div>
+            <div class="panel-heading"><span class="panel-seq">#{{ $msg.SeqNum }}</span> <b>{{ datetime $msg.CreatedAt }}</b></div>
             <div class="panel-body table-responsive">
                 <div class="meta">
                     <table class="table table-striped">
                         {{ if len $msg.Tags | gt 0 }}
-                        <tr>
-                            <th>标签</th>
-                            <td>
-                                {{ range $i, $m := $msg.Tags }}
-                                    <span class="label label-info">{{ $m }}</span>
-                                {{ end }}
-                            </td>
-                        </tr>
+                            <tr>
+                                <th>标签</th>
+                                <td>
+                                    {{ range $i, $m := $msg.Tags }}
+                                        <span class="label label-info">{{ $m }}</span>
+                                    {{ end }}
+                                </td>
+                            </tr>
                         {{ end }}
                         <tr>
                             <th>来源</th>
@@ -108,6 +121,16 @@ var defaultMessageViewTemplate = `<html>
             </div>
         </div>
     {{ end }}
+
+    <div class="paginator">
+        {{ if .HasPrev }}
+            <a class="btn btn-info" href="{{ .Path }}?offset={{ .PrevOffset }}" role="button">上一页</a>
+        {{ end }}
+
+        {{ if .HasNext }}
+            <a class="btn btn-primary" href="{{ .Path }}?offset={{ .Next }}" role="button">下一页</a>
+        {{ end }}
+    </div>
 </div>
 <script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>

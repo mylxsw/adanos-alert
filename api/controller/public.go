@@ -58,6 +58,10 @@ func (p PublicController) Group(ctx web.Context, groupRepo repository.MessageGro
 		Next:         next,
 		Offset:       offset,
 		Limit:        limit,
+		Path:         ctx.Request().Raw().URL.Path,
+		HasPrev:      offset-limit >= 0,
+		HasNext:      next > 0,
+		PrevOffset:   offset - limit,
 	})
 	if err != nil {
 		return ctx.Error(fmt.Sprintf("template parse failed: %v", err), http.StatusInternalServerError)

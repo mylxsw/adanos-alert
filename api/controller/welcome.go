@@ -35,7 +35,7 @@ func offsetAndLimit(ctx web.Context) (offset int64, limit int64) {
 		offset = 0
 	}
 
-	limit = ctx.Int64Input("limit", 10)
+	limit = ctx.Int64Input("limit", 20)
 	if limit < 0 || limit > 1000 {
 		limit = 10
 	}

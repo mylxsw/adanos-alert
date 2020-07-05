@@ -16,6 +16,10 @@ type GroupData struct {
 	Next         int64
 	Offset       int64
 	Limit        int64
+	Path         string
+	HasPrev      bool
+	HasNext      bool
+	PrevOffset   int64
 }
 
 func GroupView(data GroupData) (string, error) {
@@ -46,4 +50,3 @@ func currentPath() string {
 
 	return dir
 }
-
