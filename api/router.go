@@ -41,6 +41,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 			controller.NewRuleController(cc),
 			controller.NewTemplateController(cc),
 			controller.NewDingdingRobotController(cc),
+			controller.NewAgentController(cc),
 		)
 
 		router.WithMiddleware(mw.AccessLog(log.Module("api")), mw.CORS("*")).Controllers(

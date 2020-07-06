@@ -21,6 +21,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewTemplateRepo)
 	app.MustSingleton(NewDingdingRobotRepo)
 	app.MustSingleton(NewLockRepo)
+	app.MustSingleton(NewAgentRepo)
 }
 
 func (s ServiceProvider) Boot(app glacier.Glacier) {

@@ -13,6 +13,7 @@ import Templates from "./views/Templates";
 import TemplateEdit from "./views/TemplateEdit";
 import DingdingRobots from "./views/DingdingRobot";
 import DingdingRobotEdit from "./views/DingdingRobotEdit";
+import Agents from "./views/Agents"
 
 Vue.use(Router);
 
@@ -40,5 +41,6 @@ export default new Router({
         {path: '/queues', component: Queue},
         {path: '/settings', component: Settings},
         {path: '/errors/', component: Error},
+        {path: '/agents', component: Agents},
     ]
 });

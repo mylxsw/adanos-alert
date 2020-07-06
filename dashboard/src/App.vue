@@ -10,8 +10,9 @@
                     <b-nav-item to="/rules" exact>规则</b-nav-item>
                     <b-nav-item to="/users">用户</b-nav-item>
                     <b-nav-item to="/dingding-robots">钉钉</b-nav-item>
-                    <b-nav-item to="/queues">队列</b-nav-item>
                     <b-nav-item to="/templates">模板</b-nav-item>
+                    <b-nav-item to="/queues">队列</b-nav-item>
+                    <b-nav-item to="/agents">Agent</b-nav-item>
                     <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">

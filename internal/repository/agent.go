@@ -24,7 +24,8 @@ func (agent Agent) Alive() bool {
 
 type AgentRepo interface {
 	Update(agent Agent) (primitive.ObjectID, error)
-	Find(filter bson.M) (rules []Agent, err error)
+	Get(id primitive.ObjectID) (agent Agent, err error)
+	Find(filter bson.M) (agents []Agent, err error)
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
 }
