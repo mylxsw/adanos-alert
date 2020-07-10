@@ -114,6 +114,33 @@ func main() {
 		EnvVar: "ADANOS_QUERY_TIMEOUT",
 		Value:  "5s",
 	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "aliyun_access_key",
+		EnvVar: "ADANOS_ALIYUN_ACCESS_KEY",
+		Value:  "",
+		Usage:  "阿里云语音通知接口 Access Key ID",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "aliyun_access_secret",
+		EnvVar: "ADANOS_ALIYUN_ACCESS_SECRET",
+		Value:  "",
+		Usage:  "阿里云语音通知接口 Access Secret",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "aliyun_voice_called_show_number",
+		Value: "073182705707",
+		Usage: "阿里云语音通知被叫显号",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "aliyun_voice_tts_code",
+		Value: "",
+		Usage: "阿里云语音通知模板，这里是模板ID，模板内容在阿里云申请，建议内容：\"您有一条名为 ${title} 的报警通知，请及时处理！\"",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "aliyun_voice_tts_param",
+		Value: "title",
+		Usage: "阿里云语音通知模板变量名",
+	}))
 
 	app.WithHttpServer().TCPListenerAddr(":19999")
 
@@ -165,6 +192,14 @@ func main() {
 			QueryTimeout:          queryTimeout,
 			Migrate:               c.Bool("enable_migrate"),
 			PreviewURL:            c.String("preview_url"),
+			AliyunVoiceCall: configs.AliyunVoiceCall{
+				BaseURI:            "http://dyvmsapi.aliyuncs.com/",
+				AccessKey:          c.String("aliyun_access_key"),
+				AccessSecret:       c.String("aliyun_access_secret"),
+				TTSCode:            c.String("aliyun_voice_tts_code"),
+				TTSTemplateVarName: c.String("aliyun_voice_tts_param"),
+				CalledShowNumber:   c.String("aliyun_voice_called_show_number"),
+			},
 		}
 	})
 

@@ -12,7 +12,7 @@ import (
 )
 
 type Action interface {
-	Validate(meta string) error
+	Validate(meta string, userRefs []string) error
 	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error
 }
 
@@ -71,8 +71,8 @@ type QueueAction struct {
 	manager Manager
 }
 
-func (q *QueueAction) Validate(meta string) error {
-	return q.manager.Run(q.action).Validate(meta)
+func (q *QueueAction) Validate(meta string, userRefs []string) error {
+	return q.manager.Run(q.action).Validate(meta, userRefs)
 }
 
 type Payload struct {

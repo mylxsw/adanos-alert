@@ -135,7 +135,7 @@ func (r RuleForm) Validate(req web.Request) error {
 			return fmt.Errorf("trigger #%d, action [%s] is not support", i, tr.Action)
 		}
 
-		if err := act.Validate(tr.Meta); err != nil {
+		if err := act.Validate(tr.Meta, tr.UserRefs); err != nil {
 			return fmt.Errorf("trigger #%d, action [%s] with invalid meta: %w", i, tr.Action, err)
 		}
 	}

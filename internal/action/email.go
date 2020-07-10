@@ -8,7 +8,7 @@ type EmailAction struct {
 	manager Manager
 }
 
-func (e EmailAction) Validate(meta string) error {
+func (e EmailAction) Validate(meta string, userRefs []string) error {
 	panic("implement me")
 }
 

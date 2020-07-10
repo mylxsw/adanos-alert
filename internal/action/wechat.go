@@ -8,7 +8,7 @@ type WechatAction struct{
 	manager Manager
 }
 
-func (w WechatAction) Validate(meta string) error {
+func (w WechatAction) Validate(meta string, userRefs []string) error {
 	panic("implement me")
 }
 

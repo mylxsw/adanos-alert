@@ -24,7 +24,17 @@ type Config struct {
 	QueueWorkerNum        int           `json:"queue_worker_num"`
 	QueryTimeout          time.Duration `json:"query_timeout"`
 
-	Migrate bool `json:"migrate"`
+	Migrate         bool            `json:"migrate"`
+	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
+}
+
+type AliyunVoiceCall struct {
+	AccessKey          string `json:"-"`
+	AccessSecret       string `json:"-"`
+	CalledShowNumber   string `json:"called_show_number"`
+	TTSCode            string `json:"tts_code"`
+	TTSTemplateVarName string `json:"tts_template_var_name"`
+	BaseURI            string `json:"base_uri"`
 }
 
 func (conf *Config) Serialize() string {

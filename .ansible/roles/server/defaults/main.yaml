@@ -8,3 +8,9 @@ adanos_mongo_db: "adanos-alert"
 adanos_api_token: "6fc3dbce1b88491d1abc1479ce6d0496"
 adanos_enable_migrate: true
 adanos_listen: ":19999"
+
+adanos_aliyun_voice_tts_code: "TTS_165115246"
+adanos_aliyun_voice_called_show_number: "02388373887"
+adanos_aliyun_voice_tts_param: "title"
+adanos_aliyun_access_key: ""
+adanos_aliyun_access_secret: ""

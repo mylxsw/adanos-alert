@@ -8,7 +8,7 @@ type SmsYunxin struct{
 	manager Manager
 }
 
-func (w SmsYunxin) Validate(meta string) error {
+func (w SmsYunxin) Validate(meta string, userRefs []string) error {
 	panic("implement me")
 }
 

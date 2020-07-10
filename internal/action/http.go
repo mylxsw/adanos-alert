@@ -9,7 +9,7 @@ type HttpAction struct {
 	manager Manager
 }
 
-func (act HttpAction) Validate(meta string) error {
+func (act HttpAction) Validate(meta string, userRefs []string) error {
 	return nil
 }
 

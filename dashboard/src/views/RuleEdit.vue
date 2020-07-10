@@ -125,7 +125,7 @@
                                                :options="action_options"/>
                             </b-form-group>
                             <div v-if="trigger.action === 'dingding'" class="adanos-sub-form">
-                                <b-form-group label-cols="2" label="机器人" :label-for="'trigger_meta_robot_' + i">
+                                <b-form-group label-cols="2" label="机器人*" :label-for="'trigger_meta_robot_' + i">
                                     <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id"
                                                    :options="robot_options"/>
                                 </b-form-group>
@@ -152,20 +152,45 @@
                                     </small>
                                     <TemplateHelp v-if="trigger.template_help"/>
                                 </b-form-group>
+                                <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
+                                              v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                    <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                    <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
+                                                   class="mb-3">
+                                        <b-form-select v-model="trigger.user_refs[index]"
+                                                       :options="user_options"/>
+                                        <b-input-group-append>
+                                            <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                </b-form-group>
                             </div>
                             <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
-                                <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
-                                              :label-for="'trigger_meta_template_id_' + i">
-                                    <b-form-input :id="'trigger_meta_template_id_' + i"
-                                                  v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知内容"
+                                <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题"
                                               :label-for="'trigger_meta_content_' + i">
                                     <b-form-textarea :id="'trigger_meta_content_' + i"
                                                      class="adanos-code-textarea  text-monospace"
-                                                     v-model="trigger.meta_arr.content"
-                                                     placeholder="通知内容，必须是JSON格式，包含模板变量及内容"/>
+                                                     v-model="trigger.meta_arr.title"
+                                                     placeholder="通知标题，默认为规则名称"/>
                                 </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
+                                              :label-for="'trigger_meta_template_id_' + i">
+                                    <b-form-input :id="'trigger_meta_template_id_' + i"
+                                                  v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i"
+                                              v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                    <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                    <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
+                                                   class="mb-3">
+                                        <b-form-select v-model="trigger.user_refs[index]"
+                                                       :options="user_options"/>
+                                        <b-input-group-append>
+                                            <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                        </b-input-group-append>
+                                    </b-input-group>
+                                </b-form-group>
+
                             </div>
                             <div class="adanos-sub-form" v-else>
                                 <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
@@ -173,20 +198,6 @@
                                     <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
                                 </b-form-group>
                             </div>
-
-
-                            <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
-                                          v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
-                                <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
-                                               class="mb-3">
-                                    <b-form-select v-model="trigger.user_refs[index]"
-                                                   :options="user_options"/>
-                                    <b-input-group-append>
-                                        <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </b-form-group>
 
                             <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
                         </b-card>
@@ -494,12 +505,13 @@
                 properties: ['phone', 'email',],
                 action_options: [
                     {value: 'dingding', text: '钉钉'},
-                    {value: 'http', text: 'HTTP'},
-                    {value: 'email', text: '邮件'},
-                    {value: 'wechat', text: '微信'},
-                    {value: 'sms_aliyun', text: '阿里云短信'},
-                    {value: 'sms_yunxin', text: '网易云信'},
                     {value: 'phone_call_aliyun', text: '阿里云语音通知'},
+
+                    // {value: 'http', text: 'HTTP'},
+                    // {value: 'email', text: '邮件'},
+                    // {value: 'wechat', text: '微信'},
+                    // {value: 'sms_aliyun', text: '阿里云短信'},
+                    // {value: 'sms_yunxin', text: '网易云信'},
                 ],
                 user_options: [],
                 robot_options: [],
@@ -696,7 +708,7 @@
                     pre_condition: '',
                     action: 'dingding',
                     meta: '',
-                    meta_arr: {template: '', robot_id: null},
+                    meta_arr: {template: '', robot_id: null, title: '{{ .Rule.Title }}'},
                     id: '',
                     user_refs: [],
                     help: false,

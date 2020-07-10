@@ -26,7 +26,7 @@ type DingdingMeta struct {
 	RobotID  string `json:"robot_id"`
 }
 
-func (d DingdingAction) Validate(meta string) error {
+func (d DingdingAction) Validate(meta string, userRefs []string) error {
 	var dingdingMeta DingdingMeta
 	if err := json.Unmarshal([]byte(meta), &dingdingMeta); err != nil {
 		return err
@@ -94,48 +94,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			}).Errorf("template parse failed: %v", err)
 		}
 
-		mobiles := make([]string, 0)
-		if len(trigger.UserRefs) > 0 {
-			users, err := d.userRepo.Find(bson.M{"_id": bson.M{"$in": trigger.UserRefs}})
-			if err != nil {
-				log.WithFields(log.Fields{
-					"err":     err.Error(),
-					"trigger": trigger,
-				}).Errorf("load user from repo failed: %s", err)
-			} else {
-				if err := coll.MustNew(users).Filter(func(user repository.User) bool {
-					if user.Phone != "" {
-						return true
-					}
-
-					for _, m := range user.Metas {
-						if strings.ToLower(m.Key) == "phone" {
-							return true
-						}
-					}
-
-					return false
-				}).Map(func(user repository.User) string {
-					if user.Phone != "" {
-						return user.Phone
-					}
-
-					for _, m := range user.Metas {
-						if strings.ToLower(m.Key) == "phone" {
-							return m.Value
-						}
-					}
-					return ""
-				}).All(&mobiles); err != nil {
-					log.WithFields(log.Fields{
-						"err":     err.Error(),
-						"trigger": trigger,
-						"users":   users,
-					}).Errorf("convert user's phone to array failed: %v", err)
-				}
-			}
-		}
-
+		mobiles := extractPhonesFromUserRefs(d.userRepo, trigger.UserRefs)
 		msg := dingding.NewMarkdownMessage(rule.Name, res, mobiles)
 		if err := dingding.NewDingding(robot.Token, robot.Secret).Send(msg); err != nil {
 			log.WithFields(log.Fields{
@@ -155,4 +114,51 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 
 		return nil
 	})
+}
+
+func extractPhonesFromUserRefs(userRepo repository.UserRepo, userRefs []primitive.ObjectID) []string {
+	mobiles := make([]string, 0)
+	if len(userRefs) == 0 {
+		return mobiles
+	}
+
+	users, err := userRepo.Find(bson.M{"_id": bson.M{"$in": userRefs}})
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err":      err.Error(),
+			"userRefs": userRefs,
+		}).Errorf("load user from repo failed: %s", err)
+	} else {
+		if err := coll.MustNew(users).Filter(func(user repository.User) bool {
+			if user.Phone != "" {
+				return true
+			}
+
+			for _, m := range user.Metas {
+				if strings.ToLower(m.Key) == "phone" {
+					return true
+				}
+			}
+
+			return false
+		}).Map(func(user repository.User) string {
+			if user.Phone != "" {
+				return user.Phone
+			}
+
+			for _, m := range user.Metas {
+				if strings.ToLower(m.Key) == "phone" {
+					return m.Value
+				}
+			}
+			return ""
+		}).All(&mobiles); err != nil {
+			log.WithFields(log.Fields{
+				"err":   err.Error(),
+				"users": users,
+			}).Errorf("convert user's phone to array failed: %v", err)
+		}
+	}
+
+	return mobiles
 }

@@ -8,7 +8,7 @@ type SmsAliyun struct{
 	manager Manager
 }
 
-func (w SmsAliyun) Validate(meta string) error {
+func (w SmsAliyun) Validate(meta string, userRefs []string) error {
 	panic("implement me")
 }
 
