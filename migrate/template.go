@@ -57,6 +57,12 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
+		Name:        "判断分组中 Messages 数量是否大于某个值",
+		Description: "当前分组中有超过 10 条 Messages",
+		Content:     `MessagesCount() > 10`,
+		Type:        repository.TemplateTypeTriggerRule,
+	},
+	{
 		Name:        "展示概要信息",
 		Description: "展示分组的概要信息",
 		Content:     `当前通知方式 {{ .Action }}, 当前分组包含的消息数量 {{ .Group.MessageCount }}，触发的规则名称 {{ .Rule.Name }}  ({{ .Rule.Rule }})`,

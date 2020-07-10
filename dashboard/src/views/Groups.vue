@@ -1,6 +1,12 @@
 <template>
     <b-row class="mb-5">
         <b-col>
+            <b-card class="mb-2">
+                <b-card-text>
+                    <b-badge :variant="$route.query.status === undefined ? 'primary':''" class="mr-1" :to="'/'">全部</b-badge>
+                    <b-badge :variant="$route.query.status === status.value ? 'primary': ''" v-for="(status, index) in statuses" :key="index" class="mr-1" :to="'/?status=' + status.value">{{ status.name }}</b-badge>
+                </b-card-text>
+            </b-card>
             <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
                     <b-badge class="mr-2" variant="dark">{{ row.item.seq_num }}</b-badge>
@@ -22,7 +28,7 @@
                     </b-link>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计完成' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中
                         <span v-if="row.item.collect_time_remain > 0">
                             剩余 <human-time :value="row.item.collect_time_remain"></human-time>
                         </span>
@@ -74,7 +80,17 @@
                     {key: 'status', label: '状态'},
                     {key: 'operations', label: '操作'}
                 ],
+                statuses: [
+                    {value: 'collecting', name:'收集中'},
+                    {value: 'pending', name:'准备'},
+                    {value: 'ok', name:'完成'},
+                    {value: 'failed', name:'失败'},
+                    {value: 'canceled', name:'取消'},
+                ]
             };
+        },
+        watch: {
+            '$route': 'reload',
         },
         methods: {
             formatted(t) {

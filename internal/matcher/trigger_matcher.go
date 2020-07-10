@@ -48,6 +48,18 @@ func (tc *TriggerContext) Messages() []repository.Message {
 	return tc.messages
 }
 
+// MessagesCount return the count in group
+func (tc *TriggerContext) MessagesCount() int64 {
+	var count int64 = 0
+	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {
+		count, _ = msgRepo.Count(bson.M{
+			"group_ids": tc.Group.ID,
+		})
+	})
+
+	return count
+}
+
 // MessagesMatchRegexCount get the count for messages matched regex
 func (tc *TriggerContext) MessagesMatchRegexCount(regex string) int64 {
 	var count int64 = 0

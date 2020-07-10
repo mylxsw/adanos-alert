@@ -365,6 +365,10 @@
                     text: 'MessagesWithTagsCount(TAG)',
                     displayText: 'MessagesWithTagsCount(tags string) int64  | 获取拥有指定 tag 的 message 数量，多个 tag 使用英文逗号分隔'
                 })
+                sources.push({
+                    text: 'MessagesCount()',
+                    displayText: 'MessagesCount() int64 | 获取分组中 Messages 数量'
+                })
                 sources.push({text: 'TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)', displayText: 'TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 当前规则在指定时间范围内，状态为 triggerStatus 的触发次数'})
                 sources.push({text: 'LastTriggeredGroup(TRIGGER_STATUS)', displayText: 'LastTriggeredGroup(triggerStatus string) repository.MessageGroup 最后一次触发该规则的状态为 triggerStatus 的分组'})
 

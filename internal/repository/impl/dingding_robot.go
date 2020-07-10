@@ -42,7 +42,7 @@ func (u DingdingRobotRepo) Get(id primitive.ObjectID) (robot repository.Dingding
 
 func (u DingdingRobotRepo) Find(filter bson.M) (robots []repository.DingdingRobot, err error) {
 	robots = make([]repository.DingdingRobot, 0)
-	cur, err := u.col.Find(context.TODO(), filter)
+	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSort(bson.M{"name": -1}))
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func (u DingdingRobotRepo) Find(filter bson.M) (robots []repository.DingdingRobo
 
 func (u DingdingRobotRepo) Paginate(filter bson.M, offset, limit int64) (robots []repository.DingdingRobot, next int64, err error) {
 	robots = make([]repository.DingdingRobot, 0)
-	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
+	cur, err := u.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"name": -1}))
 	if err != nil {
 		return
 	}

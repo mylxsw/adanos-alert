@@ -54,9 +54,11 @@
                     <strong> Loading...</strong>
                 </template>
                 <template v-slot:cell(operations)="row">
-                    <b-button-group>
+                    <b-button-group class="mr-2">
                         <b-button size="sm" variant="success" :to="{path:'/', query:{rule_id: row.item.id}}">报警</b-button>
                         <b-button size="sm" variant="warning" :to="{path:'/rules/add', query: {copy_from: row.item.id}}" target="_blank">复制</b-button>
+                    </b-button-group>
+                    <b-button-group>
                         <b-button size="sm" variant="info" :to="{path:'/rules/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button size="sm" variant="danger" @click="delete_rule(row.index, row.item.id)">删除</b-button>
                     </b-button-group>

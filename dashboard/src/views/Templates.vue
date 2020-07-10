@@ -33,11 +33,12 @@
                     <strong> Loading...</strong>
                 </template>
                 <template v-slot:cell(operations)="row">
-                    <b-button-group>
+                    <b-button-group class="mr-2">
                         <b-button size="sm" @click="row.toggleDetails">
                             {{ row.detailsShowing ? '隐藏' : '显示' }}详情
                         </b-button>
-
+                    </b-button-group>
+                    <b-button-group>
                         <b-button v-if="!row.item.predefined" size="sm" variant="info" :to="{path:'/templates/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button v-if="!row.item.predefined" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">删除</b-button>
                         <b-button v-if="row.item.predefined" size="sm" disabled>预置</b-button>

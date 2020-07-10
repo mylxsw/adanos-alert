@@ -45,6 +45,7 @@ Trigger {
                         <li><code>ParseTime(layout string, value string) time.Time</code> 时间字符串转时间对象</li>
                         <li><code>DailyTimeBetween(startTime, endTime string) bool</code> 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04</li>
                         <li><code>Messages() []repository.Message</code> 获取分组中所有的 Messages</li>
+                        <li><code>MessagesCount() int64</code> 获取分组中 Messages 数量</li>
                         <li><code>MessagesMatchRegexCount(regex string) int64</code> 获取匹配指定正则表达式的 message 数量</li>
                         <li><code>MessagesWithMetaCount(key, value string) int64</code> 获取 meta 匹配指定 key=value 的 message 数量</li>
                         <li><code>MessagesWithTagsCount(tags string) int64</code> 获取拥有指定 tag 的 message 数量，多个 tag 使用英文逗号分隔</li>
