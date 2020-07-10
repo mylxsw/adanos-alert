@@ -62,9 +62,9 @@ type RuleForm struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
-	ReadyType string `json:"ready_type"`
-	Interval  int64  `json:"interval"`
-	DailyTime string `json:"daily_time"`
+	ReadyType  string   `json:"ready_type"`
+	Interval   int64    `json:"interval"`
+	DailyTimes []string `json:"daily_times"`
 
 	Rule            string            `json:"rule"`
 	Template        string            `json:"template"`
@@ -92,14 +92,21 @@ func (r RuleForm) Validate(req web.Request) error {
 			return errors.New("interval is invalid, must between 1min~24h")
 		}
 	case repository.ReadyTypeDailyTime:
-		if len(r.DailyTime) < 5 {
-			return fmt.Errorf("invalid daily_time format")
+		if len(r.DailyTimes) == 0 {
+			return fmt.Errorf("daily_times is required")
 		}
 
-		_, err := time.Parse("15:04", r.DailyTime[:5])
-		if err != nil {
-			return fmt.Errorf("invalid daily_time format: %v", err)
+		for _, dailyTime := range r.DailyTimes {
+			if len(dailyTime) < 5 {
+				return fmt.Errorf("invalid daily_time format for %s", dailyTime)
+			}
+
+			_, err := time.Parse("15:04", dailyTime[:5])
+			if err != nil {
+				return fmt.Errorf("invalid daily_time format for %s: %v", dailyTime, err)
+			}
 		}
+
 	default:
 		return errors.New("invalid readyType")
 	}
@@ -201,7 +208,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		Description:     ruleForm.Description,
 		Tags:            ruleForm.Tags,
 		ReadyType:       ruleForm.ReadyType,
-		DailyTime:       ruleForm.DailyTime,
+		DailyTimes:      array.StringUnique(ruleForm.DailyTimes),
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
@@ -268,7 +275,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		Description:     ruleForm.Description,
 		Tags:            ruleForm.Tags,
 		ReadyType:       ruleForm.ReadyType,
-		DailyTime:       ruleForm.DailyTime,
+		DailyTimes:      array.StringUnique(ruleForm.DailyTimes),
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,

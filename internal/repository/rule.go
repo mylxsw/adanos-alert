@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"sort"
 	"time"
 
 	"github.com/mylxsw/asteria/log"
+	"github.com/mylxsw/coll"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -33,9 +35,9 @@ type Rule struct {
 	Tags        []string           `bson:"tags" json:"tags"`
 
 	// ReadType 就绪类型，支持 interval/daily_time
-	ReadyType string `bson:"ready_type" json:"ready_type"`
-	Interval  int64  `bson:"interval" json:"interval"`
-	DailyTime string `bson:"daily_time" json:"daily_time"`
+	ReadyType  string   `bson:"ready_type" json:"ready_type"`
+	Interval   int64    `bson:"interval" json:"interval"`
+	DailyTimes []string `bson:"daily_times" json:"daily_times"`
 
 	Rule            string    `bson:"rule" json:"rule"`
 	Template        string    `bson:"template" json:"template"`
@@ -66,7 +68,7 @@ func (rule Rule) ToGroupRule() MessageGroupRule {
 	case ReadyTypeInterval:
 		groupRule.ExpectReadyAt = time.Now().Add(time.Duration(rule.Interval) * time.Second)
 	case ReadyTypeDailyTime:
-		groupRule.ExpectReadyAt = ExpectReadyAt(rule.DailyTime)
+		groupRule.ExpectReadyAt = ExpectReadyAt(time.Now(), rule.DailyTimes)
 	default:
 		log.Errorf("invalid readyType [%s] for ruleID=%s", rule.ReadyType, rule.ID.Hex())
 	}
@@ -87,9 +89,36 @@ type RuleRepo interface {
 	Tags() ([]Tag, error)
 }
 
-func ExpectReadyAt(dailyTime string) time.Time {
-	// 2006-01-02T15:04:05Z07:00
-	nextDayTimeStr := time.Now().Add(24 * time.Hour).Format(time.RFC3339)
-	parsed, _ := time.Parse(time.RFC3339, nextDayTimeStr[0:11]+dailyTime[:5]+":00"+nextDayTimeStr[19:])
-	return parsed
+func ExpectReadyAt(now time.Time, dailyTimes []string) time.Time {
+	// 查找最近的时间点
+	var times Times
+	todayTimeStr := now.Format(time.RFC3339)
+	_ = coll.MustNew(dailyTimes).Map(func(dailyTime string) time.Time {
+		ts, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+dailyTime[:5]+":00"+todayTimeStr[19:])
+		return ts
+	}).All(&times)
+
+	sort.Sort(times)
+
+	for _, t := range times {
+		if now.Before(t) {
+			return t
+		}
+	}
+
+	return times[0].Add(24 * time.Hour)
+}
+
+type Times []time.Time
+
+func (t Times) Len() int {
+	return len(t)
+}
+
+func (t Times) Less(i, j int) bool {
+	return t[i].Before(t[j])
+}
+
+func (t Times) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
 }

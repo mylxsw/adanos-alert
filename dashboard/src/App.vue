@@ -5,7 +5,7 @@
             <b-navbar-brand href="/">Adanos</b-navbar-brand>
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <b-navbar-nav>
-                    <b-nav-item to="/" exact>分组</b-nav-item>
+                    <b-nav-item href="/" exact>分组</b-nav-item>
                     <b-nav-item :to="{path:'/messages', query: {status: null}}" exact>
                         消息
                         <b-badge variant="danger" v-if="pending_message_count > 0" v-b-tooltip.hover title="没有匹配任何规则的消息">{{ pending_message_count }}</b-badge>

@@ -47,6 +47,7 @@ Vue.prototype.ToastSuccess = function (message) {
 };
 
 Vue.prototype.ToastError = function (message) {
+    console.log("Error: ", message);
     this.$bvToast.toast(this.ParseError(message), {
         title: 'ERROR',
         variant: 'danger'

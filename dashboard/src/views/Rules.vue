@@ -26,7 +26,7 @@
                     <p><small>
                         频率为
                         <span v-if="row.item.ready_type === 'interval' || row.item.ready_type === ''"><code><b>{{ row.item.interval / 60 }} 分钟每次</b></code></span>
-                        <span v-if="row.item.ready_type === 'daily_time'"><code><b>每天 {{ row.item.daily_time }}</b></code></span>
+                        <span v-if="row.item.ready_type === 'daily_time'"><code><b>每天 {{ row.item.daily_times.map((t) => t.substring(0, 5)).join(", ")}}</b></code></span>
                         {{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
                     <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule"><code>{{ row.item.rule }}</code></p>
                 </template>
@@ -55,6 +55,7 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
+                        <b-button size="sm" variant="success" :to="{path:'/', query:{rule_id: row.item.id}}">报警</b-button>
                         <b-button size="sm" variant="warning" :to="{path:'/rules/add', query: {copy_from: row.item.id}}" target="_blank">复制</b-button>
                         <b-button size="sm" variant="info" :to="{path:'/rules/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button size="sm" variant="danger" @click="delete_rule(row.index, row.item.id)">删除</b-button>

@@ -34,7 +34,13 @@
                                                   v-model="form.interval" required/>
                                 </b-form-group>
                                 <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
-                                    <b-form-timepicker v-model="form.daily_time" :hour12="false" :show-seconds="false"></b-form-timepicker>
+                                    <b-btn variant="success" class="mb-3" @click="dailyTimeAdd()">添加</b-btn>
+                                    <b-input-group v-bind:key="i" v-for="(daily_time, i) in form.daily_times" style="margin-bottom: 10px;">
+                                        <b-form-timepicker v-model="form.daily_times[i]" :hour12="false" :show-seconds="false"></b-form-timepicker>
+                                        <b-input-group-append>
+                                            <b-btn variant="danger" @click="dailyTimeDelete(i)">删除</b-btn>
+                                        </b-input-group-append>
+                                    </b-input-group>
                                 </b-form-group>
                             </div>
                         </b-form-group>
@@ -493,7 +499,7 @@
                     description: '',
                     tags: [],
                     ready_type: 'interval',
-                    daily_time: '09:00:00',
+                    daily_times: ['09:00:00'],
                     interval: 1,
                     rule: '',
                     template: '',
@@ -723,6 +729,19 @@
                 this.form.triggers.splice(index, 1);
             },
             /**
+             * 添加执行时间
+             */
+            dailyTimeAdd() {
+                this.form.daily_times.push('09:00:00');
+            },
+            /**
+             * 删除执行时间
+             * @param index
+             */
+            dailyTimeDelete(index) {
+                this.form.daily_times.splice(index, 1);
+            },
+            /**
              * 保存
              * @param evt
              */
@@ -767,7 +786,7 @@
                         requestData.interval = this.form.interval * 60;
                     }
                 } else {
-                    requestData.daily_time = this.form.daily_time.substring(0, 5);
+                    requestData.daily_times = this.form.daily_times;
                 }
 
                 return requestData;
@@ -784,7 +803,7 @@
                     this.form.description = response.data.description;
                     this.form.interval = response.data.interval / 60;
                     this.form.ready_type = response.data.ready_type === '' ? 'interval': response.data.ready_type;
-                    this.form.daily_time = response.data.daily_time === '' ? '09:00:00' : response.data.daily_time;
+                    this.form.daily_times = (response.data.daily_times === null || response.data.daily_times.length === 0) ? ['09:00:00'] : response.data.daily_times;
                     this.form.rule = response.data.rule;
                     this.form.tags = response.data.tags;
                     this.form.template = response.data.template;
