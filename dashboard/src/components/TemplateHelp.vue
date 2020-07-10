@@ -41,7 +41,7 @@ Group: {
 	Rule         {
 		ID              primitive.ObjectID
 		Name            string
-		Interval        int64
+		ExpectReadyAt   time.Time
 		Rule            string
 		Template        string
 		SummaryTemplate string

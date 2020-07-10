@@ -23,7 +23,11 @@
                     </p>
                 </template>
                 <template v-slot:cell(rule)="row">
-                    <p><small>报警周期为 <code><b>{{ row.item.interval / 60 }} 分钟每次</b></code>{{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
+                    <p><small>
+                        频率为
+                        <span v-if="row.item.ready_type === 'interval' || row.item.ready_type === ''"><code><b>{{ row.item.interval / 60 }} 分钟每次</b></code></span>
+                        <span v-if="row.item.ready_type === 'daily_time'"><code><b>每天 {{ row.item.daily_time }}</b></code></span>
+                        {{ row.item.description !== '' ? '，':''}} {{ row.item.description }}</small></p>
                     <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule"><code>{{ row.item.rule }}</code></p>
                 </template>
                 <template v-slot:cell(interval)="row">

@@ -18,12 +18,15 @@ const (
 )
 
 type MessageGroupRule struct {
-	ID              primitive.ObjectID `bson:"_id" json:"id"`
-	Name            string             `bson:"name" json:"name"`
-	Interval        int64              `bson:"interval" json:"interval"`
-	Rule            string             `bson:"rule" json:"rule"`
-	Template        string             `bson:"template" json:"template"`
-	SummaryTemplate string             `bson:"summary_template" json:"summary_template"`
+	ID   primitive.ObjectID `bson:"_id" json:"id"`
+	Name string             `bson:"name" json:"name"`
+
+	// ExpectReadyAt 预期就绪时间，当超过该时间后，Group自动关闭，发起通知
+	ExpectReadyAt time.Time `bson:"expect_ready_at" json:"expect_ready_at"`
+
+	Rule            string `bson:"rule" json:"rule"`
+	Template        string `bson:"template" json:"template"`
+	SummaryTemplate string `bson:"summary_template" json:"summary_template"`
 }
 
 type MessageGroup struct {
@@ -37,6 +40,11 @@ type MessageGroup struct {
 	Status    MessageGroupStatus `bson:"status" json:"status"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+}
+
+// Ready return whether the message group has reached close conditions
+func (grp *MessageGroup) Ready() bool {
+	return grp.Rule.ExpectReadyAt.Before(time.Now())
 }
 
 type MessageGroupRepo interface {

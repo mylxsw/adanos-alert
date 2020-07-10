@@ -13,6 +13,14 @@ type RuleRepo struct {
 	Rules []repository.Rule
 }
 
+func (r *RuleRepo) Paginate(filter interface{}, offset, limit int64) (rules []repository.Rule, next int64, err error) {
+	panic("implement me")
+}
+
+func (r *RuleRepo) Tags() ([]repository.Tag, error) {
+	panic("implement me")
+}
+
 func NewRuleRepo() repository.RuleRepo {
 	return &RuleRepo{Rules: make([]repository.Rule, 0)}
 }

@@ -22,8 +22,10 @@
                     </b-link>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'collecting'" variant="dark">收集中
-                        <span v-if="row.item.collect_time_remain > 0">剩余 <human-time :value="row.item.collect_time_remain"></human-time></span>
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计完成' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中
+                        <span v-if="row.item.collect_time_remain > 0">
+                            剩余 <human-time :value="row.item.collect_time_remain"></human-time>
+                        </span>
                         <span v-else>收集完成</span>
                     </b-badge>
                     <b-badge v-if="row.item.status === 'pending'" variant="info">准备</b-badge>
@@ -34,6 +36,10 @@
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
+                </template>
+                <template v-slot:cell(message_count)="row">
+                    <span v-if="row.item.status === 'collecting'">-</span>
+                    <span v-else>{{ row.item.message_count }}</span>
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
@@ -48,6 +54,7 @@
 </template>
 
 <script>
+    import moment from 'moment';
     import axios from 'axios';
 
     export default {
@@ -70,6 +77,9 @@
             };
         },
         methods: {
+            formatted(t) {
+                return moment(t).format('YYYY-MM-DD HH:mm:ss');
+            },
             users(user_refs) {
                 return user_refs.map((u) => {
                     return this.userRefs[u] !== undefined ? this.userRefs[u] : '-';

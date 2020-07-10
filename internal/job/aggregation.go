@@ -2,7 +2,6 @@ package job
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -129,7 +128,7 @@ func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*ma
 
 func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) error {
 	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusCollecting}, func(grp repository.MessageGroup) error {
-		if grp.CreatedAt.Add(time.Duration(grp.Rule.Interval) * time.Second).After(time.Now()) {
+		if !grp.Ready() {
 			return nil
 		}
 

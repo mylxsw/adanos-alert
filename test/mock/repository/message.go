@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -13,8 +14,12 @@ type MessageRepo struct {
 	Messages []repository.Message
 }
 
+func (m *MessageRepo) AddWithContext(ctx context.Context, msg repository.Message) (id primitive.ObjectID, err error) {
+	panic("implement me")
+}
+
 func NewMessageRepo() repository.MessageRepo {
-	return &MessageRepo{Messages: make([]repository.Message, 0),}
+	return &MessageRepo{Messages: make([]repository.Message, 0)}
 }
 
 func (m *MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {

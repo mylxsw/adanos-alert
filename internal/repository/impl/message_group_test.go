@@ -107,7 +107,6 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	groupRule := rule.ToGroupRule()
 	m.Equal(rule.ID, groupRule.ID)
 	m.Equal(rule.Name, groupRule.Name)
-	m.Equal(rule.Interval, groupRule.Interval)
 	m.Equal(rule.Rule, groupRule.Rule)
 
 	collectingGroup, err := m.repo.CollectingGroup(groupRule)

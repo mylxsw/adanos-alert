@@ -85,7 +85,7 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 	for i, grp := range grps {
 		var timeRemain int64 = 0
 		if grp.Status == repository.MessageGroupStatusCollecting {
-			timeRemain = grp.CreatedAt.Unix() + grp.Rule.Interval - time.Now().Unix()
+			timeRemain = grp.Rule.ExpectReadyAt.Unix() - time.Now().Unix()
 		}
 		groups[i] = GroupsGroupResp{MessageGroup: grp, CollectTimeRemain: timeRemain}
 	}

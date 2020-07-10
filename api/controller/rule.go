@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/internal/action"
@@ -61,7 +62,9 @@ type RuleForm struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
-	Interval int64 `json:"interval"`
+	ReadyType string `json:"ready_type"`
+	Interval  int64  `json:"interval"`
+	DailyTime string `json:"daily_time"`
 
 	Rule            string            `json:"rule"`
 	Template        string            `json:"template"`
@@ -79,8 +82,26 @@ func (r RuleForm) Validate(req web.Request) error {
 		return errors.New("name is required")
 	}
 
-	if !govalidator.InRangeInt(r.Interval, 60, 3600*24) {
-		return errors.New("interval is invalid, must between 1min~24h")
+	if r.ReadyType == "" {
+		r.ReadyType = repository.ReadyTypeInterval
+	}
+
+	switch r.ReadyType {
+	case repository.ReadyTypeInterval:
+		if !govalidator.InRangeInt(r.Interval, 60, 3600*24) {
+			return errors.New("interval is invalid, must between 1min~24h")
+		}
+	case repository.ReadyTypeDailyTime:
+		if len(r.DailyTime) < 5 {
+			return fmt.Errorf("invalid daily_time format")
+		}
+
+		_, err := time.Parse("15:04", r.DailyTime[:5])
+		if err != nil {
+			return fmt.Errorf("invalid daily_time format: %v", err)
+		}
+	default:
+		return errors.New("invalid readyType")
 	}
 
 	if r.Status != "" && !govalidator.IsIn(r.Status, string(repository.RuleStatusEnabled), string(repository.RuleStatusDisabled)) {
@@ -179,6 +200,8 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
 		Tags:            ruleForm.Tags,
+		ReadyType:       ruleForm.ReadyType,
+		DailyTime:       ruleForm.DailyTime,
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
@@ -244,6 +267,8 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
 		Tags:            ruleForm.Tags,
+		ReadyType:       ruleForm.ReadyType,
+		DailyTime:       ruleForm.DailyTime,
 		Interval:        ruleForm.Interval,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,

@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	"github.com/mylxsw/asteria/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -12,6 +13,11 @@ type RuleStatus string
 const (
 	RuleStatusEnabled  RuleStatus = "enabled"
 	RuleStatusDisabled RuleStatus = "disabled"
+)
+
+const (
+	ReadyTypeInterval  = "interval"
+	ReadyTypeDailyTime = "daily_time"
 )
 
 type Tag struct {
@@ -26,7 +32,10 @@ type Rule struct {
 	Description string             `bson:"description" json:"description"`
 	Tags        []string           `bson:"tags" json:"tags"`
 
-	Interval int64 `bson:"interval" json:"interval"`
+	// ReadType 就绪类型，支持 interval/daily_time
+	ReadyType string `bson:"ready_type" json:"ready_type"`
+	Interval  int64  `bson:"interval" json:"interval"`
+	DailyTime string `bson:"daily_time" json:"daily_time"`
 
 	Rule            string    `bson:"rule" json:"rule"`
 	Template        string    `bson:"template" json:"template"`
@@ -41,14 +50,28 @@ type Rule struct {
 
 // ToGroupRule convert Rule to MessageGroupRule
 func (rule Rule) ToGroupRule() MessageGroupRule {
-	return MessageGroupRule{
+	groupRule := MessageGroupRule{
 		ID:              rule.ID,
 		Name:            rule.Name,
-		Interval:        rule.Interval,
 		Rule:            rule.Rule,
 		Template:        rule.Template,
 		SummaryTemplate: rule.SummaryTemplate,
 	}
+
+	if rule.ReadyType == "" {
+		rule.ReadyType = ReadyTypeInterval
+	}
+
+	switch rule.ReadyType {
+	case ReadyTypeInterval:
+		groupRule.ExpectReadyAt = time.Now().Add(time.Duration(rule.Interval) * time.Second)
+	case ReadyTypeDailyTime:
+		groupRule.ExpectReadyAt = ExpectReadyAt(rule.DailyTime)
+	default:
+		log.Errorf("invalid readyType [%s] for ruleID=%s", rule.ReadyType, rule.ID.Hex())
+	}
+
+	return groupRule
 }
 
 type RuleRepo interface {
@@ -62,4 +85,11 @@ type RuleRepo interface {
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
 	Tags() ([]Tag, error)
+}
+
+func ExpectReadyAt(dailyTime string) time.Time {
+	// 2006-01-02T15:04:05Z07:00
+	nextDayTimeStr := time.Now().Add(24 * time.Hour).Format(time.RFC3339)
+	parsed, _ := time.Parse(time.RFC3339, nextDayTimeStr[0:11]+dailyTime[:5]+":00"+nextDayTimeStr[19:])
+	return parsed
 }

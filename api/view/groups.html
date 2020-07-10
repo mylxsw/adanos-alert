@@ -97,11 +97,16 @@
                             <td>{{ $msg.Origin }}</td>
                         </tr>
                         {{ range $i, $m := $msg.Meta }}
-                            <tr>
+                            <tr class="adanos-can-fold">
                                 <th>{{ $i }}</th>
                                 <td><pre style="margin: 0; padding: 0; line-height: 1.5;">{{ format "%v" $m | remove_empty_line }}</pre></td>
                             </tr>
                         {{ end }}
+                        <tr>
+                            <td colspan="2" style="text-align: center">
+                                <a href="#" class="more-btn">更多</a>
+                            </td>
+                        </tr>
                     </table>
                 </div>
                 <div class="alert-body">
@@ -133,7 +138,13 @@
 <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
     $(function() {
+        $('table').find('tr.adanos-can-fold:gt(3)').hide();
+        $('a.more-btn').on('click', function (e) {
+            e.preventDefault();
 
+            $(this).parents('table').find('tr.adanos-can-fold:gt(3)').show();
+            $(this).parents('tr').hide();
+        })
     });
 </script>
 </body>

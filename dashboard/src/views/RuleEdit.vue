@@ -20,10 +20,23 @@
                                          v-model="form.tags"></b-form-tags>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="rule_interval" label="报警周期*" label-for="rule_interval_input"
-                                      :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
-                            <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
-                                          v-model="form.interval" required/>
+                        <b-form-group label-cols="2" label="频率*">
+                            <div class="adanos-sub-form">
+                                <b-form-group label-cols="2" label="类型">
+                                    <b-form-select v-model="form.ready_type">
+                                        <b-form-select-option value="interval">时间间隔</b-form-select-option>
+                                        <b-form-select-option value="daily_time">固定时间</b-form-select-option>
+                                    </b-form-select>
+                                </b-form-group>
+                                <b-form-group label-cols="2" id="rule_interval" label="周期" label-for="rule_interval_input" v-if="form.ready_type === 'interval'"
+                                              :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
+                                    <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
+                                                  v-model="form.interval" required/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
+                                    <b-form-timepicker v-model="form.daily_time" :hour12="false" :show-seconds="false"></b-form-timepicker>
+                                </b-form-group>
+                            </div>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
@@ -111,7 +124,7 @@
                                 <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
                                                :options="action_options"/>
                             </b-form-group>
-                            <div v-if="trigger.action === 'dingding'" class="trigger_dynamic_area">
+                            <div v-if="trigger.action === 'dingding'" class="adanos-sub-form">
                                 <b-form-group label-cols="2" label="机器人" :label-for="'trigger_meta_robot_' + i">
                                     <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id"
                                                    :options="robot_options"/>
@@ -140,7 +153,7 @@
                                     <TemplateHelp v-if="trigger.template_help"/>
                                 </b-form-group>
                             </div>
-                            <div v-else-if="trigger.action === 'phone_call_aliyun'" class="trigger_dynamic_area">
+                            <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
                                 <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
                                               :label-for="'trigger_meta_template_id_' + i">
                                     <b-form-input :id="'trigger_meta_template_id_' + i"
@@ -154,7 +167,7 @@
                                                      placeholder="通知内容，必须是JSON格式，包含模板变量及内容"/>
                                 </b-form-group>
                             </div>
-                            <div class="trigger_dynamic_area" v-else>
+                            <div class="adanos-sub-form" v-else>
                                 <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
                                               :label-for="'trigger_meta_' + i">
                                     <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
@@ -468,6 +481,8 @@
                     name: '',
                     description: '',
                     tags: [],
+                    ready_type: 'interval',
+                    daily_time: '09:00:00',
                     interval: 1,
                     rule: '',
                     template: '',
@@ -732,10 +747,15 @@
                 });
                 requestData.status = this.form.status ? 'enabled' : 'disabled';
 
-                if (this.form.interval <= 0) {
-                    requestData.interval = 60;
+                requestData.ready_type = this.form.ready_type;
+                if (this.form.ready_type === 'interval') {
+                    if (this.form.interval <= 0) {
+                        requestData.interval = 60;
+                    } else {
+                        requestData.interval = this.form.interval * 60;
+                    }
                 } else {
-                    requestData.interval = this.form.interval * 60;
+                    requestData.daily_time = this.form.daily_time.substring(0, 5);
                 }
 
                 return requestData;
@@ -751,6 +771,8 @@
                     this.form.name = response.data.name;
                     this.form.description = response.data.description;
                     this.form.interval = response.data.interval / 60;
+                    this.form.ready_type = response.data.ready_type === '' ? 'interval': response.data.ready_type;
+                    this.form.daily_time = response.data.daily_time === '' ? '09:00:00' : response.data.daily_time;
                     this.form.rule = response.data.rule;
                     this.form.tags = response.data.tags;
                     this.form.template = response.data.template;
@@ -810,7 +832,7 @@
         max-width: 1000px;
     }
 
-    .trigger_dynamic_area {
+    .adanos-sub-form {
         border: 1px dashed #ffc107;
         padding: 10px 10px 10px 30px;
         background-color: #fff7e1;
