@@ -16,6 +16,7 @@
                     <b-nav-item to="/templates">模板</b-nav-item>
                     <b-nav-item to="/queues">队列</b-nav-item>
                     <b-nav-item to="/agents">Agent</b-nav-item>
+                    <b-nav-item to="/reports">报表</b-nav-item>
                     <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">

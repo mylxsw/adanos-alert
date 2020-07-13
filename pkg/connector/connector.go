@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/pkg/errors"
 )

@@ -1,7 +1,9 @@
 package impl_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/repository/impl"
@@ -47,7 +49,8 @@ func (r *RuleTestSuite) TestTags() {
 		Tags: []string{"数据"},
 	})
 
-	tags, err := r.ruleRepo.Tags()
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	tags, err := r.ruleRepo.Tags(ctx)
 	r.NoError(err)
 	r.ElementsMatch(tags, []repository.Tag{
 		{Name: "oracle", Count: 1},

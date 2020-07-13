@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"sort"
 	"time"
 
@@ -86,7 +87,7 @@ type RuleRepo interface {
 	Count(filter bson.M) (int64, error)
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
-	Tags() ([]Tag, error)
+	Tags(ctx context.Context) ([]Tag, error)
 }
 
 func ExpectReadyAt(now time.Time, dailyTimes []string) time.Time {

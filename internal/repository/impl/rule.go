@@ -19,8 +19,8 @@ func NewRuleRepo(db *mongo.Database) repository.RuleRepo {
 	return &RuleRepo{col: db.Collection("rule")}
 }
 
-func (r RuleRepo) Tags() ([]repository.Tag, error) {
-	aggregate, err := r.col.Aggregate(context.TODO(), mongo.Pipeline{
+func (r RuleRepo) Tags(ctx context.Context) ([]repository.Tag, error) {
+	aggregate, err := r.col.Aggregate(ctx, mongo.Pipeline{
 		bson.D{{"$unwind", "$tags"}},
 		bson.D{{"$group", bson.M{
 			"_id":   "$tags",
@@ -33,7 +33,7 @@ func (r RuleRepo) Tags() ([]repository.Tag, error) {
 	}
 
 	tags := make([]repository.Tag, 0)
-	for aggregate.Next(context.TODO()) {
+	for aggregate.Next(ctx) {
 		var tag repository.Tag
 		if err := aggregate.Decode(&tag); err != nil {
 			return nil, err

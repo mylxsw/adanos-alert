@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/container"
 )

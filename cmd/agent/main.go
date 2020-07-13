@@ -14,7 +14,7 @@ import (
 	"github.com/mylxsw/adanos-alert/agent/job"
 	"github.com/mylxsw/adanos-alert/agent/store"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"

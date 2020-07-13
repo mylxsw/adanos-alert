@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -421,7 +422,8 @@ func (r RuleController) TestMessageMatch(ctx web.Context) web.Response {
 
 // Tags return all tags existed
 func (r RuleController) Tags(ctx web.Context, repo repository.RuleRepo) web.Response {
-	tags, err := repo.Tags()
+	timeoutCtx, _ := context.WithTimeout(ctx.Context(), 5*time.Second)
+	tags, err := repo.Tags(timeoutCtx)
 	if err != nil {
 		return ctx.JSONError(fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
 	}

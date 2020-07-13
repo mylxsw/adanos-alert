@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"

@@ -1,6 +1,7 @@
 package impl_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -119,6 +120,17 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	m.NoError(err)
 	m.Equal(collectingGroup.ID, collectingGroup2.ID)
 	m.EqualValues(collectingGroup.CreatedAt.Unix(), collectingGroup2.CreatedAt.Unix())
+
+	ruleCount, err := m.repo.StatByRuleCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now())
+	m.NoError(err)
+	m.NotEmpty(ruleCount)
+
+	_, err = m.repo.StatByUserCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now())
+	m.NoError(err)
+
+	res, err := m.repo.StatByDatetimeCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now(), 1)
+	m.NoError(err)
+	m.NotEmpty(res)
 }
 
 func TestMessageGroupRepo(t *testing.T) {

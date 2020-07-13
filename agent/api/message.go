@@ -6,7 +6,7 @@ import (
 
 	"github.com/ledisdb/ledisdb/ledis"
 	"github.com/mylxsw/adanos-alert/agent/store"
-	"github.com/mylxsw/adanos-alert/misc"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"

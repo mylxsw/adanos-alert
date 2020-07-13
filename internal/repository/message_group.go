@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,6 +48,26 @@ func (grp *MessageGroup) Ready() bool {
 	return grp.Rule.ExpectReadyAt.Before(time.Now())
 }
 
+type MessageGroupByRuleCount struct {
+	RuleID        primitive.ObjectID `bson:"rule_id" json:"rule_id"`
+	RuleName      string             `bson:"rule_name" json:"rule_name"`
+	Total         int64              `bson:"total" json:"total"`
+	TotalMessages int64              `bson:"total_messages" json:"total_messages"`
+}
+
+type MessageGroupByUserCount struct {
+	UserID        primitive.ObjectID `bson:"user_id" json:"user_id"`
+	UserName      string             `bson:"user_name" json:"user_name"`
+	Total         int64              `bson:"total" json:"total"`
+	TotalMessages int64              `bson:"total_messages" json:"total_messages"`
+}
+
+type MessageGroupByDatetimeCount struct {
+	Datetime      time.Time `bson:"datetime" json:"datetime"`
+	Total         int64     `bson:"total" json:"total"`
+	TotalMessages int64     `bson:"total_messages" json:"total_messages"`
+}
+
 type MessageGroupRepo interface {
 	Add(grp MessageGroup) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (grp MessageGroup, err error)
@@ -61,4 +82,10 @@ type MessageGroupRepo interface {
 	// LastGroup get last group which match the filter in messageGroups
 	LastGroup(filter bson.M) (grp MessageGroup, err error)
 	CollectingGroup(rule MessageGroupRule) (group MessageGroup, err error)
+
+	// Statistics
+	// StatByRuleCount 按照规则的维度，查询规则相关的报警次数
+	StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]MessageGroupByRuleCount, error)
+	StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]MessageGroupByUserCount, error)
+	StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]MessageGroupByDatetimeCount, error)
 }

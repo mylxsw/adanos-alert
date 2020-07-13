@@ -163,3 +163,136 @@ func (m MessageGroupRepo) LastGroup(filter bson.M) (grp repository.MessageGroup,
 	}
 	return grp, err
 }
+
+func (m MessageGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]repository.MessageGroupByRuleCount, error) {
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
+		bson.D{{"$group", bson.M{
+			"_id": bson.M{
+				"rule_id":   "$rule._id",
+				"rule_name": "$rule.name",
+			},
+			"count":         bson.M{"$sum": 1},
+			"message_count": bson.M{"$sum": "$message_count"},
+		}}},
+		bson.D{{"$project", bson.M{
+			"rule_id":        "$_id.rule_id",
+			"rule_name":      "$_id.rule_name",
+			"total":          "$count",
+			"total_messages": "$message_count",
+			"_id":            0,
+		}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]repository.MessageGroupByRuleCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.MessageGroupByRuleCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}
+
+func (m MessageGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]repository.MessageGroupByUserCount, error) {
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
+		bson.D{{"$unwind", "$actions"}},
+		bson.D{{"$unwind", "$actions.user_refs"}},
+		bson.D{{"$group", bson.M{
+			"_id":           "$actions.user_refs",
+			"count":         bson.M{"$sum": 1},
+			"message_count": bson.M{"$sum": "$message_count"},
+		}}},
+		bson.D{{"$lookup", bson.M{
+			"localField":   "_id",
+			"from":         "user",
+			"foreignField": "_id",
+			"as":           "user",
+		}}},
+		bson.D{{"$replaceRoot", bson.M{
+			"newRoot": bson.M{
+				"$mergeObjects": bson.A{
+					bson.M{
+						"_id":           "$user._id",
+						"name":          "$user.name",
+						"count":         "$count",
+						"message_count": "$message_count",
+					},
+					"$$ROOT",
+				},
+			},
+		}}},
+		bson.D{{"$unwind", "$name"}},
+		bson.D{{"$project", bson.M{
+			"user_id":        "$_id",
+			"user_name":      "$name",
+			"total":          "$count",
+			"total_messages": "$message_count",
+			"_id":            0,
+		}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]repository.MessageGroupByUserCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.MessageGroupByUserCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}
+
+func (m MessageGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]repository.MessageGroupByDatetimeCount, error) {
+	unixTime, _ := time.Parse(time.RFC3339, "1970-01-01T00:00:00Z00:00")
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
+		bson.D{{"$group", bson.M{
+			"_id": bson.M{
+				"$subtract": bson.A{
+					bson.M{"$subtract": bson.A{"$updated_at", unixTime}},
+					bson.M{"$mod": bson.A{
+						bson.M{"$subtract": bson.A{"$updated_at", unixTime}},
+						1000 * 60 * 60 * hour,
+					}},
+				},
+			},
+			"count":         bson.M{"$sum": 1},
+			"message_count": bson.M{"$sum": "$message_count"},
+		}}},
+		bson.D{{"$project", bson.M{
+			"datetime":       bson.M{"$add": bson.A{unixTime, "$_id"}},
+			"total":          "$count",
+			"total_messages": "$message_count",
+			"_id":            0,
+		}}},
+		bson.D{{"$sort", bson.M{"datetime": 1}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]repository.MessageGroupByDatetimeCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.MessageGroupByDatetimeCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}
