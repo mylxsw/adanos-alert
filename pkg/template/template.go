@@ -10,6 +10,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/pkg/array"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
@@ -30,30 +31,32 @@ func Parse(templateStr string, data interface{}) (string, error) {
 // CreateParse create a template parser
 func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":            cutOff,
-		"implode":           strings.Join,
-		"explode":           strings.Split,
-		"ident":             leftIdent,
-		"json":              jsonFormatter,
-		"datetime":          datetimeFormat,
-		"datetime_noloc":    datetimeFormatNoLoc,
-		"json_get":          pkgJSON.Get,
-		"json_gets":         pkgJSON.Gets,
-		"json_array":        pkgJSON.GetArray,
-		"json_flatten":      jsonFlatten,
-		"starts_with":       startsWith,
-		"ends_with":         endsWith,
-		"trim":              strings.Trim,
-		"trim_right":        strings.TrimRight,
-		"trim_left":         strings.TrimLeft,
-		"trim_space":        strings.TrimSpace,
-		"format":            fmt.Sprintf,
-		"integer":           toInteger,
-		"mysql_slowlog":     parseMySQLSlowlog,
-		"open_falcon_im":    ParseOpenFalconImMessage,
-		"string_mask":       StringMask,
-		"string_tags":       StringTags,
-		"remove_empty_line": RemoveEmptyLine,
+		"cutoff":             cutOff,
+		"implode":            strings.Join,
+		"explode":            strings.Split,
+		"ident":              leftIdent,
+		"json":               jsonFormatter,
+		"datetime":           datetimeFormat,
+		"datetime_noloc":     datetimeFormatNoLoc,
+		"json_get":           pkgJSON.Get,
+		"json_gets":          pkgJSON.Gets,
+		"json_array":         pkgJSON.GetArray,
+		"json_flatten":       jsonFlatten,
+		"starts_with":        startsWith,
+		"ends_with":          endsWith,
+		"trim":               strings.Trim,
+		"trim_right":         strings.TrimRight,
+		"trim_left":          strings.TrimLeft,
+		"trim_space":         strings.TrimSpace,
+		"format":             fmt.Sprintf,
+		"integer":            toInteger,
+		"mysql_slowlog":      parseMySQLSlowlog,
+		"open_falcon_im":     ParseOpenFalconImMessage,
+		"string_mask":        StringMask,
+		"string_tags":        StringTags,
+		"remove_empty_line":  RemoveEmptyLine,
+		"meta_filter":        MetaFilter,
+		"meta_prefix_filter": MetaFilterPrefix,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -227,4 +230,28 @@ func RemoveEmptyLine(content string) string {
 			}, "").(string),
 		"\n",
 	)
+}
+
+// MetaFilter 过滤 Meta，只保留允许的key
+func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range meta {
+		if array.StringsContain(k, allowKeys) {
+			res[k] = v
+		}
+	}
+
+	return res
+}
+
+// MetaFilter 过滤 Meta，只保留以 allowKeyPrefix 开头的项
+func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range meta {
+		if array.StringsContainPrefix(k, allowKeyPrefix) {
+			res[k] = v
+		}
+	}
+
+	return res
 }

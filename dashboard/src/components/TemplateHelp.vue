@@ -80,6 +80,8 @@ Group: {
                         <li><code>string_mask(content string, left int) string</code> 在左右两侧只保留 left 个字符，中间所有字符替换为 * </li>
                         <li><code>string_tags(tags string, sep string) []string</code> 将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除 </li>
                         <li><code>remove_empty_line(content string) string</code> 移除字符串中的空行</li>
+                        <li><code>meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{}</code> 过滤Meta，只保留允许的Key</li>
+                        <li><code>meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{}</code> 过滤Meta，只保留包含指定 prefix 的Key</li>
                     </ul>
                 </li>
             </ul>

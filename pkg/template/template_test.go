@@ -7,6 +7,7 @@ import (
 
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/go-toolkit/file"
+	"github.com/stretchr/testify/assert"
 )
 
 var content = `
@@ -248,4 +249,22 @@ What are you doing?`
 
 	result := RemoveEmptyLine(original)
 	fmt.Println(result)
+}
+
+func TestMetaFilter(t *testing.T) {
+	meta := make(map[string]interface{})
+	meta["message.k1"] = "v1"
+	meta["message.k2"] = "v2"
+	meta["message.k3"] = "v3"
+	meta["message.k4"] = "v4"
+	meta["message"] = "Hello, world"
+	meta["version"] = "1.0"
+
+	var temp = `{{ range $i, $msg := meta_prefix_filter .Meta "message." "version" }}[{{ $i }}: {{ $msg }}]{{ end }}`
+
+	res, err := Parse(temp, map[string]interface{}{
+		"Meta": meta,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "[message.k1: v1][message.k2: v2][message.k3: v3][message.k4: v4][version: 1.0]", res)
 }

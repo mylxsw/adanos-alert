@@ -20,3 +20,9 @@ func TestStringUnique(t *testing.T) {
 	assert.EqualValues(t, 4, len(array.StringUnique(arr)))
 }
 
+
+func TestStringsContainPrefix(t *testing.T) {
+	s1 := "Hello, world"
+	assert.True(t, array.StringsContainPrefix(s1, []string{"xxxx", "yyyy", "Hell"}))
+	assert.False(t, array.StringsContainPrefix(s1, []string{"xxxx", "yyyy", "oops"}))
+}
