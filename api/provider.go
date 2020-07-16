@@ -8,6 +8,7 @@ import (
 	_ "github.com/mylxsw/adanos-alert/docs"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -34,8 +35,20 @@ func (s ServiceProvider) Boot(app glacier.Glacier) {
 		app.WebAppMuxRouter(func(router *mux.Router) {
 			// Swagger doc
 			router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler).Name("swagger")
+			// prometheus metrics
+			router.PathPrefix("/metrics").Handler(promhttp.Handler())
+			// health check
+			router.PathPrefix("/health").Handler(HealthCheck{})
 			// Dashboard
 			router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(FS(conf.UseLocalDashboard)))).Name("assets")
 		})
 	})
+}
+
+type HealthCheck struct{}
+
+func (h HealthCheck) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Add("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	_, _ = writer.Write([]byte(`{"status": "UP"}`))
 }

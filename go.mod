@@ -9,7 +9,7 @@ require (
 	github.com/buger/jsonparser v1.0.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible // indirect
-	github.com/golang/protobuf v1.4.0
+	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/websocket v1.4.2 // indirect
@@ -23,6 +23,7 @@ require (
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/siddontang/go v0.0.0-20170517070808-cb568a3e5cc0
@@ -41,6 +42,6 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/tools v0.0.0-20191007185444-6536af71d98a // indirect
 	google.golang.org/grpc v1.28.1
-	google.golang.org/protobuf v1.21.0
+	google.golang.org/protobuf v1.23.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
