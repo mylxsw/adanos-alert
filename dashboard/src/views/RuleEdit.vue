@@ -428,6 +428,7 @@
             {text: 'remove_empty_line STR', displayText: 'remove_empty_line(content string) string | 移除字符串中的空行'},
             {text: 'meta_filter STR FILTER_STR', displayText: 'meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} | 过滤Meta，只保留允许的Key'},
             {text: 'meta_prefix_filter STR FILTER_PREFIX', displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'},
+            {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
         ]
     }
 

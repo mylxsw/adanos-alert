@@ -33,7 +33,7 @@ func (m *MessageController) Register(router *web.Router) {
 	})
 }
 
-func (m *MessageController) saveMessage(msgRepo store.MessageStore, commonMessage misc.CommonMessage, ctx web.Context) web.Response {
+func (m *MessageController) saveMessage(msgRepo store.MessageStore, commonMessage misc.CommonMessage, ctx web.Context) error {
 	commonMessage.Meta["adanos_agent_version"] = m.cc.MustGet(glacier.VersionKey).(string)
 	commonMessage.Meta["adanos_agent_ip"] = misc.ServerIP()
 	m.cc.MustResolve(func(db *ledis.DB) {
@@ -46,7 +46,15 @@ func (m *MessageController) saveMessage(msgRepo store.MessageStore, commonMessag
 
 	if err := msgRepo.Enqueue(&req); err != nil {
 		log.Warningf("本地存储失败: %s", err)
-		return ctx.JSONError(fmt.Sprintf("本地存储写入失败：%v", err), http.StatusInternalServerError)
+		return err
+	}
+
+	return nil
+}
+
+func (m *MessageController) errorWrap(ctx web.Context, err error) web.Response {
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
 	return ctx.JSON(struct{}{})
@@ -58,7 +66,7 @@ func (m *MessageController) AddCommonMessage(ctx web.Context, messageStore store
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
-	return m.saveMessage(messageStore, commonMessage, ctx)
+	return m.errorWrap(ctx, m.saveMessage(messageStore, commonMessage, ctx))
 }
 
 // AddLogstashMessage Add logstash message
@@ -68,7 +76,7 @@ func (m *MessageController) AddLogstashMessage(ctx web.Context, messageStore sto
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageStore, *commonMessage, ctx)
+	return m.errorWrap(ctx, m.saveMessage(messageStore, *commonMessage, ctx))
 }
 
 // Add grafana message
@@ -78,17 +86,26 @@ func (m *MessageController) AddGrafanaMessage(ctx web.Context, messageStore stor
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageStore, *commonMessage, ctx)
+	return m.errorWrap(ctx, m.saveMessage(messageStore, *commonMessage, ctx))
 }
 
 // add prometheus alert message
 func (m *MessageController) AddPrometheusMessage(ctx web.Context, messageStore store.MessageStore) web.Response {
-	commonMessage, err := misc.PrometheusToCommonMessage(ctx.Request().Body())
+	commonMessages, err := misc.PrometheusToCommonMessages(ctx.Request().Body())
 	if err != nil {
-		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+		return m.errorWrap(ctx, err)
 	}
 
-	return m.saveMessage(messageStore, *commonMessage, ctx)
+	for _, cm := range commonMessages {
+		if err := m.saveMessage(messageStore, *cm, ctx); err != nil {
+			log.WithFields(log.Fields{
+				"message": cm,
+			}).Errorf("save prometheus message failed: %v", err)
+			continue
+		}
+	}
+
+	return m.errorWrap(ctx, nil)
 }
 
 // add prometheus-alert message
@@ -98,7 +115,7 @@ func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, messageSt
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageStore, *commonMessage, ctx)
+	return m.errorWrap(ctx, m.saveMessage(messageStore, *commonMessage, ctx))
 }
 
 // add open-falcon message
@@ -110,5 +127,5 @@ func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageStore s
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	return m.saveMessage(messageStore, *misc.OpenFalconToCommonMessage(tos, content), ctx)
+	return m.errorWrap(ctx, m.saveMessage(messageStore, *misc.OpenFalconToCommonMessage(tos, content), ctx))
 }

@@ -130,19 +130,24 @@ func (pm PrometheusMessage) ToRepo() repository.Message {
 	}
 }
 
-func PrometheusToCommonMessage(content []byte) (*CommonMessage, error) {
-	var prometheusMessage PrometheusMessage
-	if err := json.Unmarshal(content, &prometheusMessage); err != nil {
+func PrometheusToCommonMessages(content []byte) ([]*CommonMessage, error) {
+	var prometheusMessages []PrometheusMessage
+	if err := json.Unmarshal(content, &prometheusMessages); err != nil {
 		return nil, errors.New("invalid request")
 	}
 
-	repoMessage := prometheusMessage.ToRepo()
-	return &CommonMessage{
-		Content: repoMessage.Content,
-		Meta:    repoMessage.Meta,
-		Tags:    repoMessage.Tags,
-		Origin:  repoMessage.Origin,
-	}, nil
+	commonMessages := make([]*CommonMessage, 0)
+	for _, pm := range prometheusMessages {
+		repoMessage := pm.ToRepo()
+		commonMessages = append(commonMessages, &CommonMessage{
+			Content: repoMessage.Content,
+			Meta:    repoMessage.Meta,
+			Tags:    repoMessage.Tags,
+			Origin:  repoMessage.Origin,
+		})
+	}
+
+	return commonMessages, nil
 }
 
 type PrometheusAlertMessage struct {

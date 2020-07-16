@@ -57,6 +57,7 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"remove_empty_line":  RemoveEmptyLine,
 		"meta_filter":        MetaFilter,
 		"meta_prefix_filter": MetaFilterPrefix,
+		"serialize":          Serialize,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -254,4 +255,14 @@ func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map
 	}
 
 	return res
+}
+
+// Serialize 对象序列化为字符串，用于展示
+func Serialize(data interface{}) string {
+	serialized, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Sprintf("%v", data)
+	}
+
+	return string(serialized)
 }

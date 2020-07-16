@@ -161,8 +161,11 @@ func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageR
 	return &message, nil
 }
 
-func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage misc.RepoMessage, ctx web.Context) web.Response {
-	id, err := messageRepo.Add(repoMessage.ToRepo())
+func (m *MessageController) saveMessage(messageRepo repository.MessageRepo, repoMessage misc.RepoMessage) (id primitive.ObjectID, err error) {
+	return messageRepo.Add(repoMessage.ToRepo())
+}
+
+func (m *MessageController) errorWrap(ctx web.Context, id primitive.ObjectID, err error) web.Response {
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -180,7 +183,8 @@ func (m *MessageController) AddCommonMessage(ctx web.Context, messageRepo reposi
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
-	return m.saveMessage(messageRepo, commonMessage, ctx)
+	id, err := m.saveMessage(messageRepo, commonMessage)
+	return m.errorWrap(ctx, id, err)
 }
 
 // AddLogstashMessage Add logstash message
@@ -190,7 +194,8 @@ func (m *MessageController) AddLogstashMessage(ctx web.Context, messageRepo repo
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageRepo, commonMessage, ctx)
+	id, err := m.saveMessage(messageRepo, commonMessage)
+	return m.errorWrap(ctx, id, err)
 }
 
 // Add grafana message
@@ -200,17 +205,29 @@ func (m *MessageController) AddGrafanaMessage(ctx web.Context, messageRepo repos
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageRepo, commonMessage, ctx)
+	id, err := m.saveMessage(messageRepo, commonMessage)
+	return m.errorWrap(ctx, id, err)
 }
 
 // add prometheus alert message
 func (m *MessageController) AddPrometheusMessage(ctx web.Context, messageRepo repository.MessageRepo) web.Response {
-	commonMessage, err := misc.PrometheusToCommonMessage(ctx.Request().Body())
+	commonMessages, err := misc.PrometheusToCommonMessages(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageRepo, commonMessage, ctx)
+	var lastID primitive.ObjectID
+	var lastErr error
+	for _, cm := range commonMessages {
+		lastID, lastErr = m.saveMessage(messageRepo, *cm)
+		if lastErr != nil {
+			log.WithFields(log.Fields{
+				"message": cm,
+			}).Errorf("save prometheus message failed: %v", lastErr)
+		}
+	}
+
+	return m.errorWrap(ctx, lastID, lastErr)
 }
 
 // add prometheus-alert message
@@ -220,7 +237,8 @@ func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, messageRe
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	return m.saveMessage(messageRepo, commonMessage, ctx)
+	id, err := m.saveMessage(messageRepo, commonMessage)
+	return m.errorWrap(ctx, id, err)
 }
 
 // add open-falcon message
@@ -232,5 +250,6 @@ func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageRepo re
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	return m.saveMessage(messageRepo, misc.OpenFalconToCommonMessage(tos, content), ctx)
+	id, err := m.saveMessage(messageRepo, misc.OpenFalconToCommonMessage(tos, content))
+	return m.errorWrap(ctx, id, err)
 }
