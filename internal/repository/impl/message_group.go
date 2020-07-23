@@ -136,7 +136,7 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 	err = m.col.FindOneAndUpdate(
 		context.TODO(),
 		bson.M{"rule._id": rule.ID, "status": repository.MessageGroupStatusCollecting},
-		bson.M{"$set": bson.M{"rule": rule}},
+		bson.M{"$set": bson.M{"status": repository.MessageGroupStatusCollecting}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	).Decode(&group)
 
@@ -149,6 +149,7 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 			group.SeqNum = seq.Value
 		}
 
+		group.Rule = rule
 		_ = m.UpdateID(group.ID, group)
 	}
 
