@@ -71,7 +71,7 @@ func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []r
 		options.Find().
 			SetSkip(offset).
 			SetLimit(limit).
-			SetSort(bson.M{"updated_at": -1}),
+			SetSort(bson.M{"created_at": -1}),
 	)
 	if err != nil {
 		return
