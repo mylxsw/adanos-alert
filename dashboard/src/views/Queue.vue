@@ -5,8 +5,8 @@
                 <b-button size="sm" :variant="queue_btn" class="float-right" @click="pause_queue()">{{ queue_action }}</b-button>
                 当前状态：<span v-html="queue_status"></span>，
                 Workers: <b>{{ queue_info.worker_num }}</b>，
-                已处理：<b class="text-success">{{ queue_info.processed_count }}</b>，
-                失败：<b class="text-danger">{{ queue_info.failed_count }}</b>
+                已处理：<b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>，
+                失败：<b-badge :to="'/queues?status=failed'" variant="danger">{{ queue_info.failed_count }}</b-badge>
             </div>
             <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty>
                 <template v-slot:cell(id)="row">
@@ -29,7 +29,7 @@
                         <span v-else>（就绪）</span>
                     </b-badge>
                     <b-badge v-if="row.item.status === 'running'" variant="dark">执行中</b-badge>
-                    <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
+                    <b-badge v-if="row.item.status === 'failed'" variant="danger" v-b-tooltip.hover :title="row.item.last_error">失败</b-badge>
                     <b-badge v-if="row.item.status === 'succeed'" variant="success">成功</b-badge>
                     <b-badge v-if="row.item.status === 'canceled'" variant="warning">已取消</b-badge>
                 </template>
@@ -63,6 +63,7 @@
             return {
                 jobs: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
+                status: this.$route.query.status !== undefined ? this.$route.query.status : '',
                 next: -1,
                 isBusy: true,
                 queue_info: {
@@ -85,6 +86,9 @@
                     {key: 'operations', label: '操作'}
                 ],
             };
+        },
+        watch: {
+          '$route': 'reload',
         },
         methods: {
             delete_job(index, id) {
@@ -119,8 +123,12 @@
                 this.queue_btn = paused ? 'success' : 'warning';
                 this.queue_paused = paused;
             },
-            loadMore() {
-                axios.get('/api/queue/jobs/?offset=' + this.cur).then(response => {
+            reload() {
+                let params = this.$route.query;
+                params.offset = this.cur;
+                axios.get('/api/queue/jobs/', {
+                  params: params
+                }).then(response => {
                     this.jobs = response.data.jobs;
                     for (let i in this.jobs) {
                         this.jobs[i].payload = JSON.parse(this.jobs[i].payload);
@@ -140,7 +148,7 @@
             }
         },
         mounted() {
-            this.loadMore();
+            this.reload();
         }
     }
 </script>

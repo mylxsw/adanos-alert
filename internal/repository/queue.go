@@ -22,6 +22,7 @@ type QueueJob struct {
 	Name         string             `bson:"name" json:"name"`
 	Payload      string             `bson:"payload" json:"payload"`
 	Status       QueueItemStatus    `bson:"status" json:"status"`
+	LastError    string             `bson:"last_error" json:"last_error"`
 	RequeueTimes int                `bson:"requeue_times" json:"requeue_times"`
 
 	NextExecuteAt time.Time `bson:"next_execute_at" json:"next_execute_at"`

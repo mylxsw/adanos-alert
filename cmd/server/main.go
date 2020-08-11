@@ -87,7 +87,7 @@ func main() {
 		Name:   "aggregation_period",
 		Usage:  "aggregation job execute period",
 		EnvVar: "ADANOS_AGGREGATION_PERIOD",
-		Value:  "10s",
+		Value:  "5s",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "action_trigger_period",
@@ -168,7 +168,7 @@ func main() {
 		actionTriggerPeriod, err := time.ParseDuration(c.String("action_trigger_period"))
 		if err != nil {
 			log.Warningf("invalid argument [action_trigger_period: %s], using default value", c.String("action_trigger_period"))
-			actionTriggerPeriod = 10 * time.Second
+			actionTriggerPeriod = 5 * time.Second
 		}
 
 		queryTimeout, err := time.ParseDuration(c.String("query_timeout"))

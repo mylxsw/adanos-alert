@@ -119,7 +119,7 @@ func (manager *queueManager) StartWorker(ctx context.Context, workID string) {
 		log.Debugf("queue worker [%s] stopped", workID)
 	}()
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -184,6 +184,8 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 		manager.lock.Lock()
 		manager.info.FailedCount++
 		manager.lock.Unlock()
+
+		item.LastError = err.Error()
 
 		// if job failed, check execute times, if requeue times > max requeueTimes, set job as failed
 		// otherwise requeue it and try again latter
