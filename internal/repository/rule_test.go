@@ -31,3 +31,13 @@ func parseTime(t string) time.Time {
 	p, _ := time.Parse(time.RFC3339, t)
 	return p
 }
+
+func TestExpectReadyAtTimeRange(t *testing.T) {
+	var timeRanges []repository.TimeRange = []repository.TimeRange{
+		{StartTime: "09:00", EndTime: "18:00", Interval: 300},
+		{StartTime: "18:00", EndTime: "09:00", Interval: 600},
+	}
+
+	assert.Equal(t, "2020-07-10T10:00:16+08:00", repository.ExpectReadyAtInTimeRange(parseTime("2020-07-10T09:55:16+08:00"), timeRanges).Format(time.RFC3339))
+	assert.Equal(t, "2020-07-10T23:10:00+08:00", repository.ExpectReadyAtInTimeRange(parseTime("2020-07-10T23:00:00+08:00"), timeRanges).Format(time.RFC3339))
+}

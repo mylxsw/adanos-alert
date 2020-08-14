@@ -21,11 +21,18 @@ const (
 const (
 	ReadyTypeInterval  = "interval"
 	ReadyTypeDailyTime = "daily_time"
+	ReadyTypeTimeRange = "time_range"
 )
 
 type Tag struct {
 	Name  string `bson:"_id" json:"name"`
 	Count int64  `bson:"count" json:"count"`
+}
+
+type TimeRange struct {
+	StartTime string `bson:"start_time" json:"start_time"`
+	EndTime   string `bson:"end_time" json:"end_time"`
+	Interval  int64  `bson:"interval" json:"interval"`
 }
 
 // Rule is a rule definition
@@ -36,9 +43,10 @@ type Rule struct {
 	Tags        []string           `bson:"tags" json:"tags"`
 
 	// ReadType 就绪类型，支持 interval/daily_time
-	ReadyType  string   `bson:"ready_type" json:"ready_type"`
-	Interval   int64    `bson:"interval" json:"interval"`
-	DailyTimes []string `bson:"daily_times" json:"daily_times"`
+	ReadyType  string      `bson:"ready_type" json:"ready_type"`
+	Interval   int64       `bson:"interval" json:"interval"`
+	DailyTimes []string    `bson:"daily_times" json:"daily_times"`
+	TimeRanges []TimeRange `bson:"time_ranges" json:"time_ranges"`
 
 	Rule            string    `bson:"rule" json:"rule"`
 	Template        string    `bson:"template" json:"template"`
@@ -70,6 +78,8 @@ func (rule Rule) ToGroupRule() MessageGroupRule {
 		groupRule.ExpectReadyAt = time.Now().Add(time.Duration(rule.Interval) * time.Second)
 	case ReadyTypeDailyTime:
 		groupRule.ExpectReadyAt = ExpectReadyAt(time.Now(), rule.DailyTimes)
+	case ReadyTypeTimeRange:
+		groupRule.ExpectReadyAt = ExpectReadyAtInTimeRange(time.Now(), rule.TimeRanges)
 	default:
 		log.Errorf("invalid readyType [%s] for ruleID=%s", rule.ReadyType, rule.ID.Hex())
 	}
@@ -122,4 +132,22 @@ func (t Times) Less(i, j int) bool {
 
 func (t Times) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
+}
+
+func ExpectReadyAtInTimeRange(now time.Time, timeRanges []TimeRange) time.Time {
+	todayTimeStr := now.Format(time.RFC3339)
+	for _, t := range timeRanges {
+		startTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.StartTime[:5]+":00"+todayTimeStr[19:])
+		endTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.EndTime[:5]+":00"+todayTimeStr[19:])
+
+		if startTime.After(endTime) {
+			endTime = endTime.AddDate(0, 0, 1)
+		}
+
+		if now.Before(endTime) && now.After(startTime) {
+			return now.Add(time.Duration(t.Interval) * time.Second)
+		}
+	}
+
+	return now.Add(60 * time.Second)
 }

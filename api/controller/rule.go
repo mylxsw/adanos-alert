@@ -63,9 +63,10 @@ type RuleForm struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
-	ReadyType  string   `json:"ready_type"`
-	Interval   int64    `json:"interval"`
-	DailyTimes []string `json:"daily_times"`
+	ReadyType  string                 `json:"ready_type"`
+	Interval   int64                  `json:"interval"`
+	DailyTimes []string               `json:"daily_times"`
+	TimeRanges []repository.TimeRange `json:"time_ranges"`
 
 	Rule            string            `json:"rule"`
 	Template        string            `json:"template"`
@@ -107,7 +108,50 @@ func (r RuleForm) Validate(req web.Request) error {
 				return fmt.Errorf("invalid daily_time format for %s: %v", dailyTime, err)
 			}
 		}
+	case repository.ReadyTypeTimeRange:
+		if len(r.TimeRanges) == 0 {
+			return errors.New("invalid time ranges, must not be empty")
+		}
 
+		for _, t := range r.TimeRanges {
+			if len(t.StartTime) < 5 || len(t.EndTime) < 5 {
+				return fmt.Errorf("invalid time format for time range %s-%s", t.StartTime, t.EndTime)
+			}
+
+			if _, err := time.Parse("15:04", t.StartTime[:5]); err != nil {
+				return fmt.Errorf("invalid startTime time in time range for %s-%s: %v", t.StartTime, t.EndTime, err)
+			}
+
+			if _, err := time.Parse("15:04", t.EndTime[:5]); err != nil {
+				return fmt.Errorf("invalid endTime time in time range for %s-%s: %v", t.StartTime, t.EndTime, err)
+			}
+
+			if !govalidator.InRangeInt(t.Interval, 60, 3600*24) {
+				return fmt.Errorf("invalid interval %d in time range for %s-%s", t.Interval, t.StartTime, t.EndTime)
+			}
+
+			// 搜索开始时间是否合法
+			startTimeOk := false
+			for _, tt := range r.TimeRanges {
+				if t.StartTime == tt.EndTime {
+					startTimeOk = true
+					break
+				}
+			}
+
+			// 搜索截止时间是否合法
+			endTimeOk := false
+			for _, tt := range r.TimeRanges {
+				if t.EndTime == tt.StartTime {
+					endTimeOk = true
+					break
+				}
+			}
+
+			if !startTimeOk || !endTimeOk {
+				return errors.New("time range is not complete")
+			}
+		}
 	default:
 		return errors.New("invalid readyType")
 	}
@@ -211,6 +255,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		ReadyType:       ruleForm.ReadyType,
 		DailyTimes:      array.StringUnique(ruleForm.DailyTimes),
 		Interval:        ruleForm.Interval,
+		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
@@ -278,6 +323,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		ReadyType:       ruleForm.ReadyType,
 		DailyTimes:      array.StringUnique(ruleForm.DailyTimes),
 		Interval:        ruleForm.Interval,
+		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
