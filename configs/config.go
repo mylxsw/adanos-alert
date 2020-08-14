@@ -23,6 +23,7 @@ type Config struct {
 	QueueJobMaxRetryTimes int           `json:"queue_job_max_retry_times"`
 	QueueWorkerNum        int           `json:"queue_worker_num"`
 	QueryTimeout          time.Duration `json:"query_timeout"`
+	KeepPeriod            int           `json:"keep_period"`
 
 	Migrate         bool            `json:"migrate"`
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`

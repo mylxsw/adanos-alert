@@ -166,6 +166,8 @@ github.com/mylxsw/asteria v0.0.0-20190730075526-1867e6bc4dbe h1:JNV6IpUt1FnPkGFP
 github.com/mylxsw/asteria v0.0.0-20190730075526-1867e6bc4dbe/go.mod h1:yKtYUYKkYe2xOB6qqHW+NnoHd6zBFRk72NS/8V/dgwk=
 github.com/mylxsw/asteria v0.0.0-20200520022208-48f9ce0b961f h1:pMiRlxvQDoyZ4UW0CKNBMxyjLek7a5N6WYSSTeEENYw=
 github.com/mylxsw/asteria v0.0.0-20200520022208-48f9ce0b961f/go.mod h1:v0FN8lOptbljEJBRtBrvompc+NyUpIR7Dcpg2f9823s=
+github.com/mylxsw/asteria v0.0.0-20200709071207-26dd334a6e51 h1:a+1fNIW9RK+9AqXrnNx9kQXarjL48uxIKriD13uZUZA=
+github.com/mylxsw/asteria v0.0.0-20200709071207-26dd334a6e51/go.mod h1:v0FN8lOptbljEJBRtBrvompc+NyUpIR7Dcpg2f9823s=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8 h1:TtxSw54bx34zGgs7Y/VisH/sD5HOlopHbSavxTOzgko=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8/go.mod h1:Ugpjgv7bOSn1NXiPNHl92DdCGP2siWk50irFSyI+Hf8=
 github.com/mylxsw/container v0.0.0-20191208075953-c8ee6e3238cc h1:xBh4hQSO+fcWa/bFLOjxO4huSgofBltDJ3KXPiZlHGo=
@@ -182,6 +184,8 @@ github.com/mylxsw/glacier v0.0.0-20200522080943-c7f4d07b1849 h1:F4oqg+5rwYyzoGMi
 github.com/mylxsw/glacier v0.0.0-20200522080943-c7f4d07b1849/go.mod h1:iKetCpJ4IcG2CQwSjqz1NJr3AKy87eUMPN9oZlwD40s=
 github.com/mylxsw/glacier v0.0.0-20200605063614-87616319a1dc h1:bDqOLCMDRn+iKHppD3whBFnnthRSlTI2PiVksHZTXL8=
 github.com/mylxsw/glacier v0.0.0-20200605063614-87616319a1dc/go.mod h1:hSNQ73l+PUHHIMw4DwL5Z4bLCTlXSl98MdjyuPzWCfk=
+github.com/mylxsw/glacier v0.0.0-20200814023904-e2c4a8f9ea69 h1:HV+OSJ0T+L9xtB3WyHj6SDc3TQa2eXgBu1Mx/3gMhLM=
+github.com/mylxsw/glacier v0.0.0-20200814023904-e2c4a8f9ea69/go.mod h1:gR/AjRPG59eaf9O94gcktmuE+cR9F04WzIcPCDVSy2M=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988 h1:eUlVMPyxeWUogeqwAkat6eE+3eY5fjP/UAXyhAf/7Jw=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988/go.mod h1:aJAUawotu1IMtEPXInIm6qwiAEIMSGRAMH6otakYCWw=
 github.com/mylxsw/graceful v0.0.0-20200521071307-30ef03ecf5a8 h1:0gfJ8H7bx+si3Hqno9an6aZDsqWDO1CjAb/+U5yN3a8=
@@ -254,6 +258,7 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
+github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 h1:PyYN9JH5jY9j6av01SpfRMb+1DWg/i3MbGOKPxJ2wjM=
 github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14/go.mod h1:gxQT6pBGRuIGunNf/+tSOB5OHvguWi8Tbt82WOkf35E=
 github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e h1:m5sYJ43teIUlESuKRFQRRm7kqi6ExiYwVKfoXNuRgHU=
@@ -388,5 +393,6 @@ gopkg.in/yaml.v2 v2.2.5/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.3.0 h1:clyUAQHOM3G0M3f5vQj7LuJrETvjVot3Z5el9nffUtU=
 gopkg.in/yaml.v2 v2.3.0/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=

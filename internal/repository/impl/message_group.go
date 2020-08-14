@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,7 +18,16 @@ type MessageGroupRepo struct {
 }
 
 func NewMessageGroupRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageGroupRepo {
-	return &MessageGroupRepo{col: db.Collection("message_group"), seqRepo: seqRepo}
+	grp := db.Collection("message_group")
+	_, err := grp.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.M{"created_at": 1},
+		Options: options.Index().SetUnique(false),
+	})
+	if err != nil {
+		log.Errorf("can not create index for message_group.created_at: %v", err)
+	}
+
+	return &MessageGroupRepo{col: grp, seqRepo: seqRepo}
 }
 
 func (m MessageGroupRepo) Add(grp repository.MessageGroup) (id primitive.ObjectID, err error) {

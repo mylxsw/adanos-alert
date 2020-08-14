@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,7 +17,16 @@ type QueueRepo struct {
 }
 
 func NewQueueRepo(db *mongo.Database) repository.QueueRepo {
-	return &QueueRepo{col: db.Collection("queue")}
+	queue := db.Collection("queue")
+	_, err := queue.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.M{"next_execute_at": 1},
+		Options: options.Index().SetUnique(false),
+	})
+	if err != nil {
+		log.Errorf("can not create index for queue.next_execute_at: %v", err)
+	}
+
+	return &QueueRepo{col: queue}
 }
 
 func (q *QueueRepo) Enqueue(item repository.QueueJob) (id primitive.ObjectID, err error) {
@@ -78,7 +88,7 @@ func (q *QueueRepo) Paginate(filter bson.M, offset, limit int64) (items []reposi
 		options.Find().
 			SetSkip(offset).
 			SetLimit(limit).
-			SetSort(bson.M{"next_execute_at":-1}),
+			SetSort(bson.M{"next_execute_at": -1}),
 	)
 	if err != nil {
 		return

@@ -103,6 +103,13 @@ func main() {
 	}))
 
 	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
+		Name:   "keep_period",
+		Usage:  "保留多长时间的报警，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 keep_period 天的报警",
+		EnvVar: "ADANOS_KEEP_PERIOD",
+		Value:  0,
+	}))
+
+	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
 		Name:   "queue_worker_num",
 		Usage:  "set queue worker numbers",
 		EnvVar: "ADANOS_QUEUE_WORKER_NUM",
@@ -112,7 +119,7 @@ func main() {
 		Name:   "query_timeout",
 		Usage:  "query timeout for backend service",
 		EnvVar: "ADANOS_QUERY_TIMEOUT",
-		Value:  "5s",
+		Value:  "30s",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "aliyun_access_key",
@@ -192,6 +199,7 @@ func main() {
 			QueryTimeout:          queryTimeout,
 			Migrate:               c.Bool("enable_migrate"),
 			PreviewURL:            c.String("preview_url"),
+			KeepPeriod:            c.Int("keep_period"),
 			AliyunVoiceCall: configs.AliyunVoiceCall{
 				BaseURI:            "http://dyvmsapi.aliyuncs.com/",
 				AccessKey:          c.String("aliyun_access_key"),

@@ -29,7 +29,7 @@
             return {
                 search: {
                     origin: '',
-                    status: null,
+                    status: this.$route.query.status !== undefined ? this.$route.query.status : null,
                     tags: [],
                     meta: '',
                 },
