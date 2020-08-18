@@ -21,9 +21,15 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeMatchRule,
 	},
 	{
-		Name:        "判断Meta是否在某个范围内",
+		Name:        "判断Meta在某个范围内",
 		Description: "日志级别为 ERROR 或 FATAL",
-		Content:     `Meta["log_level"] in ["ERROR", "FATAL"]`,
+		Content:     `Upper(Meta["log_level"]) in ["ERROR", "FATAL"]`,
+		Type:        repository.TemplateTypeMatchRule,
+	},
+	{
+		Name:        "判断Meta不在某个范围内",
+		Description: "日志级别为非 DEBUG、INFO",
+		Content:     `Meta["log_level"] not in ["DEBUG", "INFO"]`,
 		Type:        repository.TemplateTypeMatchRule,
 	},
 	{
@@ -63,20 +69,12 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
-		Name:        "展示概要信息",
-		Description: "展示分组的概要信息",
-		Content:     `当前通知方式 {{ .Action }}, 当前分组包含的消息数量 {{ .Group.MessageCount }}，触发的规则名称 {{ .Rule.Name }}  ({{ .Rule.Rule }})`,
-		Type:        repository.TemplateTypeTemplate,
-	},
-	{
-		Name:        "报警信息列表",
+		Name:        "报警信息摘要",
 		Description: "展示报警信息列表",
 		Content: `## {{ .Rule.Name }}
 
 {{ range $i, $msg := .Messages 4 }}- 来源：**{{ $msg.Origin }}**，标签：{{ $msg.Tags  }}
-
 {{ cutoff 400 $msg.Content | ident "    > " }}
-
 {{ end }}
 
 ---
@@ -85,29 +83,17 @@ var predefinedTemplates = []repository.Template{
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
+		Name:        "报警信息摘要（Meta 信息）",
+		Description: "显示报警摘要，输出匹配前缀的 Meta 信息",
+		Content: `{{ range $i, $msg := .Messages 4 }}- 文件：{{ index $msg.Meta "log.file.path" }}
+{{ meta_prefix_filter $msg.Meta "message" | serialize | cutoff 400 | ident "    > "}}
+{{ end }}`,
+		Type: repository.TemplateTypeTemplate,
+	},
+	{
 		Name:        "报警详情链接",
 		Description: "报警详细信息链接地址",
 		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
-		Type:        repository.TemplateTypeTemplate,
-	},
-	{
-		Name:        "MySQL Guard - Deadlock Logs",
-		Description: "MySQL Guard 死锁日志",
-		Content:     `## {{ .Rule.Name }} ({{ .Group.MessageCount }})
-
-序号: {{ .Group.ID.Hex }}
-
-规则: {{ .Group.Rule.ID.Hex }}
-
-{{ range $i, $msg := .Messages 4 }}- {{ index $msg.Meta "db_host" }}:{{ index $msg.Meta "db_port" }}
-{{ range $j, $deadlock := json_array "context.deadlocks" $msg.Content }}
-{{ range $k, $info := json_array "Sections" $deadlock }}
-	{{ format "%v" $info }}
-{{ end }}{{ end }}{{ end }}
-
----
-
-[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 }

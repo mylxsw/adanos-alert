@@ -138,7 +138,8 @@
 <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
     $(function() {
-        $('table').find('tr.adanos-can-fold:gt(3)').hide();
+        $('table:lt(2)').find('a.more-btn').parents('tr').hide();
+        $('table:gt(1)').find('tr.adanos-can-fold:gt(3)').hide();
         $('a.more-btn').on('click', function (e) {
             e.preventDefault();
 

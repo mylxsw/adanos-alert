@@ -19,12 +19,19 @@ type MessageRepo struct {
 
 func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageRepo {
 	col := db.Collection("message")
-	_, err := col.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+
+	if _, err := col.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1},
 		Options: options.Index().SetUnique(false),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Errorf("can not create index for message.created_at: %v", err)
+	}
+
+	if _, err := col.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.M{"group_ids": 1},
+		Options: options.Index().SetUnique(false),
+	}); err != nil {
+		log.Errorf("can not create index for message.group_ids: %v", err)
 	}
 
 	return &MessageRepo{col: col, seqRepo: seqRepo}
