@@ -1,6 +1,5 @@
 package view
 
-
 var defaultMessageViewTemplate = `<html>
 <head>
     <title>{{ .Group.Rule.Name }}</title>
@@ -99,10 +98,10 @@ var defaultMessageViewTemplate = `<html>
                             <th>来源</th>
                             <td>{{ $msg.Origin }}</td>
                         </tr>
-                        {{ range $i, $m := $msg.Meta }}
+                        {{ range $i, $m := sort_map_human $msg.Meta }}
                             <tr class="adanos-can-fold">
-                                <th>{{ $i }}</th>
-                                <td><pre style="margin: 0; padding: 0; line-height: 1.5;">{{ format "%v" $m | remove_empty_line }}</pre></td>
+                                <th>{{ $m.Key }}</th>
+                                <td><pre style="margin: 0; padding: 0; line-height: 1.5;">{{ format "%v" $m.Value | remove_empty_line }}</pre></td>
                             </tr>
                         {{ end }}
                         <tr>

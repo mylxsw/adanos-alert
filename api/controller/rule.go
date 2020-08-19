@@ -63,6 +63,8 @@ type RuleForm struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
+	AggregateRule string `json:"aggregate_rule"`
+
 	ReadyType  string                 `json:"ready_type"`
 	Interval   int64                  `json:"interval"`
 	DailyTimes []string               `json:"daily_times"`
@@ -192,6 +194,10 @@ func (r RuleForm) Validate(req web.Request) error {
 		}
 	}
 
+	if _, err := matcher.NewMessageFinger(r.AggregateRule); err != nil {
+		return fmt.Errorf("group rule is invalid")
+	}
+
 	return nil
 }
 
@@ -207,6 +213,8 @@ func (r RuleController) Check(ctx web.Context) web.Response {
 		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
 	case repository.TemplateTypeTemplate:
 		_, err = template.CreateParser(content)
+	case "aggregate_rule":
+		_, err = matcher.NewMessageFinger(content)
 	}
 
 	if err != nil {
@@ -257,6 +265,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		Interval:        ruleForm.Interval,
 		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
+		AggregateRule:   ruleForm.AggregateRule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
 		Triggers:        triggers,
@@ -325,6 +334,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		Interval:        ruleForm.Interval,
 		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
+		AggregateRule:   ruleForm.AggregateRule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
 		Triggers:        triggers,

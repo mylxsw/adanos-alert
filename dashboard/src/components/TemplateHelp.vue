@@ -38,6 +38,7 @@ Group: {
 	ID     primitive.ObjectID
 	SeqNum int64
 	MessageCount int64
+	AggregateKey string
 	Rule         {
 		ID              primitive.ObjectID
 		Name            string

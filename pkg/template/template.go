@@ -58,6 +58,7 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"meta_filter":        MetaFilter,
 		"meta_prefix_filter": MetaFilterPrefix,
 		"serialize":          Serialize,
+		"sort_map_human":     SortMapByKeyHuman,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -265,4 +266,49 @@ func Serialize(data interface{}) string {
 	}
 
 	return string(serialized)
+}
+
+type KVPair struct {
+	Key   string
+	Value interface{}
+}
+
+type Keys []string
+
+func (ks Keys) Len() int {
+	return len(ks)
+}
+
+func (ks Keys) Less(i, j int) bool {
+	if strings.HasPrefix(ks[i], "message") && !strings.HasPrefix(ks[j], "message") {
+		return true
+	}
+	if strings.HasPrefix(ks[j], "message") && !strings.HasPrefix(ks[i], "message") {
+		return false
+	}
+
+	return ks[i] < ks[j]
+}
+
+func (ks Keys) Swap(i, j int) {
+	ks[i], ks[j] = ks[j], ks[i]
+}
+
+func SortMapByKeyHuman(data map[string]interface{}) []KVPair {
+	keys := make(Keys, 0)
+	for k := range data {
+		keys = append(keys, k)
+	}
+
+	sort.Sort(keys)
+
+	kvPairs := make([]KVPair, 0)
+	for _, v := range keys {
+		kvPairs = append(kvPairs, KVPair{
+			Key:   v,
+			Value: data[v],
+		})
+	}
+
+	return kvPairs
 }

@@ -93,6 +93,16 @@
                             target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                         </small>
                         <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
+                        <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input" description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy">
+                            <b-input-group>
+                                <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件"
+                                              v-model="form.aggregate_rule"/>
+
+                                <b-input-group-append>
+                                    <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </b-form-group>
                     </b-card>
                 </b-card-group>
 
@@ -374,6 +384,7 @@ let helpers = {
         {text: "Group.ID", displayText: ""},
         {text: "Group.SeqNum", displayText: ""},
         {text: "Group.MessageCount", displayText: ""},
+        {text: "Group.AggregateKey", displayText: ""},
         {text: "Group.Rule", displayText: ""},
         {text: "Group.Rule.ID", displayText: ""},
         {text: "Group.Rule.Name", displayText: ""},
@@ -601,6 +612,7 @@ export default {
                 name: '',
                 description: '',
                 tags: [],
+                aggregate_rule: '',
                 ready_type: 'interval',
                 daily_times: ['09:00:00'],
                 time_ranges: [
@@ -739,6 +751,18 @@ export default {
             }
 
             this.sendCheckRequest('template', template.trim());
+        },
+
+        /**
+         * 检查模板是否合法
+         */
+        checkAggregateRule(content) {
+            if (content.trim() === '') {
+                this.ErrorBox('分组规则为空，无需检查');
+                return;
+            }
+
+            this.sendCheckRequest('aggregate_rule', content.trim());
         },
 
         /**
@@ -914,6 +938,7 @@ export default {
             requestData.description = this.form.description;
             requestData.rule = this.form.rule;
             requestData.tags = this.form.tags;
+            requestData.aggregate_rule = this.form.aggregate_rule;
             requestData.template = this.form.template;
             requestData.triggers = this.form.triggers.map(function (value) {
                 value.meta = JSON.stringify(value.meta_arr);
@@ -958,6 +983,7 @@ export default {
                 this.form.daily_times = (response.data.daily_times === null || response.data.daily_times.length === 0) ? ['09:00:00'] : response.data.daily_times;
                 this.form.rule = response.data.rule;
                 this.form.tags = response.data.tags;
+                this.form.aggregate_rule = response.data.aggregate_rule;
                 this.form.template = response.data.template;
 
                 if (response.data.time_ranges === null || response.data.time_ranges.length === 0) {

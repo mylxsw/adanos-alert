@@ -9,7 +9,6 @@ import (
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const AggregationJobName = "aggregation"
@@ -39,7 +38,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		return err
 	}
 
-	collectingGroups := make(map[primitive.ObjectID]repository.MessageGroup)
+	collectingGroups := make(map[string]repository.MessageGroup)
 	err = msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
 		for _, m := range matchers {
 			matched, err := m.Match(msg)
@@ -49,8 +48,10 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
-				if _, ok := collectingGroups[m.Rule().ID]; !ok {
-					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule())
+				aggregateKey := buildMessageFinger(m.Rule().AggregateRule, msg)
+				key := fmt.Sprintf("%s:%s", m.Rule().ID.Hex(), aggregateKey)
+				if _, ok := collectingGroups[key]; !ok {
+					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey))
 					if err != nil {
 						log.WithFields(log.Fields{
 							"msg":  msg,
@@ -60,10 +61,10 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 						return err
 					}
 
-					collectingGroups[m.Rule().ID] = grp
+					collectingGroups[key] = grp
 				}
 
-				msg.GroupID = append(msg.GroupID, collectingGroups[m.Rule().ID].ID)
+				msg.GroupID = append(msg.GroupID, collectingGroups[key].ID)
 				msg.Status = repository.MessageStatusGrouped
 			}
 		}
@@ -150,4 +151,23 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 
 		return groupRepo.UpdateID(grp.ID, grp)
 	})
+}
+
+func buildMessageFinger(groupRule string, msg repository.Message) string {
+	finger, err := matcher.NewMessageFinger(groupRule)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"rule": groupRule,
+		}).Errorf("parse group rule failed: %v", err)
+		return "[error]invalid_rule"
+	}
+	groupKey, err := finger.Run(msg)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"rule": groupRule,
+		}).Errorf("rule group failed: %v", err)
+		return "[error]parse_failed"
+	}
+
+	return groupKey
 }

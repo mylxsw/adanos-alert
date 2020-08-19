@@ -268,3 +268,22 @@ func TestMetaFilter(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "[message.k1: v1][message.k2: v2][message.k3: v3][message.k4: v4][version: 1.0]", res)
 }
+
+func TestSortMapByKeyHuman(t *testing.T) {
+	data := map[string]interface{}{
+		"@timestamp":      "123456",
+		"a1":              "a1",
+		"b1":              "b1",
+		"message.message": "hello, world",
+		"message.name":    "your name",
+		"yyy":             "zzz",
+	}
+
+	dataSorted := SortMapByKeyHuman(data)
+	for _, d := range dataSorted {
+		fmt.Printf("%s: %s\n", d.Key, d.Value)
+	}
+
+	assert.Equal(t, len(data), len(dataSorted))
+	assert.True(t, strings.HasPrefix(dataSorted[0].Key, "message"))
+}

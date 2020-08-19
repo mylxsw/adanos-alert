@@ -37,10 +37,11 @@ type TimeRange struct {
 
 // Rule is a rule definition
 type Rule struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name        string             `bson:"name" json:"name"`
-	Description string             `bson:"description" json:"description"`
-	Tags        []string           `bson:"tags" json:"tags"`
+	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name          string             `bson:"name" json:"name"`
+	Description   string             `bson:"description" json:"description"`
+	Tags          []string           `bson:"tags" json:"tags"`
+	AggregateRule string             `bson:"aggregate_rule" json:"aggregate_rule"`
 
 	// ReadType 就绪类型，支持 interval/daily_time
 	ReadyType  string      `bson:"ready_type" json:"ready_type"`
@@ -60,13 +61,14 @@ type Rule struct {
 }
 
 // ToGroupRule convert Rule to MessageGroupRule
-func (rule Rule) ToGroupRule() MessageGroupRule {
+func (rule Rule) ToGroupRule(aggregateKey string) MessageGroupRule {
 	groupRule := MessageGroupRule{
 		ID:              rule.ID,
 		Name:            rule.Name,
 		Rule:            rule.Rule,
 		Template:        rule.Template,
 		SummaryTemplate: rule.SummaryTemplate,
+		AggregateKey:    aggregateKey,
 	}
 
 	if rule.ReadyType == "" {
@@ -136,18 +138,31 @@ func (t Times) Swap(i, j int) {
 
 func ExpectReadyAtInTimeRange(now time.Time, timeRanges []TimeRange) time.Time {
 	todayTimeStr := now.Format(time.RFC3339)
+	zeroTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+"00:00:00"+todayTimeStr[19:])
+	lastTime := zeroTime.AddDate(0, 0, 1)
+
 	for _, t := range timeRanges {
 		startTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.StartTime[:5]+":00"+todayTimeStr[19:])
 		endTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.EndTime[:5]+":00"+todayTimeStr[19:])
 
 		if startTime.After(endTime) {
-			endTime = endTime.AddDate(0, 0, 1)
+			if (timeBeforeOrEq(now, endTime) && timeAfterOrEq(now, zeroTime)) || (timeBeforeOrEq(now, lastTime) && timeAfterOrEq(now, startTime)) {
+				return now.Add(time.Duration(t.Interval) * time.Second)
+			}
 		}
 
-		if now.Before(endTime) && now.After(startTime) {
+		if timeBeforeOrEq(now, endTime) && timeAfterOrEq(now, startTime) {
 			return now.Add(time.Duration(t.Interval) * time.Second)
 		}
 	}
 
 	return now.Add(60 * time.Second)
+}
+
+func timeBeforeOrEq(t1 time.Time, t2 time.Time) bool {
+	return t1.Before(t2) || t1.Equal(t2)
+}
+
+func timeAfterOrEq(t1 time.Time, t2 time.Time) bool {
+	return t1.After(t2) || t1.Equal(t2)
 }

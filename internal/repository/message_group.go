@@ -22,6 +22,9 @@ type MessageGroupRule struct {
 	ID   primitive.ObjectID `bson:"_id" json:"id"`
 	Name string             `bson:"name" json:"name"`
 
+	// AggregateKey 通过该 Key 对同一个规则下的 message 分组
+	AggregateKey string `bson:"aggregate_key" json:"aggregate_key"`
+
 	// ExpectReadyAt 预期就绪时间，当超过该时间后，Group自动关闭，发起通知
 	ExpectReadyAt time.Time `bson:"expect_ready_at" json:"expect_ready_at"`
 
@@ -33,6 +36,9 @@ type MessageGroupRule struct {
 type MessageGroup struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	SeqNum int64              `bson:"seq_num" json:"seq_num"`
+
+	// AggregateKey 与 .Rule.AggregateKey 相同，方便读取
+	AggregateKey string `bson:"aggregate_key" json:"aggregate_key"`
 
 	MessageCount int64            `bson:"message_count" json:"message_count"`
 	Rule         MessageGroupRule `bson:"rule" json:"rule"`

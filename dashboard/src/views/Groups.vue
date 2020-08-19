@@ -26,6 +26,7 @@
                     <b-link :to="'/rules/' + row.item.rule.id + '/edit'" target="_blank" class="ml-2">
                         <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
                     </b-link>
+                    <p v-if="row.item.aggregate_key !== ''"><b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge></p>
                 </template>
                 <template v-slot:cell(status)="row">
                     <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中

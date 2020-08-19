@@ -69,6 +69,12 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
+		Name:        "判断分组聚合条件值是否为某些值",
+		Description: "匹配聚合条件值为 BigData 的消息",
+		Content:     `Group.AggregateKey in ["BigData"]`,
+		Type:        repository.TemplateTypeTriggerRule,
+	},
+	{
 		Name:        "报警信息摘要",
 		Description: "展示报警信息列表",
 		Content: `## {{ .Rule.Name }}
