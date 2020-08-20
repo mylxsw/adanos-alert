@@ -1,5 +1,5 @@
 <template>
-    <span>{{ formatted(value) }}</span>
+    <span v-b-tooltip.hover :title="value">{{ formatted(value) }}</span>
 </template>
 
 <script>
@@ -7,7 +7,7 @@
     export default {
         name: 'DateTime',
         props: {
-            value: String
+            value: String,
         },
         methods: {
             formatted(t) {

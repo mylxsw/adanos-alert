@@ -5,7 +5,7 @@
                 <b-button size="sm" :variant="queue_btn" class="float-right" @click="pause_queue()">{{ queue_action }}</b-button>
                 当前状态：<span v-html="queue_status"></span>，
                 Workers: <b>{{ queue_info.worker_num }}</b>，
-                已处理：<b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>，
+                自 <date-time :value="queue_info.start_at"></date-time> 开始，已处理：<b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>，
                 失败：<b-badge :to="'/queues?status=failed'" variant="danger">{{ queue_info.failed_count }}</b-badge>
             </div>
             <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty>
@@ -70,7 +70,7 @@
                     worker_num: '-',
                     processed_count: '-',
                     failed_count: '-',
-                    started_at: '-',
+                    start_at: '-',
                 },
                 queue_paused: false,
                 queue_status: "-",
