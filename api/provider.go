@@ -7,7 +7,7 @@ import (
 	"github.com/mylxsw/adanos-alert/configs"
 	_ "github.com/mylxsw/adanos-alert/docs"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -29,7 +29,7 @@ type ServiceProvider struct{}
 
 func (s ServiceProvider) Register(app container.Container) {}
 
-func (s ServiceProvider) Boot(app glacier.Glacier) {
+func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(conf *configs.Config) {
 		app.WebAppRouter(routers(app.Container()))
 		app.WebAppMuxRouter(func(router *mux.Router) {

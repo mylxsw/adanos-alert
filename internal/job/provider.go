@@ -2,16 +2,17 @@ package job
 
 import (
 	"fmt"
-	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/asteria/log"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
 	"sync"
 
+	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/asteria/log"
+	"github.com/mylxsw/glacier/infra"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/glacier/cron"
 )
 
@@ -22,7 +23,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewTrigger)
 }
 
-func (s ServiceProvider) Boot(app glacier.Glacier) {
+func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
 
 		return cc.Resolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob, lockRepo repository.LockRepo) {

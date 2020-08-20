@@ -12,7 +12,7 @@ import (
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/graceful"
 	"google.golang.org/grpc"
 )
@@ -36,14 +36,14 @@ func (p Provider) Register(app container.Container) {
 
 }
 
-func (p Provider) Boot(app glacier.Glacier) {
+func (p Provider) Boot(app infra.Glacier) {
 	app.MustResolve(func(serv *grpc.Server) {
 		protocol.RegisterMessageServer(serv, NewMessageService(app.Container()))
 		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app.Container()))
 	})
 }
 
-func (p Provider) Daemon(_ context.Context, app glacier.Glacier) {
+func (p Provider) Daemon(_ context.Context, app infra.Glacier) {
 	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf graceful.Graceful) {
 		listener, err := net.Listen("tcp", conf.GRPCListen)
 		if err != nil {

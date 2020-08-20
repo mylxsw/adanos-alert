@@ -19,7 +19,7 @@ require (
 	github.com/mylxsw/asteria v0.0.0-20200709071207-26dd334a6e51
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
-	github.com/mylxsw/glacier v0.0.0-20200814023904-e2c4a8f9ea69
+	github.com/mylxsw/glacier v0.0.0-20200820103600-705c319bcccc
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pkg/errors v0.9.1

@@ -8,7 +8,7 @@ import (
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 )
 
 // HeartbeatService is a service server for heartbeat
@@ -36,6 +36,6 @@ func (h *HeartbeatService) Ping(ctx context.Context, request *protocol.PingReque
 	})
 	return &protocol.PongResponse{
 		ServerTs:      time.Now().Unix(),
-		ServerVersion: h.cc.MustGet(glacier.VersionKey).(string),
+		ServerVersion: h.cc.MustGet(infra.VersionKey).(string),
 	}, nil
 }

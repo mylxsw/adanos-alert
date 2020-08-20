@@ -9,6 +9,8 @@ import (
 
 	"github.com/mylxsw/adanos-alert/rpc"
 	"github.com/mylxsw/asteria/writer"
+	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/glacier/listener"
 
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
@@ -22,7 +24,6 @@ import (
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/glacier/starter/application"
 	"github.com/mylxsw/glacier/web"
 	"github.com/urfave/cli"
@@ -39,7 +40,7 @@ func main() {
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "listen",
 		Usage: "http listen addr",
-		Value: "19999",
+		Value: ":19999",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "grpc_listen",
@@ -149,7 +150,7 @@ func main() {
 		Usage: "阿里云语音通知模板变量名",
 	}))
 
-	app.WithHttpServer().TCPListenerAddr(":19999")
+	app.WithHttpServer(listener.FlagContext("listen"))
 
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
@@ -165,7 +166,7 @@ func main() {
 		return nil
 	})
 
-	app.Singleton(func(c glacier.FlagContext) *configs.Config {
+	app.Singleton(func(c infra.FlagContext) *configs.Config {
 		aggregationPeriod, err := time.ParseDuration(c.String("aggregation_period"))
 		if err != nil {
 			log.Warningf("invalid argument [aggregation_period: %s], using default value", c.String("aggregation_period"))

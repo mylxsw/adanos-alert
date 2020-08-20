@@ -7,7 +7,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 )
 
 type ServiceProvider struct{}
@@ -16,11 +16,11 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewManager)
 }
 
-func (s ServiceProvider) Boot(app glacier.Glacier) {
+func (s ServiceProvider) Boot(app infra.Glacier) {
 
 }
 
-func (s ServiceProvider) Daemon(ctx context.Context, app glacier.Glacier) {
+func (s ServiceProvider) Daemon(ctx context.Context, app infra.Glacier) {
 	app.MustResolve(func(manager Manager, conf *configs.Config) {
 		var wg sync.WaitGroup
 		wg.Add(conf.QueueWorkerNum)

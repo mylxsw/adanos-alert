@@ -172,8 +172,8 @@ github.com/mylxsw/container v0.0.0-20191208075953-c8ee6e3238cc h1:xBh4hQSO+fcWa/
 github.com/mylxsw/container v0.0.0-20191208075953-c8ee6e3238cc/go.mod h1:v2QwNL+V2nI1o7naopTXXalpa1Y6b5E8lCwwANiYfyc=
 github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074 h1:8OLLLh/tG7M5kQrkmFIVYFpj2bLUtYZ3q+jp4vcA5gQ=
 github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074/go.mod h1:UDbF8EtqT7jB0yDc6g9u4P8ORvw4RbFot1QputpgR5U=
-github.com/mylxsw/glacier v0.0.0-20200814023904-e2c4a8f9ea69 h1:HV+OSJ0T+L9xtB3WyHj6SDc3TQa2eXgBu1Mx/3gMhLM=
-github.com/mylxsw/glacier v0.0.0-20200814023904-e2c4a8f9ea69/go.mod h1:gR/AjRPG59eaf9O94gcktmuE+cR9F04WzIcPCDVSy2M=
+github.com/mylxsw/glacier v0.0.0-20200820103600-705c319bcccc h1:UZ+X4drqKtDR0/OKxuvz5nzHssurkVkJW2vR1qbfVlY=
+github.com/mylxsw/glacier v0.0.0-20200820103600-705c319bcccc/go.mod h1:gR/AjRPG59eaf9O94gcktmuE+cR9F04WzIcPCDVSy2M=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988 h1:eUlVMPyxeWUogeqwAkat6eE+3eY5fjP/UAXyhAf/7Jw=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988/go.mod h1:aJAUawotu1IMtEPXInIm6qwiAEIMSGRAMH6otakYCWw=
 github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134 h1:uYT1HZC8kyKGtAR/Los/azrD8uROgkM8HHuhN2bzPmI=

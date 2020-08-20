@@ -10,7 +10,7 @@ import (
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 )
 
@@ -34,7 +34,7 @@ func (m *MessageController) Register(router *web.Router) {
 }
 
 func (m *MessageController) saveMessage(msgRepo store.MessageStore, commonMessage misc.CommonMessage, ctx web.Context) error {
-	commonMessage.Meta["adanos_agent_version"] = m.cc.MustGet(glacier.VersionKey).(string)
+	commonMessage.Meta["adanos_agent_version"] = m.cc.MustGet(infra.VersionKey).(string)
 	commonMessage.Meta["adanos_agent_ip"] = misc.ServerIP()
 	m.cc.MustResolve(func(db *ledis.DB) {
 		agentID, _ := db.Get([]byte("agent-id"))

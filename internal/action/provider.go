@@ -5,7 +5,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +15,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewManager)
 }
 
-func (s ServiceProvider) Boot(app glacier.Glacier) {
+func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(manager Manager, queueManager queue.Manager) {
 		manager.Register("http", NewHttpAction(manager))
 		manager.Register("dingding", NewDingdingAction(manager))

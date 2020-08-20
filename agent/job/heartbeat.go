@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
 )
 
 func heartbeatJob(cc container.Container, db *ledis.DB, hs protocol.HeartbeatClient) error {
@@ -19,7 +19,7 @@ func heartbeatJob(cc container.Container, db *ledis.DB, hs protocol.HeartbeatCli
 		AgentTs:       time.Now().Unix(),
 		AgentIP:       misc.ServerIP(),
 		AgentID:       string(agentID),
-		ClientVersion: cc.MustGet(glacier.VersionKey).(string),
+		ClientVersion: cc.MustGet(infra.VersionKey).(string),
 	}
 
 	pong, err := hs.Ping(ctx, &pingReq)

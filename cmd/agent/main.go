@@ -20,7 +20,8 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
+	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/glacier/listener"
 	"github.com/mylxsw/glacier/starter/application"
 	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-toolkit/network"
@@ -53,8 +54,14 @@ func main() {
 		Usage: "本地数据库存储目录",
 		Value: "/tmp/adanos-agent",
 	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "listen",
+		Usage:  "listen address",
+		EnvVar: "ADANOS_AGENT_LISTEN_ADDR",
+		Value:  "127.0.0.1:29999",
+	}))
 
-	app.WithHttpServer().TCPListenerAddr("127.0.0.1:29999")
+	app.WithHttpServer(listener.FlagContext("listen"))
 
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
@@ -71,7 +78,7 @@ func main() {
 	})
 
 	// Config
-	app.Singleton(func(c glacier.FlagContext) *config.Config {
+	app.Singleton(func(c infra.FlagContext) *config.Config {
 		return &config.Config{
 			DataDir:     c.String("data_dir"),
 			ServerAddr:  c.String("server_addr"),

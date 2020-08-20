@@ -8,8 +8,8 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier"
 	"github.com/mylxsw/glacier/cron"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -30,7 +30,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewAgentRepo)
 }
 
-func (s ServiceProvider) Boot(app glacier.Glacier) {
+func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
 		return cc.Resolve(func(kvRepo repository.KVRepo, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo, conf *configs.Config) {
 			_ = cr.Add("kv_repository_gc", "@hourly", func() {
