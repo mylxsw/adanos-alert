@@ -14,7 +14,9 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/array"
 	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -227,7 +229,7 @@ func (r RuleController) Check(ctx web.Context) web.Response {
 }
 
 // Add create a new rule
-func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
+func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.Manager, manager action.Manager) (*repository.Rule, error) {
 	var ruleForm RuleForm
 	if err := ctx.Unmarshal(&ruleForm); err != nil {
 		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
@@ -256,7 +258,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		})
 	}
 
-	ruleID, err := repo.Add(repository.Rule{
+	newRule := repository.Rule{
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
 		Tags:            ruleForm.Tags,
@@ -270,10 +272,18 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 		SummaryTemplate: ruleForm.SummaryTemplate,
 		Triggers:        triggers,
 		Status:          repository.RuleStatus(ruleForm.Status),
-	})
+	}
+
+	ruleID, err := repo.Add(newRule)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
+
+	em.Publish(pubsub.RuleChangedEvent{
+		Rule:      newRule,
+		Type:      pubsub.EventTypeAdd,
+		CreatedAt: time.Now(),
+	})
 
 	rule, err := repo.Get(ruleID)
 	if err != nil {
@@ -284,7 +294,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, manager a
 }
 
 // Update replace one rule for specified id
-func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, manager action.Manager) (*repository.Rule, error) {
+func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em event.Manager, manager action.Manager) (*repository.Rule, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
@@ -324,7 +334,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		})
 	}
 
-	if err := ruleRepo.UpdateID(id, repository.Rule{
+	newRule := repository.Rule{
 		ID:              original.ID,
 		Name:            ruleForm.Name,
 		Description:     ruleForm.Description,
@@ -341,9 +351,17 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, ma
 		Status:          repository.RuleStatus(ruleForm.Status),
 		CreatedAt:       original.CreatedAt,
 		UpdatedAt:       original.CreatedAt,
-	}); err != nil {
+	}
+
+	if err := ruleRepo.UpdateID(id, newRule); err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
+
+	em.Publish(pubsub.RuleChangedEvent{
+		Rule:      newRule,
+		Type:      pubsub.EventTypeUpdate,
+		CreatedAt: time.Now(),
+	})
 
 	rule, err := ruleRepo.Get(id)
 	if err != nil {
@@ -442,11 +460,22 @@ func (r RuleController) Rule(ctx web.Context, ruleRepo repository.RuleRepo) (*re
 }
 
 // Delete delete a rule
-func (r RuleController) Delete(ctx web.Context, repo repository.RuleRepo) error {
+func (r RuleController) Delete(ctx web.Context, em event.Manager, repo repository.RuleRepo) error {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return web.WrapJSONError(err, http.StatusUnprocessableEntity)
 	}
+
+	rule, err := repo.Get(id)
+	if err != nil {
+		return err
+	}
+
+	em.Publish(pubsub.RuleChangedEvent{
+		Rule:      rule,
+		Type:      pubsub.EventTypeDelete,
+		CreatedAt: time.Now(),
+	})
 
 	return repo.DeleteID(id)
 }

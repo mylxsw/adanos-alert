@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -135,7 +138,7 @@ func (u UserController) UserNames(ctx web.Context, userRepo repository.UserRepo)
 	return resps, nil
 }
 
-func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*repository.User, error) {
+func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo, em event.Manager) (*repository.User, error) {
 	var userForm *UserForm
 	if err := ctx.Unmarshal(&userForm); err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -144,7 +147,7 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*rep
 	userForm.Init(userRepo, false)
 	ctx.Validate(userForm, true)
 
-	id, err := userRepo.Add(repository.User{
+	newUser := repository.User{
 		Name:     userForm.Name,
 		Email:    userForm.Email,
 		Phone:    userForm.Phone,
@@ -152,10 +155,18 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*rep
 		Role:     userForm.Role,
 		Metas:    userForm.GetMetas(),
 		Status:   repository.UserStatus(userForm.Status),
-	})
+	}
+
+	id, err := userRepo.Add(newUser)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
+
+	em.Publish(pubsub.UserChangedEvent{
+		User:      newUser,
+		Type:      pubsub.EventTypeAdd,
+		CreatedAt: time.Now(),
+	})
 
 	user, err := userRepo.Get(id)
 	if err != nil {
@@ -165,7 +176,7 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo) (*rep
 	return &user, nil
 }
 
-func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*repository.User, error) {
+func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo, em event.Manager) (*repository.User, error) {
 	userID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -203,14 +214,31 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo) (*
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
+	em.Publish(pubsub.UserChangedEvent{
+		User:      user,
+		Type:      pubsub.EventTypeUpdate,
+		CreatedAt: time.Now(),
+	})
+
 	return &user, nil
 }
 
-func (u UserController) Delete(ctx web.Context, userRepo repository.UserRepo) error {
+func (u UserController) Delete(ctx web.Context, userRepo repository.UserRepo, em event.Manager) error {
 	userID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
+
+	user, err := userRepo.Get(userID)
+	if err != nil {
+		return err
+	}
+
+	em.Publish(pubsub.UserChangedEvent{
+		User:      user,
+		Type:      pubsub.EventTypeDelete,
+		CreatedAt: time.Now(),
+	})
 
 	return userRepo.DeleteID(userID)
 }

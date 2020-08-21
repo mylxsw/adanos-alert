@@ -55,7 +55,7 @@
                     </b-button-group>
                 </template>
             </b-table>
-            <paginator :per_page="10" :cur="cur" :next="next" path="/"></paginator>
+            <paginator :per_page="10" :cur="cur" :next="next" path="/" :query="this.$route.query"></paginator>
         </b-col>
     </b-row>
 </template>

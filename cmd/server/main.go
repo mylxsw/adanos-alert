@@ -7,8 +7,10 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/adanos-alert/rpc"
 	"github.com/mylxsw/asteria/writer"
+	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/listener"
 
@@ -232,7 +234,7 @@ func main() {
 		return nil
 	})
 
-	app.Main(func(conf *configs.Config, router *mux.Router) {
+	app.Main(func(conf *configs.Config, router *mux.Router, em event.Manager) {
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")
@@ -240,6 +242,20 @@ func main() {
 		for _, r := range web.GetAllRoutes(router) {
 			log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
 		}
+
+		em.Publish(pubsub.SystemUpDownEvent{
+			Up:        true,
+			CreatedAt: time.Now(),
+		})
+	})
+
+	app.BeforeServerStop(func(cc container.Container) error {
+		return cc.Resolve(func(em event.Manager) {
+			em.Publish(pubsub.SystemUpDownEvent{
+				Up:        false,
+				CreatedAt: time.Now(),
+			})
+		})
 	})
 
 	app.Provider(action.ServiceProvider{})
@@ -249,6 +265,7 @@ func main() {
 	app.Provider(queue.ServiceProvider{})
 	app.Provider(migrate.ServiceProvider{})
 	app.Provider(rpc.Provider{})
+	app.Provider(pubsub.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
@@ -264,10 +281,23 @@ func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.cc.ResolveWithError(func(msgRepo repository.MessageRepo) error {
-		_, err := msgRepo.Add(repository.Message{
+	return e.cc.ResolveWithError(func(msgRepo repository.MessageRepo, auditRepo repository.AuditLogRepo) error {
+
+		auditLogID, err := auditRepo.Add(repository.AuditLog{
+			Type: repository.AuditLogTypeError,
+			Context: map[string]interface{}{
+				"level":  le.GetLevelName(),
+				"module": module,
+			},
+			Body: message,
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = msgRepo.Add(repository.Message{
 			Content: message,
-			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module},
+			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module, "audit_id": auditLogID.Hex()},
 			Tags:    []string{"internal-error"},
 			Origin:  "internal",
 		})

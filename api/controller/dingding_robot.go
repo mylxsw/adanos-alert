@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -79,7 +82,7 @@ func (u DingdingRobotController) DingdingRobotNames(ctx web.Context, robotRepo r
 	return resps, nil
 }
 
-func (u DingdingRobotController) Add(ctx web.Context, robotRepo repository.DingdingRobotRepo) (*repository.DingdingRobot, error) {
+func (u DingdingRobotController) Add(ctx web.Context, em event.Manager, robotRepo repository.DingdingRobotRepo) (*repository.DingdingRobot, error) {
 	var robotForm *DingdingRobotForm
 	if err := ctx.Unmarshal(&robotForm); err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -87,17 +90,25 @@ func (u DingdingRobotController) Add(ctx web.Context, robotRepo repository.Dingd
 
 	ctx.Validate(robotForm, true)
 
-	id, err := robotRepo.Add(repository.DingdingRobot{
+	robot := repository.DingdingRobot{
 		Name:        robotForm.Name,
 		Description: robotForm.Description,
 		Token:       robotForm.Token,
 		Secret:      robotForm.Secret,
-	})
+	}
+
+	id, err := robotRepo.Add(robot)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	robot, err := robotRepo.Get(id)
+	em.Publish(pubsub.DingdingRobotEvent{
+		DingDingRobot: robot,
+		Type:          pubsub.EventTypeAdd,
+		CreatedAt:     time.Now(),
+	})
+
+	robot, err = robotRepo.Get(id)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
@@ -105,7 +116,7 @@ func (u DingdingRobotController) Add(ctx web.Context, robotRepo repository.Dingd
 	return &robot, nil
 }
 
-func (u DingdingRobotController) Update(ctx web.Context, robotRepo repository.DingdingRobotRepo) (*repository.DingdingRobot, error) {
+func (u DingdingRobotController) Update(ctx web.Context, em event.Manager, robotRepo repository.DingdingRobotRepo) (*repository.DingdingRobot, error) {
 	robotID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
@@ -136,14 +147,31 @@ func (u DingdingRobotController) Update(ctx web.Context, robotRepo repository.Di
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
+	em.Publish(pubsub.DingdingRobotEvent{
+		DingDingRobot: robot,
+		Type:          pubsub.EventTypeUpdate,
+		CreatedAt:     time.Now(),
+	})
+
 	return &robot, nil
 }
 
-func (u DingdingRobotController) Delete(ctx web.Context, robotRepo repository.DingdingRobotRepo) error {
+func (u DingdingRobotController) Delete(ctx web.Context, em event.Manager, robotRepo repository.DingdingRobotRepo) error {
 	robotID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return web.WrapJSONError(fmt.Errorf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
+
+	robot, err := robotRepo.Get(robotID)
+	if err != nil {
+		return err
+	}
+
+	em.Publish(pubsub.DingdingRobotEvent{
+		DingDingRobot: robot,
+		Type:          pubsub.EventTypeDelete,
+		CreatedAt:     time.Now(),
+	})
 
 	return robotRepo.DeleteID(robotID)
 }
