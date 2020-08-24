@@ -2,12 +2,15 @@ package job
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/event"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -127,7 +130,7 @@ func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*ma
 	return matchers, nil
 }
 
-func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) error {
+func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo, em event.Manager) error {
 	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusCollecting}, func(grp repository.MessageGroup) error {
 		if !grp.Ready() {
 			return nil
@@ -149,7 +152,14 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 			"status": grp.Status,
 		}).Debug("change group status")
 
-		return groupRepo.UpdateID(grp.ID, grp)
+		err = groupRepo.UpdateID(grp.ID, grp)
+
+		em.Publish(pubsub.MessageGroupPendingEvent{
+			Group:     grp,
+			CreatedAt: time.Now(),
+		})
+
+		return err
 	})
 }
 

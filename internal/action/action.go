@@ -3,11 +3,14 @@ package action
 import (
 	"encoding/json"
 	"sync"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/event"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -116,13 +119,21 @@ func (payload *Payload) Decode(data []byte) error {
 }
 
 func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
-	return q.manager.Resolve(func(queueManager queue.Manager) error {
+	return q.manager.Resolve(func(queueManager queue.Manager, em event.Manager) error {
 		payload := Payload{
 			Action:  q.action,
 			Trigger: trigger,
 			Group:   grp,
 			Rule:    rule,
 		}
+
+		em.Publish(pubsub.MessageGroupTriggeredEvent{
+			Action:    q.action,
+			Trigger:   trigger,
+			Group:     grp,
+			Rule:      rule,
+			CreatedAt: time.Now(),
+		})
 
 		id, err := queueManager.Enqueue(repository.QueueJob{
 			Name:    "action",
