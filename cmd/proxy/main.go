@@ -9,6 +9,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/connector"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/urfave/cli"
 )
@@ -81,11 +82,7 @@ func createMessageMeta(meta []string) repository.MessageMeta {
 	if meta != nil && len(meta) > 0 {
 		for _, m := range meta {
 			segs := strings.SplitN(m, "=", 2)
-			if len(segs) == 2 {
-				metas[segs[0]] = segs[1]
-			} else {
-				metas[segs[0]] = ""
-			}
+			metas[segs[0]] = misc.IfElse(len(segs) == 2, segs[1], "")
 		}
 	}
 	return metas

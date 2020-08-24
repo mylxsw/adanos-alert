@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -31,18 +32,18 @@ func Parse(templateStr string, data interface{}) (string, error) {
 // CreateParse create a template parser
 func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":             cutOff,
-		"implode":            strings.Join,
-		"explode":            strings.Split,
-		"ident":              leftIdent,
-		"json":               jsonFormatter,
-		"datetime":           datetimeFormat,
-		"datetime_noloc":     datetimeFormatNoLoc,
-		"json_get":           pkgJSON.Get,
-		"json_gets":          pkgJSON.Gets,
-		"json_array":         pkgJSON.GetArray,
-		"json_flatten":       jsonFlatten,
-		"starts_with":        startsWith,
+		"cutoff":         cutOff,
+		"Implode":        Implode,
+		"explode":        strings.Split,
+		"ident":          leftIdent,
+		"json":           jsonFormatter,
+		"datetime":       datetimeFormat,
+		"datetime_noloc": datetimeFormatNoLoc,
+		"json_get":       pkgJSON.Get,
+		"json_gets":      pkgJSON.Gets,
+		"json_array":     pkgJSON.GetArray,
+		"json_flatten":   jsonFlatten,
+		"starts_with":    startsWith,
 		"ends_with":          endsWith,
 		"trim":               strings.Trim,
 		"trim_right":         strings.TrimSuffix,
@@ -311,4 +312,23 @@ func SortMapByKeyHuman(data map[string]interface{}) []KVPair {
 	}
 
 	return kvPairs
+}
+
+func Implode(elems interface{}, sep string) string {
+	if _, ok := elems.([]string); ok {
+		return strings.Join(elems.([]string), sep)
+	}
+
+	elemsType := reflect.TypeOf(elems).Kind()
+	if elemsType == reflect.Array || elemsType == reflect.Slice {
+		joinStrs := make([]string, 0)
+		elemsVal := reflect.ValueOf(elems)
+		for i := 0; i < elemsVal.Len(); i++ {
+			joinStrs = append(joinStrs, fmt.Sprintf("%v", elemsVal.Index(i).Interface()))
+		}
+
+		return strings.Join(joinStrs, sep)
+	}
+
+	return fmt.Sprintf("%v", elems)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/color"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
@@ -46,14 +47,9 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 
 		// 系统启停事件监听
 		em.Listen(func(ev SystemUpDownEvent) {
-			status := "down"
-			if ev.Up {
-				status = "up"
-			}
-
 			auditRepo.Add(repository.AuditLog{
 				Type: repository.AuditLogTypeSystem,
-				Body: fmt.Sprintf("[%s] System is changed to %s", ev.CreatedAt.Format(time.RFC3339), status),
+				Body: fmt.Sprintf("[%s] System is changed to %s", ev.CreatedAt.Format(time.RFC3339), misc.IfElse(ev.Up, "up", "down")),
 			})
 		})
 	})

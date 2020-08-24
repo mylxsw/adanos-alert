@@ -287,3 +287,23 @@ func TestSortMapByKeyHuman(t *testing.T) {
 	assert.Equal(t, len(data), len(dataSorted))
 	assert.True(t, strings.HasPrefix(dataSorted[0].Key, "message"))
 }
+
+func TestImplode(t *testing.T) {
+	assert.Equal(t, "aaa, bbb, ccc", Implode([]string{"aaa", "bbb", "ccc"}, ", "))
+	assert.Equal(t, "aaa, bbb, ccc", Implode([]interface{}{"aaa", "bbb", "ccc"}, ", "))
+	assert.Equal(t, "aaa, 123, ccc", Implode([]interface{}{"aaa", 123, "ccc"}, ", "))
+	assert.Equal(t, "111, 123, 333", Implode([]int{111, 123, 333}, ", "))
+	assert.Equal(t, "1322", Implode(1322, ", "))
+
+	type user struct {
+		Name string
+		Age  int
+	}
+
+	users := []user{
+		{Name: "zhangsan", Age: 11},
+		{Name: "lisi", Age: 22},
+	}
+
+	assert.Equal(t, "{zhangsan 11},{lisi 22}", Implode(users, ","))
+}
