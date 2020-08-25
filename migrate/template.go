@@ -102,6 +102,12 @@ var predefinedTemplates = []repository.Template{
 		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
+	{
+		Name:        "嵌入全局的规则模板",
+		Description: "在动作模板中引用规则的展示模板内容",
+		Content:     `{{ .RuleTemplateParsed }}`,
+		Type:        repository.TemplateTypeTemplate,
+	},
 }
 
 func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo) {

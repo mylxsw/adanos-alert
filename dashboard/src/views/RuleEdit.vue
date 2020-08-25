@@ -545,7 +545,10 @@ let helpers = {
             displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'
         },
         {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
-    ]
+    ],
+    triggerTemplates: [
+
+    ],
 }
 
 let hintHandler = function (editor) {
@@ -559,9 +562,12 @@ let hintHandler = function (editor) {
             sources.push(...helpers.triggerMatchRules);
             sources.push(...helpers.matchRules);
             break;
-        case 'Template': // no break
+        case 'Template':
+            sources.push(...helpers.templates);
+            break;
         case 'DingTemplate':
             sources.push(...helpers.templates);
+            sources.push(...helpers.triggerTemplates);
             break;
         default:
     }

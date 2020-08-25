@@ -38,7 +38,7 @@ Trigger {
 }
                     </code></pre>
                 </li>
-                <li>支持的函数：
+                <li>支持的对象、函数：
                     <ul>
                         <li v-for="(helper, i) in helpers" v-bind:key="i"><code>{{ helper.text }}</code> {{ helper.displayText }}</li>
                     </ul>

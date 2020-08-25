@@ -4,7 +4,9 @@
             <ul>
                 <li>支持的基本字段：
                     <pre><code>
-Action:  string
+Action: string
+RuleTemplateParsed: string // 根据规则全局模板生成的报警摘要，只在动作触发模板部分可用
+PreviewURL: string // 报警详情预览地址
 Rule: {
 	ID          primitive.ObjectID
 	Name        string
@@ -55,7 +57,7 @@ Group: {
 }
                     </code></pre>
                 </li>
-                <li>支持的函数：
+                <li>支持的对象、函数：
                     <ul>
                         <li v-for="(helper, i) in helpers" v-bind:key="i"><code>{{ helper.text }}</code> {{ helper.displayText }}</li>
                     </ul>

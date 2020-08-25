@@ -79,27 +79,36 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return fmt.Errorf("query robot for id=%s failed: %v", meta.RobotID, err)
 		}
 
-		summaryTemplate := rule.Template
-		if strings.TrimSpace(meta.Template) != "" {
-			summaryTemplate = meta.Template
-		}
-
-		res, err := template.Parse(summaryTemplate, payload)
+		ruleTemplateContent, err := template.Parse(rule.Template, payload)
 		if err != nil {
-			res = fmt.Sprintf("template parse failed: %s", err)
+			ruleTemplateContent = fmt.Sprintf("<rule> template parse failed: %s", err)
 			log.WithFields(log.Fields{
 				"err":      err.Error(),
 				"template": rule.Template,
 				"payload":  payload,
-			}).Errorf("template parse failed: %v", err)
+			}).Errorf("<rule> template parse failed: %v", err)
+		}
+
+		notifyContent := ruleTemplateContent
+		if strings.TrimSpace(meta.Template) != "" {
+			payload.RuleTemplateParsed = ruleTemplateContent
+			notifyContent, err = template.Parse(meta.Template, payload)
+			if err != nil {
+				notifyContent = fmt.Sprintf("<trigger> template parse failed: %s", err)
+				log.WithFields(log.Fields{
+					"err":      err.Error(),
+					"template": rule.Template,
+					"payload":  payload,
+				}).Errorf("<trigger> template parse failed: %v", err)
+			}
 		}
 
 		mobiles := extractPhonesFromUserRefs(d.userRepo, trigger.UserRefs)
-		msg := dingding.NewMarkdownMessage(rule.Name, res, mobiles)
+		msg := dingding.NewMarkdownMessage(rule.Name, notifyContent, mobiles)
 		if err := dingding.NewDingding(robot.Token, robot.Secret).Send(msg); err != nil {
 			log.WithFields(log.Fields{
 				"title":   rule.Name,
-				"content": res,
+				"content": notifyContent,
 				"mobiles": mobiles,
 				"err":     err,
 			}).Errorf("send message to dingding failed: %v", err)
@@ -108,7 +117,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 
 		log.WithFields(log.Fields{
 			"title":   rule.Name,
-			"content": res,
+			"content": notifyContent,
 			"mobiles": mobiles,
 		}).Debug("send message to dingding succeed")
 
