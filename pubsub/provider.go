@@ -13,19 +13,22 @@ import (
 	"github.com/mylxsw/glacier/infra"
 )
 
+// ServiceProvider 消息监听 Provider
 type ServiceProvider struct {
 }
 
+// Register 实现 ServiceProvider 接口
 func (s ServiceProvider) Register(app container.Container) {
 }
 
+// Boot 实现 ServiceProvider 接口
 func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(em event.Manager, auditRepo repository.AuditLogRepo) {
 		// 用户变更事件监听
 		em.Listen(func(ev UserChangedEvent) {
 			auditRepo.Add(repository.AuditLog{
 				Type: repository.AuditLogTypeAction,
-				Body: fmt.Sprintf("[%s] User %s: %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.User)),
+				Body: fmt.Sprintf("[%s] User %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.User)),
 			})
 		})
 
@@ -33,7 +36,7 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 		em.Listen(func(ev RuleChangedEvent) {
 			auditRepo.Add(repository.AuditLog{
 				Type: repository.AuditLogTypeAction,
-				Body: fmt.Sprintf("[%s] Rule %s: %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.Rule)),
+				Body: fmt.Sprintf("[%s] Rule %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.Rule)),
 			})
 		})
 
@@ -41,7 +44,7 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 		em.Listen(func(ev DingdingRobotEvent) {
 			auditRepo.Add(repository.AuditLog{
 				Type: repository.AuditLogTypeAction,
-				Body: fmt.Sprintf("[%s] DingdingRobot %s: %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.DingDingRobot)),
+				Body: fmt.Sprintf("[%s] DingdingRobot %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.DingDingRobot)),
 			})
 		})
 

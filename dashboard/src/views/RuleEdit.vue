@@ -521,6 +521,10 @@ let helpers = {
             text: 'format "FORMAT" VAL',
             displayText: 'format(format string, a ...interface{}) string  |  格式化展示，调用 fmt.Sprintf'
         },
+        {
+            text: 'number_beauty VAL',
+            displayText: 'number_beauty(num interface{}) string  |  数字格式化展示，自动添加千分位分隔符'
+        },
         {text: 'integer STR', displayText: 'integer(str string) int  |  字符串转整数 '},
         {
             text: 'mysql_slowlog STR',

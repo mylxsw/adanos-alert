@@ -32,24 +32,25 @@ func Parse(templateStr string, data interface{}) (string, error) {
 // CreateParse create a template parser
 func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":         cutOff,
-		"Implode":        Implode,
-		"explode":        strings.Split,
-		"ident":          leftIdent,
-		"json":           jsonFormatter,
-		"datetime":       datetimeFormat,
-		"datetime_noloc": datetimeFormatNoLoc,
-		"json_get":       pkgJSON.Get,
-		"json_gets":      pkgJSON.Gets,
-		"json_array":     pkgJSON.GetArray,
-		"json_flatten":   jsonFlatten,
-		"starts_with":    startsWith,
+		"cutoff":             cutOff,
+		"Implode":            Implode,
+		"explode":            strings.Split,
+		"ident":              leftIdent,
+		"json":               jsonFormatter,
+		"datetime":           datetimeFormat,
+		"datetime_noloc":     datetimeFormatNoLoc,
+		"json_get":           pkgJSON.Get,
+		"json_gets":          pkgJSON.Gets,
+		"json_array":         pkgJSON.GetArray,
+		"json_flatten":       jsonFlatten,
+		"starts_with":        startsWith,
 		"ends_with":          endsWith,
 		"trim":               strings.Trim,
 		"trim_right":         strings.TrimSuffix,
 		"trim_left":          strings.TrimPrefix,
 		"trim_space":         strings.TrimSpace,
 		"format":             fmt.Sprintf,
+		"number_beauty":      NumberBeauty,
 		"integer":            toInteger,
 		"mysql_slowlog":      parseMySQLSlowlog,
 		"open_falcon_im":     ParseOpenFalconImMessage,
@@ -331,4 +332,27 @@ func Implode(elems interface{}, sep string) string {
 	}
 
 	return fmt.Sprintf("%v", elems)
+}
+
+// NumberBeauty 字符串数字格式化
+func NumberBeauty(number interface{}) string {
+	str, ok := number.(string)
+	if !ok {
+		str = fmt.Sprintf("%.2f", number)
+	}
+
+	length := len(str)
+	if length < 4 {
+		return str
+	}
+	arr := strings.Split(str, ".") //用小数点符号分割字符串,为数组接收
+	length1 := len(arr[0])
+	if length1 < 4 {
+		return str
+	}
+	count := (length1 - 1) / 3
+	for i := 0; i < count; i++ {
+		arr[0] = arr[0][:length1-(i+1)*3] + "," + arr[0][length1-(i+1)*3:]
+	}
+	return strings.Join(arr, ".")
 }

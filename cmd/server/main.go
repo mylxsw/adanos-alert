@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"runtime/debug"
 	"time"
@@ -235,6 +236,8 @@ func main() {
 	})
 
 	app.Main(func(conf *configs.Config, router *mux.Router, em event.Manager) {
+		rand.Seed(time.Now().Unix())
+
 		log.WithFields(log.Fields{
 			"config": conf,
 		}).Debug("configuration")

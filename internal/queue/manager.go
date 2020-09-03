@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/mylxsw/container"
 )
 
+// Manager 队列管理接口
 type Manager interface {
 	Enqueue(item repository.QueueJob) (string, error)
 	StartWorker(ctx context.Context, workerID string)
@@ -22,8 +24,10 @@ type Manager interface {
 	RegisterHandler(name string, handler Handler)
 }
 
+// Handler 队列消息处理器
 type Handler func(item repository.QueueJob) error
 
+// Info 队列状态信息
 type Info struct {
 	StartAt        time.Time `json:"start_at"`
 	WorkerNum      int       `json:"worker_num"`
@@ -208,7 +212,7 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 		}
 
 		// try again latter
-		item.NextExecuteAt = time.Now().Add(time.Duration((item.RequeueTimes+1)*30) * time.Second)
+		item.NextExecuteAt = time.Now().Add(time.Duration((item.RequeueTimes+1)*30+rand.Intn(10)) * time.Second)
 		if _, err := manager.repo.Enqueue(item); err != nil {
 			log.WithFields(log.Fields{
 				"err":  err.Error(),

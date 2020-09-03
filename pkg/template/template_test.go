@@ -307,3 +307,14 @@ func TestImplode(t *testing.T) {
 
 	assert.Equal(t, "{zhangsan 11},{lisi 22}", Implode(users, ","))
 }
+
+func TestNumberBeauty(t *testing.T) {
+	parsed, _ := Parse(`{{ index .Data "number" | format "%.0f" | number_beauty }} | {{ index .Data "number" | number_beauty }}`, struct {
+		Data map[string]interface{}
+	}{
+		Data: map[string]interface{}{
+			"number": 111133448958232.0,
+		},
+	})
+	assert.Equal(t, "111,133,448,958,232 | 111,133,448,958,232.00", parsed)
+}

@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Helpers 用于规则引擎的助手函数
 type Helpers struct{}
 
 // Lower returns a copy of the string s with all Unicode letters mapped to their lower case.

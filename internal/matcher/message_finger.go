@@ -8,11 +8,13 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 )
 
+// MessageFinger 消息指纹
 type MessageFinger struct {
 	expr    string
 	program *vm.Program
 }
 
+// NewMessageFinger create a new MessageFinger instance
 func NewMessageFinger(fingerExpr string) (*MessageFinger, error) {
 	if fingerExpr == "" {
 		fingerExpr = `""`
