@@ -155,19 +155,20 @@ func parseDatetimeRFC3339(dt string) time.Time {
 
 // reformatDatetimeStr 时间字符串重新格式化
 func reformatDatetimeStr(originalLayout, targetLayout string, dt string) string {
-	return parseDatetime(originalLayout, dt).Format(targetLayout)
+	loc, _ := time.LoadLocation("Asia/Chongqing")
+	return parseDatetime(originalLayout, dt).In(loc).Format(targetLayout)
 }
 
 // datetimeFormat 时间格式化，不使用Location
-func datetimeFormatNoLoc(datetime time.Time) string {
-	return datetime.Format("2006-01-02 15:04:05")
+func datetimeFormatNoLoc(layout string, datetime time.Time) string {
+	return datetime.Format(layout)
 }
 
 // datetimeFormat 时间格式化
-func datetimeFormat(datetime time.Time) string {
+func datetimeFormat(layout string, datetime time.Time) string {
 	loc, _ := time.LoadLocation("Asia/Chongqing")
 
-	return datetime.In(loc).Format("2006-01-02 15:04:05")
+	return datetime.In(loc).Format(layout)
 }
 
 type KvPairs []jsonutils.KvPair
