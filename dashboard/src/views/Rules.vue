@@ -32,16 +32,15 @@
                 <template v-slot:cell(rule)="row">
                     <p><small>
                         频率为
-                        <span v-if="row.item.ready_type === 'interval' || row.item.ready_type === ''"><code><b>{{
-                                row.item.interval / 60
-                            }} 分钟每次</b></code></span>
-                        <span
-                            v-if="row.item.ready_type === 'daily_time'"><code><b>每天 {{ row.item.daily_times.map((t) => t.substring(0, 5)).join(", ") }}</b></code></span>
-                        <span v-if="row.item.ready_type === 'time_range'"><code><b>{{
-                                timeRangeDesc(row.item.time_ranges)
-                            }}</b></code></span>
-                        {{ row.item.description !== '' ? '，' : '' }} {{ row.item.description }}</small></p>
-                    <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule"><code>{{ row.item.rule }}</code>
+                        <span v-if="row.item.ready_type === 'interval' || row.item.ready_type === ''"><code><b>{{ row.item.interval / 60 }} 分钟每次</b></code></span>
+                        <span v-if="row.item.ready_type === 'daily_time'">
+                            <code><b>每天 {{ row.item.daily_times.map((t) => t.substring(0, 5)).join(", ") }}</b></code>
+                        </span>
+                        <span v-if="row.item.ready_type === 'time_range'"><code><b>{{ timeRangeDesc(row.item.time_ranges)  }}</b></code></span>
+                        {{ row.item.description !== '' ? '，' : '' }} {{ row.item.description }}</small>
+                    </p>
+                    <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule">
+                        <code>{{ row.item.rule }}</code>
                     </p>
                 </template>
                 <template v-slot:cell(interval)="row">
@@ -50,12 +49,11 @@
                 <template v-slot:cell(triggers)="row">
                     <b-list-group>
                         <b-list-group-item v-for="(trigger, index) in row.item.triggers" :key="index">
-                            <code>{{
-                                    trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition ||
-                                        'true') : trigger.name
-                                }}</code> <b class="text-success"> | </b> {{
-                                formatAction(trigger.action)
-                            }} <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
+                            <code v-b-tooltip :title="trigger.pre_condition" class="action-pre-condition">
+                                {{ trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition || 'true') : trigger.name }}
+                            </code>
+                            <b class="text-success"> | </b> {{ formatAction(trigger.action) }}
+                            <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>
                 </template>
@@ -221,5 +219,13 @@ export default {
     overflow: hidden;
     display: inline-block;
     font-size: 70%;
+}
+
+.action-pre-condition {
+    max-width: 400px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
