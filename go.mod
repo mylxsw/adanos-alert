@@ -22,6 +22,11 @@ require (
 	github.com/mylxsw/glacier v0.0.0-20200820103600-705c319bcccc
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
+	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
+	github.com/pingcap/errors v0.11.4 // indirect
+	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
+	github.com/pingcap/tidb v1.0.9 // indirect
+	github.com/pingcap/tipb v0.0.0-20200813070854-57da1e63f73e // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
@@ -38,7 +43,6 @@ require (
 	go.mongodb.org/mongo-driver v1.0.4
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
 	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
-	golang.org/x/tools v0.0.0-20191007185444-6536af71d98a // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect

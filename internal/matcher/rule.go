@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/pingcap/parser"
 )
 
 // Helpers 用于规则引擎的助手函数
@@ -49,4 +51,9 @@ func (Helpers) Now() time.Time {
 func (Helpers) ParseTime(layout string, value string) time.Time {
 	ts, _ := time.Parse(layout, value)
 	return ts
+}
+
+// SQLFinger 将 SQL 转换为其指纹
+func (Helpers) SQLFinger(sqlStr string) string {
+	return parser.Normalize(sqlStr)
 }

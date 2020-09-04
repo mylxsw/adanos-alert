@@ -318,3 +318,8 @@ func TestNumberBeauty(t *testing.T) {
 	})
 	assert.Equal(t, "111,133,448,958,232 | 111,133,448,958,232.00", parsed)
 }
+
+func TestSQLFinger(t *testing.T) {
+	assert.Equal(t, "xxxxxx adsfa", SQLFinger("XXXXxx adsfa"))
+	assert.Equal(t, "select id , name from users where id in ( ... ) and age > ?", SQLFinger("Select id, name from users where id in (1, 2,3 ,4 ) and age > 19"))
+}

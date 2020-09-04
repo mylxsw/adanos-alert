@@ -453,6 +453,7 @@ let helpers = {
             text: "DailyTimeBetween(START_TIME_STR, END_TIME_STR)",
             displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"
         },
+        {text: 'SQLFinger(SQL_STR) SQL_STR', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"}
     ],
     templates: [
         {
@@ -530,6 +531,7 @@ let helpers = {
             text: 'mysql_slowlog STR',
             displayText: 'mysql_slowlog(slowlog string) map[string]string  |  解析 MySQL 慢查询日志为 map'
         },
+        {text: 'sql_finger STR', displayText: 'sql_finger(str string) string | 将 SQL 转换为其指纹（替换参数为占位符）'},
         {text: 'open_falcon_im STR', displayText: 'open_falcon_im(msg string) OpenFalconIM  |  解析 OpenFalcon 消息格式'},
         {
             text: 'string_mask STR LEFT',
