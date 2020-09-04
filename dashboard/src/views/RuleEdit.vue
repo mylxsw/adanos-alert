@@ -392,27 +392,12 @@ let helpers = {
         {text: "Group.Rule.Rule", displayText: ""},
         {text: "Group.Rule.Template", displayText: ""},
         {text: "Messages()", displayText: "Messages() []repository.Message | 获取分组中所有的 Messages"},
-        {
-            text: "MessagesMatchRegexCount(REGEX)",
-            displayText: "MessagesMatchRegexCount(regex string) int64  | 获取匹配指定正则表达式的 message 数量"
-        },
-        {
-            text: "MessagesWithMetaCount(KEY, VALUE)",
-            displayText: "MessagesWithMetaCount(key, value string) int64  | 获取 meta 匹配指定 key=value 的 message 数量"
-        },
-        {
-            text: "MessagesWithTagsCount(TAG)",
-            displayText: "MessagesWithTagsCount(tags string) int64  | 获取拥有指定 tag 的 message 数量，多个 tag 使用英文逗号分隔"
-        },
+        {text: "MessagesMatchRegexCount(REGEX)", displayText: "MessagesMatchRegexCount(regex string) int64  | 获取匹配指定正则表达式的 message 数量"},
+        {text: "MessagesWithMetaCount(KEY, VALUE)", displayText: "MessagesWithMetaCount(key, value string) int64  | 获取 meta 匹配指定 key=value 的 message 数量"},
+        {text: "MessagesWithTagsCount(TAG)", displayText: "MessagesWithTagsCount(tags string) int64  | 获取拥有指定 tag 的 message 数量，多个 tag 使用英文逗号分隔"},
         {text: "MessagesCount()", displayText: "MessagesCount() int64 | 获取分组中 Messages 数量"},
-        {
-            text: "TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)",
-            displayText: "TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 当前规则在指定时间范围内，状态为 triggerStatus 的触发次数"
-        },
-        {
-            text: "LastTriggeredGroup(TRIGGER_STATUS)",
-            displayText: "LastTriggeredGroup(triggerStatus string) repository.MessageGroup 最后一次触发该规则的状态为 triggerStatus 的分组"
-        },
+        {text: "TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)", displayText: "TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 当前规则在指定时间范围内，状态为 triggerStatus 的触发次数"},
+        {text: "LastTriggeredGroup(TRIGGER_STATUS)", displayText: "LastTriggeredGroup(triggerStatus string) repository.MessageGroup 最后一次触发该规则的状态为 triggerStatus 的分组"},
         {text: "collecting", displayText: "collecting  | TriggerStatus：collecting"},
         {text: "pending", displayText: "pending | TriggerStatus：pending"},
         {text: "ok", displayText: "ok | TriggerStatus：ok"},
@@ -438,119 +423,54 @@ let helpers = {
         {text: "filter", displayText: "filter | filter array by the predicate"},
         {text: "map", displayText: "map | map all items with the closure"},
         {text: "count", displayText: "count | returns number of elements what satisfies the predicate"},
-        {
-            text: "JsonGet(KEY, DEFAULT)",
-            displayText: "JsonGet(key string, defaultValue string) string  | 将消息体作为json解析，获取指定的key"
-        },
+        {text: "JsonGet(KEY, DEFAULT)", displayText: "JsonGet(key string, defaultValue string) string  | 将消息体作为json解析，获取指定的key"},
         {text: "Upper(KEY)", displayText: "Upper(val string) string  | 字符串转大写"},
         {text: "Lower(KEY)", displayText: "Lower(val string) string  | 字符串转小写"},
         {text: "Now()", displayText: "Now() time.Time  | 当前时间"},
-        {
-            text: "ParseTime(LAYOUT, VALUE)",
-            displayText: "ParseTime(layout string, value string) time.Time | 时间字符串转时间对象"
-        },
-        {
-            text: "DailyTimeBetween(START_TIME_STR, END_TIME_STR)",
-            displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"
-        },
+        {text: "ParseTime(LAYOUT, VALUE)", displayText: "ParseTime(layout string, value string) time.Time | 时间字符串转时间对象"},
+        {text: "DailyTimeBetween(START_TIME_STR, END_TIME_STR)", displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"},
         {text: 'SQLFinger(SQL_STR) SQL_STR', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"}
     ],
     templates: [
-        {
-            text: '.Messages MESSAGE_COUNT',
-            displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'
-        },
+        {text: '.Messages MESSAGE_COUNT', displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'},
         {text: '{{ }}', displayText: '{{ }} |  Golang 代码块'},
-        {
-            text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}',
-            displayText: '{{ range }}  | Golang 遍历对象'
-        },
-        {
-            text: '{{ if pipeline }}\n T1 \n{{ else if pipeline }}\n T2 \n{{ else }}\n T3 \n{{ end }}',
-            displayText: '{{ if }} |  Golang 分支条件'
-        },
+        {text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}', displayText: '{{ range }}  | Golang 遍历对象'},
+        {text: '{{ if pipeline }}\n T1 \n{{ else if pipeline }}\n T2 \n{{ else }}\n T3 \n{{ end }}', displayText: '{{ if }} |  Golang 分支条件'},
         {text: '[]()', displayText: 'Markdown 连接地址'},
         {text: 'index MAP_VAR "KEY"', displayText: 'index $msg.Meta "message.message" | 从 Map 中获取某个 Key 的值'},
-        {text: 'cut_off MAX_LENGTH STR', displayText: 'cut_off(maxLen int, val string) string  |  字符串截断'},
+        {text: 'cutoff MAX_LENGTH STR', displayText: 'cutoff(maxLen int, val string) string  |  字符串截断'},
         {text: 'implode ELEMENT_ARR ","', displayText: 'implode(elems []string, sep string) string  |  字符串数组拼接'},
         {text: 'explode STR ","', displayText: 'explode(s, sep string) []string  |  字符串分隔成数组'},
         {text: 'ident "IDENT_STR" STR', displayText: 'ident(ident string, message string) string  |  多行字符串统一缩进'},
         {text: 'json JSONSTR', displayText: 'json(content string) string  |  JSON 字符串格式化'},
-        {
-            text: 'datetime DATETIME',
-            displayText: 'datetime(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，时区选择北京/重庆'
-        },
-        {
-            text: 'datetime_noloc DATETIME',
-            displayText: 'datetime_noloc(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，默认时区'
-        },
-        {
-            text: 'json_get "KEY" "DEFAULT" JSONSTR',
-            displayText: 'json_get(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值，失败返回 defaultValue'
-        },
-        {
-            text: 'json_gets "KEY" "DEFAULT" JSONSTR',
-            displayText: 'json_gets(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值(可以使用逗号分割多个key作为备选)，失败返回 defaultValue'
-        },
-        {
-            text: 'json_array "KEY" JSONSTR',
-            displayText: 'json_array(key string, body string) []string  |  将 body 解析为 json，然后获取 key 的值（数组值）'
-        },
-        {
-            text: 'json_flatten JSONSTR MAX_LEVEL',
-            displayText: 'json_flatten(body string, maxLevel int) []jsonutils.KvPair  |  将 body 解析为 json，然后转换为键值对返回'
-        },
-        {
-            text: 'starts_with STR "START_STR"',
-            displayText: 'starts_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 开头'
-        },
-        {
-            text: 'ends_with STR "START_END"',
-            displayText: 'ends_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 结尾'
-        },
+        {text: 'datetime DATETIME', displayText: 'datetime(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，时区选择北京/重庆'},
+        {text: 'datetime_noloc DATETIME',displayText: 'datetime_noloc(datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，默认时区'},
+        {text: 'reformat_datetime_str ORIGINAL_LAYOUT TARGET_LAYOUT DATETIME_STR',displayText: 'reformat_datetime_str(originalLayout, targetLayout string, dt string) string  |  重新格式化时间字符串，默认时区'},
+        {text: 'parse_datetime_str LAYOUT DATETIME_STR',displayText: 'parse_datetime_str(layout string, dt string) time.Time  | 将时间字符串解析为时间对象，默认时区'},
+        {text: 'parse_datetime_str_rfc3339 DATETIME_STR',displayText: 'parse_datetime_str_rfc3339(dt string) time.Time  |  将时间字符串解析为时间对象，格式为 RFC3339，默认时区'},
+        {text: 'json_get "KEY" "DEFAULT" JSONSTR', displayText: 'json_get(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值，失败返回 defaultValue'},
+        {text: 'json_gets "KEY" "DEFAULT" JSONSTR', displayText: 'json_gets(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值(可以使用逗号分割多个key作为备选)，失败返回 defaultValue'},
+        {text: 'json_array "KEY" JSONSTR', displayText: 'json_array(key string, body string) []string  |  将 body 解析为 json，然后获取 key 的值（数组值）'},
+        {text: 'json_flatten JSONSTR MAX_LEVEL', displayText: 'json_flatten(body string, maxLevel int) []jsonutils.KvPair  |  将 body 解析为 json，然后转换为键值对返回'},
+        {text: 'starts_with STR "START_STR"', displayText: 'starts_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 开头'},
+        {text: 'ends_with STR "START_END"', displayText: 'ends_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 结尾'},
         {text: 'trim STR "CUTSTR"', displayText: 'trim(s string, cutset string) string  |  去掉字符串 s 两边的 cutset 字符'},
-        {
-            text: 'trim_left STR "CUTSTR"',
-            displayText: 'trim_left(s string, cutset string) string  |  去掉字符串 s 左侧的 cutset 字符'
-        },
-        {
-            text: 'trim_right STR "CUTSTR"',
-            displayText: 'trim_right(s string, cutset string) string  |  去掉字符串 s 右侧的 cutset 字符'
-        },
+        {text: 'trim_left STR "CUTSTR"', displayText: 'trim_left(s string, cutset string) string  |  去掉字符串 s 左侧的 cutset 字符'},
+        {text: 'trim_right STR "CUTSTR"', displayText: 'trim_right(s string, cutset string) string  |  去掉字符串 s 右侧的 cutset 字符'},
         {text: 'trim_space STR', displayText: 'trim_space(s string) string  |  去掉字符串 s 两边的空格'},
-        {
-            text: 'format "FORMAT" VAL',
-            displayText: 'format(format string, a ...interface{}) string  |  格式化展示，调用 fmt.Sprintf'
-        },
-        {
-            text: 'number_beauty VAL',
-            displayText: 'number_beauty(num interface{}) string  |  数字格式化展示，自动添加千分位分隔符'
-        },
+        {text: 'format "FORMAT" VAL', displayText: 'format(format string, a ...interface{}) string  |  格式化展示，调用 fmt.Sprintf'},
+        {text: 'number_beauty VAL', displayText: 'number_beauty(num interface{}) string  |  数字格式化展示，自动添加千分位分隔符'},
         {text: 'integer STR', displayText: 'integer(str string) int  |  字符串转整数 '},
-        {
-            text: 'mysql_slowlog STR',
-            displayText: 'mysql_slowlog(slowlog string) map[string]string  |  解析 MySQL 慢查询日志为 map'
-        },
+        {text: 'mysql_slowlog STR', displayText: 'mysql_slowlog(slowlog string) map[string]string  |  解析 MySQL 慢查询日志为 map'},
         {text: 'sql_finger STR', displayText: 'sql_finger(str string) string | 将 SQL 转换为其指纹（替换参数为占位符）'},
         {text: 'open_falcon_im STR', displayText: 'open_falcon_im(msg string) OpenFalconIM  |  解析 OpenFalcon 消息格式'},
-        {
-            text: 'string_mask STR LEFT',
-            displayText: 'string_mask(content string, left int) string  |  在左右两侧只保留 left 个字符，中间所有字符替换为 *'
-        },
-        {
-            text: 'string_tags TAG_STR SEPARATOR',
-            displayText: 'string_tags(tags string, sep string) []string  |  将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除'
-        },
+        {text: 'string_mask STR LEFT', displayText: 'string_mask(content string, left int) string  |  在左右两侧只保留 left 个字符，中间所有字符替换为 *'},
+        {text: 'string_tags TAG_STR SEPARATOR', displayText: 'string_tags(tags string, sep string) []string  |  将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除'},
         {text: 'remove_empty_line STR', displayText: 'remove_empty_line(content string) string | 移除字符串中的空行'},
-        {
-            text: 'meta_filter STR FILTER_STR',
-            displayText: 'meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} | 过滤Meta，只保留允许的Key'
-        },
-        {
-            text: 'meta_prefix_filter STR FILTER_PREFIX',
-            displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'
-        },
+        {text: 'meta_filter STR FILTER_STR', displayText: 'meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} | 过滤Meta，只保留允许的Key'},
+        {text: 'meta_prefix_filter STR FILTER_PREFIX', displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'},
         {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
+        {text: 'important', displayText: 'important() string | 红色字体显示"【重要】"两字'},
     ],
     triggerTemplates: [
 

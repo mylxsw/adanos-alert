@@ -22,7 +22,7 @@ FROM users user WHERE id in (1, 2, 3,
 5, 6) and enteprise_id = 145;
 `
 
-	body := `## 这是报警标题 
+	body := `## <font color="#ea2426">【重要】</font> 这是报警标题 
 
 **192.168.1.1:user**
 

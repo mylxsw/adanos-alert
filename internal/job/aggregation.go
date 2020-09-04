@@ -17,21 +17,28 @@ import (
 const AggregationJobName = "aggregation"
 
 type AggregationJob struct {
-	app container.Container
+	app       container.Container
+	executing chan interface{} // 标识当前Job是否在执行中
 }
 
 func NewAggregationJob(app container.Container) *AggregationJob {
-	return &AggregationJob{app: app}
+	return &AggregationJob{app: app, executing: make(chan interface{}, 1)}
 }
 
 // Handle do two things:
 // 1. message grouping, delivery all ungrouped messages to message group
 // 2. change the message groups that satisfied the conditions to pending status
 func (a *AggregationJob) Handle() {
-	// traverse all ungrouped messages to group
-	a.app.MustResolve(a.groupingMessages)
-	// change message group status to pending when it reach the aggregate condition
-	a.app.MustResolve(a.pendingMessageGroup)
+	select {
+	case a.executing <- struct{}{}:
+		defer func() { <-a.executing }()
+		// traverse all ungrouped messages to group
+		a.app.MustResolve(a.groupingMessages)
+		// change message group status to pending when it reach the aggregate condition
+		a.app.MustResolve(a.pendingMessageGroup)
+	default:
+		log.Warningf("the last aggregation job is not finished yet, skip for this time")
+	}
 }
 
 func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) error {

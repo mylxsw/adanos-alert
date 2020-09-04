@@ -15,6 +15,7 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/array"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
+	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
@@ -390,7 +391,7 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 	filter := bson.M{}
 	name := ctx.Input("name")
 	if name != "" {
-		filter["name"] = name
+		filter["name"] = bson.M{"$regex": name}
 	}
 
 	status := ctx.Input("status")
@@ -412,6 +413,8 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 
 		filter["triggers.user_refs"] = userID
 	}
+
+	log.With(filter).Debug("filter")
 
 	offset, limit := offsetAndLimit(ctx)
 	rules, next, err := ruleRepo.Paginate(filter, offset, limit)

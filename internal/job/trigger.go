@@ -12,15 +12,22 @@ import (
 const TriggerJobName = "trigger"
 
 type TriggerJob struct {
-	app container.Container
+	app       container.Container
+	executing chan interface{} // 标识当前Job是否在执行中
 }
 
 func NewTrigger(app container.Container) *TriggerJob {
-	return &TriggerJob{app: app}
+	return &TriggerJob{app: app, executing: make(chan interface{}, 1)}
 }
 
 func (a TriggerJob) Handle() {
-	a.app.MustResolve(a.processMessageGroups)
+	select {
+	case a.executing <- struct{}{}:
+		defer func() { <-a.executing }()
+		a.app.MustResolve(a.processMessageGroups)
+	default:
+		log.Warningf("the last trigger job is not finished yet, skip for this time")
+	}
 }
 
 func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, messageRepo repository.MessageRepo, ruleRepo repository.RuleRepo, manager action.Manager) error {

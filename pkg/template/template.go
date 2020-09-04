@@ -33,36 +33,40 @@ func Parse(templateStr string, data interface{}) (string, error) {
 // CreateParse create a template parser
 func CreateParser(templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":             cutOff,
-		"Implode":            Implode,
-		"explode":            strings.Split,
-		"ident":              leftIdent,
-		"json":               jsonFormatter,
-		"datetime":           datetimeFormat,
-		"datetime_noloc":     datetimeFormatNoLoc,
-		"json_get":           pkgJSON.Get,
-		"json_gets":          pkgJSON.Gets,
-		"json_array":         pkgJSON.GetArray,
-		"json_flatten":       jsonFlatten,
-		"starts_with":        startsWith,
-		"ends_with":          endsWith,
-		"trim":               strings.Trim,
-		"trim_right":         strings.TrimSuffix,
-		"trim_left":          strings.TrimPrefix,
-		"trim_space":         strings.TrimSpace,
-		"format":             fmt.Sprintf,
-		"number_beauty":      NumberBeauty,
-		"integer":            toInteger,
-		"mysql_slowlog":      parseMySQLSlowlog,
-		"sql_finger":         SQLFinger,
-		"open_falcon_im":     ParseOpenFalconImMessage,
-		"string_mask":        StringMask,
-		"string_tags":        StringTags,
-		"remove_empty_line":  RemoveEmptyLine,
-		"meta_filter":        MetaFilter,
-		"meta_prefix_filter": MetaFilterPrefix,
-		"serialize":          Serialize,
-		"sort_map_human":     SortMapByKeyHuman,
+		"cutoff":                     cutOff,
+		"implode":                    Implode,
+		"explode":                    strings.Split,
+		"ident":                      leftIdent,
+		"json":                       jsonFormatter,
+		"datetime":                   datetimeFormat,
+		"datetime_noloc":             datetimeFormatNoLoc,
+		"reformat_datetime_str":      reformatDatetimeStr,
+		"parse_datetime_str":         parseDatetime,
+		"parse_datetime_str_rfc3339": parseDatetimeRFC3339,
+		"json_get":                   pkgJSON.Get,
+		"json_gets":                  pkgJSON.Gets,
+		"json_array":                 pkgJSON.GetArray,
+		"json_flatten":               jsonFlatten,
+		"starts_with":                startsWith,
+		"ends_with":                  endsWith,
+		"trim":                       strings.Trim,
+		"trim_right":                 strings.TrimSuffix,
+		"trim_left":                  strings.TrimPrefix,
+		"trim_space":                 strings.TrimSpace,
+		"format":                     fmt.Sprintf,
+		"number_beauty":              NumberBeauty,
+		"integer":                    toInteger,
+		"mysql_slowlog":              parseMySQLSlowlog,
+		"sql_finger":                 SQLFinger,
+		"open_falcon_im":             ParseOpenFalconImMessage,
+		"string_mask":                StringMask,
+		"string_tags":                StringTags,
+		"remove_empty_line":          RemoveEmptyLine,
+		"meta_filter":                MetaFilter,
+		"meta_prefix_filter":         MetaFilterPrefix,
+		"serialize":                  Serialize,
+		"sort_map_human":             SortMapByKeyHuman,
+		"important":                  importantNotice,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -132,6 +136,26 @@ func jsonFormatter(content string) string {
 	}
 
 	return output.String()
+}
+
+// parseDatetime 将字符串解析为时间格式
+func parseDatetime(layout string, dt string) time.Time {
+	parsed, err := time.Parse(layout, dt)
+	if err != nil {
+		return time.Now()
+	}
+
+	return parsed
+}
+
+// parseDateTimeRFC3339 解析 RFC3339 格式的时间字符串为 time.Time
+func parseDatetimeRFC3339(dt string) time.Time {
+	return parseDatetime(time.RFC3339, dt)
+}
+
+// reformatDatetimeStr 时间字符串重新格式化
+func reformatDatetimeStr(originalLayout, targetLayout string, dt string) string {
+	return parseDatetime(originalLayout, dt).Format(targetLayout)
 }
 
 // datetimeFormat 时间格式化，不使用Location
@@ -362,4 +386,8 @@ func NumberBeauty(number interface{}) string {
 		arr[0] = arr[0][:length1-(i+1)*3] + "," + arr[0][length1-(i+1)*3:]
 	}
 	return strings.Join(arr, ".")
+}
+
+func importantNotice() string {
+	return `<font color="#ea2426">【重要】</font>`
 }
