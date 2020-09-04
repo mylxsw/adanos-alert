@@ -62,7 +62,7 @@ func messagesFilter(ctx web.Context) bson.M {
 
 	origin := ctx.Input("origin")
 	if origin != "" {
-		filter["origin"] = origin
+		filter["origin"] = bson.M{"$regex": origin}
 	}
 	status := template.StringTags(ctx.Input("status"), ",")
 	if len(status) > 0 {
