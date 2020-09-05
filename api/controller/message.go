@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -27,6 +29,7 @@ func (m *MessageController) Register(router *web.Router) {
 	router.Group("/messages", func(router *web.Router) {
 		router.Get("/", m.Messages).Name("messages:all")
 		router.Get("/{id}/", m.Message).Name("messages:one")
+		router.Post("/{id}/matched-rules/", m.TestMatchedRules).Name("messages:matched-rules")
 
 		router.Post("/", m.AddCommonMessage).Name("messages:add:common")
 		router.Post("/logstash/", m.AddLogstashMessage).Name("messages:add:logstash")
@@ -252,4 +255,23 @@ func (m *MessageController) AddOpenFalconMessage(ctx web.Context, messageRepo re
 
 	id, err := m.saveMessage(messageRepo, misc.OpenFalconToCommonMessage(tos, content))
 	return m.errorWrap(ctx, id, err)
+}
+
+// TestMatchedRules 测试 message 匹配哪些规则
+func (m *MessageController) TestMatchedRules(ctx web.Context, msgRepo repository.MessageRepo, ruleRepo repository.RuleRepo) ([]job.MatchedRule, error) {
+	msgID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid message id")
+	}
+
+	message, err := msgRepo.Get(msgID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			return nil, errors.Wrap(err, "no such message")
+		}
+
+		return nil, errors.Wrap(err, "query message failed")
+	}
+
+	return job.BuildMessageMatchTest(ruleRepo)(message)
 }

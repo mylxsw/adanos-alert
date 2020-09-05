@@ -10,6 +10,7 @@
                 <b-badge v-if="message.status === 'grouped'" variant="success">已分组</b-badge>
                 <b-badge v-if="message.status === 'canceled'" variant="danger">无规则，已取消</b-badge>
                 <b-badge v-if="message.status === 'expired'" variant="warning">匹配规则，已过期</b-badge>
+                <b-button size="sm" class="ml-2" variant="warning" @click="testMatchedRules(message.id)" v-if="testMatchedRules">测试</b-button>
             </div>
         </template>
 
@@ -45,16 +46,16 @@
         props: {
             message: Object,
             message_index: Number,
+            testMatchedRules: Function,
         },
         methods: {
-            
         }
     }
 </script>
 
 <style scoped>
     .adanos-code {
-        max-height: 100rem;
+        max-height: 50rem;
         white-space: pre-wrap!important;
         word-wrap: break-word!important;
         *white-space:normal!important;

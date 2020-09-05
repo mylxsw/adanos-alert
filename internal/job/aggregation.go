@@ -42,7 +42,7 @@ func (a *AggregationJob) Handle() {
 }
 
 func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) error {
-	matchers, err := a.initializeMatchers(ruleRepo)
+	matchers, err := initializeMatchers(ruleRepo)
 	if err != nil {
 		log.Error(err.Error())
 		return err
@@ -114,7 +114,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 	})
 }
 
-func (a *AggregationJob) initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher, error) {
+func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher, error) {
 	// get all rules
 	rules, err := ruleRepo.Find(bson.M{"status": repository.RuleStatusEnabled})
 	if err != nil {
@@ -187,4 +187,39 @@ func buildMessageFinger(groupRule string, msg repository.Message) string {
 	}
 
 	return groupKey
+}
+
+type MatchedRule struct {
+	Rule         repository.Rule `json:"rule"`
+	AggregateKey string          `json:"aggregate_key"`
+}
+
+// BuildMessageMatchTest 创建 message 与规则的匹配测试，用于检测 message 能够匹配哪些规则
+func BuildMessageMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Message) ([]MatchedRule, error) {
+	return func(msg repository.Message) ([]MatchedRule, error) {
+		matchedRules := make([]MatchedRule, 0)
+
+		matchers, err := initializeMatchers(ruleRepo)
+		if err != nil {
+			log.Error(err.Error())
+			return matchedRules, err
+		}
+
+		for _, m := range matchers {
+			matched, err := m.Match(msg)
+			if err != nil {
+				continue
+			}
+
+			// if the message matched a rule, update message's group_id and skip to next message
+			if matched {
+				matchedRules = append(matchedRules, MatchedRule{
+					Rule:         m.Rule(),
+					AggregateKey: buildMessageFinger(m.Rule().AggregateRule, msg),
+				})
+			}
+		}
+
+		return matchedRules, nil
+	}
 }

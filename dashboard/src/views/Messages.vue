@@ -11,12 +11,37 @@
                     </b-form>   
                 </b-card-text>
             </b-card>
-            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3" :message="message" :message_index="index"></MessageCard>
+            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3" :message="message" :message_index="index" :test-matched-rules="testMatchedRules"></MessageCard>
             <b-card v-if="messages.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
             </b-card>
             <paginator :per_page="2" :cur="cur" :next="next" path="/messages" :query="this.$route.query"></paginator>
         </b-col>
+
+        <b-modal id="matched-rules-dialog" title="匹配到的规则" hide-footer size="xl">
+            <b-table responsive="true" :items="matched_rules" :fields="matched_rules_fields">
+                <template v-slot:cell(name)="row">
+                    <span v-b-tooltip.hover :title="row.item.rule.id">{{ row.item.rule.name }}</span>
+                    <b-link :to="'/rules/' + row.item.rule.id + '/edit'" target="_blank" class="ml-2">
+                        <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
+                    </b-link>
+                    <p>
+                        <b-badge variant="info" v-for="(tag, index) in row.item.rule.tags" :key="index" class="mr-1">{{ tag }}</b-badge>
+                    </p>
+                </template>
+                <template v-slot:cell(rule)="row">
+                    <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule.rule">
+                        <code>{{ row.item.rule.rule }}</code>
+                    </p>
+                </template>
+                <template v-slot:cell(aggregate_rule)="row">
+                    <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule.aggregate_rule">
+                        <code>{{ row.item.rule.aggregate_rule }}</code>
+                    </p>
+                    <p><b-badge variant="success" v-if="row.item.aggregate_key" v-b-tooltip.hover title="实际匹配的聚合 Key">{{ row.item.aggregate_key }}</b-badge></p>
+                </template>
+            </b-table>
+        </b-modal>
     </b-row>
 </template>
 
@@ -43,6 +68,12 @@
                 messages: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
+                matched_rules: [],
+                matched_rules_fields: [
+                    {key: 'name', label: '规则名称/ID'},
+                    {key: 'rule', label: '规则'},
+                    {key: 'aggregate_rule', label: '聚合条件'},
+                ],
             };
         },
         watch: {
@@ -59,10 +90,18 @@
                     tags: this.search.tags.join(),
                     meta: this.search.meta,
                     origin: this.search.origin,
-                }}).catch(err => {err});
+                }}).catch(err => {this.ToastError(err);});
+            },
+            testMatchedRules(id) {
+                axios.post('/api/messages/' + id + '/matched-rules/', {}).then(resp => {
+                    this.matched_rules = resp.data;
+                    this.$root.$emit('bv::show::modal', "matched-rules-dialog");
+                }).catch(error => {
+                    this.ErrorBox(error);
+                });
             },
             loadMore() {
-                var params = this.$route.query;
+                let params = this.$route.query;
                 params.offset = this.cur;
                 
                 axios.get('/api/messages/', {

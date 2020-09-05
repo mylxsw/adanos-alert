@@ -174,14 +174,14 @@ export default {
         },
         searchSubmit(evt) {
             evt.preventDefault();
-            var query = this.search;
+            let query = this.search;
             query.offset = 0;
             this.$router.push({path: '/rules', query: query}).catch(err => {
-                err
+                this.ToastError(err)
             });
         },
         reload() {
-            var params = this.$route.query;
+            let params = this.$route.query;
             params.offset = this.cur;
 
             axios.get('/api/rules/', {
