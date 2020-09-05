@@ -74,7 +74,7 @@
                     </b-card>
                 </b-card-group>
 
-                <MessageCard class="mb-3" title="待匹配消息示例" :fold="true" v-if="test_message_id !== null" :message="test_message" :message_index="0" :onlyShow="true"></MessageCard>
+                <MessageCard class="mb-3" title="消息示例" :fold="true" v-if="test_message !== null" :message="test_message" :message_index="0" :onlyShow="true"></MessageCard>
 
                 <b-card-group class="mb-3">
                     <b-card header="规则">
@@ -141,16 +141,17 @@
                             </b-form-group>
                             <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
                                           :label-for="'trigger_pre_condition_' + i">
-                                <b-btn-group class="mb-2">
+                                <b-btn-group class="mb-2" v-if="!trigger.pre_condition_fold">
                                     <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
                                     <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
                                 </b-btn-group>
+                                <span class="text-muted" style="line-height: 2.5" v-if="trigger.pre_condition_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
                                 <b-btn-group class="mb-2 float-right">
-                                    <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查
-                                    </b-btn>
+                                    <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查</b-btn>
+                                    <b-btn variant="info" class="float-right" @click="trigger.pre_condition_fold = !trigger.pre_condition_fold">{{ trigger.pre_condition_fold ? '展开' : '收起' }}</b-btn>
                                 </b-btn-group>
                             </b-form-group>
-                            <b-form-group label-cols="2">
+                            <b-form-group label-cols="2" v-if="!trigger.pre_condition_fold">
                                 <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
                                             :options="options.trigger_rule"></codemirror>
                                 <small class="form-text text-muted">
@@ -172,19 +173,20 @@
                                 </b-form-group>
                                 <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
                                               :label-for="'trigger_meta_template_' + i">
-                                    <b-btn-group class="mb-2">
+                                    <b-btn-group class="mb-2" v-if="!trigger.template_fold">
                                         <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
                                         <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">
                                             帮助
                                         </b-btn>
                                     </b-btn-group>
+                                    <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+
                                     <b-btn-group class="mb-2 float-right">
-                                        <b-btn variant="primary" class="float-right"
-                                               @click="checkTemplate(trigger.meta_arr.template)">检查
-                                        </b-btn>
+                                        <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                        <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
                                     </b-btn-group>
                                 </b-form-group>
-                                <b-form-group>
+                                <b-form-group v-if="!trigger.template_fold">
                                     <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea"
                                                 :options="options.ding_template"></codemirror>
                                     <small class="form-text text-muted">
@@ -635,7 +637,7 @@ export default {
                 dingdingTemplateRules: helpers.templates,
             },
             test_message_id: this.$route.query.test_message_id !== undefined ? this.$route.query.test_message_id : null,
-            test_message: {},
+            test_message: null,
         };
     },
     computed: {
@@ -707,7 +709,8 @@ export default {
          * 发送规则检查请求
          */
         sendCheckRequest(type, content) {
-            axios.post('/api/rules-test/rule-check/' + type + '/', {content: content, msg_id: this.test_message_id}).then(resp => {
+            let msg_id = this.test_message_id;
+            axios.post('/api/rules-test/rule-check/' + type + '/', {content: content, msg_id: msg_id}).then(resp => {
                 if (resp.data.error === null || resp.data.error === "") {
                     this.SuccessBox('检查通过' + (resp.data.msg !== '' ? '：' + resp.data.msg : ''));
                 } else {
@@ -805,6 +808,7 @@ export default {
             this.form.triggers.push({
                 name: '',
                 pre_condition: '',
+                pre_condition_fold: true,
                 action: 'dingding',
                 meta: '',
                 meta_arr: {template: '', robot_id: null, title: '{{ .Rule.Title }}'},
@@ -812,6 +816,7 @@ export default {
                 user_refs: [],
                 help: false,
                 template_help: false,
+                template_fold: true,
             });
         },
         /**
@@ -939,6 +944,8 @@ export default {
                     trigger.template_help = false;
                     trigger.meta_arr = {};
 
+                    trigger.pre_condition_fold = !(trigger.pre_condition !== null && trigger.pre_condition !== "" && trigger.pre_condition !== 'true');
+
                     try {
                         trigger.meta_arr = JSON.parse(trigger.meta);
                     } catch (e) {
@@ -949,6 +956,7 @@ export default {
                     if (trigger.meta_arr.template === undefined) {
                         trigger.meta_arr.template = "";
                     }
+                    trigger.template_fold = trigger.meta_arr.template === "";
 
                     this.form.triggers.push(trigger);
                 }
@@ -986,6 +994,14 @@ export default {
             }).catch((error) => {
                 this.ToastError(error);
             })
+        } else if (this.$route.params.id !== undefined) {
+            // 编辑时获取一个样本来展示
+            axios.get('/api/rules-meta/message-sample/?id=' + this.$route.params.id).then(resp => {
+                this.test_message = resp.data;
+                if (this.test_message !== null && this.test_message.id !== undefined) {
+                    this.test_message_id = this.test_message.id;
+                }
+            }).catch((error) => {this.ToastError(error)})
         }
     }
 }

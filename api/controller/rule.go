@@ -42,6 +42,7 @@ func (r RuleController) Register(router *web.Router) {
 
 	router.Group("/rules-meta/", func(router *web.Router) {
 		router.Get("/tags/", r.Tags).Name("rules:meta:tags")
+		router.Get("/message-sample/", r.MessageSample).Name("rules:meta:message-sample")
 	})
 
 	router.Group("/rules-test/", func(router *web.Router) {
@@ -559,4 +560,32 @@ func (r RuleController) Tags(ctx web.Context, repo repository.RuleRepo) web.Resp
 	return ctx.JSON(web.M{
 		"tags": tags,
 	})
+}
+
+// MessageSample 根据规则id查询一个匹配的消息样本
+func (r RuleController) MessageSample(ctx web.Context, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) (*repository.Message, error) {
+	id, err := primitive.ObjectIDFromHex(ctx.Input("id"))
+	if err != nil {
+		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
+	}
+
+	grp, err := groupRepo.LastGroup(bson.M{"rule._id": id})
+	if err != nil {
+		if err == repository.ErrNotFound {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("query related group failed: %v", err)
+	}
+
+	messages, _, err := msgRepo.Paginate(bson.M{"group_ids": grp.ID}, 0, 1)
+	if err != nil {
+		return nil, fmt.Errorf("query related message failed: %v", err)
+	}
+
+	if len(messages) == 0 {
+		return nil, nil
+	}
+
+	return &messages[0], nil
 }

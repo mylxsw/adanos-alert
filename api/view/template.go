@@ -62,7 +62,7 @@ var defaultMessageViewTemplate = `<html>
 
 <body>
 <div class="container-fluid" style="max-width: 1000px">
-    <h2>{{ .Group.UpdatedAt | datetime }} - {{ .Group.Rule.Name }}</h2>
+    <h2>{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }} - {{ .Group.Rule.Name }}</h2>
     <div class="alert alert-info" role="alert">
         <p>ID：{{ .Group.ID.Hex }}</p>
         <p>规则ID：{{ .Group.Rule.ID.Hex }}</p>
@@ -80,7 +80,7 @@ var defaultMessageViewTemplate = `<html>
     </div>
     {{ range $i, $msg := .Messages }}
         <div class="panel panel-default">
-            <div class="panel-heading"><span class="panel-seq">#{{ $msg.SeqNum }}</span> <b>{{ datetime $msg.CreatedAt }}</b></div>
+            <div class="panel-heading"><span class="panel-seq">#{{ $msg.SeqNum }}</span> <b>{{ datetime "2006-01-02 15:04:05" $msg.CreatedAt }}</b></div>
             <div class="panel-body table-responsive">
                 <div class="meta">
                     <table class="table table-striped">
