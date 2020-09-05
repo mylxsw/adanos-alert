@@ -33,10 +33,25 @@ func (s ServiceProvider) Register(app container.Container) {
 
 func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
-		return cc.Resolve(func(kvRepo repository.KVRepo, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo, conf *configs.Config) {
+		return cc.Resolve(func(
+			kvRepo repository.KVRepo,
+			groupRepo repository.MessageGroupRepo,
+			msgRepo repository.MessageRepo,
+			auditRepo repository.AuditLogRepo,
+			conf *configs.Config,
+		) {
 			_ = cr.Add("kv_repository_gc", "@hourly", func() {
 				if err := kvRepo.GC(); err != nil {
 					log.Errorf("kv kvRepo gc failed: %v", err)
+				}
+			})
+
+			_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
+				deadLineDate := time.Now().AddDate(0, 0, -7*2)
+				log.Infof("clear expired audit logs before %v", deadLineDate)
+
+				if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
+					log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
 				}
 			})
 
