@@ -74,6 +74,8 @@
                     </b-card>
                 </b-card-group>
 
+                <MessageCard class="mb-3" title="待匹配消息示例" :fold="true" v-if="test_message_id !== null" :message="test_message" :message_index="0" :onlyShow="true"></MessageCard>
+
                 <b-card-group class="mb-3">
                     <b-card header="规则">
                         <p class="text-muted">分组匹配规则，作用于单条 message，用于判断该 message 是否与当前规则匹配。
@@ -632,6 +634,8 @@ export default {
                 templateRules: helpers.templates,
                 dingdingTemplateRules: helpers.templates,
             },
+            test_message_id: this.$route.query.test_message_id !== undefined ? this.$route.query.test_message_id : null,
+            test_message: {},
         };
     },
     computed: {
@@ -703,9 +707,9 @@ export default {
          * 发送规则检查请求
          */
         sendCheckRequest(type, content) {
-            axios.post('/api/rules-test/rule-check/' + type + '/', {content: content}).then(resp => {
+            axios.post('/api/rules-test/rule-check/' + type + '/', {content: content, msg_id: this.test_message_id}).then(resp => {
                 if (resp.data.error === null || resp.data.error === "") {
-                    this.SuccessBox('检查通过');
+                    this.SuccessBox('检查通过' + (resp.data.msg !== '' ? '：' + resp.data.msg : ''));
                 } else {
                     this.ErrorBox('检查不通过：' + resp.data.error);
                 }
@@ -975,6 +979,14 @@ export default {
         })).catch((error) => {
             this.ToastError(error)
         });
+
+        if (this.test_message_id !== null && this.test_message_id !== '') {
+            axios.get('/api/messages/' + this.test_message_id + '/').then(resp => {
+                this.test_message = resp.data;
+            }).catch((error) => {
+                this.ToastError(error);
+            })
+        }
     }
 }
 </script>

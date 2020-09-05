@@ -7,8 +7,10 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+import { BootstrapVueIcons } from 'bootstrap-vue'
+
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
+import { faExternalLinkAlt, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import DateTime from "./components/DateTime";
@@ -17,7 +19,10 @@ import Paginator from "./components/Paginator";
 import MessageCard from "./components/MessageCard";
 
 library.add(faExternalLinkAlt);
+library.add(faPlus)
 Vue.component('font-awesome-icon', FontAwesomeIcon);
+
+Vue.use(BootstrapVueIcons);
 
 Vue.component('DateTime', DateTime);
 Vue.component('HumanTime', HumanTime);
@@ -47,7 +52,6 @@ Vue.prototype.ToastSuccess = function (message) {
 };
 
 Vue.prototype.ToastError = function (message) {
-    console.log("Error: ", message);
     this.$bvToast.toast(this.ParseError(message), {
         title: 'ERROR',
         variant: 'danger'

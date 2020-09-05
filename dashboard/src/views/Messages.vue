@@ -11,7 +11,10 @@
                     </b-form>   
                 </b-card-text>
             </b-card>
-            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3" :message="message" :message_index="index" :test-matched-rules="testMatchedRules"></MessageCard>
+            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3"
+                         :message="message"
+                         :message_index="index"
+                         :test-matched-rules="testMatchedRules"></MessageCard>
             <b-card v-if="messages.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
             </b-card>

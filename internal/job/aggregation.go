@@ -58,7 +58,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
-				aggregateKey := buildMessageFinger(m.Rule().AggregateRule, msg)
+				aggregateKey := BuildMessageFinger(m.Rule().AggregateRule, msg)
 				key := fmt.Sprintf("%s:%s", m.Rule().ID.Hex(), aggregateKey)
 				if _, ok := collectingGroups[key]; !ok {
 					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey))
@@ -170,7 +170,7 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 	})
 }
 
-func buildMessageFinger(groupRule string, msg repository.Message) string {
+func BuildMessageFinger(groupRule string, msg repository.Message) string {
 	finger, err := matcher.NewMessageFinger(groupRule)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -215,7 +215,7 @@ func BuildMessageMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Mes
 			if matched {
 				matchedRules = append(matchedRules, MatchedRule{
 					Rule:         m.Rule(),
-					AggregateKey: buildMessageFinger(m.Rule().AggregateRule, msg),
+					AggregateKey: BuildMessageFinger(m.Rule().AggregateRule, msg),
 				})
 			}
 		}

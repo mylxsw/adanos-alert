@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/array"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
@@ -45,7 +45,6 @@ func (r RuleController) Register(router *web.Router) {
 	})
 
 	router.Group("/rules-test/", func(router *web.Router) {
-		router.Post("/rule-message/", r.TestMessageMatch).Name("rules:test:rule-message")
 		router.Post("/rule-check/{type}/", r.Check).Name("rules:test:check")
 	})
 }
@@ -205,27 +204,64 @@ func (r RuleForm) Validate(req web.Request) error {
 }
 
 // Check validate the rule
-func (r RuleController) Check(ctx web.Context) web.Response {
+func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) web.Response {
 	content := ctx.Input("content")
+	msgID := ctx.Input("msg_id")
 
 	var err error
 	switch repository.TemplateType(ctx.PathVar("type")) {
 	case repository.TemplateTypeMatchRule:
-		_, err = matcher.NewMessageMatcher(repository.Rule{Rule: content})
+		if msgID != "" {
+			matched, err := r.testMessageMatchRule(content, msgID, msgRepo)
+			if err != nil {
+				return ctx.JSON(web.M{
+					"error": err,
+					"msg":   "",
+				})
+			}
+
+			return ctx.JSON(web.M{
+				"error": nil,
+				"msg":   misc.IfElse(matched, "与当前 message 匹配", "与当前 message 不匹配"),
+			})
+		} else {
+			_, err = matcher.NewMessageMatcher(repository.Rule{Rule: content})
+		}
 	case repository.TemplateTypeTriggerRule:
 		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
 	case repository.TemplateTypeTemplate:
 		_, err = template.CreateParser(content)
 	case "aggregate_rule":
-		_, err = matcher.NewMessageFinger(content)
+		finger, err1 := matcher.NewMessageFinger(content)
+		if err1 == nil {
+			if msgID != "" {
+				msg, err1 := r.getMessageByID(msgID, msgRepo)
+				if err1 == nil {
+					res, err1 := finger.Run(msg)
+					if err1 == nil {
+						return ctx.JSON(web.M{
+							"error": nil,
+							"msg":   fmt.Sprintf("当前 message 聚合 Key 为 %s", res),
+						})
+					} else {
+						err = err1
+					}
+				} else {
+					err = err1
+				}
+			}
+		} else {
+			err = err1
+		}
 	}
 
 	if err != nil {
-		return ctx.JSON(web.M{"error": err.Error()})
+		return ctx.JSON(web.M{"error": err.Error(), "msg": ""})
 	}
 
 	return ctx.JSON(web.M{
 		"error": nil,
+		"msg":   "",
 	})
 }
 
@@ -483,29 +519,33 @@ func (r RuleController) Delete(ctx web.Context, em event.Manager, repo repositor
 	return repo.DeleteID(id)
 }
 
-// TestMessageMatch test if the message and rule can be matched
-func (r RuleController) TestMessageMatch(ctx web.Context) web.Response {
-	rule := ctx.Input("rule")
-	message := ctx.Input("message")
+func (r RuleController) getMessageByID(messageID string, msgRepo repository.MessageRepo) (repository.Message, error) {
+	msgID, err := primitive.ObjectIDFromHex(messageID)
+	if err != nil {
+		return repository.Message{}, fmt.Errorf("invalid message_id: %v", err)
+	}
 
-	var msg repository.Message
-	if err := json.Unmarshal([]byte(message), &msg); err != nil {
-		return ctx.JSONError(fmt.Sprintf("invalid message: %v", err), http.StatusUnprocessableEntity)
+	return msgRepo.Get(msgID)
+}
+
+// testMessageMatchRule test if the message and rule can be matched
+func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.MessageRepo) (bool, error) {
+	message, err := r.getMessageByID(messageID, msgRepo)
+	if err != nil {
+		return false, err
 	}
 
 	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: rule})
 	if err != nil {
-		return ctx.JSONError(fmt.Sprintf("invalid rule: %v", err), http.StatusUnprocessableEntity)
+		return false, fmt.Errorf("invalid rule: %v", err)
 	}
 
-	rs, err := m.Match(msg)
+	rs, err := m.Match(message)
 	if err != nil {
-		return ctx.JSONError(fmt.Sprintf("rule match with errors: %v", err), http.StatusUnprocessableEntity)
+		return false, fmt.Errorf("rule match with errors: %v", err)
 	}
 
-	return ctx.JSON(bson.M{
-		"matched": rs,
-	})
+	return rs, nil
 }
 
 // Tags return all tags existed
