@@ -429,7 +429,9 @@ let helpers = {
         {text: "Now()", displayText: "Now() time.Time  | 当前时间"},
         {text: "ParseTime(LAYOUT, VALUE)", displayText: "ParseTime(layout string, value string) time.Time | 时间字符串转时间对象"},
         {text: "DailyTimeBetween(START_TIME_STR, END_TIME_STR)", displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"},
-        {text: 'SQLFinger(SQL_STR) SQL_STR', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"}
+        {text: 'SQLFinger(SQL_STR)', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"},
+        {text: 'TrimSuffix(STR, SUFFIX)', displayText: 'TrimSuffix(str, suffix string) string | 去除字符串后缀'},
+        {text: 'TrimPrefix(STR, PREFIX)', displayText: 'TrimPrefix(str, prefix string) string | 去除字符串前缀'},
     ],
     templates: [
         {text: '.Messages MESSAGE_COUNT', displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'},

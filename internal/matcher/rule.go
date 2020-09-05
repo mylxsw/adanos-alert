@@ -57,3 +57,14 @@ func (Helpers) ParseTime(layout string, value string) time.Time {
 func (Helpers) SQLFinger(sqlStr string) string {
 	return parser.Normalize(sqlStr)
 }
+
+// TrimSuffix 字符串去除后缀
+func (Helpers) TrimSuffix(s, suffix string) string {
+	return strings.TrimSuffix(s, suffix)
+}
+
+// TrimPrefix 字符串去除前缀
+func (Helpers) TrimPrefix(s, prefix string) string {
+	return strings.TrimPrefix(s, prefix)
+}
+
