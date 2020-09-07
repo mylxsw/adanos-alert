@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>{{ .Group.Rule.Name }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
@@ -39,7 +39,7 @@
 
         .alert-body {
             padding: 10px;
-            margin: -15px;
+            margin: 0 -15px -15px;
             border-top: 1px solid #ccc;
             background: #fcf8e3;
         }
@@ -47,25 +47,52 @@
         .meta {
             margin: -15px -15px 0;
         }
-        .meta li:hover {
+        .meta .row:hover {
             background: #ffc107;
         }
-
+        .meta .row {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+        .meta .row .label {
+            line-height: 1.5;
+        }
+        .value-box {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size: 80%;
+        }
         .paginator {
             margin: 20px 0;
         }
-
+        .bs-callout {
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #eee;
+            border-left-width: 5px;
+            border-radius: 3px;
+        }
+        .bs-callout-warning {
+            border-left-color: #aa6708;
+        }
+        .bs-callout-warning h4 {
+            color: #aa6708;
+        }
+        .bs-callout h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
 <body>
-<div class="container-fluid" style="max-width: 1000px">
-    <h2>{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }} - {{ .Group.Rule.Name }}</h2>
-    <div class="alert alert-info" role="alert">
-        <p>ID：{{ .Group.ID.Hex }}</p>
-        <p>规则ID：{{ .Group.Rule.ID.Hex }}</p>
-        <p>规则：{{ .Group.Rule.Rule }}</p>
-        <p>数量：{{ .MessageCount }}</p>
+<div class="container-fluid">
+    <h2>{{ .Group.Rule.Name }}</h2>
+    <div class="bs-callout bs-callout-warning">
+        <p>创建时间：{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }}</p>
+        <p>规则：<code>{{ .Group.Rule.Rule }}</code></p>
+        <p>消息数量：{{ .MessageCount }}</p>
     </div>
     <div class="paginator">
         {{ if .HasPrev }}
@@ -78,36 +105,37 @@
     </div>
     {{ range $i, $msg := .Messages }}
         <div class="panel panel-default">
-            <div class="panel-heading"><span class="panel-seq">#{{ $msg.SeqNum }}</span> <b>{{ datetime "2006-01-02 15:04:05" $msg.CreatedAt }}</b></div>
-            <div class="panel-body table-responsive">
+            <div class="panel-heading"><span class="panel-seq" id="{{ $msg.SeqNum }}"><a href="#{{ $msg.SeqNum }}">#{{ $msg.SeqNum }}</a></span> <b>{{ datetime "2006-01-02 15:04:05" $msg.CreatedAt }}</b></div>
+            <div class="panel-body">
                 <div class="meta">
-                    <table class="table table-striped">
+                    <div class="container-fluid">
                         {{ if len $msg.Tags | gt 0 }}
-                            <tr>
-                                <th>标签</th>
-                                <td>
+                            <div class="row">
+                                <div class="col-sm-3"><span class="label label-success">标签</span></div>
+                                <div class="col-sm-9">
                                     {{ range $i, $m := $msg.Tags }}
                                         <span class="label label-info">{{ $m }}</span>
                                     {{ end }}
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                         {{ end }}
-                        <tr>
-                            <th>来源</th>
-                            <td>{{ $msg.Origin }}</td>
-                        </tr>
+                        <div class="row">
+                            <div class="col-sm-3"><span class="label label-primary">来源</span></div>
+                            <div class="col-sm-9">
+                                {{ $msg.Origin }}
+                            </div>
+                        </div>
                         {{ range $i, $m := sort_map_human $msg.Meta }}
-                            <tr class="adanos-can-fold">
-                                <th>{{ $m.Key }}</th>
-                                <td><pre style="margin: 0; padding: 0; line-height: 1.5;">{{ format "%v" $m.Value | remove_empty_line }}</pre></td>
-                            </tr>
+                            {{ if format "%v" $m.Value | ne "" }}
+                                <div class="row adanos-can-fold">
+                                    <div class="col-sm-3"><span class="label label-info">{{ $m.Key }}</span></div>
+                                    <div class="col-sm-9">
+                                        <pre class="value-box">{{ format "%v" $m.Value | remove_empty_line }}</pre>
+                                    </div>
+                                </div>
+                            {{ end }}
                         {{ end }}
-                        <tr>
-                            <td colspan="2" style="text-align: center">
-                                <a href="#" class="more-btn">更多</a>
-                            </td>
-                        </tr>
-                    </table>
+                    </div>
                 </div>
                 <div class="alert-body">
                     {{ range $i, $m := json_flatten $msg.Content 3 }}
@@ -138,14 +166,7 @@
 <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
     $(function() {
-        $('table:lt(2)').find('a.more-btn').parents('tr').hide();
-        $('table:gt(1)').find('tr.adanos-can-fold:gt(3)').hide();
-        $('a.more-btn').on('click', function (e) {
-            e.preventDefault();
 
-            $(this).parents('table').find('tr.adanos-can-fold:gt(3)').show();
-            $(this).parents('tr').hide();
-        })
     });
 </script>
 </body>

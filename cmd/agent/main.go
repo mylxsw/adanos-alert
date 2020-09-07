@@ -39,13 +39,13 @@ func main() {
 	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "server_addr",
-		Usage:  "server listen address",
+		Usage:  "server grpc listen address",
 		EnvVar: "ADANOS_SERVER_ADDR",
 		Value:  "127.0.0.1:19998",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "server_token",
-		Usage:  "API Token for api access control",
+		Usage:  "API Token for grpc api access control",
 		EnvVar: "ADANOS_SERVER_TOKEN",
 		Value:  "000000",
 	}))
@@ -104,12 +104,11 @@ func main() {
 	})
 
 	app.WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
-		log.Errorf("Stack: %s", debug.Stack())
+		log.Errorf("error: %v, call stack: %s", err, debug.Stack())
 		return nil
 	})
 
 	app.Main(func(conf *config.Config, router *mux.Router, db *ledis.DB) {
-
 		agentID, err := db.Get([]byte("agent-id"))
 		if err != nil || agentID == nil {
 			_ = db.Set([]byte("agent-id"), []byte(misc.UUID()))

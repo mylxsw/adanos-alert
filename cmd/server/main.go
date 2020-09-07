@@ -231,7 +231,7 @@ func main() {
 	})
 
 	app.WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
-		log.Errorf("Stack: %s", debug.Stack())
+		log.Errorf("error: %v, call stack: %s", err, debug.Stack())
 		return nil
 	})
 

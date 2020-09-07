@@ -1,4 +1,4 @@
 
-adanos_server_addr: "{{ adanos_agent_server_addr }}"
-adanos_server_token: "{{ adanos_agent_server_token }}"
-adanos_data_dir: "{{ adanos_agent_data_dir }}"
+server_addr: "{{ adanos_agent_server_addr }}"
+server_token: "{{ adanos_agent_server_token }}"
+data_dir: "{{ adanos_agent_data_dir }}"

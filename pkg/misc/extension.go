@@ -9,6 +9,7 @@ import (
 
 	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/array"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 )
 
@@ -57,10 +58,38 @@ func LogstashToCommonMessage(content []byte, contentField string) (*CommonMessag
 
 	return &CommonMessage{
 		Content: fmt.Sprintf("%v", msg),
-		Meta:    meta,
+		Meta:    logstashMetaFilter(meta),
 		Tags:    nil,
 		Origin:  "logstash",
 	}, nil
+}
+
+// 待排除的 Logstash 字段
+var excludeLogstashPrefix = []string{
+	"beat.",
+	"host.",
+	"input.",
+	"log.flags.",
+	"log.file.",
+	"offset",
+	"prospector.",
+	"tags.",
+	"@version",
+	"@timestamp",
+}
+
+// logstashMetaFilter 过滤掉不需要存储的 logstash 专有字段
+func logstashMetaFilter(meta repository.MessageMeta) repository.MessageMeta {
+	res := make(repository.MessageMeta)
+	for k, v := range meta {
+		if array.StringsContainPrefix(k, excludeLogstashPrefix) {
+			continue
+		}
+
+		res[k] = v
+	}
+
+	return res
 }
 
 type GrafanaMessage struct {
