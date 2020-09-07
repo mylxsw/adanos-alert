@@ -11,7 +11,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 	"time"
+
+	"github.com/mylxsw/adanos-alert/pkg/array"
 )
 
 // DingdingMessage is a message holds all informations for a dingding sender
@@ -59,9 +63,20 @@ func NewMarkdownMessage(title string, body string, mobiles []string) MarkdownMes
 			Text:  body,
 		},
 		At: MessageAtSomebody{
-			Mobiles: mobiles,
+			Mobiles: ExtractAtSomeones(body),
 		},
 	}
+}
+
+var atSomebodyRegexp = regexp.MustCompile(`@1\d{10}(\s|$)`)
+
+func ExtractAtSomeones(body string) []string {
+	results := make([]string, 0)
+	for _, s := range atSomebodyRegexp.FindAllString(body, -1) {
+		results = append(results, strings.TrimSpace(strings.TrimLeft(s, "@")))
+	}
+
+	return array.StringUnique(results)
 }
 
 // MarkdownMessageBody is markdown body

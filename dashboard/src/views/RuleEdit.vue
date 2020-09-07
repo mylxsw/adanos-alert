@@ -97,9 +97,7 @@
                         <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
                         <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input" description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy">
                             <b-input-group>
-                                <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件"
-                                              v-model="form.aggregate_rule"/>
-
+                                <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件" v-model="form.aggregate_rule"/>
                                 <b-input-group-append>
                                     <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
                                 </b-input-group-append>
@@ -441,12 +439,15 @@ let helpers = {
         {text: '.Messages MESSAGE_COUNT', displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'},
         {text: '{{ }}', displayText: '{{ }} |  Golang 代码块'},
         {text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}', displayText: '{{ range }}  | Golang 遍历对象'},
+        {text: '{{ range $i, $msg := .Messages 4 }} {{ end }}', displayText: '{{ range $i, $msg := .Messages 4 }} {{ end }} | Golang 遍历 Messages，只取 4 条作为摘要'},
         {text: '{{ if pipeline }}\n T1 \n{{ else if pipeline }}\n T2 \n{{ else }}\n T3 \n{{ end }}', displayText: '{{ if }} |  Golang 分支条件'},
         {text: '[]()', displayText: 'Markdown 连接地址'},
         {text: 'index MAP_VAR "KEY"', displayText: 'index $msg.Meta "message.message" | 从 Map 中获取某个 Key 的值'},
         {text: 'cutoff MAX_LENGTH STR', displayText: 'cutoff(maxLen int, val string) string  |  字符串截断'},
         {text: 'implode ELEMENT_ARR ","', displayText: 'implode(elems []string, sep string) string  |  字符串数组拼接'},
+        {text: 'join "," ELEMENT_ARR', displayText: 'join(sep string, elems []string) string  |  字符串数组拼接'},
         {text: 'explode STR ","', displayText: 'explode(s, sep string) []string  |  字符串分隔成数组'},
+        {text: 'split "," STR', displayText: 'split(sep, s string) []string  |  字符串分隔成数组'},
         {text: 'ident "IDENT_STR" STR', displayText: 'ident(ident string, message string) string  |  多行字符串统一缩进'},
         {text: 'json JSONSTR', displayText: 'json(content string) string  |  JSON 字符串格式化'},
         {text: 'datetime LAYOUT DATETIME', displayText: 'datetime(layout string, datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，时区选择北京/重庆'},
@@ -477,6 +478,9 @@ let helpers = {
         {text: 'meta_prefix_filter STR FILTER_PREFIX', displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'},
         {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
         {text: 'important', displayText: 'important() string | 红色字体显示"【重要】"两字'},
+        {text: 'user_metas QUERY_K QUERY_V FIELD', displayText: 'user_metas(queryK, queryV string, field string) []string | 查询 queryK=queryV 的用户 field 元信息，查询结果是个字符串数组'},
+        {text: 'prefix_all_str PREFIX ARR', displayText: 'prefix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加前缀'},
+        {text: 'suffix_all_str SUFFIX ARR', displayText: 'suffix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加后缀'},
     ],
     triggerTemplates: [
 
@@ -991,6 +995,13 @@ export default {
         if (this.test_message_id !== null && this.test_message_id !== '') {
             axios.get('/api/messages/' + this.test_message_id + '/').then(resp => {
                 this.test_message = resp.data;
+                if (this.test_message !== null && this.test_message.id !== undefined) {
+                    for (let k in resp.data.meta) {
+                        helpers.groupMatchRules.push({text: 'Meta["'+ k + '"]', displayText: 'Meta["'+ k + '"]'});
+                        helpers.templates.push({text: k, displayText: k});
+                        helpers.templates.push({text: '{{ index $msg.Meta "' + k + '" }}', displayText: '{{ index $msg.Meta "' + k + '" }}'});
+                    }
+                }
             }).catch((error) => {
                 this.ToastError(error);
             })
@@ -1000,6 +1011,11 @@ export default {
                 this.test_message = resp.data;
                 if (this.test_message !== null && this.test_message.id !== undefined) {
                     this.test_message_id = this.test_message.id;
+                    for (let k in resp.data.meta) {
+                        helpers.groupMatchRules.push({text: 'Meta["'+ k + '"]', displayText: 'Meta["'+ k + '"]'});
+                        helpers.templates.push({text: k, displayText: k});
+                        helpers.templates.push({text: '{{ index $msg.Meta "' + k + '" }}', displayText: '{{ index $msg.Meta "' + k + '" }}'});
+                    }
                 }
             }).catch((error) => {this.ToastError(error)})
         }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
+	"github.com/mylxsw/container"
 	"github.com/mylxsw/go-toolkit/file"
 	"github.com/stretchr/testify/assert"
 )
@@ -46,7 +47,7 @@ func (data testParseData) Strings(ele string) []string {
 
 func TestParse(t *testing.T) {
 	{
-		parsed, err := Parse(`{{ range $i, $msg := (explode .Name " ") }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		parsed, err := Parse(container.New(), `{{ range $i, $msg := (explode .Name " ") }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
 		if err != nil {
 			t.Errorf("test parse template failed: %v", err)
 		}
@@ -57,7 +58,7 @@ func TestParse(t *testing.T) {
 	}
 
 	{
-		parsed, err := Parse(`{{ range $i, $msg := .Strings "last element" }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		parsed, err := Parse(container.New(), `{{ range $i, $msg := .Strings "last element" }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
 		if err != nil {
 			t.Errorf("test parse template failed: %v", err)
 		}
@@ -198,7 +199,7 @@ User: {{ $slog.user }}
 			t.Errorf("test failed: %s", err)
 		}
 
-		res, err := Parse(templateContent, map[string]string{"body": mysqlSlowlog})
+		res, err := Parse(container.New(), templateContent, map[string]string{"body": mysqlSlowlog})
 		if err != nil {
 			t.Errorf("test failed: %s", err)
 		}
@@ -262,7 +263,7 @@ func TestMetaFilter(t *testing.T) {
 
 	var temp = `{{ range $i, $msg := meta_prefix_filter .Meta "message." "version" }}[{{ $i }}: {{ $msg }}]{{ end }}`
 
-	res, err := Parse(temp, map[string]interface{}{
+	res, err := Parse(container.New(), temp, map[string]interface{}{
 		"Meta": meta,
 	})
 	assert.NoError(t, err)
@@ -309,7 +310,7 @@ func TestImplode(t *testing.T) {
 }
 
 func TestNumberBeauty(t *testing.T) {
-	parsed, _ := Parse(`{{ index .Data "number" | format "%.0f" | number_beauty }} | {{ index .Data "number" | number_beauty }}`, struct {
+	parsed, _ := Parse(container.New(), `{{ index .Data "number" | format "%.0f" | number_beauty }} | {{ index .Data "number" | number_beauty }}`, struct {
 		Data map[string]interface{}
 	}{
 		Data: map[string]interface{}{

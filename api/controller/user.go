@@ -131,7 +131,7 @@ func (u UserController) UserNames(ctx web.Context, userRepo repository.UserRepo)
 	for _, u := range users {
 		resps = append(resps, UserNameResp{
 			ID:   u.ID.Hex(),
-			Name: u.Name,
+			Name: fmt.Sprintf("%s (%s, %s)", u.Name, u.Email, u.Phone),
 		})
 	}
 

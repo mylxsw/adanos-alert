@@ -231,7 +231,7 @@ func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) w
 	case repository.TemplateTypeTriggerRule:
 		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
 	case repository.TemplateTypeTemplate:
-		_, err = template.CreateParser(content)
+		_, err = template.CreateParser(r.cc, content)
 	case "aggregate_rule":
 		finger, err1 := matcher.NewMessageFinger(content)
 		if err1 == nil {

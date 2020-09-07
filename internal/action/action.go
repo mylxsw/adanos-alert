@@ -22,6 +22,7 @@ type Action interface {
 type Manager interface {
 	Resolve(f interface{}) error
 	MustResolve(f interface{})
+	Get(key interface{}) (interface{}, error)
 	Dispatch(action string) Action
 	Run(action string) Action
 	Register(name string, action Action)
@@ -35,6 +36,10 @@ type actionManager struct {
 
 func NewManager(cc container.Container) Manager {
 	return &actionManager{cc: cc, actions: make(map[string]Action)}
+}
+
+func (manager *actionManager) Get(key interface{}) (interface{}, error) {
+	return manager.cc.Get(key)
 }
 
 func (manager *actionManager) Resolve(f interface{}) error {

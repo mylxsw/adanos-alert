@@ -7,6 +7,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/container"
 )
 
 type GroupData struct {
@@ -22,13 +23,13 @@ type GroupData struct {
 	PrevOffset   int64
 }
 
-func GroupView(data GroupData) (string, error) {
+func GroupView(cc container.Container, data GroupData) (string, error) {
 	templateContent, err := fileGetContent(filepath.Join(currentPath(), "groups.html"))
 	if err != nil {
 		templateContent = defaultMessageViewTemplate
 	}
 
-	return template.Parse(templateContent, data)
+	return template.Parse(cc, templateContent, data)
 }
 
 // fileGetContent 读取文件内容

@@ -79,7 +79,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return fmt.Errorf("query robot for id=%s failed: %v", meta.RobotID, err)
 		}
 
-		ruleTemplateContent, err := template.Parse(rule.Template, payload)
+		ruleTemplateContent, err := template.Parse(d.manager, rule.Template, payload)
 		if err != nil {
 			ruleTemplateContent = fmt.Sprintf("<rule> template parse failed: %s", err)
 			log.WithFields(log.Fields{
@@ -92,7 +92,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		notifyContent := ruleTemplateContent
 		if strings.TrimSpace(meta.Template) != "" {
 			payload.RuleTemplateParsed = ruleTemplateContent
-			notifyContent, err = template.Parse(meta.Template, payload)
+			notifyContent, err = template.Parse(d.manager, meta.Template, payload)
 			if err != nil {
 				notifyContent = fmt.Sprintf("<trigger> template parse failed: %s", err)
 				log.WithFields(log.Fields{

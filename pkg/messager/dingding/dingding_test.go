@@ -10,7 +10,19 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	_ "github.com/pingcap/parser/test_driver"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNewMarkdownMessage(t *testing.T) {
+	body := `## Hello
+
+Hello, world！@18344822222 @19999999991
+That all.
+`
+	encoded, err := dingding.NewMarkdownMessage("Hello", body, []string{"18888888888", "12455552211"}).Encode()
+	assert.NoError(t, err)
+	fmt.Println(string(encoded))
+}
 
 func TestDingding_Send(t *testing.T) {
 

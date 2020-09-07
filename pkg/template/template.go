@@ -11,6 +11,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/array"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/asteria/log"
@@ -18,12 +19,17 @@ import (
 	"github.com/mylxsw/go-toolkit/jsonutils"
 	"github.com/pingcap/parser"
 	"github.com/vjeantet/grok"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
+type SimpleContainer interface {
+	Get(key interface{}) (interface{}, error)
+}
+
 // Parse parse template with data to html
-func Parse(templateStr string, data interface{}) (string, error) {
+func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, error) {
 	var buffer bytes.Buffer
-	if err := template.Must(CreateParser(templateStr)).Execute(&buffer, data); err != nil {
+	if err := template.Must(CreateParser(cc, templateStr)).Execute(&buffer, data); err != nil {
 		return "", err
 	}
 
@@ -31,11 +37,13 @@ func Parse(templateStr string, data interface{}) (string, error) {
 }
 
 // CreateParse create a template parser
-func CreateParser(templateStr string) (*template.Template, error) {
+func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":                     cutOff,
 		"implode":                    Implode,
 		"explode":                    strings.Split,
+		"join":                       join,
+		"split":                      split,
 		"ident":                      leftIdent,
 		"json":                       jsonFormatter,
 		"datetime":                   datetimeFormat,
@@ -67,6 +75,9 @@ func CreateParser(templateStr string) (*template.Template, error) {
 		"serialize":                  Serialize,
 		"sort_map_human":             SortMapByKeyHuman,
 		"important":                  importantNotice,
+		"user_metas":                 BuildUserMetasFunc(cc),
+		"prefix_all_str":             prefixStrArray,
+		"suffix_all_str":             suffixStrArray,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -391,4 +402,75 @@ func NumberBeauty(number interface{}) string {
 
 func importantNotice() string {
 	return `<font color="#ea2426">【重要】</font>`
+}
+
+// BuildUserMetasFunc 构建查询用户元信息的函数
+func BuildUserMetasFunc(cc SimpleContainer) func(queryK, queryV string, field string) []string {
+	userRepoR, err := cc.Get(new(repository.UserRepo))
+	if err != nil {
+		return func(queryK, queryV string, field string) []string {
+			return []string{fmt.Sprintf("<error>:%v", err)}
+		}
+	}
+
+	userRepo := userRepoR.(repository.UserRepo)
+	return func(queryK, queryV string, field string) []string {
+		filter := bson.M{}
+		if array.StringsContain(queryK, []string{"name", "phone", "email", "role", "status"}) {
+			filter[queryK] = queryV
+		} else {
+			filter["metas.key"] = queryK
+			filter["metas.value"] = queryV
+		}
+
+		users, err := userRepo.Find(filter)
+		if err != nil {
+			return []string{}
+		}
+
+		var res []string
+		_ = coll.MustNew(users).Map(func(u repository.User) string {
+			switch field {
+			case "name":
+				return u.Name
+			case "phone":
+				return u.Phone
+			case "email":
+				return u.Email
+			case "role":
+				return u.Role
+			case "status":
+				return string(u.Status)
+			default:
+				for _, m := range u.Metas {
+					if m.Key == field {
+						return m.Value
+					}
+				}
+
+				return ""
+			}
+		}).Filter(func(v string) bool { return v != "" }).All(&res)
+		return res
+	}
+}
+
+func join(sep string, elems []string) string {
+	return Implode(elems, sep)
+}
+
+func split(sep, s string) []string {
+	return strings.Split(s, sep)
+}
+
+func prefixStrArray(prefix string, arr []string) []string {
+	var dest []string
+	_ = coll.Map(arr, &dest, func(s string) string { return prefix + s })
+	return dest
+}
+
+func suffixStrArray(suffix string, arr []string) []string {
+	var dest []string
+	_ = coll.Map(arr, &dest, func(s string) string { return s + suffix })
+	return dest
 }

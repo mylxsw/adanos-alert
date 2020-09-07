@@ -51,7 +51,7 @@ func (p PublicController) Group(ctx web.Context, groupRepo repository.MessageGro
 
 	messageCount, _ := msgRepo.Count(filter)
 
-	res, err := view.GroupView(view.GroupData{
+	res, err := view.GroupView(p.cc, view.GroupData{
 		Group:        group,
 		Messages:     messages,
 		MessageCount: messageCount,

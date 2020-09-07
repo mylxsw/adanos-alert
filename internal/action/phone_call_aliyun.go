@@ -40,7 +40,7 @@ func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.T
 			meta.Title = "{{ .Rule.Name }}"
 		}
 
-		title, err := template.Parse(meta.Title, grp)
+		title, err := template.Parse(w.manager, meta.Title, grp)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"rule_id": rule.ID.Hex(),
