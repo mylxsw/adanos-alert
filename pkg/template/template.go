@@ -79,6 +79,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"user_metas":                 BuildUserMetasFunc(cc),
 		"prefix_all_str":             prefixStrArray,
 		"suffix_all_str":             suffixStrArray,
+		"trim_prefix_map_k":          TrimPrefixMapK,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -494,4 +495,13 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 	}
 
 	return data
+}
+
+// TrimPrefixMapK 移除 Map 中所有 Key 的前缀
+func TrimPrefixMapK(source map[string]interface{}, prefix string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range source {
+		res[strings.TrimPrefix(k, prefix)] = v
+	}
+	return res
 }

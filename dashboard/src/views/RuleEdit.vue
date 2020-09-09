@@ -499,6 +499,7 @@ let helpers = {
         {text: 'prefix_all_str PREFIX ARR', displayText: 'prefix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加前缀'},
         {text: 'suffix_all_str SUFFIX ARR', displayText: 'suffix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加后缀'},
         {text: 'json_fields_cutoff LENGTH JSON_STR', displayText: 'json_fields_cutoff(length int, body string) map[string]interface{} | 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，返回 KV 对儿'},
+        {text: 'trim_prefix_map_k SOURCE PREFIX', displayText: 'trim_prefix_map_k(source map[string]interface{}, prefix string) map[string]interface{} | 移除 Map 中所有 Key 的前缀'},
 
         {text: '.Action', displayText: '.Action | 字段类型：string | 所属对象：ROOT' },
         {text: '.RuleTemplateParsed', displayText: '.RuleTemplateParsed | 字段类型：string | 所属对象：ROOT' },

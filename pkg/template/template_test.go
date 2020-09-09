@@ -68,7 +68,7 @@ func TestParse(t *testing.T) {
 }
 
 func TestCutOffFunc(t *testing.T) {
-	if len(cutOff(40, content)) - 3 > 40 {
+	if len(cutOff(40, content))-3 > 40 {
 		t.Errorf("CutOff函数执行异常")
 	}
 }
@@ -119,7 +119,6 @@ var jsonContent = `{
 }`
 
 func TestJsonGet(t *testing.T) {
-
 
 	if pkgJSON.Get("message", "", jsonContent) != "sms_send_failed" {
 		t.Errorf("test failed")
@@ -328,5 +327,6 @@ func TestSQLFinger(t *testing.T) {
 }
 
 func TestJSONCutOffFields(t *testing.T) {
-	fmt.Println(Serialize(MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel")))
+	data := Serialize(TrimPrefixMapK(MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel"), "context."))
+	assert.Equal(t, `{"final_channel":"亿美软通","msg":"短信发送失败，该错误不允许重试其它通道，..."}`, data)
 }
