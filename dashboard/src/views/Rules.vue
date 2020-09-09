@@ -174,8 +174,11 @@ export default {
         },
         searchSubmit(evt) {
             evt.preventDefault();
-            let query = this.$route.query;
-            query.offset = 0;
+            let query = {offset: 0};
+            for (let i in this.$route.query) {
+                query[i] = this.$route.query[i];
+            }
+
             for (let i in this.search) {
                 query[i] = this.search[i];
             }
