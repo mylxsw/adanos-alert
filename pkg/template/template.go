@@ -41,6 +41,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 	funcMap := template.FuncMap{
 		"cutoff":                     cutOff,
 		"json_fields_cutoff":         JSONCutOffFields,
+		"map_fields_cutoff":          MapFieldsCutoff,
 		"implode":                    Implode,
 		"explode":                    strings.Split,
 		"join":                       join,
@@ -402,8 +403,8 @@ func NumberBeauty(number interface{}) string {
 	return strings.Join(arr, ".")
 }
 
-func importantNotice() string {
-	return `<font color="#ea2426">【重要】</font>`
+func importantNotice(msg string) string {
+	return fmt.Sprintf("`<font color=\"#ea2426\">%s</font>`", msg)
 }
 
 // BuildUserMetasFunc 构建查询用户元信息的函数
@@ -477,7 +478,7 @@ func suffixStrArray(suffix string, arr []string) []string {
 	return dest
 }
 
-// JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，返回 KV 对
+// JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度
 func JSONCutOffFields(length int, body string) map[string]interface{} {
 	var pairs []KVPair
 	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
@@ -497,8 +498,18 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 	return data
 }
 
+// MapFieldsCutoff 对 Map 的每个 KV 截取指定长度
+func MapFieldsCutoff(length int, source map[string]interface{}) map[string]interface{} {
+	data := make(map[string]interface{})
+	for k, v := range source {
+		data[cutOff(30, k)] = cutOff(length, fmt.Sprintf("%v", v))
+	}
+
+	return data
+}
+
 // TrimPrefixMapK 移除 Map 中所有 Key 的前缀
-func TrimPrefixMapK(source map[string]interface{}, prefix string) map[string]interface{} {
+func TrimPrefixMapK(prefix string, source map[string]interface{}) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range source {
 		res[strings.TrimPrefix(k, prefix)] = v
