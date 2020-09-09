@@ -4,7 +4,7 @@
             <b-btn-group class="mb-3">
                 <b-button to="/users/add" variant="primary">新增用户</b-button>
             </b-btn-group>
-            <b-table :items="users" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="users" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(name)="row">
                     {{ row.item.name }}
                     <p><b>{{ row.item.id }}</b></p>
@@ -31,7 +31,6 @@
                     <b-button-group class="mr-2">
                         <b-button size="sm" variant="success" :to="{path:'/', query:{user_id: row.item.id}}">报警</b-button>
                         <b-button size="sm" variant="dark" :to="{path:'/rules', query:{user_id: row.item.id}}">规则</b-button>
-
                     </b-button-group>
                     <b-button-group>
                         <b-button size="sm" variant="info" :to="{path:'/users/' + row.item.id + '/edit'}">编辑</b-button>

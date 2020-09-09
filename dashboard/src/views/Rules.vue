@@ -19,7 +19,7 @@
                     </b-badge>
                 </b-card-text>
             </b-card>
-            <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty responsive="true">
+            <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty responsive="true" hover>
                 <template v-slot:cell(name)="row">
                     <span v-b-tooltip.hover :title="row.item.id">{{ row.item.name }}</span>
                     <p>
@@ -174,8 +174,12 @@ export default {
         },
         searchSubmit(evt) {
             evt.preventDefault();
-            let query = this.search;
+            let query = this.$route.query;
             query.offset = 0;
+            for (let i in this.search) {
+                query[i] = this.search[i];
+            }
+
             this.$router.push({path: '/rules', query: query}).catch(err => {
                 this.ToastError(err)
             });

@@ -40,6 +40,7 @@ func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, er
 func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":                     cutOff,
+		"json_fields_cutoff":         JSONCutOffFields,
 		"implode":                    Implode,
 		"explode":                    strings.Split,
 		"join":                       join,
@@ -120,7 +121,7 @@ func cutOff(maxLen int, val string) string {
 		return string(valRune)
 	}
 
-	return string(valRune[0:maxLen])
+	return string(valRune[0:maxLen]) + "..."
 }
 
 // 字符串多行缩进
@@ -473,4 +474,24 @@ func suffixStrArray(suffix string, arr []string) []string {
 	var dest []string
 	_ = coll.Map(arr, &dest, func(s string) string { return s + suffix })
 	return dest
+}
+
+// JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，返回 KV 对
+func JSONCutOffFields(length int, body string) map[string]interface{} {
+	var pairs []KVPair
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+		return KVPair{
+			Key:   cutOff(30, p.Key),
+			Value: cutOff(length, p.Value),
+		}
+	}).Filter(func(p KVPair) bool {
+		return p.Key != "" && p.Value != ""
+	}).All(&pairs)
+
+	data := make(map[string]interface{})
+	for _, p := range pairs {
+		data[p.Key] = p.Value
+	}
+
+	return data
 }

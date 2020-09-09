@@ -67,3 +67,8 @@ FROM users user WHERE id in (1, 2, 3,
 		t.Errorf("send failed: %v", err)
 	}
 }
+
+func TestExtractAtSomeones(t *testing.T) {
+	lines := "Hello\n@18888888888\nok,@19999999949\t@19433333334"
+	assert.Equal(t, 3, len(dingding.ExtractAtSomeones(lines)))
+}

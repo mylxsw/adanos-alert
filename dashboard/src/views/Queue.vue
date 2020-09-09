@@ -8,7 +8,7 @@
                 自 <date-time :value="queue_info.start_at"></date-time> 开始，已处理：<b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>，
                 失败：<b-badge :to="'/queues?status=failed'" variant="danger">{{ queue_info.failed_count }}</b-badge>
             </div>
-            <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(id)="row">
                     <date-time :value="row.item.created_at"></date-time>
                     <p><b>{{ row.item.id }}</b></p>

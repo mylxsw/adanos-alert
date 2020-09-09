@@ -68,7 +68,7 @@ func NewMarkdownMessage(title string, body string, mobiles []string) MarkdownMes
 	}
 }
 
-var atSomebodyRegexp = regexp.MustCompile(`@1\d{10}(\s|$)`)
+var atSomebodyRegexp = regexp.MustCompile(`@1\d{10}(\s|\n|$)`)
 
 func ExtractAtSomeones(body string) []string {
 	results := make([]string, 0)

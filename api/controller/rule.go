@@ -451,6 +451,11 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 		filter["triggers.user_refs"] = userID
 	}
 
+	dingID := ctx.Input("dingding_id")
+	if dingID != "" {
+		filter["triggers.meta"] = bson.M{"$regex": fmt.Sprintf(`"robot_id":"%s"`, dingID)}
+	}
+
 	log.With(filter).Debug("filter")
 
 	offset, limit := offsetAndLimit(ctx)

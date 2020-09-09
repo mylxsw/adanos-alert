@@ -68,7 +68,7 @@ func TestParse(t *testing.T) {
 }
 
 func TestCutOffFunc(t *testing.T) {
-	if len(cutOff(40, content)) > 40 {
+	if len(cutOff(40, content)) - 3 > 40 {
 		t.Errorf("CutOff函数执行异常")
 	}
 }
@@ -81,8 +81,7 @@ func TestLeftIdent(t *testing.T) {
 	}
 }
 
-func TestJsonGet(t *testing.T) {
-	var jsonContent = `{
+var jsonContent = `{
     "message": "sms_send_failed",
     "context": {
         "msg": "短信发送失败，该错误不允许重试其它通道，请人工介入处理",
@@ -118,6 +117,9 @@ func TestJsonGet(t *testing.T) {
         "ref": "20181103233101-5bddbf35de697"
     }
 }`
+
+func TestJsonGet(t *testing.T) {
+
 
 	if pkgJSON.Get("message", "", jsonContent) != "sms_send_failed" {
 		t.Errorf("test failed")
@@ -323,4 +325,8 @@ func TestNumberBeauty(t *testing.T) {
 func TestSQLFinger(t *testing.T) {
 	assert.Equal(t, "xxxxxx adsfa", SQLFinger("XXXXxx adsfa"))
 	assert.Equal(t, "select id , name from users where id in ( ... ) and age > ?", SQLFinger("Select id, name from users where id in (1, 2,3 ,4 ) and age > 19"))
+}
+
+func TestJSONCutOffFields(t *testing.T) {
+	fmt.Println(Serialize(MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel")))
 }

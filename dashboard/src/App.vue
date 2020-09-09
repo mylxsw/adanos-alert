@@ -2,8 +2,9 @@
   <div id="app">
     <b-container fluid>
         <b-navbar type="dark" toggleable="md" variant="dark" class="mb-3" sticky>
-            <b-navbar-brand href="/">Adanos</b-navbar-brand>
+            <b-navbar-brand href="/">Adanos <a href="https://github.com/mylxsw/adanos-alert" class="text-white" style="font-size: 30%">{{ version }}</a></b-navbar-brand>
             <b-collapse is-nav id="nav_dropdown_collapse">
+                <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex"></ul>
                 <b-navbar-nav>
                     <b-nav-item href="/" exact>分组</b-nav-item>
                     <b-nav-item :to="{path:'/messages', query: {status: 'canceled'}}" exact>
@@ -20,11 +21,6 @@
                     <b-nav-item to="/audit">审计</b-nav-item>
                     <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
-                <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
-                    <li class="nav-item">
-                        <a href="https://github.com/mylxsw/adanos-alert" class="text-white">{{ version }}</a>
-                    </li>
-                </ul>
             </b-collapse>
         </b-navbar>
         <div class="main-view">

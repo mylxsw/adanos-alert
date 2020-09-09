@@ -7,7 +7,7 @@
                     <b-badge :variant="$route.query.status === status.value ? 'primary': ''" v-for="(status, index) in statuses" :key="index" class="mr-1" :to="'/?status=' + status.value">{{ status.name }}</b-badge>
                 </b-card-text>
             </b-card>
-            <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(id)="row">
                     <b-badge class="mr-2" variant="dark">{{ row.item.seq_num }}</b-badge>
                     <date-time :value="row.item.updated_at"></date-time>

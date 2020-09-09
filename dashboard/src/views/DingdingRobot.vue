@@ -4,7 +4,7 @@
             <b-btn-group class="mb-3">
                 <b-button to="/dingding-robots/add" variant="primary">新增机器人</b-button>
             </b-btn-group>
-            <b-table :items="robots" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="robots" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
                 </template>
@@ -13,7 +13,12 @@
                     <strong> Loading...</strong>
                 </template>
                 <template v-slot:cell(operations)="row">
+                    <b-button-group class="mr-2">
+                        <b-button size="sm" variant="success" :to="{path:'/', query:{dingding_id: row.item.id}}">报警</b-button>
+                        <b-button size="sm" variant="dark" :to="{path:'/rules', query:{dingding_id: row.item.id}}">规则</b-button>
+                    </b-button-group>
                     <b-button-group>
+
                         <b-button size="sm" variant="info" :to="{path:'/dingding-robots/' + row.item.id + '/edit'}">编辑</b-button>
                         <b-button size="sm" variant="danger" @click="delete_robot(row.index, row.item.id)">删除</b-button>
                     </b-button-group>

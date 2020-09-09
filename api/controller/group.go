@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,6 +62,11 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 	userID, err := primitive.ObjectIDFromHex(ctx.Input("user_id"))
 	if err == nil {
 		filter["actions.user_refs"] = userID
+	}
+
+	dingID := ctx.Input("dingding_id")
+	if dingID != "" {
+		filter["actions.meta"] = bson.M{"$regex": fmt.Sprintf(`"robot_id":"%s"`, dingID)}
 	}
 
 	grps, next, err := groupRepo.Paginate(filter, offset, limit)

@@ -4,7 +4,7 @@
             <b-btn-group class="mb-3">
                 <b-button to="/templates/add" variant="primary">新增模板</b-button>
             </b-btn-group>
-            <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty>
+            <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(name)="row">
                     <b>{{ row.item.name }}</b>
                     <p><i>{{ row.item.description }}</i></p>
