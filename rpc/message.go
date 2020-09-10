@@ -32,7 +32,7 @@ func (ms *MessageService) Push(ctx context.Context, request *protocol.MessageReq
 		return nil, err
 	}
 
-	id, err := ms.msgRepo.AddWithContext(ctx, commonMessage.ToRepo())
+	id, err := ms.msgRepo.AddWithContext(ctx, commonMessage.GetRepoMessage())
 	if err != nil {
 		return nil, err
 	}

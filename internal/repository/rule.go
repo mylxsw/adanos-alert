@@ -61,7 +61,7 @@ type Rule struct {
 }
 
 // ToGroupRule convert Rule to MessageGroupRule
-func (rule Rule) ToGroupRule(aggregateKey string) MessageGroupRule {
+func (rule Rule) ToGroupRule(aggregateKey string, msgType MessageType) MessageGroupRule {
 	groupRule := MessageGroupRule{
 		ID:              rule.ID,
 		Name:            rule.Name,
@@ -69,6 +69,7 @@ func (rule Rule) ToGroupRule(aggregateKey string) MessageGroupRule {
 		Template:        rule.Template,
 		SummaryTemplate: rule.SummaryTemplate,
 		AggregateKey:    aggregateKey,
+		Type:            msgType,
 	}
 
 	if rule.ReadyType == "" {

@@ -59,9 +59,9 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
 				aggregateKey := BuildMessageFinger(m.Rule().AggregateRule, msg)
-				key := fmt.Sprintf("%s:%s", m.Rule().ID.Hex(), aggregateKey)
+				key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, msg.Type)
 				if _, ok := collectingGroups[key]; !ok {
-					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey))
+					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, msg.Type))
 					if err != nil {
 						log.WithFields(log.Fields{
 							"msg":  msg,

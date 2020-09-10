@@ -44,6 +44,18 @@ func main() {
 				Name:  "origin",
 				Usage: "specify origin for alert message",
 			},
+			&cli.StringFlag{
+				Name:  "id",
+				Usage: "指定当前 message 的 ID，用于消息抑制和自动恢复",
+			},
+			&cli.StringFlag{
+				Name:  "inhibit-interval",
+				Usage: "消息抑制周期，比如 1m 表示 1 分钟内只有一条相同 id 的消息会被接收",
+			},
+			&cli.StringFlag{
+				Name:  "recovery-after",
+				Usage: "自动恢复周期，比如 1m 表示 1 分钟内如果没有新的相同 id 的消息到达，自动创建一条已恢复的消息",
+			},
 			&cli.IntFlag{
 				Name:  "max-lines",
 				Value: 100,
@@ -60,12 +72,19 @@ func main() {
 				adanosServers = append(adanosServers, "http://localhost:19999")
 			}
 
+			ctl := misc.MessageControl{
+				ID:              c.String("id"),
+				InhibitInterval: c.String("inhibit-interval"),
+				RecoveryAfter:   c.String("recovery-after"),
+			}
+
 			return connector.Send(
 				adanosServers,
 				c.String("adanos-token"),
 				createMessageMeta(c.StringSlice("meta")),
 				c.StringSlice("tag"),
 				c.String("origin"),
+				ctl,
 				message,
 			)
 		},

@@ -9,7 +9,7 @@ import (
 
 	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/array"
+	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 )
 
@@ -18,6 +18,32 @@ type CommonMessage struct {
 	Meta    repository.MessageMeta `json:"meta"`
 	Tags    []string               `json:"tags"`
 	Origin  string                 `json:"origin"`
+
+	Control MessageControl `json:"control"`
+}
+
+type MessageControl struct {
+	ID              string `json:"id"`               // 消息标识，用于去重
+	InhibitInterval string `json:"inhibit_interval"` // 抑制周期，周期内相同 ID 的消息直接丢弃
+	RecoveryAfter   string `json:"recovery_after"`   // 自动恢复周期，该事件后一直没有发生相同标识的 消息，则自动生成一条恢复消息
+}
+
+func (mc MessageControl) GetInhibitInterval() time.Duration {
+	duration, err := time.ParseDuration(mc.InhibitInterval)
+	if err != nil {
+		return 0
+	}
+
+	return duration
+}
+
+func (mc MessageControl) GetRecoveryAfter() time.Duration {
+	duration, err := time.ParseDuration(mc.RecoveryAfter)
+	if err != nil {
+		return 0
+	}
+
+	return duration
 }
 
 func (msg CommonMessage) Serialize() string {
@@ -25,17 +51,27 @@ func (msg CommonMessage) Serialize() string {
 	return string(data)
 }
 
-func (msg CommonMessage) ToRepo() repository.Message {
+func (msg CommonMessage) GetRepoMessage() repository.Message {
 	return repository.Message{
 		Content: msg.Content,
 		Meta:    msg.Meta,
 		Tags:    msg.Tags,
 		Origin:  msg.Origin,
+		Type: IfElse(
+			msg.Control.ID != "" && msg.Control.GetRecoveryAfter() > 0,
+			repository.MessageTypeRecoverable,
+			repository.MessageTypePlain,
+		).(repository.MessageType),
 	}
 }
 
+func (msg CommonMessage) GetControlMessage() MessageControl {
+	return msg.Control
+}
+
 type RepoMessage interface {
-	ToRepo() repository.Message
+	GetRepoMessage() repository.Message
+	GetControlMessage() MessageControl
 }
 
 func LogstashToCommonMessage(content []byte, contentField string) (*CommonMessage, error) {
@@ -82,7 +118,7 @@ var excludeLogstashPrefix = []string{
 func logstashMetaFilter(meta repository.MessageMeta) repository.MessageMeta {
 	res := make(repository.MessageMeta)
 	for k, v := range meta {
-		if array.StringsContainPrefix(k, excludeLogstashPrefix) {
+		if strarr.HasPrefixes(k, excludeLogstashPrefix) {
 			continue
 		}
 
@@ -149,7 +185,7 @@ type PrometheusMessage struct {
 	GeneratorURL string                 `json:"generatorURL"`
 }
 
-func (pm PrometheusMessage) ToRepo() repository.Message {
+func (pm PrometheusMessage) GetRepoMessage() repository.Message {
 	data, _ := json.Marshal(pm)
 	return repository.Message{
 		Content: string(data),
@@ -157,6 +193,28 @@ func (pm PrometheusMessage) ToRepo() repository.Message {
 		Tags:    nil,
 		Origin:  "prometheus",
 	}
+}
+
+func (pm PrometheusMessage) GetControlMessage() MessageControl {
+	mc := MessageControl{}
+	if msgID, ok := pm.Labels["adanos_id"]; ok {
+		mc.ID = fmt.Sprintf("%v", msgID)
+
+		recoveryAfter, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels["adanos_recovery_after"]))
+		if err != nil {
+			recoveryAfter = 10 * time.Minute // 默认10分钟自动恢复
+		}
+
+		repeatInterval, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels["adanos_repeat_interval"]))
+		if err != nil || repeatInterval < 0 {
+			repeatInterval = 0
+		}
+
+		mc.InhibitInterval = repeatInterval.String()
+		mc.RecoveryAfter = recoveryAfter.String()
+	}
+
+	return mc
 }
 
 func PrometheusToCommonMessages(content []byte) ([]*CommonMessage, error) {
@@ -167,12 +225,13 @@ func PrometheusToCommonMessages(content []byte) ([]*CommonMessage, error) {
 
 	commonMessages := make([]*CommonMessage, 0)
 	for _, pm := range prometheusMessages {
-		repoMessage := pm.ToRepo()
+		repoMessage := pm.GetRepoMessage()
 		commonMessages = append(commonMessages, &CommonMessage{
 			Content: repoMessage.Content,
 			Meta:    repoMessage.Meta,
 			Tags:    repoMessage.Tags,
 			Origin:  repoMessage.Origin,
+			Control: pm.GetControlMessage(),
 		})
 	}
 

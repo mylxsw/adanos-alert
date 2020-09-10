@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/array"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
+	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
@@ -286,7 +286,7 @@ func RemoveEmptyLine(content string) string {
 func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if array.StringsContain(k, allowKeys) {
+		if strarr.In(k, allowKeys) {
 			res[k] = v
 		}
 	}
@@ -298,7 +298,7 @@ func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]int
 func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if array.StringsContainPrefix(k, allowKeyPrefix) {
+		if strarr.HasPrefixes(k, allowKeyPrefix) {
 			res[k] = v
 		}
 	}
@@ -404,7 +404,7 @@ func NumberBeauty(number interface{}) string {
 }
 
 func importantNotice(msg string) string {
-	return fmt.Sprintf("`<font color=\"#ea2426\">%s</font>`", msg)
+	return fmt.Sprintf(`<font color="#ea2426">%s</font>`, msg)
 }
 
 // BuildUserMetasFunc 构建查询用户元信息的函数
@@ -419,7 +419,7 @@ func BuildUserMetasFunc(cc SimpleContainer) func(queryK, queryV string, field st
 	userRepo := userRepoR.(repository.UserRepo)
 	return func(queryK, queryV string, field string) []string {
 		filter := bson.M{}
-		if array.StringsContain(queryK, []string{"name", "phone", "email", "role", "status"}) {
+		if strarr.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
 			filter[queryK] = queryV
 		} else {
 			filter["metas.key"] = queryK

@@ -9,12 +9,20 @@ import (
 
 type MessageMeta map[string]interface{}
 type MessageStatus string
+type MessageType string
 
 const (
 	MessageStatusPending  MessageStatus = "pending"
 	MessageStatusGrouped  MessageStatus = "grouped"
 	MessageStatusCanceled MessageStatus = "canceled"
 	MessageStatusExpired  MessageStatus = "expired"
+
+	// MessageTypePlain 普通消息
+	MessageTypePlain MessageType = "plain"
+	// MessageTypeRecoverable 可恢复消息
+	MessageTypeRecoverable MessageType = "recoverable"
+	// MessageTypeRecovery 恢复消息
+	MessageTypeRecovery MessageType = "recovery"
 )
 
 type Message struct {
@@ -25,6 +33,7 @@ type Message struct {
 	Tags      []string             `bson:"tags" json:"tags"`
 	Origin    string               `bson:"origin" json:"origin"`
 	GroupID   []primitive.ObjectID `bson:"group_ids" json:"group_ids"`
+	Type      MessageType          `bson:"type" json:"type"`
 	Status    MessageStatus        `bson:"status" json:"status"`
 	CreatedAt time.Time            `bson:"created_at" json:"created_at"`
 }

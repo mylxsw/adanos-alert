@@ -28,6 +28,21 @@ func (msg *MessageWrap) JsonGet(key string, defaultValue string) string {
 	return json.Gets(key, defaultValue, msg.Content)
 }
 
+// IsRecovery return whether the message is a recovery message
+func (msg *MessageWrap) IsRecovery() bool {
+	return msg.Type == repository.MessageTypeRecovery
+}
+
+// IsRecoverable return whether the message is recoverable
+func (msg *MessageWrap) IsRecoverable() bool {
+	return msg.Type == repository.MessageTypeRecoverable
+}
+
+// IsPlain return whether the message is a plain message
+func (msg *MessageWrap) IsPlain() bool {
+	return msg.Type == repository.MessageTypePlain || msg.Type == ""
+}
+
 // MessageMatcher is a matcher for repository.Message
 type MessageMatcher struct {
 	program *vm.Program

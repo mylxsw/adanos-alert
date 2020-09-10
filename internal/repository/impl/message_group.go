@@ -145,7 +145,7 @@ func (m MessageGroupRepo) Count(filter bson.M) (int64, error) {
 func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (group repository.MessageGroup, err error) {
 	err = m.col.FindOneAndUpdate(
 		context.TODO(),
-		bson.M{"rule._id": rule.ID, "rule.aggregate_key": rule.AggregateKey, "status": repository.MessageGroupStatusCollecting},
+		bson.M{"rule._id": rule.ID, "rule.aggregate_key": rule.AggregateKey, "rule.type": rule.Type, "status": repository.MessageGroupStatusCollecting},
 		bson.M{"$set": bson.M{"status": repository.MessageGroupStatusCollecting}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	).Decode(&group)
@@ -161,6 +161,7 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 
 		group.Rule = rule
 		group.AggregateKey = rule.AggregateKey
+		group.Type = rule.Type
 
 		_ = m.UpdateID(group.ID, group)
 	}

@@ -327,6 +327,6 @@ func TestSQLFinger(t *testing.T) {
 }
 
 func TestJSONCutOffFields(t *testing.T) {
-	data := Serialize(TrimPrefixMapK(MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel"), "context."))
+	data := Serialize(TrimPrefixMapK("context.", MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel")))
 	assert.Equal(t, `{"final_channel":"亿美软通","msg":"短信发送失败，该错误不允许重试其它通道，..."}`, data)
 }

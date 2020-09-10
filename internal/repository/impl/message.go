@@ -48,6 +48,10 @@ func (m MessageRepo) AddWithContext(ctx context.Context, msg repository.Message)
 		msg.SeqNum = seq.Value
 	}
 
+	if msg.Type == "" {
+		msg.Type = repository.MessageTypePlain
+	}
+
 	rs, err := m.col.InsertOne(ctx, msg)
 	if err != nil {
 		return id, err

@@ -21,6 +21,8 @@ run-dashboard:
 build-dashboard:
 	cd dashboard && yarn build
 
+build-all: build build-agent build-proxy
+
 build-agent:
 	go build -race -ldflags $(LDFLAGS) -o build/debug/adanos-agent cmd/agent/main.go
 
@@ -56,4 +58,4 @@ doc-gen:
 clean:
 	rm -fr build/debug/adanos-alert build/release/adanos-alert*
 
-.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build build-release-linux
+.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build build-release-linux build-all

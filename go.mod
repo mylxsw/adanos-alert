@@ -45,5 +45,6 @@ require (
 	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

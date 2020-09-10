@@ -380,6 +380,11 @@ let helpers = {
         {text: 'Meta[""]', displayText: 'Meta | 字段类型：map[string]interface{} | 字段，字典类型'},
         {text: 'Tags[0]', displayText: 'Tags | 字段类型：[]string | 字段，数组类型'},
         {text: 'Origin', displayText: 'Origin | 字段类型：string | 消息来源，字符串'},
+        {text: "JsonGet(KEY, DEFAULT)", displayText: "JsonGet(key string, defaultValue string) string  | 将消息体作为json解析，获取指定的key"},
+        {text: "IsRecovery()", displayText: "IsRecovery() bool  | 判断当前消息是否是恢复消息"},
+        {text: "IsRecoverable()", displayText: "IsRecoverable() bool | 判断当前消息是否可恢复"},
+        {text: "IsPlain()", displayText: "IsPlain() bool | 判断当前消息是否是普通消息"},
+
     ],
     triggerMatchRules: [
         {text: "Messages()", displayText: "Messages() []repository.Message | 获取分组中所有的 Messages"},
@@ -442,7 +447,6 @@ let helpers = {
         {text: "filter", displayText: "filter | filter array by the predicate"},
         {text: "map", displayText: "map | map all items with the closure"},
         {text: "count", displayText: "count | returns number of elements what satisfies the predicate"},
-        {text: "JsonGet(KEY, DEFAULT)", displayText: "JsonGet(key string, defaultValue string) string  | 将消息体作为json解析，获取指定的key"},
         {text: "Upper(KEY)", displayText: "Upper(val string) string  | 字符串转大写"},
         {text: "Lower(KEY)", displayText: "Lower(val string) string  | 字符串转小写"},
         {text: "Now()", displayText: "Now() time.Time  | 当前时间"},
@@ -454,6 +458,10 @@ let helpers = {
     ],
     templates: [
         {text: '.Messages MESSAGE_COUNT', displayText: 'Messages(limit int64) []repository.Message | 从分组中获取 MESSAGE_COUNT 个 Message'},
+        {text: ".IsRecovery", displayText: "IsRecovery() bool  | 判断当前分组中的消息是否是恢复消息"},
+        {text: ".IsRecoverable", displayText: "IsRecoverable() bool | 判断当前分组中的消息是否可恢复"},
+        {text: ".IsPlain", displayText: "IsPlain() bool | 判断当前分组中的消息是否是普通消息"},
+        {text: ".MessageType", displayText: "MessageType() string | 判断当前分组中的消息类型：recovery/plain/recoverable"},
         {text: '{{ }}', displayText: '{{ }} |  Golang 代码块'},
         {text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}', displayText: '{{ range }}  | Golang 遍历对象'},
         {text: '{{ range $i, $msg := .Messages 4 }} {{ end }}', displayText: '{{ range $i, $msg := .Messages 4 }} {{ end }} | Golang 遍历 Messages，只取 4 条作为摘要'},

@@ -23,7 +23,8 @@ type MessageGroupRule struct {
 	Name string             `bson:"name" json:"name"`
 
 	// AggregateKey 通过该 Key 对同一个规则下的 message 分组
-	AggregateKey string `bson:"aggregate_key" json:"aggregate_key"`
+	AggregateKey string      `bson:"aggregate_key" json:"aggregate_key"`
+	Type         MessageType `bson:"type" json:"type"`
 
 	// ExpectReadyAt 预期就绪时间，当超过该时间后，Group自动关闭，发起通知
 	ExpectReadyAt time.Time `bson:"expect_ready_at" json:"expect_ready_at"`
@@ -38,7 +39,8 @@ type MessageGroup struct {
 	SeqNum int64              `bson:"seq_num" json:"seq_num"`
 
 	// AggregateKey 与 .Rule.AggregateKey 相同，方便读取
-	AggregateKey string `bson:"aggregate_key" json:"aggregate_key"`
+	AggregateKey string      `bson:"aggregate_key" json:"aggregate_key"`
+	Type         MessageType `bson:"type" json:"type"`
 
 	MessageCount int64            `bson:"message_count" json:"message_count"`
 	Rule         MessageGroupRule `bson:"rule" json:"rule"`

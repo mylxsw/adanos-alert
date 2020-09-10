@@ -16,12 +16,11 @@ import (
 func TestNewMarkdownMessage(t *testing.T) {
 	body := `## Hello
 
-Hello, world！@18344822222 @19999999991
+Hello, world！@18344822222 @19999999991 @18888888888
 That all.
 `
-	encoded, err := dingding.NewMarkdownMessage("Hello", body, []string{"18888888888", "12455552211"}).Encode()
-	assert.NoError(t, err)
-	fmt.Println(string(encoded))
+	msg := dingding.NewMarkdownMessage("Hello", body, []string{"18888888888", "12455552211"})
+	assert.Equal(t, 4, len(msg.At.Mobiles))
 }
 
 func TestDingding_Send(t *testing.T) {

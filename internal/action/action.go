@@ -100,6 +100,26 @@ func (payload *Payload) Init(manager Manager) {
 	})
 }
 
+// MessageType return message type in group
+func (payload *Payload) MessageType() string {
+	return string(payload.Group.Type)
+}
+
+// IsRecovery return whether the messages in group is recovery message
+func (payload *Payload) IsRecovery() bool {
+	return payload.Group.Type == repository.MessageTypeRecovery
+}
+
+// IsRecoverable return whether the messages in group is recoverable message
+func (payload *Payload) IsRecoverable() bool {
+	return payload.Group.Type == repository.MessageTypeRecoverable
+}
+
+// IsPlain return whether the messages in group is plain message
+func (payload *Payload) IsPlain() bool {
+	return payload.Group.Type == repository.MessageTypePlain || payload.Group.Type == ""
+}
+
 // Messages get messages for group
 func (payload *Payload) Messages(limit int64) []repository.Message {
 	messages, _, err := payload.msgRepo.Paginate(bson.M{"group_ids": payload.Group.ID}, 0, limit)

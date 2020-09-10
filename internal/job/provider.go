@@ -21,17 +21,19 @@ type ServiceProvider struct{}
 func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewAggregationJob)
 	app.MustSingleton(NewTrigger)
+	app.MustSingleton(NewRecoveryJob)
 }
 
 func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
 
-		return cc.Resolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob, lockRepo repository.LockRepo) {
+		return cc.Resolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob, recoveryJob *RecoveryJob, lockRepo repository.LockRepo) {
 			hostname, _ := os.Hostname()
 			cr.DistributeLockManager(NewDistributeLockManager(lockRepo, fmt.Sprintf("%s(%s)", hostname, conf.Listen)))
 
 			_ = cr.Add(AggregationJobName, fmt.Sprintf("@every %s", conf.AggregationPeriod), aggregationJob.Handle)
 			_ = cr.Add(TriggerJobName, fmt.Sprintf("@every %s", conf.ActionTriggerPeriod), alertJob.Handle)
+			_ = cr.Add(RecoveryJobName, fmt.Sprintf("@every %s", conf.AggregationPeriod), recoveryJob.Handle)
 		})
 	})
 }

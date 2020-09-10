@@ -29,6 +29,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewLockRepo)
 	app.MustSingleton(NewAgentRepo)
 	app.MustSingleton(NewAuditLogRepo)
+	app.MustSingleton(NewRecoveryRepo)
 }
 
 func (s ServiceProvider) Boot(app infra.Glacier) {

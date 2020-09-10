@@ -16,12 +16,13 @@ import (
 )
 
 // Send send a message to adanos servers
-func Send(servers []string, token string, meta map[string]interface{}, tags []string, origin string, message string) error {
+func Send(servers []string, token string, meta map[string]interface{}, tags []string, origin string, ctl misc.MessageControl, message string) error {
 	commonMessage := misc.CommonMessage{
 		Content: message,
 		Meta:    meta,
 		Tags:    tags,
 		Origin:  origin,
+		Control: ctl,
 	}
 	data, _ := json.Marshal(commonMessage)
 
