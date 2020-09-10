@@ -34,6 +34,8 @@ func (r RecoveryRepo) Register(ctx context.Context, recoveryAt time.Time, recove
 			if err != nil {
 				return err
 			}
+
+			return nil
 		}
 
 		return err
@@ -46,7 +48,7 @@ func (r RecoveryRepo) Register(ctx context.Context, recoveryAt time.Time, recove
 	rec.UpdatedAt = time.Now()
 	rec.RecoveryAt = recoveryAt
 
-	_, err = r.col.UpdateOne(ctx, bson.M{"recovery_id": recoveryID}, rec)
+	_, err = r.col.ReplaceOne(ctx, bson.M{"recovery_id": recoveryID}, rec)
 	return err
 }
 

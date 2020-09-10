@@ -88,7 +88,7 @@
 
 <body>
 <div class="container-fluid">
-    <h2>{{ .Group.Rule.Name }}</h2>
+    <h2>{{ .Group.Rule.Name }} {{ if eq .Group.Type "recovery" }}<span class="label label-success">恢复</span>{{ end }}</h2>
     <div class="bs-callout bs-callout-warning">
         <p>创建时间：{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }}</p>
         <p>规则：<code>{{ .Group.Rule.Rule }}</code></p>

@@ -76,7 +76,10 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"meta_prefix_filter":         MetaFilterPrefix,
 		"serialize":                  Serialize,
 		"sort_map_human":             SortMapByKeyHuman,
-		"important":                  importantNotice,
+		"error_notice":               errorNotice,
+		"success_notice":             successNotice,
+		"error_success_notice":       errorOrSuccessNotice,
+		"recoverable_notice":         recoverableNotice,
 		"user_metas":                 BuildUserMetasFunc(cc),
 		"prefix_all_str":             prefixStrArray,
 		"suffix_all_str":             suffixStrArray,
@@ -403,8 +406,31 @@ func NumberBeauty(number interface{}) string {
 	return strings.Join(arr, ".")
 }
 
-func importantNotice(msg string) string {
+// errorNotice 错误提示
+func errorNotice(msg string) string {
 	return fmt.Sprintf(`<font color="#ea2426">%s</font>`, msg)
+}
+
+// successNotice 成功提示
+func successNotice(msg string) string {
+	return fmt.Sprintf(`<font color="#27a745">%s</font>`, msg)
+}
+
+// errorOrSuccessNotice 错误或者成功提示， 根据 success 参数判断
+func errorOrSuccessNotice(success bool, msg string) string {
+	if success {
+		return successNotice(msg)
+	}
+	return errorNotice(msg)
+}
+
+// recoverableNotice 可恢复消息提示
+func recoverableNotice(recovered bool, msg string) string {
+	if recovered {
+		return successNotice("【已恢复】" + msg)
+	}
+
+	return errorNotice(msg)
 }
 
 // BuildUserMetasFunc 构建查询用户元信息的函数
