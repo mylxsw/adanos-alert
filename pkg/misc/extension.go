@@ -201,16 +201,21 @@ func (pm PrometheusMessage) GetControlMessage() MessageControl {
 		mc.ID = fmt.Sprintf("%v", msgID)
 
 		recoveryAfter, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels["adanos_recovery_after"]))
-		if err != nil {
-			recoveryAfter = 10 * time.Minute // 默认10分钟自动恢复
+		if err != nil || recoveryAfter < 0 {
+			recoveryAfter = 0
 		}
 
-		repeatInterval, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels["adanos_repeat_interval"]))
-		if err != nil || repeatInterval < 0 {
-			repeatInterval = 0
+		inhibitIntervalKey := "adanos_inhibit_interval"
+		_, ok := pm.Labels[inhibitIntervalKey]
+		if !ok {
+			inhibitIntervalKey = "adanos_repeat_interval"
+		}
+		inhibitInterval, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels[inhibitIntervalKey]))
+		if err != nil || inhibitInterval < 0 {
+			inhibitInterval = 0
 		}
 
-		mc.InhibitInterval = repeatInterval.String()
+		mc.InhibitInterval = inhibitInterval.String()
 		mc.RecoveryAfter = recoveryAfter.String()
 	}
 

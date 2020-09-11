@@ -169,7 +169,7 @@ func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageR
 func (m *MessageController) saveMessage(kvRepo repository.KVRepo, messageRepo repository.MessageRepo, msg misc.RepoMessage) (id primitive.ObjectID, err error) {
 	controlMessage := msg.GetControlMessage()
 	if controlMessage.ID != "" {
-		key := fmt.Sprintf("msgctl_%s", controlMessage.ID)
+		key := fmt.Sprintf("msgctl:inhibit:%s", controlMessage.ID)
 		// 消息抑制
 		inhibitInterval := controlMessage.GetInhibitInterval()
 		if inhibitInterval > 0 {

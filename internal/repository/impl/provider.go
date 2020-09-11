@@ -41,7 +41,7 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 			auditRepo repository.AuditLogRepo,
 			conf *configs.Config,
 		) {
-			_ = cr.Add("kv_repository_gc", "@hourly", func() {
+			_ = cr.Add("kv_repository_gc", "@every 60s", func() {
 				if err := kvRepo.GC(); err != nil {
 					log.Errorf("kv kvRepo gc failed: %v", err)
 				}
