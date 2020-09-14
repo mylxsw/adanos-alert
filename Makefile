@@ -48,8 +48,11 @@ build-release:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-linux cmd/server/main.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-arm cmd/server/main.go
 
-static-gen: build-dashboard
+esc-build:
 	esc -pkg api -o api/static.go -prefix=dashboard/dist dashboard/dist
+	esc -pkg view -o api/view/views.go -include '.*\.html' -prefix=api/view api/view
+
+static-gen: build-dashboard esc-build
 
 proto-build:
 	protoc --go_out=plugins=grpc:. rpc/protocol/*.proto

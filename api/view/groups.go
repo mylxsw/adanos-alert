@@ -23,10 +23,16 @@ type GroupData struct {
 	PrevOffset   int64
 }
 
+var defaultTemplateContent string
+
+func init() {
+	defaultTemplateContent = FSMustString(false, "/groups.html")
+}
+
 func GroupView(cc container.Container, data GroupData) (string, error) {
 	templateContent, err := fileGetContent(filepath.Join(currentPath(), "groups.html"))
 	if err != nil {
-		templateContent = defaultMessageViewTemplate
+		templateContent = defaultTemplateContent
 	}
 
 	return template.Parse(cc, templateContent, data)
