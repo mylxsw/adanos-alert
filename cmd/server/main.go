@@ -173,7 +173,7 @@ func main() {
 
 			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
 			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(func(le level.Level, module string) string {
-				return filepath.Join(logPath, fmt.Sprintf("server.%s.log", le.GetLevelName()))
+				return filepath.Join(logPath, fmt.Sprintf("server-%s.%s.log", le.GetLevelName(), time.Now().Format("20060102")))
 			}))
 		})
 

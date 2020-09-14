@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/ledisdb/ledisdb/ledis"
@@ -80,7 +81,7 @@ func main() {
 
 			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
 			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(func(le level.Level, module string) string {
-				return filepath.Join(logPath, fmt.Sprintf("agent.%s.log", le.GetLevelName()))
+				return filepath.Join(logPath, fmt.Sprintf("agent-%s.%s.log", le.GetLevelName(), time.Now().Format("20060102")))
 			}))
 		})
 
