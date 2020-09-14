@@ -270,17 +270,17 @@ func (u UserController) Users(ctx web.Context, userRepo repository.UserRepo) web
 
 	name := ctx.Input("name")
 	if name != "" {
-		filter["name"] = name
+		filter["name"] = bson.M{"$regex": name}
 	}
 
 	email := ctx.Input("email")
 	if email != "" {
-		filter["email"] = email
+		filter["email"] = bson.M{"$regex": email}
 	}
 
 	phone := ctx.Input("phone")
 	if phone != "" {
-		filter["phone"] = phone
+		filter["phone"] = bson.M{"$regex": phone}
 	}
 
 	status := ctx.Input("status")
@@ -305,5 +305,10 @@ func (u UserController) Users(ctx web.Context, userRepo repository.UserRepo) web
 	return ctx.JSON(web.M{
 		"users": users,
 		"next":  next,
+		"search": web.M{
+			"name":  name,
+			"phone": phone,
+			"email": email,
+		},
 	})
 }

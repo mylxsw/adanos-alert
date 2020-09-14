@@ -1,9 +1,17 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-btn-group class="mb-3">
-                <b-button to="/users/add" variant="primary">新增用户</b-button>
-            </b-btn-group>
+            <b-card class="mb-2">
+                <b-card-text style="display: flex; justify-content:space-between">
+                    <b-form inline @submit="searchSubmit">
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="用户名" v-model="search.name"></b-input>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="邮箱" v-model="search.email"></b-input>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="手机号码" v-model="search.phone"></b-input>
+                        <b-button variant="light" type="submit">搜索</b-button>
+                    </b-form>
+                    <b-button to="/users/add" variant="primary">新增用户</b-button>
+                </b-card-text>
+            </b-card>
             <b-table :items="users" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(name)="row">
                     {{ row.item.name }}
@@ -62,9 +70,32 @@
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}
                 ],
+                search: {
+                    name: '',
+                    phone: '',
+                    email: '',
+                },
             };
         },
+        watch: {
+            '$route': 'reload',
+        },
         methods: {
+            searchSubmit(evt) {
+                evt.preventDefault();
+                let query = {offset: 0};
+                for (let i in this.$route.query) {
+                    query[i] = this.$route.query[i];
+                }
+
+                for (let i in this.search) {
+                    query[i] = this.search[i];
+                }
+
+                this.$router.push({path: '/users', query: query}).catch(err => {
+                    this.ToastError(err)
+                });
+            },
             delete_user(index, id) {
                 let self = this;
                 this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
@@ -81,9 +112,16 @@
                 });
             },
             reload() {
-                axios.get('/api/users/?offset=' + this.cur).then(response => {
+                let params = this.$route.query;
+                params.offset = this.cur;
+                axios.get('/api/users/', {
+                    params: params
+                }).then(response => {
                     this.users = response.data.users;
                     this.next = response.data.next;
+                    this.search.name = response.data.search.name;
+                    this.search.phone = response.data.search.phone;
+                    this.search.email = response.data.search.email;
                     this.isBusy = false;
                 }).catch(error => {
                     this.ToastError(error);

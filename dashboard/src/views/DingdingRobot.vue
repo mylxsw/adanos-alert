@@ -1,9 +1,15 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-btn-group class="mb-3">
-                <b-button to="/dingding-robots/add" variant="primary">新增机器人</b-button>
-            </b-btn-group>
+            <b-card class="mb-2">
+                <b-card-text style="display: flex; justify-content:space-between">
+                    <b-form inline @submit="searchSubmit">
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="名称" v-model="search.name"></b-input>
+                        <b-button variant="light" type="submit">搜索</b-button>
+                    </b-form>
+                    <b-button to="/dingding-robots/add" variant="primary">新增机器人</b-button>
+                </b-card-text>
+            </b-card>
             <b-table :items="robots" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
@@ -47,9 +53,30 @@
                     {key: 'updated_at', label: '最后更新'},
                     {key: 'operations', label: '操作'}
                 ],
+                search: {
+                    name: '',
+                },
             };
         },
+        watch: {
+            '$route': 'reload',
+        },
         methods: {
+            searchSubmit(evt) {
+                evt.preventDefault();
+                let query = {offset: 0};
+                for (let i in this.$route.query) {
+                    query[i] = this.$route.query[i];
+                }
+
+                for (let i in this.search) {
+                    query[i] = this.search[i];
+                }
+
+                this.$router.push({path: '/dingding-robots', query: query}).catch(err => {
+                    this.ToastError(err)
+                });
+            },
             delete_robot(index, id) {
                 let self = this;
                 this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
@@ -66,9 +93,15 @@
                 });
             },
             reload() {
-                axios.get('/api/dingding-robots/?offset=' + this.cur).then(response => {
+                let params = this.$route.query;
+                params.offset = this.cur;
+                axios.get('/api/dingding-robots/', {
+                    params: params
+                }).then(response => {
                     this.robots = response.data.robots;
                     this.next = response.data.next;
+                    this.search.name = response.data.search.name;
+
                     this.isBusy = false;
                 }).catch(error => {
                     this.ToastError(error);

@@ -201,7 +201,7 @@ func (u DingdingRobotController) DingdingRobots(ctx web.Context, robotRepo repos
 
 	name := ctx.Input("name")
 	if name != "" {
-		filter["name"] = name
+		filter["name"] = bson.M{"$regex": name}
 	}
 
 	robots, next, err := robotRepo.Paginate(filter, offset, limit)
@@ -217,5 +217,8 @@ func (u DingdingRobotController) DingdingRobots(ctx web.Context, robotRepo repos
 	return ctx.JSON(web.M{
 		"robots": robots,
 		"next":   next,
+		"search": web.M{
+			"name": name,
+		},
 	})
 }
