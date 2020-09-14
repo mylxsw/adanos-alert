@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Provider struct{}
+type ServiceProvider struct{}
 
-func (p Provider) Register(app container.Container) {
+func (p ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(func(conf *configs.Config) *grpc.Server {
 		auth := authFunc(app, conf)
 		return grpc.NewServer(
@@ -36,14 +36,14 @@ func (p Provider) Register(app container.Container) {
 
 }
 
-func (p Provider) Boot(app infra.Glacier) {
+func (p ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(serv *grpc.Server) {
 		protocol.RegisterMessageServer(serv, NewMessageService(app.Container()))
 		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app.Container()))
 	})
 }
 
-func (p Provider) Daemon(_ context.Context, app infra.Glacier) {
+func (p ServiceProvider) Daemon(_ context.Context, app infra.Glacier) {
 	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf graceful.Graceful) {
 		listener, err := net.Listen("tcp", conf.GRPCListen)
 		if err != nil {

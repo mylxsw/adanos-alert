@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 
 	"github.com/gorilla/mux"
@@ -16,6 +17,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
+	"github.com/mylxsw/asteria/formatter"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
@@ -60,12 +62,28 @@ func main() {
 		EnvVar: "ADANOS_AGENT_LISTEN_ADDR",
 		Value:  "127.0.0.1:29999",
 	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "log_path",
+		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
+	}))
 
 	app.WithHttpServer(listener.FlagContext("listen"))
 
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
-		stackWriter.PushWithLevels(writer.NewStdoutWriter())
+		cc.MustResolve(func(c infra.FlagContext) {
+			logPath := c.String("log_path")
+			if logPath == "" {
+				stackWriter.PushWithLevels(writer.NewStdoutWriter())
+				return
+			}
+
+			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
+			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(func(le level.Level, module string) string {
+				return filepath.Join(logPath, fmt.Sprintf("agent.%s.log", le.GetLevelName()))
+			}))
+		})
+
 		stackWriter.PushWithLevels(
 			NewErrorCollectorWriter(app.Container()),
 			level.Error,

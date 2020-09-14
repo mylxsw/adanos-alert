@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/adanos-alert/rpc"
+	"github.com/mylxsw/adanos-alert/service"
+	"github.com/mylxsw/asteria/formatter"
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/infra"
@@ -152,12 +155,28 @@ func main() {
 		Value: "title",
 		Usage: "阿里云语音通知模板变量名",
 	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:  "log_path",
+		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
+	}))
 
 	app.WithHttpServer(listener.FlagContext("listen"))
 
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
-		stackWriter.PushWithLevels(writer.NewStdoutWriter())
+		cc.MustResolve(func(c infra.FlagContext) {
+			logPath := c.String("log_path")
+			if logPath == "" {
+				stackWriter.PushWithLevels(writer.NewStdoutWriter())
+				return
+			}
+
+			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
+			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(func(le level.Level, module string) string {
+				return filepath.Join(logPath, fmt.Sprintf("server.%s.log", le.GetLevelName()))
+			}))
+		})
+
 		stackWriter.PushWithLevels(
 			NewErrorCollectorWriter(app.Container()),
 			level.Error,
@@ -267,7 +286,8 @@ func main() {
 	app.Provider(job.ServiceProvider{})
 	app.Provider(queue.ServiceProvider{})
 	app.Provider(migrate.ServiceProvider{})
-	app.Provider(rpc.Provider{})
+	app.Provider(rpc.ServiceProvider{})
+	app.Provider(service.ServiceProvider{})
 	app.Provider(pubsub.ServiceProvider{})
 
 	if err := app.Run(os.Args); err != nil {

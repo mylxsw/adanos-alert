@@ -4,25 +4,23 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
+	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/container"
 )
 
 // MessageService is a service server for message processing
 type MessageService struct {
-	cc      container.Container
-	msgRepo repository.MessageRepo
+	cc         container.Container
+	msgService service.MessageService `autowire:"@"`
 }
 
 // NewMessageService create a new message service
 func NewMessageService(cc container.Container) *MessageService {
-	ms := MessageService{cc: cc}
-	cc.MustResolve(func(mr repository.MessageRepo) {
-		ms.msgRepo = mr
-	})
-	return &ms
+	ms := &MessageService{cc: cc}
+	cc.Must(cc.AutoWire(ms))
+	return ms
 }
 
 // Push add a new message
@@ -32,7 +30,7 @@ func (ms *MessageService) Push(ctx context.Context, request *protocol.MessageReq
 		return nil, err
 	}
 
-	id, err := ms.msgRepo.AddWithContext(ctx, commonMessage.GetRepoMessage())
+	id, err := ms.msgService.Add(ctx, commonMessage)
 	if err != nil {
 		return nil, err
 	}

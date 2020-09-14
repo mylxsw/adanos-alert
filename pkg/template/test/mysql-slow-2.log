@@ -1,7 +1,0 @@
-# User@Host: bd_yunsombi[bd_yunsombi] @  [10.168.100.70]
-# Thread_id: 247319481  Schema: bd_yunsombi  QC_hit: No
-# Query_time: 229.595303  Lock_time: 0.000306  Rows_sent: 0  Rows_examined: 374611
-use bd_yunsombi;
-SET timestamp=1561574400;
-INSERT INTO XXX(ID,client_id,client_name)
-SELECT * FROM XXX;

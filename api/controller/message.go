@@ -1,16 +1,15 @@
 package controller
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
@@ -166,47 +165,6 @@ func (m *MessageController) Message(ctx web.Context, msgRepo repository.MessageR
 	return &message, nil
 }
 
-func (m *MessageController) saveMessage(kvRepo repository.KVRepo, messageRepo repository.MessageRepo, msg misc.RepoMessage) (id primitive.ObjectID, err error) {
-	controlMessage := msg.GetControlMessage()
-	if controlMessage.ID != "" {
-		key := fmt.Sprintf("msgctl:inhibit:%s", controlMessage.ID)
-		// 消息抑制
-		inhibitInterval := controlMessage.GetInhibitInterval()
-		if inhibitInterval > 0 {
-			if _, err := kvRepo.Get(key); err != nil {
-				if err := kvRepo.SetWithTTL(key, time.Now().String(), inhibitInterval); err != nil {
-					log.Errorf("set inhibit interval for %s failed: %v", key, err)
-				}
-			} else {
-				// 消息被抑制，直接丢弃
-				log.WithFields(log.Fields{
-					"key": key,
-					"ctl": msg.GetControlMessage(),
-					"msg": msg.GetRepoMessage(),
-				}).Debugf("message is discard because it's been inhibited")
-				return primitive.NilObjectID, nil
-			}
-		}
-	}
-
-	// 保存消息
-	msgID, err := messageRepo.Add(msg.GetRepoMessage())
-	if err != nil {
-		return primitive.NilObjectID, err
-	}
-
-	// 自动恢复
-	recoveryAfter := controlMessage.GetRecoveryAfter()
-	if controlMessage.ID != "" && recoveryAfter > 0 {
-		recoveryRepo := m.cc.MustGet(new(repository.RecoveryRepo)).(repository.RecoveryRepo)
-		if err := recoveryRepo.Register(context.TODO(), time.Now().Add(recoveryAfter), controlMessage.ID, msgID); err != nil {
-			log.Errorf("register recovery message(id=%s) failed: %v", msgID.Hex(), err)
-		}
-	}
-
-	return msgID, nil
-}
-
 func (m *MessageController) errorWrap(ctx web.Context, id primitive.ObjectID, err error) web.Response {
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
@@ -219,40 +177,40 @@ func (m *MessageController) errorWrap(ctx web.Context, id primitive.ObjectID, er
 
 // Add common message
 
-func (m *MessageController) AddCommonMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddCommonMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	var commonMessage misc.CommonMessage
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
-	id, err := m.saveMessage(kvRepo, messageRepo, commonMessage)
+	id, err := msgService.Add(ctx.Context(), commonMessage)
 	return m.errorWrap(ctx, id, err)
 }
 
 // AddLogstashMessage Add logstash message
-func (m *MessageController) AddLogstashMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddLogstashMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	commonMessage, err := misc.LogstashToCommonMessage(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	id, err := m.saveMessage(kvRepo, messageRepo, commonMessage)
+	id, err := msgService.Add(ctx.Context(), *commonMessage)
 	return m.errorWrap(ctx, id, err)
 }
 
 // Add grafana message
-func (m *MessageController) AddGrafanaMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddGrafanaMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	commonMessage, err := misc.GrafanaToCommonMessage(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	id, err := m.saveMessage(kvRepo, messageRepo, commonMessage)
+	id, err := msgService.Add(ctx.Context(), *commonMessage)
 	return m.errorWrap(ctx, id, err)
 }
 
 // add prometheus alert message
-func (m *MessageController) AddPrometheusMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddPrometheusMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	commonMessages, err := misc.PrometheusToCommonMessages(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
@@ -261,7 +219,7 @@ func (m *MessageController) AddPrometheusMessage(ctx web.Context, kvRepo reposit
 	var lastID primitive.ObjectID
 	var lastErr error
 	for _, cm := range commonMessages {
-		lastID, lastErr = m.saveMessage(kvRepo, messageRepo, *cm)
+		lastID, lastErr = msgService.Add(ctx.Context(), *cm)
 		if lastErr != nil {
 			log.WithFields(log.Fields{
 				"message": cm,
@@ -273,18 +231,18 @@ func (m *MessageController) AddPrometheusMessage(ctx web.Context, kvRepo reposit
 }
 
 // add prometheus-alert message
-func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddPrometheusAlertMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	commonMessage, err := misc.PrometheusAlertToCommonMessage(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
 
-	id, err := m.saveMessage(kvRepo, messageRepo, commonMessage)
+	id, err := msgService.Add(ctx.Context(), *commonMessage)
 	return m.errorWrap(ctx, id, err)
 }
 
 // add open-falcon message
-func (m *MessageController) AddOpenFalconMessage(ctx web.Context, kvRepo repository.KVRepo, messageRepo repository.MessageRepo) web.Response {
+func (m *MessageController) AddOpenFalconMessage(ctx web.Context, msgService service.MessageService) web.Response {
 	tos := ctx.Input("tos")
 	content := ctx.Input("content")
 
@@ -292,7 +250,7 @@ func (m *MessageController) AddOpenFalconMessage(ctx web.Context, kvRepo reposit
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	id, err := m.saveMessage(kvRepo, messageRepo, misc.OpenFalconToCommonMessage(tos, content))
+	id, err := msgService.Add(ctx.Context(), *misc.OpenFalconToCommonMessage(tos, content))
 	return m.errorWrap(ctx, id, err)
 }
 

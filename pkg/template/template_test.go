@@ -7,7 +7,6 @@ import (
 
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/container"
-	"github.com/mylxsw/go-toolkit/file"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -176,38 +175,6 @@ func TestEndsWith(t *testing.T) {
 
 	if endsWith("stackstrace", "test") {
 		t.Errorf("test failed")
-	}
-}
-
-func TestParseMysqlSlowlog(t *testing.T) {
-
-	testcases := map[string]string{
-		"./test/mysql-slow.log":   "\nSQL: select count(*) as aggregate from `ms_sms_message_history` where exists (select * from `ms_sms_message` where `ms_sms_message_history`.`sms_id` = `ms_sms_message`.`id` and `phone` = '17623803369' and `created_at` >= '2019-06-26 00:00:00') and `channel_id` = 1\nDB: core_message\nElapse: 3.297862\nRowsExamined: 1915\nUser: core_message\n",
-		"./test/mysql-slow-2.log": "\nSQL: INSERT INTO XXX(ID,client_id,client_name)\nSELECT * FROM XXX\nDB: bd_yunsombi\nElapse: 229.595303\nRowsExamined: 374611\nUser: bd_yunsombi\n",
-		"./test/mysql-slow-3.log": "\nSQL: select child.*, parent.material_id as new_material_id,parent.material_ins_id as new_material_ins_id\n    from workflow_instance parent\n    join workflow_instance child on parent.id = child.parent_wf_inst_id\n    where child.material_ins_id  <>  parent.material_ins_id\nDB: \nElapse: 1.200693\nRowsExamined: 1041475\nUser: mat_lifecycle\n",
-	}
-
-	templateContent := `{{ $slog := mysql_slowlog .body }}
-SQL: {{ $slog.sql }}
-DB: {{ $slog.database }}
-Elapse: {{ $slog.query_time }}
-RowsExamined: {{ $slog.rows_examined }}
-User: {{ $slog.user }}
-`
-	for f, tc := range testcases {
-		mysqlSlowlog, err := file.FileGetContents(f)
-		if err != nil {
-			t.Errorf("test failed: %s", err)
-		}
-
-		res, err := Parse(container.New(), templateContent, map[string]string{"body": mysqlSlowlog})
-		if err != nil {
-			t.Errorf("test failed: %s", err)
-		}
-
-		if res != tc {
-			t.Errorf("test failed: %s", res)
-		}
 	}
 }
 
