@@ -7,8 +7,8 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
-	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"

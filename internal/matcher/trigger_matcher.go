@@ -7,7 +7,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson"

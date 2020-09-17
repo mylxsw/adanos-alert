@@ -9,8 +9,8 @@ import (
 
 	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/strarr"
-	"github.com/mylxsw/adanos-alert/pkg/template"
 )
 
 type CommonMessage struct {

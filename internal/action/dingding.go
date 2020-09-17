@@ -8,8 +8,8 @@ import (
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/messager/dingding"
-	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"go.mongodb.org/mongo-driver/bson"

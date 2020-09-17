@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/messager/dingding"
-	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/asteria/log"
 	_ "github.com/pingcap/parser/test_driver"
 	"github.com/stretchr/testify/assert"

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/container"
 )
 

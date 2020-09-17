@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/template"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
