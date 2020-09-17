@@ -15,7 +15,6 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/adanos-alert/pkg/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
-	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
@@ -74,6 +73,7 @@ type RuleForm struct {
 	TimeRanges []repository.TimeRange `json:"time_ranges"`
 
 	Rule            string            `json:"rule"`
+	IgnoreRule      string            `json:"ignore_rule"`
 	Template        string            `json:"template"`
 	SummaryTemplate string            `json:"summary_template"`
 	Triggers        []RuleTriggerForm `json:"triggers"`
@@ -165,7 +165,7 @@ func (r RuleForm) Validate(req web.Request) error {
 		return errors.New("status is invalid, must be enabled/disabled")
 	}
 
-	_, err := matcher.NewMessageMatcher(repository.Rule{Rule: r.Rule})
+	_, err := matcher.NewMessageMatcher(repository.Rule{Rule: r.Rule, IgnoreRule: r.IgnoreRule})
 	if err != nil {
 		return fmt.Errorf("rule is invalid: %w", err)
 	}
@@ -211,9 +211,9 @@ func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) w
 
 	var err error
 	switch repository.TemplateType(ctx.PathVar("type")) {
-	case repository.TemplateTypeMatchRule:
+	case "match_rule_ignore":
 		if msgID != "" {
-			matched, err := r.testMessageMatchRule(content, msgID, msgRepo)
+			ignored, err := r.testMessageIgnoreRule(content, msgID, msgRepo)
 			if err != nil {
 				return ctx.JSON(web.M{
 					"error": err,
@@ -223,7 +223,28 @@ func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) w
 
 			return ctx.JSON(web.M{
 				"error": nil,
-				"msg":   misc.IfElse(matched, "与当前 message 匹配", "与当前 message 不匹配"),
+				"msg":   misc.IfElse(ignored, "该消息被忽略", "该消息不会被忽略"),
+			})
+		} else {
+			_, err = matcher.NewMessageMatcher(repository.Rule{Rule: "true", IgnoreRule: content})
+		}
+	case repository.TemplateTypeMatchRule:
+		if msgID != "" {
+			matched, ignored, err := r.testMessageMatchRule(content, msgID, msgRepo)
+			if err != nil {
+				return ctx.JSON(web.M{
+					"error": err,
+					"msg":   "",
+				})
+			}
+
+			return ctx.JSON(web.M{
+				"error": nil,
+				"msg": fmt.Sprintf(
+					"%s%s",
+					misc.IfElse(matched, "与当前 message 匹配", "与当前 message 不匹配"),
+					misc.IfElse(matched && ignored, "，但是该消息被忽略", ""),
+				),
 			})
 		} else {
 			_, err = matcher.NewMessageMatcher(repository.Rule{Rule: content})
@@ -305,6 +326,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		Interval:        ruleForm.Interval,
 		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
+		IgnoreRule:      ruleForm.IgnoreRule,
 		AggregateRule:   ruleForm.AggregateRule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
@@ -382,6 +404,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		Interval:        ruleForm.Interval,
 		TimeRanges:      ruleForm.TimeRanges,
 		Rule:            ruleForm.Rule,
+		IgnoreRule:      ruleForm.IgnoreRule,
 		AggregateRule:   ruleForm.AggregateRule,
 		Template:        ruleForm.Template,
 		SummaryTemplate: ruleForm.SummaryTemplate,
@@ -455,8 +478,6 @@ func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, use
 	if dingID != "" {
 		filter["triggers.meta"] = bson.M{"$regex": fmt.Sprintf(`"robot_id":"%s"`, dingID)}
 	}
-
-	log.With(filter).Debug("filter")
 
 	offset, limit := offsetAndLimit(ctx)
 	rules, next, err := ruleRepo.Paginate(filter, offset, limit)
@@ -535,23 +556,43 @@ func (r RuleController) getMessageByID(messageID string, msgRepo repository.Mess
 }
 
 // testMessageMatchRule test if the message and rule can be matched
-func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.MessageRepo) (bool, error) {
+func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.MessageRepo) (matched bool, ignored bool, err error) {
+	message, err := r.getMessageByID(messageID, msgRepo)
+	if err != nil {
+		return false, false, err
+	}
+
+	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: rule})
+	if err != nil {
+		return false, false, fmt.Errorf("invalid rule: %v", err)
+	}
+
+	rs, ignored, err := m.Match(message)
+	if err != nil {
+		return false, false, fmt.Errorf("rule match with errors: %v", err)
+	}
+
+	return rs, ignored, nil
+}
+
+// testMessageIgnoreRule test if the message and rule can be ignored
+func (r RuleController) testMessageIgnoreRule(rule string, messageID string, msgRepo repository.MessageRepo) (bool, error) {
 	message, err := r.getMessageByID(messageID, msgRepo)
 	if err != nil {
 		return false, err
 	}
 
-	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: rule})
+	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: "true", IgnoreRule: rule})
 	if err != nil {
 		return false, fmt.Errorf("invalid rule: %v", err)
 	}
 
-	rs, err := m.Match(message)
+	_, ignored, err := m.Match(message)
 	if err != nil {
 		return false, fmt.Errorf("rule match with errors: %v", err)
 	}
 
-	return rs, nil
+	return ignored, nil
 }
 
 // Tags return all tags existed

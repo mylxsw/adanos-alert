@@ -11,8 +11,10 @@ import (
 )
 
 type messageMatcherTestCase struct {
-	Rule    string
-	Matched bool
+	Rule        string
+	IgnoredRule string
+	Matched     bool
+	Ignored     bool
 }
 
 func TestMessageMatcher_Match(t *testing.T) {
@@ -46,14 +48,16 @@ func TestMessageMatcher_Match(t *testing.T) {
 		{Rule: `Content endsWith "XX"`, Matched: false},
 		{Rule: `Upper(Meta["environment"]) == "DEV"`, Matched: true},
 		{Rule: `Lower(Origin) == "filebeat"`, Matched: true},
+		{Rule: `Lower(Origin) == "filebeat"`, IgnoredRule: `"php" in Tags`, Matched: true, Ignored: true},
 	}
 
 	for _, tc := range testcases {
-		mt, err := matcher.NewMessageMatcher(repository.Rule{Rule: tc.Rule,})
+		mt, err := matcher.NewMessageMatcher(repository.Rule{Rule: tc.Rule, IgnoreRule: tc.IgnoredRule})
 		assert.NoError(t, err)
-		matched, err := mt.Match(msg)
+		matched, ignored, err := mt.Match(msg)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.Matched, matched)
+		assert.Equal(t, tc.Ignored, ignored)
 
 		assert.Equal(t, tc.Rule, mt.Rule().Rule)
 	}

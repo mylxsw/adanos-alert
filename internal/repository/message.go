@@ -12,10 +12,16 @@ type MessageStatus string
 type MessageType string
 
 const (
-	MessageStatusPending  MessageStatus = "pending"
-	MessageStatusGrouped  MessageStatus = "grouped"
+	// MessageStatusPending 待处理
+	MessageStatusPending MessageStatus = "pending"
+	// MessageStatusGrouped 已分组（已经匹配规则并且分组）
+	MessageStatusGrouped MessageStatus = "grouped"
+	// MessageStatusCanceled 已取消（没有任何匹配的规则）
 	MessageStatusCanceled MessageStatus = "canceled"
-	MessageStatusExpired  MessageStatus = "expired"
+	// MessageStatusExpired 已过期（有匹配的规则，但是当时没有匹配）
+	MessageStatusExpired MessageStatus = "expired"
+	// MessageStatusDead 死信（匹配规则，但是被主动忽略）
+	MessageStatusIgnored MessageStatus = "ignored"
 
 	// MessageTypePlain 普通消息
 	MessageTypePlain MessageType = "plain"

@@ -75,7 +75,11 @@ func expiredMessageGC(conf *configs.Config, msgRepo repository.MessageRepo, grou
 
 	// 删除过期或者取消发送的 messages
 	if err := msgRepo.Delete(bson.M{
-		"status":     bson.M{"$in": []repository.MessageStatus{repository.MessageStatusCanceled, repository.MessageStatusExpired}},
+		"status":     bson.M{"$in": []repository.MessageStatus{
+			repository.MessageStatusCanceled,
+			repository.MessageStatusExpired,
+			repository.MessageStatusIgnored,
+		}},
 		"created_at": bson.M{"$lt": deadLineDate},
 	}); err != nil {
 		log.Errorf("remove expired/canceled messages before %v failed: %v", deadLineDate, err)

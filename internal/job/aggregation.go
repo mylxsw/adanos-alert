@@ -6,6 +6,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
@@ -50,38 +51,52 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 
 	collectingGroups := make(map[string]repository.MessageGroup)
 	err = msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
+		messageCanIgnore := false
 		for _, m := range matchers {
-			matched, err := m.Match(msg)
+			matched, ignored, err := m.Match(msg)
 			if err != nil {
 				continue
 			}
 
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
-				aggregateKey := BuildMessageFinger(m.Rule().AggregateRule, msg)
-				key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, msg.Type)
-				if _, ok := collectingGroups[key]; !ok {
-					grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, msg.Type))
-					if err != nil {
-						log.WithFields(log.Fields{
-							"msg":  msg,
-							"rule": m.Rule(),
-							"err":  err.Error(),
-						}).Errorf("create collecting group failed: %v", err)
-						return err
+				if ignored {
+					messageCanIgnore = true
+				} else {
+					aggregateKey := BuildMessageFinger(m.Rule().AggregateRule, msg)
+					key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, msg.Type)
+					if _, ok := collectingGroups[key]; !ok {
+						grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, msg.Type))
+						if err != nil {
+							log.WithFields(log.Fields{
+								"msg":  msg,
+								"rule": m.Rule(),
+								"err":  err.Error(),
+							}).Errorf("create collecting group failed: %v", err)
+							return err
+						}
+
+						collectingGroups[key] = grp
 					}
 
-					collectingGroups[key] = grp
+					msg.GroupID = append(msg.GroupID, collectingGroups[key].ID)
+					msg.Status = repository.MessageStatusGrouped
 				}
-
-				msg.GroupID = append(msg.GroupID, collectingGroups[key].ID)
-				msg.Status = repository.MessageStatusGrouped
 			}
 		}
 
+		// messageCanIgnore 和 message 状态 变换规则
+		// true  | pending  -> ignore
+		// false | pending  -> canceled
+		// true  | grouped  -> grouped
+		// false | grouped  -> grouped
+
 		// if message not match any rules, set message as canceled
-		if msg.Status != repository.MessageStatusGrouped {
-			msg.Status = repository.MessageStatusCanceled
+		if msg.Status == repository.MessageStatusPending {
+			msg.Status = misc.IfElse(messageCanIgnore,
+				repository.MessageStatusIgnored,
+				repository.MessageStatusCanceled,
+			).(repository.MessageStatus)
 		}
 
 		log.WithFields(log.Fields{
@@ -98,7 +113,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 	// 将能够与规则匹配的 Canceled 的 message 转换为 Expired
 	return msgRepo.Traverse(bson.M{"status": repository.MessageStatusCanceled}, func(msg repository.Message) error {
 		for _, m := range matchers {
-			matched, err := m.Match(msg)
+			matched, _, err := m.Match(msg)
 			if err != nil {
 				continue
 			}
@@ -206,7 +221,7 @@ func BuildMessageMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Mes
 		}
 
 		for _, m := range matchers {
-			matched, err := m.Match(msg)
+			matched, _, err := m.Match(msg)
 			if err != nil {
 				continue
 			}

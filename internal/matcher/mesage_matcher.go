@@ -7,6 +7,7 @@ import (
 	"github.com/antonmedv/expr/vm"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/json"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 )
 
 // InvalidReturnVal is a error represents the expression return value is invalid
@@ -45,38 +46,58 @@ func (msg *MessageWrap) IsPlain() bool {
 
 // MessageMatcher is a matcher for repository.Message
 type MessageMatcher struct {
-	program *vm.Program
-	rule    repository.Rule
+	matchProgram  *vm.Program
+	ignoreProgram *vm.Program
+	rule          repository.Rule
 }
 
 // NewMessageMatcher create a new MessageMatcher
 // https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md
 func NewMessageMatcher(rule repository.Rule) (*MessageMatcher, error) {
-	condition := rule.Rule
-	if condition == "" {
-		condition = "true"
-	}
 
-	program, err := expr.Compile(condition, expr.Env(&MessageWrap{}), expr.AsBool())
+	matchProgram, err := expr.Compile(
+		misc.IfElse(rule.Rule == "", "true", rule.Rule).(string),
+		expr.Env(&MessageWrap{}),
+		expr.AsBool(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &MessageMatcher{program: program, rule: rule}, nil
+	ignoreProgram, err := expr.Compile(
+		misc.IfElse(rule.IgnoreRule == "", "false", rule.IgnoreRule).(string),
+		expr.Env(&MessageWrap{}),
+		expr.AsBool(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MessageMatcher{matchProgram: matchProgram, ignoreProgram: ignoreProgram, rule: rule}, nil
 }
 
 // Match check whether the msg is match with the rule
-func (m *MessageMatcher) Match(msg repository.Message) (bool, error) {
-	rs, err := expr.Run(m.program, NewMessageWrap(msg))
+func (m *MessageMatcher) Match(msg repository.Message) (matched bool, ignored bool, err error) {
+	wrapMsg := NewMessageWrap(msg)
+	rs, err := expr.Run(m.matchProgram, wrapMsg)
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 
 	if boolRes, ok := rs.(bool); ok {
-		return boolRes, nil
+		if boolRes {
+			ignore, err := expr.Run(m.ignoreProgram, wrapMsg)
+			if err != nil {
+				return boolRes, false, err
+			}
+
+			return boolRes, ignore.(bool), nil
+		}
+
+		return boolRes, false, nil
 	}
 
-	return false, InvalidReturnVal
+	return false, false, InvalidReturnVal
 }
 
 // Rule return original rule object

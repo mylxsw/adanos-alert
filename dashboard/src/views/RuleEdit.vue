@@ -103,6 +103,30 @@
                                 </b-input-group-append>
                             </b-input-group>
                         </b-form-group>
+
+                        <b-button v-b-toggle.advance variant="secondary">高级</b-button>
+                        <b-collapse id="advance" visible class="mt-2">
+                            <b-card>
+                                <b-form-group label-cols="2" label="忽略规则">
+                                    <b-btn-group class="mb-2">
+                                        <b-btn variant="dark" @click="ignore_rule_help = !ignore_rule_help">帮助</b-btn>
+                                    </b-btn-group>
+                                    <b-btn-group class="mb-2 float-right">
+                                        <b-btn variant="primary" class="float-right" @click="checkIgnoreRule()">检查</b-btn>
+                                    </b-btn-group>
+                                </b-form-group>
+                                <b-form-group label-cols="2">
+                                    <codemirror v-model="form.ignore_rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
+                                    <small class="form-text text-muted">当匹配规则后，会检查消息是否与忽略规则匹配，匹配则忽略该消息，常用于临时忽略某些不需要报警的消息。</small>
+                                    <small class="form-text text-muted">
+                                        语法提示 <code>Alt+/</code>，语法参考 <a
+                                        href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                        target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                    </small>
+                                    <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
+                                </b-form-group>
+                            </b-card>
+                        </b-collapse>
                     </b-card>
                 </b-card-group>
 
@@ -674,11 +698,13 @@ export default {
                 ],
                 interval: 1,
                 rule: '',
+                ignore_rule: '',
                 template: '',
                 triggers: [],
                 status: true,
             },
             rule_help: false,
+            ignore_rule_help: false,
             template_help: false,
             properties: ['phone', 'email',],
             action_options: [
@@ -784,6 +810,15 @@ export default {
             }
 
             this.sendCheckRequest('match_rule', this.form.rule.trim());
+        },
+
+        checkIgnoreRule() {
+            if (this.form.ignore_rule.trim() === '') {
+                this.ErrorBox('规则为空，无需检查');
+                return ;
+            }
+
+            this.sendCheckRequest('match_rule_ignore', this.form.ignore_rule.trim());
         },
 
         checkTriggerRule(trigger) {
@@ -995,6 +1030,7 @@ export default {
             requestData.name = this.form.name;
             requestData.description = this.form.description;
             requestData.rule = this.form.rule;
+            requestData.ignore_rule = this.form.ignore_rule;
             requestData.tags = this.form.tags;
             requestData.aggregate_rule = this.form.aggregate_rule;
             requestData.template = this.form.template;
@@ -1040,6 +1076,7 @@ export default {
                 this.form.ready_type = response.data.ready_type === '' ? 'interval' : response.data.ready_type;
                 this.form.daily_times = (response.data.daily_times === null || response.data.daily_times.length === 0) ? ['09:00:00'] : response.data.daily_times;
                 this.form.rule = response.data.rule;
+                this.form.ignore_rule = response.data.ignore_rule;
                 this.form.tags = response.data.tags;
                 this.form.aggregate_rule = response.data.aggregate_rule;
                 this.form.template = response.data.template;
@@ -1077,9 +1114,16 @@ export default {
                 }
 
                 this.form.status = response.data.status === 'enabled';
+                if (this.form.ignore_rule.trim() === '') {
+                    // 解决高级规则默认不展示时，编辑器窗口初始化不完整问题
+                    this.$root.$emit('bv::toggle::collapse', 'advance')
+                }
             }).catch((error) => {
                 this.ToastError(error)
             });
+        } else {
+            // 解决高级规则默认不展示时，编辑器窗口初始化不完整问题
+            this.$root.$emit('bv::toggle::collapse', 'advance')
         }
 
         // 加载辅助元素

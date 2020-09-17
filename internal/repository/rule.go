@@ -49,7 +49,10 @@ type Rule struct {
 	DailyTimes []string    `bson:"daily_times" json:"daily_times"`
 	TimeRanges []TimeRange `bson:"time_ranges" json:"time_ranges"`
 
-	Rule            string    `bson:"rule" json:"rule"`
+	// Rule 用于分组匹配的规则
+	Rule string `bson:"rule" json:"rule"`
+	// IgnoreRule 分组匹配后，检查 message 是否应该被忽略
+	IgnoreRule      string    `bson:"ignore_rule" json:"ignore_rule"`
 	Template        string    `bson:"template" json:"template"`
 	SummaryTemplate string    `bson:"summary_template" json:"summary_template"`
 	Triggers        []Trigger `bson:"triggers" json:"triggers"`
@@ -66,6 +69,7 @@ func (rule Rule) ToGroupRule(aggregateKey string, msgType MessageType) MessageGr
 		ID:              rule.ID,
 		Name:            rule.Name,
 		Rule:            rule.Rule,
+		IgnoreRule:      rule.IgnoreRule,
 		Template:        rule.Template,
 		SummaryTemplate: rule.SummaryTemplate,
 		AggregateKey:    aggregateKey,

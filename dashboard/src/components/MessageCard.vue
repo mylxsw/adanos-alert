@@ -11,6 +11,7 @@
                 <b-badge v-if="message.status === 'grouped'" variant="success">已分组</b-badge>
                 <b-badge v-if="message.status === 'canceled'" variant="danger">无规则，已取消</b-badge>
                 <b-badge v-if="message.status === 'expired'" variant="warning">匹配规则，已过期</b-badge>
+                <b-badge v-if="message.status === 'ignored'" variant="warning">匹配规则，已忽略</b-badge>
 
                 <b-link class="ml-2" @click="isFold = !isFold">
                     <b-icon icon="arrows-collapse" v-if="isFold"></b-icon>

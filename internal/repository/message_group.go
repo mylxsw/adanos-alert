@@ -30,6 +30,7 @@ type MessageGroupRule struct {
 	ExpectReadyAt time.Time `bson:"expect_ready_at" json:"expect_ready_at"`
 
 	Rule            string `bson:"rule" json:"rule"`
+	IgnoreRule      string `bson:"ignore_rule" json:"ignore_rule"`
 	Template        string `bson:"template" json:"template"`
 	SummaryTemplate string `bson:"summary_template" json:"summary_template"`
 }
