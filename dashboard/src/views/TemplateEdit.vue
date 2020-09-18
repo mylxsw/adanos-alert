@@ -20,7 +20,7 @@
 
                         <b-form-group label-cols="2" id="template_content" label="内容"
                                       label-for="template_content_input">
-                            <codemirror v-model="form.content" class="mt-3 adanos-code-textarea" :options="{mode: (form.type === 'template' || form.type === 'template_dingding') ? 'markdown':'go',smartIndent:true, lineNumbers: true, placeholder: '输入模板内容', lineWrapping: true}"></codemirror>
+                            <codemirror v-model="form.content" class="mt-3 adanos-code-textarea" :options="options[form.type]"></codemirror>
                         </b-form-group>
                     </b-card>
                 </b-card-group>
@@ -35,11 +35,18 @@
 <script>
     import axios from 'axios'
 
-    import {codemirror} from 'vue-codemirror-lite';
+    import {codemirror, CodeMirror} from 'vue-codemirror-lite';
     import 'codemirror/addon/display/placeholder.js';
 
     require('codemirror/mode/go/go');
     require('codemirror/mode/markdown/markdown');
+    require('codemirror/addon/hint/show-hint.js')
+    require('codemirror/addon/hint/show-hint.css')
+
+    import {helpers, hintHandler} from '@/plugins/editor-helper';
+
+    CodeMirror.registerHelper("hint", "go", hintHandler);
+    CodeMirror.registerHelper("hint", "markdown", hintHandler);
 
     export default {
         name: 'TemplateEdit',
@@ -57,7 +64,64 @@
                     {value: 'template', text: '分组展示模板'},
                     {value: 'trigger_rule', text: '动作触发规则'},
                     {value: 'template_dingding', text: '钉钉通知模板'},
+                    {value: 'template_report', text: '报告模板'},
                 ],
+                helper: {
+                    groupMatchRules: helpers.groupMatchRules.concat(...helpers.matchRules),
+                    triggerMatchRules: helpers.triggerMatchRules.concat(...helpers.matchRules),
+                    templateRules: helpers.templates,
+                    dingdingTemplateRules: helpers.templates,
+                },
+                options: {
+                    match_rule: {
+                        extraKeys: {'Alt-/': 'autocomplete'},
+                        hintOptions: {adanosType: 'GroupMatchRule'},
+                        smartIndent: true,
+                        completeSingle: false,
+                        lineNumbers: true,
+                        placeholder: '输入规则，必须返回布尔值',
+                        lineWrapping: true
+                    },
+                    template: {
+                        extraKeys: {'Alt-/': 'autocomplete'},
+                        mode: 'markdown',
+                        hintOptions: {adanosType: 'Template'},
+                        smartIndent: true,
+                        completeSingle: false,
+                        lineNumbers: true,
+                        placeholder: '输入模板',
+                        lineWrapping: true
+                    },
+                    template_report: {
+                        extraKeys: {'Alt-/': 'autocomplete'},
+                        mode: 'markdown',
+                        hintOptions: {adanosType: 'Template'},
+                        smartIndent: true,
+                        completeSingle: false,
+                        lineNumbers: true,
+                        placeholder: '输入模板',
+                        lineWrapping: true
+                    },
+                    trigger_rule: {
+                        extraKeys: {'Alt-/': 'autocomplete'},
+                        smartIndent: true,
+                        hintOptions: {adanosType: 'TriggerMatchRule'},
+                        completeSingle: false,
+                        lineNumbers: true,
+                        placeholder: '默认为 true （全部匹配）',
+                        lineWrapping: true
+                    },
+                    template_dingding: {
+                        extraKeys: {'Alt-/': 'autocomplete'},
+                        mode: 'markdown',
+                        smartIndent: true,
+                        hintOptions: {adanosType: 'DingTemplate'},
+                        completeSingle: false,
+                        lineNumbers: true,
+                        placeholder: '默认使用分组展示模板',
+                        lineWrapping: true
+                    }
+                }
             };
         },
         methods: {

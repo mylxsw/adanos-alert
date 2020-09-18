@@ -60,6 +60,9 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		if conf.PreviewURL != "" {
 			payload.PreviewURL = fmt.Sprintf(conf.PreviewURL, grp.ID.Hex())
 		}
+		if conf.ReportURL != "" {
+			payload.ReportURL = fmt.Sprintf(conf.ReportURL, grp.ID.Hex())
+		}
 	})
 
 	var meta DingdingMeta

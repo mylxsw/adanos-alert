@@ -57,6 +57,9 @@ type Rule struct {
 	SummaryTemplate string    `bson:"summary_template" json:"summary_template"`
 	Triggers        []Trigger `bson:"triggers" json:"triggers"`
 
+	// ReportTemplateID 报表模板 ID
+	ReportTemplateID primitive.ObjectID `bson:"report_template_id" json:"report_template_id"`
+
 	Status RuleStatus `bson:"status" json:"status"`
 
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
@@ -66,14 +69,15 @@ type Rule struct {
 // ToGroupRule convert Rule to MessageGroupRule
 func (rule Rule) ToGroupRule(aggregateKey string, msgType MessageType) MessageGroupRule {
 	groupRule := MessageGroupRule{
-		ID:              rule.ID,
-		Name:            rule.Name,
-		Rule:            rule.Rule,
-		IgnoreRule:      rule.IgnoreRule,
-		Template:        rule.Template,
-		SummaryTemplate: rule.SummaryTemplate,
-		AggregateKey:    aggregateKey,
-		Type:            msgType,
+		ID:               rule.ID,
+		Name:             rule.Name,
+		Rule:             rule.Rule,
+		IgnoreRule:       rule.IgnoreRule,
+		Template:         rule.Template,
+		SummaryTemplate:  rule.SummaryTemplate,
+		ReportTemplateID: rule.ReportTemplateID,
+		AggregateKey:     aggregateKey,
+		Type:             msgType,
 	}
 
 	if rule.ReadyType == "" {

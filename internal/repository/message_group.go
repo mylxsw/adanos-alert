@@ -33,6 +33,9 @@ type MessageGroupRule struct {
 	IgnoreRule      string `bson:"ignore_rule" json:"ignore_rule"`
 	Template        string `bson:"template" json:"template"`
 	SummaryTemplate string `bson:"summary_template" json:"summary_template"`
+
+	// Report template
+	ReportTemplateID primitive.ObjectID `bson:"report_template_id" json:"report_template_id"`
 }
 
 type MessageGroup struct {

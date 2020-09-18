@@ -72,11 +72,12 @@ type RuleForm struct {
 	DailyTimes []string               `json:"daily_times"`
 	TimeRanges []repository.TimeRange `json:"time_ranges"`
 
-	Rule            string            `json:"rule"`
-	IgnoreRule      string            `json:"ignore_rule"`
-	Template        string            `json:"template"`
-	SummaryTemplate string            `json:"summary_template"`
-	Triggers        []RuleTriggerForm `json:"triggers"`
+	Rule             string            `json:"rule"`
+	IgnoreRule       string            `json:"ignore_rule"`
+	Template         string            `json:"template"`
+	SummaryTemplate  string            `json:"summary_template"`
+	ReportTemplateID string            `json:"report_template_id"`
+	Triggers         []RuleTriggerForm `json:"triggers"`
 
 	Status string `json:"status"`
 
@@ -317,21 +318,27 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		})
 	}
 
+	reportTempID, err := primitive.ObjectIDFromHex(ruleForm.ReportTemplateID)
+	if err != nil {
+		reportTempID = primitive.NilObjectID
+	}
+
 	newRule := repository.Rule{
-		Name:            ruleForm.Name,
-		Description:     ruleForm.Description,
-		Tags:            ruleForm.Tags,
-		ReadyType:       ruleForm.ReadyType,
-		DailyTimes:      strarr.Distinct(ruleForm.DailyTimes),
-		Interval:        ruleForm.Interval,
-		TimeRanges:      ruleForm.TimeRanges,
-		Rule:            ruleForm.Rule,
-		IgnoreRule:      ruleForm.IgnoreRule,
-		AggregateRule:   ruleForm.AggregateRule,
-		Template:        ruleForm.Template,
-		SummaryTemplate: ruleForm.SummaryTemplate,
-		Triggers:        triggers,
-		Status:          repository.RuleStatus(ruleForm.Status),
+		Name:             ruleForm.Name,
+		Description:      ruleForm.Description,
+		Tags:             ruleForm.Tags,
+		ReadyType:        ruleForm.ReadyType,
+		DailyTimes:       strarr.Distinct(ruleForm.DailyTimes),
+		Interval:         ruleForm.Interval,
+		TimeRanges:       ruleForm.TimeRanges,
+		Rule:             ruleForm.Rule,
+		IgnoreRule:       ruleForm.IgnoreRule,
+		AggregateRule:    ruleForm.AggregateRule,
+		Template:         ruleForm.Template,
+		SummaryTemplate:  ruleForm.SummaryTemplate,
+		ReportTemplateID: reportTempID,
+		Triggers:         triggers,
+		Status:           repository.RuleStatus(ruleForm.Status),
 	}
 
 	ruleID, err := repo.Add(newRule)
@@ -394,24 +401,30 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		})
 	}
 
+	reportTempID, err := primitive.ObjectIDFromHex(ruleForm.ReportTemplateID)
+	if err != nil {
+		reportTempID = primitive.NilObjectID
+	}
+
 	newRule := repository.Rule{
-		ID:              original.ID,
-		Name:            ruleForm.Name,
-		Description:     ruleForm.Description,
-		Tags:            ruleForm.Tags,
-		ReadyType:       ruleForm.ReadyType,
-		DailyTimes:      strarr.Distinct(ruleForm.DailyTimes),
-		Interval:        ruleForm.Interval,
-		TimeRanges:      ruleForm.TimeRanges,
-		Rule:            ruleForm.Rule,
-		IgnoreRule:      ruleForm.IgnoreRule,
-		AggregateRule:   ruleForm.AggregateRule,
-		Template:        ruleForm.Template,
-		SummaryTemplate: ruleForm.SummaryTemplate,
-		Triggers:        triggers,
-		Status:          repository.RuleStatus(ruleForm.Status),
-		CreatedAt:       original.CreatedAt,
-		UpdatedAt:       original.CreatedAt,
+		ID:               original.ID,
+		Name:             ruleForm.Name,
+		Description:      ruleForm.Description,
+		Tags:             ruleForm.Tags,
+		ReadyType:        ruleForm.ReadyType,
+		DailyTimes:       strarr.Distinct(ruleForm.DailyTimes),
+		Interval:         ruleForm.Interval,
+		TimeRanges:       ruleForm.TimeRanges,
+		Rule:             ruleForm.Rule,
+		IgnoreRule:       ruleForm.IgnoreRule,
+		AggregateRule:    ruleForm.AggregateRule,
+		Template:         ruleForm.Template,
+		SummaryTemplate:  ruleForm.SummaryTemplate,
+		ReportTemplateID: reportTempID,
+		Triggers:         triggers,
+		Status:           repository.RuleStatus(ruleForm.Status),
+		CreatedAt:        original.CreatedAt,
+		UpdatedAt:        original.CreatedAt,
 	}
 
 	if err := ruleRepo.UpdateID(id, newRule); err != nil {

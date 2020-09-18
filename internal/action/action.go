@@ -91,6 +91,7 @@ type Payload struct {
 	Group              repository.MessageGroup `json:"group"`
 	RuleTemplateParsed string                  `json:"rule_template_parsed"`
 	PreviewURL         string                  `json:"preview_url"`
+	ReportURL          string                  `json:"report_url"`
 }
 
 // Init initialize a payload

@@ -103,6 +103,12 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
+		Name:        "报警详情链接(报告)",
+		Description: "报警详细信息链接地址，报告模式",
+		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .ReportURL }})`,
+		Type:        repository.TemplateTypeTemplate,
+	},
+	{
 		Name:        "嵌入全局的规则模板",
 		Description: "在动作模板中引用规则的展示模板内容",
 		Content:     `{{ .RuleTemplateParsed }}`,

@@ -1,9 +1,19 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-btn-group class="mb-3">
-                <b-button to="/templates/add" variant="primary">新增模板</b-button>
-            </b-btn-group>
+            <b-card class="mb-2">
+                <b-card-text style="display: flex; justify-content:space-between">
+                    <div>
+                        <b-badge :variant="$route.query.type === undefined ? 'primary':''" class="mr-1" :to="'/templates'">全部</b-badge>
+                        <b-badge :variant="$route.query.type === 'match_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=match_rule'">分组匹配规则</b-badge>
+                        <b-badge :variant="$route.query.type === 'template' ? 'primary':''" class="mr-1" :to="'/templates?type=template'">分组展示模板</b-badge>
+                        <b-badge :variant="$route.query.type === 'trigger_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=trigger_rule'">动作触发规则</b-badge>
+                        <b-badge :variant="$route.query.type === 'template_dingding' ? 'primary':''" class="mr-1" :to="'/templates?type=template_dingding'">钉钉通知模板</b-badge>
+                        <b-badge :variant="$route.query.type === 'template_report' ? 'primary':''" class="mr-1" :to="'/templates?type=template_report'">报告模板</b-badge>
+                    </div>
+                    <b-button to="/templates/add" variant="primary">新增模板</b-button>
+                </b-card-text>
+            </b-card>
             <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(name)="row">
                     <b>{{ row.item.name }}</b>
@@ -21,6 +31,7 @@
                     <b-badge v-if="row.item.type === 'template'" variant="info">分组展示模板</b-badge>
                     <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">动作触发规则</b-badge>
                     <b-badge v-if="row.item.type === 'template_dingding'" variant="info">钉钉通知模板</b-badge>
+                    <b-badge v-if="row.item.type === 'template_report'" variant="warning">报告模板</b-badge>
                 </template>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
@@ -72,6 +83,9 @@
                 ],
             };
         },
+        watch: {
+            '$route': 'reload',
+        },
         methods: {
             delete_template(index, id) {
                 let self = this;
@@ -89,7 +103,7 @@
                 });
             },
             reload() {
-                axios.get('/api/templates/').then(response => {
+                axios.get('/api/templates/', {params: this.$route.query}).then(response => {
                     this.templates = response.data;
                     this.isBusy = false;
                 }).catch(error => {

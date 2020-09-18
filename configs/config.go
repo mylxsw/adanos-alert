@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	PreviewURL string `json:"preview_url"`
+	ReportURL  string `json:"report_url"`
 	Listen     string `json:"listen"`
 	GRPCListen string `json:"grpc_listen"`
 	GRPCToken  string `json:"-"`

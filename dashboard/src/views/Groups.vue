@@ -55,7 +55,10 @@
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
                         <b-button size="sm" variant="info" :to="{path:'/messages', query: {group_id: row.item.id}}">详情</b-button>
-                        <b-button size="sm" variant="primary" :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">预览</b-button>
+                        <b-dropdown size="sm" right text="预览" variant="primary">
+                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">分组</b-dropdown-item>
+                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">报告</b-dropdown-item>
+                        </b-dropdown>
                     </b-button-group>
                 </template>
             </b-table>

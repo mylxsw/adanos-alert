@@ -65,6 +65,12 @@ func main() {
 		Value:  "http://localhost:19999/ui/groups/%s.html",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "report_url",
+		Usage:  "Alert report page url",
+		EnvVar: "ADANOS_REPORT_URL",
+		Value:  "http://localhost:19999/ui/reports/%s.html",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_uri",
 		Usage:  "Mongodb connection uri",
 		EnvVar: "MONGODB_HOST",
@@ -222,6 +228,7 @@ func main() {
 			QueryTimeout:          queryTimeout,
 			Migrate:               c.Bool("enable_migrate"),
 			PreviewURL:            c.String("preview_url"),
+			ReportURL:             c.String("report_url"),
 			KeepPeriod:            c.Int("keep_period"),
 			AliyunVoiceCall: configs.AliyunVoiceCall{
 				BaseURI:            "http://dyvmsapi.aliyuncs.com/",

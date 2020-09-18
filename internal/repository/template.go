@@ -14,6 +14,7 @@ const (
 	TemplateTypeTemplate         TemplateType = "template"
 	TemplateTypeTriggerRule      TemplateType = "trigger_rule"
 	TemplateTypeDingdingTemplate TemplateType = "template_dingding"
+	TemplateTypeReport           TemplateType = "template_report"
 )
 
 func AllTemplateTypes() []string {
@@ -22,6 +23,7 @@ func AllTemplateTypes() []string {
 		string(TemplateTypeTriggerRule),
 		string(TemplateTypeTemplate),
 		string(TemplateTypeDingdingTemplate),
+		string(TemplateTypeReport),
 	}
 }
 
