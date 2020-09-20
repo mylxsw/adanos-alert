@@ -1,6 +1,7 @@
 ---
 
 adanos_view_link: "http://localhost:19999/ui/groups/%s.html"
+adanos_report_link: "http://localhost:19999/ui/reports/%s.html"
 adanos_grpc_listen: ":19998"
 adanos_grpc_token: "000000"
 adanos_mongo_uri: "mongodb://localhost:27017"

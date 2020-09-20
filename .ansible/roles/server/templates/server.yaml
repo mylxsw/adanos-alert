@@ -1,5 +1,6 @@
 
 preview_url: "{{ adanos_view_link }}"
+report_link: "{{ adanos_report_link }}"
 grpc_listen: "{{ adanos_grpc_listen }}"
 grpc_token: "{{ adanos_grpc_token }}"
 mongo_uri: "{{ adanos_mongo_uri }}"
