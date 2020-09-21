@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -25,6 +26,10 @@ func (g GroupController) Register(router *web.Router) {
 	router.Group("/groups/", func(router *web.Router) {
 		router.Get("/", g.Groups).Name("groups:all")
 		router.Get("/{id}/", g.Group).Name("groups:one")
+	})
+
+	router.Group("/recoverable-groups/", func(router *web.Router) {
+		router.Get("/", g.RecoverableGroups).Name("recoverable-groups:all")
 	})
 }
 
@@ -144,4 +149,9 @@ func (g GroupController) Group(
 		Messages: messages,
 		Next:     next,
 	}, nil
+}
+
+// RecoverableGroups 当前待恢复的报警组
+func (g GroupController) RecoverableGroups(recoveryRepo repository.RecoveryRepo) ([]repository.Recovery, error) {
+	return recoveryRepo.RecoverableMessages(context.TODO(), time.Now().AddDate(1, 0, 0))
 }
