@@ -23,6 +23,7 @@
     follow: true
   with_items:
     - /usr/local/adanos-alert-agent/data
+    - /data/logs/adanos-alert-agent/
 
 - name: install adanos-alert-agent
   copy:

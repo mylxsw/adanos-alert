@@ -4,3 +4,7 @@
   roles:
     - server
     - agent
+
+- hosts: adanos-alert-agent-office
+  roles:
+    - agent

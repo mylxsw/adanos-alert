@@ -2,3 +2,5 @@
 server_addr: "{{ adanos_agent_server_addr }}"
 server_token: "{{ adanos_agent_server_token }}"
 data_dir: "{{ adanos_agent_data_dir }}"
+listen: "{{ adanos_agent_listen }}"
+log_path: "{{ adanos_agent_logpath }}"
