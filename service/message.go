@@ -31,6 +31,21 @@ func NewMessageService(cc container.Container) MessageService {
 
 func (m *messageService) Add(ctx context.Context, msg misc.CommonMessage) (primitive.ObjectID, error) {
 	controlMessage := msg.GetControlMessage()
+
+	var msgID primitive.ObjectID
+	var err error
+
+	defer func() {
+		// 自动恢复
+		recoveryAfter := controlMessage.GetRecoveryAfter()
+		if controlMessage.ID != "" && recoveryAfter > 0 {
+			recoveryRepo := m.cc.MustGet(new(repository.RecoveryRepo)).(repository.RecoveryRepo)
+			if err := recoveryRepo.Register(ctx, time.Now().Add(recoveryAfter), controlMessage.ID, msgID); err != nil {
+				log.Errorf("register recovery message(id=%s) failed: %v", msgID.Hex(), err)
+			}
+		}
+	}()
+
 	if controlMessage.ID != "" {
 		key := fmt.Sprintf("msgctl:inhibit:%s", controlMessage.ID)
 		// 消息抑制
@@ -53,18 +68,9 @@ func (m *messageService) Add(ctx context.Context, msg misc.CommonMessage) (primi
 	}
 
 	// 保存消息
-	msgID, err := m.msgRepo.AddWithContext(ctx, msg.GetRepoMessage())
+	msgID, err = m.msgRepo.AddWithContext(ctx, msg.GetRepoMessage())
 	if err != nil {
 		return primitive.NilObjectID, err
-	}
-
-	// 自动恢复
-	recoveryAfter := controlMessage.GetRecoveryAfter()
-	if controlMessage.ID != "" && recoveryAfter > 0 {
-		recoveryRepo := m.cc.MustGet(new(repository.RecoveryRepo)).(repository.RecoveryRepo)
-		if err := recoveryRepo.Register(ctx, time.Now().Add(recoveryAfter), controlMessage.ID, msgID); err != nil {
-			log.Errorf("register recovery message(id=%s) failed: %v", msgID.Hex(), err)
-		}
 	}
 
 	return msgID, nil
