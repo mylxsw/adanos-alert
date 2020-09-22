@@ -3,280 +3,328 @@
         <b-col>
             <b-form @submit="onSubmit">
                 <b-card-group class="mb-3">
-                    <b-card header="基本">
-                        <b-form-group label-cols="2" id="rule_name" label="名称*" label-for="name_input">
-                            <b-form-input id="name_input" type="text" v-model="form.name" required
-                                          placeholder="输入规则名称"/>
-                        </b-form-group>
-
-                        <b-form-group label-cols="2" id="rule_description" label="描述" label-for="description_input">
-                            <b-form-textarea id="description_input" placeholder="输入规则描述"
-                                             v-model="form.description"/>
-                        </b-form-group>
-
-                        <b-form-group label-cols="2" id="rule_tags" label="标签" label-for="tags_input">
-                            <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills
-                                         separator=" "
-                                         v-model="form.tags"></b-form-tags>
-                        </b-form-group>
-
-                        <b-form-group label-cols="2" label="频率*">
-                            <div class="adanos-sub-form">
-                                <b-form-group label-cols="2" label="类型">
-                                    <b-form-select v-model="form.ready_type">
-                                        <b-form-select-option value="interval">时间间隔</b-form-select-option>
-                                        <b-form-select-option value="daily_time">固定时间</b-form-select-option>
-                                        <b-form-select-option value="time_range">时间范围</b-form-select-option>
-                                    </b-form-select>
-                                </b-form-group>
-                                <b-form-group label-cols="2" id="rule_interval" label="周期"
-                                              label-for="rule_interval_input"
-                                              v-if="form.ready_type === 'interval'"
-                                              :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
-                                    <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
-                                                  v-model="form.interval" required/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
-                                    <b-btn variant="success" class="mb-3" @click="dailyTimeAdd()">添加</b-btn>
-                                    <b-input-group v-bind:key="i" v-for="(daily_time, i) in form.daily_times"
-                                                   style="margin-bottom: 10px;">
-                                        <b-form-timepicker v-model="form.daily_times[i]" :hour12="false"
-                                                           :show-seconds="false"></b-form-timepicker>
-                                        <b-input-group-append>
-                                            <b-btn variant="danger" @click="dailyTimeDelete(i)">删除</b-btn>
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                </b-form-group>
-                                <b-form-group label-cols="2" label="时间范围" v-if="form.ready_type === 'time_range'"
-                                              :description="timeRangeDesc">
-                                    <b-btn variant="success" class="mb-3" @click="timeRangeAdd()">添加</b-btn>
-                                    <b-input-group v-bind:key="i" v-for="(time_range, i) in form.time_ranges"
-                                                   style="margin-bottom: 10px;">
-                                        <b-form-timepicker v-model="form.time_ranges[i].start_time" :hour12="false"
-                                                           :show-seconds="false"
-                                                           placeholder="起始时间"></b-form-timepicker>
-                                        <b-form-timepicker v-model="form.time_ranges[i].end_time" :hour12="false"
-                                                           :show-seconds="false"
-                                                           placeholder="截止时间"></b-form-timepicker>
-                                        <b-form-input type="number" min="1" max="1440" step="1"
-                                                      v-model="form.time_ranges[i].interval"/>
-                                        <b-input-group-append>
-                                            <b-btn variant="danger" @click="timeRangeDelete(i)">删除</b-btn>
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                </b-form-group>
+                    <b-card>
+                        <template v-slot:header>
+                            基本
+                            <div class="float-right">
+                                <b-link class="ml-2" @click="basic_card_fold = !basic_card_fold">
+                                    <b-icon icon="arrows-collapse" v-if="basic_card_fold"></b-icon>
+                                    <b-icon icon="arrows-expand" v-if="!basic_card_fold"></b-icon>
+                                </b-link>
                             </div>
-                        </b-form-group>
+                        </template>
+                        <b-card-text v-if="basic_card_fold">...</b-card-text>
+                        <b-card-text v-if="!basic_card_fold">
+                            <b-form-group label-cols="2" id="rule_name" label="名称*" label-for="name_input">
+                                <b-form-input id="name_input" type="text" v-model="form.name" required
+                                              placeholder="输入规则名称"/>
+                            </b-form-group>
 
-                        <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
-                            <b-form-checkbox id="is_enabled_checkbox" v-model="form.status">启用</b-form-checkbox>
-                        </b-form-group>
+                            <b-form-group label-cols="2" id="rule_description" label="描述" label-for="description_input">
+                                <b-form-textarea id="description_input" placeholder="输入规则描述"
+                                                 v-model="form.description"/>
+                            </b-form-group>
+
+                            <b-form-group label-cols="2" id="rule_tags" label="标签" label-for="tags_input">
+                                <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills
+                                             separator=" "
+                                             v-model="form.tags"></b-form-tags>
+                            </b-form-group>
+
+                            <b-form-group label-cols="2" label="频率*">
+                                <div class="adanos-sub-form">
+                                    <b-form-group label-cols="2" label="类型">
+                                        <b-form-select v-model="form.ready_type">
+                                            <b-form-select-option value="interval">时间间隔</b-form-select-option>
+                                            <b-form-select-option value="daily_time">固定时间</b-form-select-option>
+                                            <b-form-select-option value="time_range">时间范围</b-form-select-option>
+                                        </b-form-select>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" id="rule_interval" label="周期"
+                                                  label-for="rule_interval_input"
+                                                  v-if="form.ready_type === 'interval'"
+                                                  :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
+                                        <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
+                                                      v-model="form.interval" required/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
+                                        <b-btn variant="success" class="mb-3" @click="dailyTimeAdd()">添加</b-btn>
+                                        <b-input-group v-bind:key="i" v-for="(daily_time, i) in form.daily_times"
+                                                       style="margin-bottom: 10px;">
+                                            <b-form-timepicker v-model="form.daily_times[i]" :hour12="false"
+                                                               :show-seconds="false"></b-form-timepicker>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="dailyTimeDelete(i)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="时间范围" v-if="form.ready_type === 'time_range'"
+                                                  :description="timeRangeDesc">
+                                        <b-btn variant="success" class="mb-3" @click="timeRangeAdd()">添加</b-btn>
+                                        <b-input-group v-bind:key="i" v-for="(time_range, i) in form.time_ranges"
+                                                       style="margin-bottom: 10px;">
+                                            <b-form-timepicker v-model="form.time_ranges[i].start_time" :hour12="false"
+                                                               :show-seconds="false"
+                                                               placeholder="起始时间"></b-form-timepicker>
+                                            <b-form-timepicker v-model="form.time_ranges[i].end_time" :hour12="false"
+                                                               :show-seconds="false"
+                                                               placeholder="截止时间"></b-form-timepicker>
+                                            <b-form-input type="number" min="1" max="1440" step="1"
+                                                          v-model="form.time_ranges[i].interval"/>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="timeRangeDelete(i)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+                                </div>
+                            </b-form-group>
+
+                            <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
+                                <b-form-checkbox id="is_enabled_checkbox" v-model="form.status">启用</b-form-checkbox>
+                            </b-form-group>
+                        </b-card-text>
                     </b-card>
                 </b-card-group>
 
                 <MessageCard class="mb-3" title="消息示例" :fold="true" v-if="test_message !== null" :message="test_message" :message_index="0" :onlyShow="true"></MessageCard>
 
                 <b-card-group class="mb-3">
-                    <b-card header="规则">
-                        <p class="text-muted">分组匹配规则，作用于单条 message，用于判断该 message 是否与当前规则匹配。
-                            <br/>如果 message 没有匹配任何规则，将会被标记为 <code>已取消</code>。</p>
-                        <b-btn-group class="mb-2">
-                            <b-btn variant="warning" v-b-modal.match_rule_selector>插入模板</b-btn>
-                            <b-btn variant="dark" @click="rule_help = !rule_help">帮助</b-btn>
-                        </b-btn-group>
-                        <b-btn-group class="mb-2 float-right">
-                            <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
-                        </b-btn-group>
-                        <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea"
-                                    :options="options.group_match_rule"></codemirror>
-                        <small class="form-text text-muted">
-                            语法提示 <code>Alt+/</code>，语法参考 <a
-                            href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                            target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
-                        </small>
-                        <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
-                        <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input" description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy">
-                            <b-input-group>
-                                <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件" v-model="form.aggregate_rule"/>
-                                <b-input-group-append>
-                                    <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
-                                </b-input-group-append>
-                            </b-input-group>
-                        </b-form-group>
+                    <b-card>
+                        <template v-slot:header>
+                            规则
+                            <div class="float-right">
+                                <b-link class="ml-2" @click="rule_card_fold = !rule_card_fold">
+                                    <b-icon icon="arrows-collapse" v-if="rule_card_fold"></b-icon>
+                                    <b-icon icon="arrows-expand" v-if="!rule_card_fold"></b-icon>
+                                </b-link>
+                            </div>
+                        </template>
+                        <b-card-text v-if="rule_card_fold">...</b-card-text>
+                        <b-card-text v-if="!rule_card_fold">
+                            <p class="text-muted">分组匹配规则，作用于单条 message，用于判断该 message 是否与当前规则匹配。
+                                <br/>如果 message 没有匹配任何规则，将会被标记为 <code>已取消</code>。</p>
+                            <b-btn-group class="mb-2">
+                                <b-btn variant="warning" v-b-modal.match_rule_selector>插入模板</b-btn>
+                                <b-btn variant="dark" @click="rule_help = !rule_help">帮助</b-btn>
+                            </b-btn-group>
+                            <b-btn-group class="mb-2 float-right">
+                                <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
+                            </b-btn-group>
+                            <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea"
+                                        :options="options.group_match_rule"></codemirror>
+                            <small class="form-text text-muted">
+                                语法提示 <code>Alt+/</code>，语法参考 <a
+                                href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                            </small>
+                            <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
+                            <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input" description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy">
+                                <b-input-group>
+                                    <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件" v-model="form.aggregate_rule"/>
+                                    <b-input-group-append>
+                                        <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
+                                    </b-input-group-append>
+                                </b-input-group>
+                            </b-form-group>
 
-                        <b-button v-b-toggle.advance variant="secondary" class="mt-2">高级</b-button>
-                        <b-collapse id="advance" visible class="mt-2">
-                            <b-card>
-                                <b-form-group label-cols="2" label="忽略规则">
-                                    <b-btn-group class="mb-2">
-                                        <b-btn variant="dark" @click="ignore_rule_help = !ignore_rule_help">帮助</b-btn>
+                            <b-button v-b-toggle.advance variant="secondary" class="mt-2">高级</b-button>
+                            <b-collapse id="advance" visible class="mt-2">
+                                <b-card>
+                                    <b-form-group label-cols="2" label="忽略规则">
+                                        <b-btn-group class="mb-2">
+                                            <b-btn variant="dark" @click="ignore_rule_help = !ignore_rule_help">帮助</b-btn>
+                                        </b-btn-group>
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkIgnoreRule()">检查</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2">
+                                        <codemirror v-model="form.ignore_rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
+                                        <small class="form-text text-muted">当匹配规则后，会检查消息是否与忽略规则匹配，匹配则忽略该消息，常用于临时忽略某些不需要报警的消息。</small>
+                                        <small class="form-text text-muted">
+                                            语法提示 <code>Alt+/</code>，语法参考 <a
+                                            href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                            target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                        </small>
+                                        <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
+                                    </b-form-group>
+                                </b-card>
+                            </b-collapse>
+                        </b-card-text>
+                    </b-card>
+                </b-card-group>
+
+                <b-card-group class="mb-3">
+                    <b-card>
+                        <template v-slot:header>
+                            概要模板
+                            <div class="float-right">
+                                <b-link class="ml-2" @click="template_card_fold = !template_card_fold">
+                                    <b-icon icon="arrows-collapse" v-if="template_card_fold"></b-icon>
+                                    <b-icon icon="arrows-expand" v-if="!template_card_fold"></b-icon>
+                                </b-link>
+                            </div>
+                        </template>
+                        <b-card-text v-if="template_card_fold">...</b-card-text>
+                        <b-card-text v-if="!template_card_fold">
+                            <p class="text-muted">概要模板，用于各通知方式的默认展示模板，Adanos 会按照该模板将分组信息发送给接收人。</p>
+                            <b-btn-group class="mb-2">
+                                <b-btn variant="warning" v-b-modal.template_selector>插入模板</b-btn>
+                                <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
+                            </b-btn-group>
+                            <b-btn-group class="mb-2 float-right">
+                                <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查
+                                </b-btn>
+                            </b-btn-group>
+                            <codemirror v-model="form.template" class="mt-3 adanos-code-textarea"
+                                        :options="options.template"></codemirror>
+                            <small class="form-text text-muted">
+                                语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
+                                                                target="_blank">https://golang.org/pkg/text/template/</a>
+                            </small>
+                            <TemplateHelp v-if="template_help" :helpers="helper.templateRules"/>
+
+                            <b-button v-b-toggle.advance-template variant="secondary" class="mt-2">高级</b-button>
+                            <b-collapse id="advance-template" class="mt-2">
+                                <b-card>
+                                    <b-form-group label-cols="2" label="报告模板" label-for="report-template">
+                                        <b-form-select id="report-template" v-model="form.report_template_id" :options="reportTemplateOptions"/>
+                                    </b-form-group>
+                                </b-card>
+                            </b-collapse>
+                        </b-card-text>
+                    </b-card>
+                </b-card-group>
+
+                <b-card-group class="mb-3">
+                    <b-card>
+                        <template v-slot:header>
+                            动作
+                            <div class="float-right">
+                                <b-link class="ml-2" @click="action_card_fold = !action_card_fold">
+                                    <b-icon icon="arrows-collapse" v-if="action_card_fold"></b-icon>
+                                    <b-icon icon="arrows-expand" v-if="!action_card_fold"></b-icon>
+                                </b-link>
+                            </div>
+                        </template>
+                        <b-card-text v-if="action_card_fold">...</b-card-text>
+                        <b-card-text v-if="!action_card_fold">
+                            <p class="text-muted">分组达到报警周期后，会按照这里的规则来将分组信息通知给对应的通道。</p>
+                            <b-card :header="trigger.id" border-variant="dark" header-bg-variant="dark"
+                                    header-text-variant="white" class="mb-3" v-bind:key="i"
+                                    v-for="(trigger, i) in form.triggers">
+                                <b-form-group label-cols="2" :id="'trigger_' + i" label="名称"
+                                              :label-for="'trigger_name' + i">
+                                    <b-form-input :id="'trigger_name_' + i" v-model="trigger.name" placeholder="动作名称，可选"/>
+                                </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
+                                              :label-for="'trigger_pre_condition_' + i">
+                                    <b-btn-group class="mb-2" v-if="!trigger.pre_condition_fold">
+                                        <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
+                                        <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
                                     </b-btn-group>
+                                    <span class="text-muted" style="line-height: 2.5" v-if="trigger.pre_condition_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
                                     <b-btn-group class="mb-2 float-right">
-                                        <b-btn variant="primary" class="float-right" @click="checkIgnoreRule()">检查</b-btn>
+                                        <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查</b-btn>
+                                        <b-btn variant="info" class="float-right" @click="trigger.pre_condition_fold = !trigger.pre_condition_fold">{{ trigger.pre_condition_fold ? '展开' : '收起' }}</b-btn>
                                     </b-btn-group>
                                 </b-form-group>
-                                <b-form-group label-cols="2">
-                                    <codemirror v-model="form.ignore_rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
-                                    <small class="form-text text-muted">当匹配规则后，会检查消息是否与忽略规则匹配，匹配则忽略该消息，常用于临时忽略某些不需要报警的消息。</small>
+                                <b-form-group label-cols="2" v-if="!trigger.pre_condition_fold">
+                                    <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
+                                                :options="options.trigger_rule"></codemirror>
                                     <small class="form-text text-muted">
                                         语法提示 <code>Alt+/</code>，语法参考 <a
                                         href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
                                         target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                                     </small>
-                                    <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
+                                    <TriggerHelp class="mt-2" v-if="trigger.help" :helpers="helper.triggerMatchRules"/>
                                 </b-form-group>
+                                <b-form-group label-cols="2" :id="'trigger_action_' + i" label="动作"
+                                              :label-for="'trigger_action_' + i">
+                                    <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
+                                                   :options="action_options"/>
+                                </b-form-group>
+                                <div v-if="trigger.action === 'dingding'" class="adanos-sub-form">
+                                    <b-form-group label-cols="2" label="机器人*" :label-for="'trigger_meta_robot_' + i">
+                                        <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id"
+                                                       :options="robot_options"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
+                                                  :label-for="'trigger_meta_template_' + i">
+                                        <b-btn-group class="mb-2" v-if="!trigger.template_fold">
+                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">
+                                                帮助
+                                            </b-btn>
+                                        </b-btn-group>
+                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                            <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group v-if="!trigger.template_fold">
+                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea"
+                                                    :options="options.ding_template"></codemirror>
+                                        <small class="form-text text-muted">
+                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
+                                                                            target="_blank">https://golang.org/pkg/text/template/</a>
+                                        </small>
+                                        <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
+                                                  v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                        <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
+                                                       class="mb-3">
+                                            <b-form-select v-model="trigger.user_refs[index]"
+                                                           :options="user_options"/>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+                                </div>
+                                <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题"
+                                                  :label-for="'trigger_meta_content_' + i">
+                                        <b-form-textarea :id="'trigger_meta_content_' + i"
+                                                         class="adanos-code-textarea  text-monospace"
+                                                         v-model="trigger.meta_arr.title"
+                                                         placeholder="通知标题，默认为规则名称"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
+                                                  :label-for="'trigger_meta_template_id_' + i">
+                                        <b-form-input :id="'trigger_meta_template_id_' + i"
+                                                      v-model="trigger.meta_arr.template_id"
+                                                      placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i"
+                                                  v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                        <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
+                                                       class="mb-3">
+                                            <b-form-select v-model="trigger.user_refs[index]"
+                                                           :options="user_options"/>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+
+                                </div>
+                                <div class="adanos-sub-form" v-else>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
+                                                  :label-for="'trigger_meta_' + i">
+                                        <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
+                                    </b-form-group>
+                                </div>
+
+                                <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
                             </b-card>
-                        </b-collapse>
-                    </b-card>
-                </b-card-group>
-
-                <b-card-group class="mb-3">
-                    <b-card header="概要模板">
-                        <p class="text-muted">概要模板，用于各通知方式的默认展示模板，Adanos 会按照该模板将分组信息发送给接收人。</p>
-                        <b-btn-group class="mb-2">
-                            <b-btn variant="warning" v-b-modal.template_selector>插入模板</b-btn>
-                            <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
-                        </b-btn-group>
-                        <b-btn-group class="mb-2 float-right">
-                            <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查
-                            </b-btn>
-                        </b-btn-group>
-                        <codemirror v-model="form.template" class="mt-3 adanos-code-textarea"
-                                    :options="options.template"></codemirror>
-                        <small class="form-text text-muted">
-                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
-                                                            target="_blank">https://golang.org/pkg/text/template/</a>
-                        </small>
-                        <TemplateHelp v-if="template_help" :helpers="helper.templateRules"/>
-
-                        <b-button v-b-toggle.advance-template variant="secondary" class="mt-2">高级</b-button>
-                        <b-collapse id="advance-template" class="mt-2">
-                            <b-card>
-                                <b-form-group label-cols="2" label="报告模板" label-for="report-template">
-                                    <b-form-select id="report-template" v-model="form.report_template_id" :options="reportTemplateOptions"/>
-                                </b-form-group>
-                            </b-card>
-                        </b-collapse>
-                    </b-card>
-                </b-card-group>
-
-                <b-card-group class="mb-3">
-                    <b-card header="动作">
-                        <p class="text-muted">分组达到报警周期后，会按照这里的规则来将分组信息通知给对应的通道。</p>
-                        <b-card :header="trigger.id" border-variant="dark" header-bg-variant="dark"
-                                header-text-variant="white" class="mb-3" v-bind:key="i"
-                                v-for="(trigger, i) in form.triggers">
-                            <b-form-group label-cols="2" :id="'trigger_' + i" label="名称"
-                                          :label-for="'trigger_name' + i">
-                                <b-form-input :id="'trigger_name_' + i" v-model="trigger.name" placeholder="动作名称，可选"/>
-                            </b-form-group>
-                            <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
-                                          :label-for="'trigger_pre_condition_' + i">
-                                <b-btn-group class="mb-2" v-if="!trigger.pre_condition_fold">
-                                    <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
-                                    <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
-                                </b-btn-group>
-                                <span class="text-muted" style="line-height: 2.5" v-if="trigger.pre_condition_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
-                                <b-btn-group class="mb-2 float-right">
-                                    <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查</b-btn>
-                                    <b-btn variant="info" class="float-right" @click="trigger.pre_condition_fold = !trigger.pre_condition_fold">{{ trigger.pre_condition_fold ? '展开' : '收起' }}</b-btn>
-                                </b-btn-group>
-                            </b-form-group>
-                            <b-form-group label-cols="2" v-if="!trigger.pre_condition_fold">
-                                <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
-                                            :options="options.trigger_rule"></codemirror>
-                                <small class="form-text text-muted">
-                                    语法提示 <code>Alt+/</code>，语法参考 <a
-                                    href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                    target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
-                                </small>
-                                <TriggerHelp class="mt-2" v-if="trigger.help" :helpers="helper.triggerMatchRules"/>
-                            </b-form-group>
-                            <b-form-group label-cols="2" :id="'trigger_action_' + i" label="动作"
-                                          :label-for="'trigger_action_' + i">
-                                <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
-                                               :options="action_options"/>
-                            </b-form-group>
-                            <div v-if="trigger.action === 'dingding'" class="adanos-sub-form">
-                                <b-form-group label-cols="2" label="机器人*" :label-for="'trigger_meta_robot_' + i">
-                                    <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id"
-                                                   :options="robot_options"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
-                                              :label-for="'trigger_meta_template_' + i">
-                                    <b-btn-group class="mb-2" v-if="!trigger.template_fold">
-                                        <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
-                                        <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">
-                                            帮助
-                                        </b-btn>
-                                    </b-btn-group>
-                                    <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
-
-                                    <b-btn-group class="mb-2 float-right">
-                                        <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
-                                        <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
-                                    </b-btn-group>
-                                </b-form-group>
-                                <b-form-group v-if="!trigger.template_fold">
-                                    <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea"
-                                                :options="options.ding_template"></codemirror>
-                                    <small class="form-text text-muted">
-                                        语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
-                                                                        target="_blank">https://golang.org/pkg/text/template/</a>
-                                    </small>
-                                    <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
-                                              v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
-                                    <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                    <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
-                                                   class="mb-3">
-                                        <b-form-select v-model="trigger.user_refs[index]"
-                                                       :options="user_options"/>
-                                        <b-input-group-append>
-                                            <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                </b-form-group>
-                            </div>
-                            <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
-                                <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题"
-                                              :label-for="'trigger_meta_content_' + i">
-                                    <b-form-textarea :id="'trigger_meta_content_' + i"
-                                                     class="adanos-code-textarea  text-monospace"
-                                                     v-model="trigger.meta_arr.title"
-                                                     placeholder="通知标题，默认为规则名称"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
-                                              :label-for="'trigger_meta_template_id_' + i">
-                                    <b-form-input :id="'trigger_meta_template_id_' + i"
-                                                  v-model="trigger.meta_arr.template_id"
-                                                  placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
-                                </b-form-group>
-                                <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i"
-                                              v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
-                                    <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                    <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
-                                                   class="mb-3">
-                                        <b-form-select v-model="trigger.user_refs[index]"
-                                                       :options="user_options"/>
-                                        <b-input-group-append>
-                                            <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                </b-form-group>
-
-                            </div>
-                            <div class="adanos-sub-form" v-else>
-                                <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
-                                              :label-for="'trigger_meta_' + i">
-                                    <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
-                                </b-form-group>
-                            </div>
-
-                            <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
-                        </b-card>
-                        <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
+                            <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
+                        </b-card-text>
                     </b-card>
                 </b-card-group>
 
@@ -512,6 +560,11 @@ export default {
             },
             test_message_id: this.$route.query.test_message_id !== undefined ? this.$route.query.test_message_id : null,
             test_message: null,
+
+            basic_card_fold: false,
+            rule_card_fold: false,
+            template_card_fold: false,
+            action_card_fold: false,
         };
     },
     computed: {
