@@ -1,18 +1,20 @@
 package repository
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 type Agent struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
-	IP          string    `bson:"ip" json:"ip"`
-	AgentID     string    `bson:"agent_id" json:"agent_id"`
-	Version     string    `bson:"version" json:"version"`
-	LastAliveAt time.Time `bson:"last_alive_at" json:"last_alive_at"`
+	IP          string      `bson:"ip" json:"ip"`
+	AgentID     string      `bson:"agent_id" json:"agent_id"`
+	Version     string      `bson:"version" json:"version"`
+	LastAliveAt time.Time   `bson:"last_alive_at" json:"last_alive_at"`
+	LastStat    interface{} `bson:"last_stat" json:"last_stat"`
 
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`

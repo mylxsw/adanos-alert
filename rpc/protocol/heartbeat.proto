@@ -15,6 +15,7 @@ message PingRequest {
     string agentIP = 2;
     string agentID = 3;
     string clientVersion = 4;
+    AgentInfo agent = 5;
 }
 
 message PongResponse {
@@ -22,4 +23,48 @@ message PongResponse {
     string serverVersion = 2;
 }
 
+message AgentInfo {
+    string listen = 1;
+    string logPath = 2;
 
+    AgentInfoHost host = 3;
+    AgentInfoLoad load = 4;
+    AgentInfoMemorySwap memorySwap = 5;
+    AgentInfoMemoryVirtual memoryVirtual = 6;
+}
+
+message AgentInfoLoad {
+    double load1 = 1;
+    double load5 = 2;
+    double load15 = 3;
+}
+
+message AgentInfoHost {
+    string hostname = 1;
+    int64 uptime = 2;
+    int64 bootTime = 3;
+    int64 procs = 4;
+    string os = 5;
+    string platform = 6;
+    string platformFamily = 7;
+    string platformVersion = 8;
+    string kernelVersion = 9;
+    string kernelArch = 10;
+}
+
+message AgentInfoMemorySwap {
+    int64 total = 1;
+    int64 used = 2;
+    int64 free = 3;
+    double usedPercent = 4;
+}
+
+message AgentInfoMemoryVirtual {
+    int64 total = 1;
+    int64 available = 2;
+    int64 used = 3;
+    double usedPercent = 4;
+    int64 free = 5;
+    int64 buffers = 6;
+    int64 cached = 7;
+}

@@ -132,8 +132,6 @@ let helpers = {
         {text: 'success_notice MSG', displayText: 'success_notice(msg string) string | 绿色字体显示"msg"两字'},
         {text: 'error_success_notice IS_SUCCESS MSG', displayText: 'error_success_notice(success bool, msg string) string | 显示"msg"两字，如果 success 为 true，显示绿色，否则显示红色'},
         {text: 'recoverable_notice .IsRecovery MSG', displayText: 'recoverable_notice(recovered bool, msg string) string | 显示"msg"两字，如果 recovered 为 true，显示绿色，并且自动添加 【已恢复】两字，否则显示红色'},
-        {text: 'important MSG', displayText: 'important(msg string) string | 红色字体显示"msg"两字'},
-        {text: 'important MSG', displayText: 'important(msg string) string | 红色字体显示"msg"两字'},
         {text: 'user_metas QUERY_K QUERY_V FIELD', displayText: 'user_metas(queryK, queryV string, field string) []string | 查询 queryK=queryV 的用户 field 元信息，查询结果是个字符串数组'},
         {text: 'prefix_all_str PREFIX ARR', displayText: 'prefix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加前缀'},
         {text: 'suffix_all_str SUFFIX ARR', displayText: 'suffix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加后缀'},

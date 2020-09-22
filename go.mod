@@ -3,12 +3,14 @@ module github.com/mylxsw/adanos-alert
 go 1.12
 
 require (
+	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonmedv/expr v1.8.2
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v1.0.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible // indirect
+	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/mux v1.7.4
@@ -23,14 +25,12 @@ require (
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
-	github.com/pingcap/errors v0.11.4 // indirect
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
-	github.com/pingcap/tidb v1.0.9 // indirect
-	github.com/pingcap/tipb v0.0.0-20200813070854-57da1e63f73e // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/satori/go.uuid v1.2.0
+	github.com/shirou/gopsutil v2.20.8+incompatible
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
@@ -43,6 +43,7 @@ require (
 	go.mongodb.org/mongo-driver v1.0.4
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
 	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
+	golang.org/x/sys v0.0.0-20200922070232-aee5d888a860 // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22

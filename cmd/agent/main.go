@@ -35,6 +35,7 @@ import (
 	lediscfg "github.com/ledisdb/ledisdb/config"
 )
 
+// Version GitCommit 编译参数，编译时通过编译选项 ldflags 指定
 var Version = "1.0"
 var GitCommit = "5dbef13fb456f51a5d29464d"
 
@@ -102,6 +103,8 @@ func main() {
 			DataDir:     c.String("data_dir"),
 			ServerAddr:  c.String("server_addr"),
 			ServerToken: c.String("server_token"),
+			Listen:      c.String("listen"),
+			LogPath:     c.String("log_path"),
 		}
 	})
 
@@ -154,10 +157,12 @@ func main() {
 	}
 }
 
+// ErrorCollectorWriter Agent 错误日志采集器
 type ErrorCollectorWriter struct {
 	cc container.Container
 }
 
+// NewErrorCollectorWriter 创建一个错误日志采集器
 func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 	return &ErrorCollectorWriter{cc: cc}
 }
