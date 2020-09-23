@@ -118,13 +118,15 @@
                                 target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                             </small>
                             <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
-                            <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input" description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy">
-                                <b-input-group>
-                                    <b-form-input id="aggregate_cond_input" placeholder="输入聚合条件" v-model="form.aggregate_rule"/>
-                                    <b-input-group-append>
-                                        <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
-                                    </b-input-group-append>
-                                </b-input-group>
+                            <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input">
+                                <b-btn-group class="mb-2 float-right">
+                                    <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
+                                </b-btn-group>
+                            </b-form-group>
+                            <b-form-group class="mt-2" >
+                                <codemirror v-model="form.aggregate_rule" class="adanos-code-textarea"
+                                            description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy"
+                                            :options="options.aggregate_rule"></codemirror>
                             </b-form-group>
 
                             <b-button v-b-toggle.advance variant="secondary" class="mt-2">高级</b-button>
@@ -522,6 +524,15 @@ export default {
                     placeholder: '输入规则，必须返回布尔值',
                     lineWrapping: true
                 },
+                aggregate_rule: {
+                    extraKeys: {'Alt-/': 'autocomplete'},
+                    hintOptions: {adanosType: 'GroupMatchRule'},
+                    smartIndent: true,
+                    completeSingle: false,
+                    lineNumbers: true,
+                    placeholder: '输入规则，必须返回字符串',
+                    lineWrapping: true,
+                },
                 template: {
                     extraKeys: {'Alt-/': 'autocomplete'},
                     mode: 'markdown',
@@ -596,7 +607,7 @@ export default {
          */
         checkRule() {
             if (this.form.rule.trim() === '') {
-                this.ErrorBox('规则为空，无需检查');
+                this.SuccessBox('规则为空，无需检查');
                 return;
             }
 
@@ -605,7 +616,7 @@ export default {
 
         checkIgnoreRule() {
             if (this.form.ignore_rule.trim() === '') {
-                this.ErrorBox('规则为空，无需检查');
+                this.SuccessBox('规则为空，无需检查');
                 return ;
             }
 
@@ -615,7 +626,7 @@ export default {
         checkTriggerRule(trigger) {
             let rule = trigger.pre_condition.trim();
             if (rule === '') {
-                this.ErrorBox('动作触发条件为空，无需检查');
+                this.SuccessBox('动作触发条件为空，无需检查');
                 return;
             }
 
@@ -627,7 +638,7 @@ export default {
          */
         checkTemplate(template) {
             if (template.trim() === '') {
-                this.ErrorBox('模板为空，无需检查');
+                this.SuccessBox('模板为空，无需检查');
                 return;
             }
 
@@ -639,7 +650,7 @@ export default {
          */
         checkAggregateRule(content) {
             if (content.trim() === '') {
-                this.ErrorBox('分组规则为空，无需检查');
+                this.SuccessBox('聚合条件为空，无需检查');
                 return;
             }
 
@@ -1009,5 +1020,9 @@ export default {
 
 .CodeMirror pre.CodeMirror-placeholder {
     color: #999;
+}
+.CodeMirror {
+    border: 1px solid #eee;
+    height: auto;
 }
 </style>

@@ -164,7 +164,7 @@
     }
 </script>
 
-<style>
+<style scoped>
     .adanos-input-box {
         max-width: 1000px;
     }

@@ -66,6 +66,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"format":                     fmt.Sprintf,
 		"number_beauty":              NumberBeauty,
 		"integer":                    toInteger,
+		"float":                      toFloat,
 		"mysql_slowlog":              parseMySQLSlowlog,
 		"sql_finger":                 SQLFinger,
 		"open_falcon_im":             ParseOpenFalconImMessage,
@@ -79,6 +80,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"error_notice":               errorNotice,
 		"success_notice":             successNotice,
 		"error_success_notice":       errorOrSuccessNotice,
+		"condition":                  conditionStr,
 		"recoverable_notice":         recoverableNotice,
 		"user_metas":                 BuildUserMetasFunc(cc),
 		"prefix_all_str":             prefixStrArray,
@@ -247,6 +249,16 @@ func endsWith(haystack string, needles ...string) bool {
 // toInteger 转换为整数
 func toInteger(str string) int {
 	val, err := strconv.Atoi(str)
+	if err != nil {
+		return 0
+	}
+
+	return val
+}
+
+// toFloat 字符串转 float64
+func toFloat(str string) float64 {
+	val, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		return 0
 	}
@@ -542,4 +554,13 @@ func TrimPrefixMapK(prefix string, source map[string]interface{}) map[string]int
 		res[strings.TrimPrefix(k, prefix)] = v
 	}
 	return res
+}
+
+// conditionStr 条件输出字符串，符合条件，输出 s1，否则 s2
+func conditionStr(s1, s2 string, cond bool) string {
+	if cond {
+		return s1
+	}
+
+	return s2
 }
