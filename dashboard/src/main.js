@@ -61,6 +61,7 @@ Vue.prototype.ToastError = function (message) {
 Vue.prototype.SuccessBox = function (message, cb) {
     cb = cb || function () {};
     this.$bvModal.msgBoxOk(message, {
+        title: '操作成功',
         centered: true,
         okVariant: 'success',
         headerClass: 'p-2 border-bottom-0',

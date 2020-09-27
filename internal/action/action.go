@@ -2,9 +2,11 @@ package action
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pubsub"
@@ -12,6 +14,7 @@ import (
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Action interface {
@@ -83,8 +86,9 @@ func (q *QueueAction) Validate(meta string, userRefs []string) error {
 	return q.manager.Run(q.action).Validate(meta, userRefs)
 }
 
+type MessageQuerier func(groupID primitive.ObjectID, limit int64) []repository.Message
 type Payload struct {
-	msgRepo            repository.MessageRepo
+	messageQuerier     MessageQuerier
 	Action             string                  `json:"action"`
 	Rule               repository.Rule         `json:"rule"`
 	Trigger            repository.Trigger      `json:"trigger"`
@@ -95,10 +99,8 @@ type Payload struct {
 }
 
 // Init initialize a payload
-func (payload *Payload) Init(manager Manager) {
-	manager.MustResolve(func(msgRepo repository.MessageRepo) {
-		payload.msgRepo = msgRepo
-	})
+func (payload *Payload) Init(messageQuerier MessageQuerier) {
+	payload.messageQuerier = messageQuerier
 }
 
 // MessageType return message type in group
@@ -123,17 +125,22 @@ func (payload *Payload) IsPlain() bool {
 
 // Messages get messages for group
 func (payload *Payload) Messages(limit int64) []repository.Message {
-	messages, _, err := payload.msgRepo.Paginate(bson.M{"group_ids": payload.Group.ID}, 0, limit)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"group_id": payload.Group.ID,
-			"limit":    limit,
-			"error":    err,
-		}).Errorf("query messages failed for template: %v", err)
-		return []repository.Message{}
-	}
+	return payload.messageQuerier(payload.Group.ID, limit)
+}
 
-	return messages
+func CreateRepositoryMessageQuerier(msgRepo repository.MessageRepo) func(groupID primitive.ObjectID, limit int64) []repository.Message {
+	return func(groupID primitive.ObjectID, limit int64) []repository.Message {
+		messages, _, err := msgRepo.Paginate(bson.M{"group_ids": groupID}, 0, limit)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"group_id": groupID,
+				"limit":    limit,
+				"error":    err,
+			}).Errorf("query messages failed for template: %v", err)
+			return []repository.Message{}
+		}
+		return messages
+	}
 }
 
 func (payload *Payload) Encode() []byte {
@@ -177,4 +184,24 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 
 		return nil
 	})
+}
+
+// BuildPayload 创建一个 Payload
+func BuildPayload(conf *configs.Config, messageQuerier MessageQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) *Payload {
+	payload := &Payload{
+		Action:  action,
+		Rule:    rule,
+		Trigger: trigger,
+		Group:   grp,
+	}
+	payload.Init(messageQuerier)
+
+	if conf.PreviewURL != "" {
+		payload.PreviewURL = fmt.Sprintf(conf.PreviewURL, grp.ID.Hex())
+	}
+	if conf.ReportURL != "" {
+		payload.ReportURL = fmt.Sprintf(conf.ReportURL, grp.ID.Hex())
+	}
+
+	return payload
 }

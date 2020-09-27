@@ -48,29 +48,13 @@ func NewDingdingAction(manager Manager) *DingdingAction {
 }
 
 func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
-	payload := &Payload{
-		Action:  "dingding",
-		Rule:    rule,
-		Trigger: trigger,
-		Group:   grp,
-	}
-	payload.Init(d.manager)
-
-	d.manager.MustResolve(func(conf *configs.Config) {
-		if conf.PreviewURL != "" {
-			payload.PreviewURL = fmt.Sprintf(conf.PreviewURL, grp.ID.Hex())
-		}
-		if conf.ReportURL != "" {
-			payload.ReportURL = fmt.Sprintf(conf.ReportURL, grp.ID.Hex())
-		}
-	})
 
 	var meta DingdingMeta
 	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {
 		return fmt.Errorf("parse dingding meta failed: %v", err)
 	}
 
-	return d.manager.Resolve(func(robotRepo repository.DingdingRobotRepo) error {
+	return d.manager.Resolve(func(conf *configs.Config, msgRepo repository.MessageRepo, robotRepo repository.DingdingRobotRepo) error {
 		// get robot for dingding
 		robotID, err := primitive.ObjectIDFromHex(meta.RobotID)
 		if err != nil {
@@ -82,6 +66,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return fmt.Errorf("query robot for id=%s failed: %v", meta.RobotID, err)
 		}
 
+		payload := BuildPayload(conf, CreateRepositoryMessageQuerier(msgRepo), "dingding", rule, trigger, grp)
 		ruleTemplateContent, err := template.Parse(d.manager, rule.Template, payload)
 		if err != nil {
 			ruleTemplateContent = fmt.Sprintf("<rule> template parse failed: %s", err)

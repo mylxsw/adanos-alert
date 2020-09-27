@@ -664,7 +664,7 @@ export default {
             let msg_id = this.test_message_id;
             axios.post('/api/rules-test/rule-check/' + type + '/', {content: content, msg_id: msg_id}).then(resp => {
                 if (resp.data.error === null || resp.data.error === "") {
-                    this.SuccessBox('检查通过' + (resp.data.msg !== '' ? '：' + resp.data.msg : ''));
+                    this.SuccessBox(this.$createElement('pre', {class: 'adanos-message-box-code'}, resp.data.msg));
                 } else {
                     this.ErrorBox('检查不通过：' + resp.data.error);
                 }
@@ -1024,5 +1024,17 @@ export default {
 .CodeMirror {
     border: 1px solid #eee;
     height: auto;
+}
+
+.adanos-message-box-code {
+    max-height: 400px;
+    overflow-y: scroll;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 80%;
+    color: #e83e8c;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 </style>

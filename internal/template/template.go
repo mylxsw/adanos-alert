@@ -29,7 +29,11 @@ type SimpleContainer interface {
 // Parse parse template with data to html
 func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, error) {
 	var buffer bytes.Buffer
-	if err := template.Must(CreateParser(cc, templateStr)).Execute(&buffer, data); err != nil {
+	par, err := CreateParser(cc, templateStr)
+	if err != nil {
+		return "", err
+	}
+	if err := par.Execute(&buffer, data); err != nil {
 		return "", err
 	}
 

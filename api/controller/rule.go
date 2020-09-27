@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/action"
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -206,7 +207,7 @@ func (r RuleForm) Validate(req web.Request) error {
 }
 
 // Check validate the rule
-func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) web.Response {
+func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo repository.MessageRepo) web.Response {
 	content := ctx.Input("content")
 	msgID := ctx.Input("msg_id")
 
@@ -253,7 +254,15 @@ func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) w
 	case repository.TemplateTypeTriggerRule:
 		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
 	case repository.TemplateTypeTemplate:
-		_, err = template.CreateParser(r.cc, content)
+		data, err1 := template.Parse(r.cc, content, createPayloadForTemplateCheck(r, conf, msgID, msgRepo, content))
+		if err1 != nil {
+			err = err1
+		} else {
+			return ctx.JSON(web.M{
+				"error": nil,
+				"msg":   data,
+			})
+		}
 	case "aggregate_rule":
 		finger, err1 := matcher.NewMessageFinger(content)
 		if err1 == nil {
@@ -286,6 +295,66 @@ func (r RuleController) Check(ctx web.Context, msgRepo repository.MessageRepo) w
 		"error": nil,
 		"msg":   "",
 	})
+}
+
+func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID string, msgRepo repository.MessageRepo, content string) *action.Payload {
+	triggers := []repository.Trigger{
+		{
+			ID:           primitive.NewObjectID(),
+			Name:         "测试触发规则",
+			PreCondition: "",
+			Action:       "dingding",
+			UserRefs:     []primitive.ObjectID{primitive.NewObjectID()},
+			Status:       repository.TriggerStatusOK,
+		},
+	}
+	rule := repository.Rule{
+		ID:          primitive.NewObjectID(),
+		Name:        "测试报警规则",
+		Description: "测试报警规则描述",
+		Tags:        []string{"test-tag"},
+		ReadyType:   repository.ReadyTypeInterval,
+		Interval:    60,
+		Template:    content,
+		Triggers:    triggers,
+		Status:      repository.RuleStatusEnabled,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	messagesQuerier := func(groupID primitive.ObjectID, limit int64) []repository.Message {
+		msg, err := r.getMessageByID(msgID, msgRepo)
+		if err != nil {
+			return []repository.Message{}
+		}
+
+		messages := make([]repository.Message, 0)
+		for i := int64(0); i < limit; i++ {
+			messages = append(messages, msg)
+		}
+
+		return messages
+	}
+
+	payload := action.BuildPayload(
+		conf,
+		messagesQuerier,
+		"dingding",
+		rule,
+		triggers[0],
+		repository.MessageGroup{
+			ID:           primitive.NewObjectID(),
+			SeqNum:       1000,
+			Type:         repository.MessageTypePlain,
+			MessageCount: 3,
+			AggregateKey: "AggregateKey",
+			Rule:         rule.ToGroupRule("", repository.MessageTypePlain),
+			Actions:      triggers,
+			Status:       repository.MessageGroupStatusOK,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+	)
+	return payload
 }
 
 // Add create a new rule
