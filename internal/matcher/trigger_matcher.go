@@ -90,7 +90,7 @@ func (tc *TriggerContext) MessagesWithTagsCount(tags string) int64 {
 	return count
 }
 
-// MessagesWithMetaCount get the count for messasges has a meta[key] equals to value
+// MessagesWithMetaCount get the count for messages has a meta[key] equals to value
 func (tc *TriggerContext) MessagesWithMetaCount(key, value string) int64 {
 	var count int64 = 0
 	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {

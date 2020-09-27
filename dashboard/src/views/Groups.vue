@@ -16,7 +16,9 @@
                 <template v-slot:cell(actions)="row">
                     <b-list-group style="font-size: 80%">
                         <b-list-group-item v-for="(act, index) in row.item.actions" :key="index" :variant="act.trigger_status === 'ok' ? 'success': 'danger'">
-                            <code class="action-pre-condition" v-b-tooltip :title="act.pre_condition">{{ act.pre_condition || '全部' }}</code> <b class="text-dark"> | </b>
+                            <code class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || '全部' }}</code>
+                            <code class="action-pre-condition" v-if="act.is_else_trigger">兜底</code>
+                            <b :class="act.is_else_trigger ? 'text-warning':'text-dark'"> | </b>
                             {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>

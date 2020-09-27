@@ -44,13 +44,19 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 
 		hasError := false
 		maxFailedCount := 0
-		triggers := make([]repository.Trigger, 0)
+		matchedTriggers := make([]repository.Trigger, 0)
+		elseTriggers := make([]repository.Trigger, 0)
 		for _, trigger := range rule.Triggers {
 			// check whether the trigger has been executed
 			for _, act := range grp.Actions {
 				if act.ID == trigger.ID && act.Status == repository.TriggerStatusOK {
 					continue
 				}
+			}
+
+			if trigger.IsElseTrigger {
+				elseTriggers = append(elseTriggers, trigger)
+				continue
 			}
 
 			tm, err := matcher.NewTriggerMatcher(trigger)
@@ -79,25 +85,28 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 			}
 
 			if matched {
-				if err := manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
-					trigger.Status = repository.TriggerStatusFailed
-					trigger.FailedCount = trigger.FailedCount + 1
-					trigger.FailedReason = err.Error()
-					hasError = true
-				} else {
-					trigger.Status = repository.TriggerStatusOK
-				}
+				hasError, matchedTriggers, maxFailedCount = a.matchedTriggerAction(
+					grp,
+					manager,
+					trigger,
+					rule,
+					matchedTriggers,
+					maxFailedCount,
+				)
+			}
+		}
 
-				triggers = append(triggers, trigger)
-				if trigger.FailedCount > maxFailedCount {
-					maxFailedCount = trigger.FailedCount
-				}
-
-				log.WithFields(log.Fields{
-					"trigger_id": trigger.ID,
-					"status":     trigger.Status,
-					"grp_id":     grp.ID,
-				}).Debug("change trigger status")
+		// 所有非 ElseTrigger 都没有匹配，执行 ElseTrigger
+		if len(matchedTriggers) == 0 && len(elseTriggers) > 0 {
+			for _, trigger := range elseTriggers {
+				hasError, matchedTriggers, maxFailedCount = a.matchedTriggerAction(
+					grp,
+					manager,
+					trigger,
+					rule,
+					matchedTriggers,
+					maxFailedCount,
+				)
 			}
 		}
 
@@ -113,11 +122,35 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 		log.WithFields(log.Fields{
 			"grp_id": grp.ID,
 			"status": grp.Status,
-		}).Debug("change group status for triggers")
+		}).Debug("change group status for matchedTriggers")
 
-		grp.Actions = mergeActions(grp.Actions, triggers)
+		grp.Actions = mergeActions(grp.Actions, matchedTriggers)
 		return groupRepo.UpdateID(grp.ID, grp)
 	})
+}
+
+func (a TriggerJob) matchedTriggerAction(grp repository.MessageGroup, manager action.Manager, trigger repository.Trigger, rule repository.Rule, matchedTriggers []repository.Trigger, maxFailedCount int) (bool, []repository.Trigger, int) {
+	hasError := false
+	if err := manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
+		trigger.Status = repository.TriggerStatusFailed
+		trigger.FailedCount = trigger.FailedCount + 1
+		trigger.FailedReason = err.Error()
+		hasError = true
+	} else {
+		trigger.Status = repository.TriggerStatusOK
+	}
+
+	matchedTriggers = append(matchedTriggers, trigger)
+	if trigger.FailedCount > maxFailedCount {
+		maxFailedCount = trigger.FailedCount
+	}
+
+	log.WithFields(log.Fields{
+		"trigger_id": trigger.ID,
+		"status":     trigger.Status,
+		"grp_id":     grp.ID,
+	}).Debug("change trigger status")
+	return hasError, matchedTriggers, maxFailedCount
 }
 
 func mergeActions(actions []repository.Trigger, triggers []repository.Trigger) []repository.Trigger {

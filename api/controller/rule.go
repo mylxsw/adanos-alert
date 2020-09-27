@@ -52,12 +52,13 @@ func (r RuleController) Register(router *web.Router) {
 
 // RuleTriggerForm is a form object using to hold a trigger
 type RuleTriggerForm struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	PreCondition string   `json:"pre_condition"`
-	Action       string   `json:"action"`
-	Meta         string   `json:"meta"`
-	UserRefs     []string `json:"user_refs"`
+	ID            string   `json:"id"`
+	Name          string   `json:"name"`
+	IsElseTrigger bool     `json:"is_else_trigger"`
+	PreCondition  string   `json:"pre_condition"`
+	Action        string   `json:"action"`
+	Meta          string   `json:"meta"`
+	UserRefs      []string `json:"user_refs"`
 }
 
 // RuleForm is a form object using create or update rule
@@ -379,11 +380,12 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		}
 
 		triggers = append(triggers, repository.Trigger{
-			Name:         t.Name,
-			PreCondition: t.PreCondition,
-			Action:       t.Action,
-			Meta:         t.Meta,
-			UserRefs:     users,
+			Name:          t.Name,
+			PreCondition:  t.PreCondition,
+			Action:        t.Action,
+			Meta:          t.Meta,
+			IsElseTrigger: t.IsElseTrigger,
+			UserRefs:      users,
 		})
 	}
 
@@ -461,12 +463,13 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 
 		triggerID, _ := primitive.ObjectIDFromHex(t.ID)
 		triggers = append(triggers, repository.Trigger{
-			ID:           triggerID,
-			Name:         t.Name,
-			PreCondition: t.PreCondition,
-			Action:       t.Action,
-			Meta:         t.Meta,
-			UserRefs:     users,
+			ID:            triggerID,
+			Name:          t.Name,
+			PreCondition:  t.PreCondition,
+			Action:        t.Action,
+			Meta:          t.Meta,
+			IsElseTrigger: t.IsElseTrigger,
+			UserRefs:      users,
 		})
 	}
 

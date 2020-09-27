@@ -212,24 +212,28 @@
                         <b-card-text v-if="action_card_fold">...</b-card-text>
                         <b-card-text v-if="!action_card_fold">
                             <p class="text-muted">分组达到报警周期后，会按照这里的规则来将分组信息通知给对应的通道。</p>
-                            <b-card :header="trigger.id" border-variant="dark" header-bg-variant="dark"
+                            <b-card :header="trigger.id" :border-variant="trigger.is_else_trigger ? 'warning':'dark'" :header-bg-variant="trigger.is_else_trigger ? 'warning':'dark'"
                                     header-text-variant="white" class="mb-3" v-bind:key="i"
                                     v-for="(trigger, i) in form.triggers">
                                 <b-form-group label-cols="2" :id="'trigger_' + i" label="名称"
                                               :label-for="'trigger_name' + i">
                                     <b-form-input :id="'trigger_name_' + i" v-model="trigger.name" placeholder="动作名称，可选"/>
                                 </b-form-group>
-                                <b-form-group label-cols="2" :id="'trigger_' + i" label="条件"
-                                              :label-for="'trigger_pre_condition_' + i">
-                                    <b-btn-group class="mb-2" v-if="!trigger.pre_condition_fold">
-                                        <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
-                                        <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
-                                    </b-btn-group>
-                                    <span class="text-muted" style="line-height: 2.5" v-if="trigger.pre_condition_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
-                                    <b-btn-group class="mb-2 float-right">
-                                        <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查</b-btn>
-                                        <b-btn variant="info" class="float-right" @click="trigger.pre_condition_fold = !trigger.pre_condition_fold">{{ trigger.pre_condition_fold ? '展开' : '收起' }}</b-btn>
-                                    </b-btn-group>
+                                <b-form-group label-cols="2" :id="'trigger_' + i" label="条件" :label-for="'trigger_pre_condition_' + i">
+                                    <div v-if="!trigger.is_else_trigger">
+                                        <b-btn-group class="mb-2" v-if="!trigger.pre_condition_fold">
+                                            <b-btn variant="warning" @click="openTriggerRuleTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="dark" @click="toggleHelp(trigger)">帮助</b-btn>
+                                        </b-btn-group>
+                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.pre_condition_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkTriggerRule(trigger)">检查</b-btn>
+                                            <b-btn variant="info" class="float-right" @click="trigger.pre_condition_fold = !trigger.pre_condition_fold">{{ trigger.pre_condition_fold ? '展开' : '收起' }}</b-btn>
+                                        </b-btn-group>
+                                    </div>
+                                    <div v-else>
+                                        <span class="text-muted" style="line-height: 2.5">这是一个 <b>兜底动作</b>，当其它动作都没有被触发时生效。</span>
+                                    </div>
                                 </b-form-group>
                                 <b-form-group label-cols="2" v-if="!trigger.pre_condition_fold">
                                     <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
@@ -325,7 +329,10 @@
 
                                 <b-btn class="float-right" variant="danger" @click="triggerDelete(i)">删除动作</b-btn>
                             </b-card>
-                            <b-btn variant="success" class="mb-3" @click="triggerAdd()">添加</b-btn>
+                            <b-dropdown variant="success" text="添加" class="mb-3">
+                                <b-dropdown-item @click="triggerAdd(false)">规则动作</b-dropdown-item>
+                                <b-dropdown-item @click="triggerAdd(true)">兜底动作</b-dropdown-item>
+                            </b-dropdown>
                         </b-card-text>
                     </b-card>
                 </b-card-group>
@@ -756,10 +763,11 @@ export default {
         /**
          * 添加动作
          */
-        triggerAdd() {
+        triggerAdd(isElseTrigger) {
             this.form.triggers.push({
                 name: '',
                 pre_condition: '',
+                is_else_trigger: isElseTrigger,
                 pre_condition_fold: true,
                 action: 'dingding',
                 meta: '',

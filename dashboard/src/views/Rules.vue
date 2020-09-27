@@ -49,10 +49,11 @@
                 <template v-slot:cell(triggers)="row">
                     <b-list-group>
                         <b-list-group-item v-for="(trigger, index) in row.item.triggers" :key="index">
-                            <code v-b-tooltip :title="trigger.pre_condition" class="action-pre-condition">
+                            <code v-b-tooltip :title="trigger.pre_condition" class="action-pre-condition" v-if="!trigger.is_else_trigger">
                                 {{ trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition || 'true') : trigger.name }}
                             </code>
-                            <b class="text-success"> | </b> {{ formatAction(trigger.action) }}
+                            <code v-if="trigger.is_else_trigger">兜底</code>
+                            <b :class="trigger.is_else_trigger ? 'text-warning' : 'text-success'"> | </b> {{ formatAction(trigger.action) }}
                             <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
                         </b-list-group-item>
                     </b-list-group>
