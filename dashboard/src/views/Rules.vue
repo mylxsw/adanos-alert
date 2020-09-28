@@ -1,7 +1,7 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-card class="mb-2">
+            <b-card class="mb-2 search-box">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <b-form inline @submit="searchSubmit">
                         <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="名称" v-model="search.name"></b-input>
@@ -69,7 +69,7 @@
                     <b-spinner class="align-middle"></b-spinner>
                     <strong> Loading...</strong>
                 </template>
-                <template v-slot:cell(operations)="row">
+                <template v-slot:cell(operations)="row" >
                     <b-button-group class="mr-2">
                         <b-button size="sm" variant="success" :to="{path:'/', query:{rule_id: row.item.id}}">报警
                         </b-button>
@@ -110,9 +110,9 @@ export default {
             isBusy: true,
             fields: [
                 {key: 'name', label: '规则名称/ID'},
-                {key: 'rule', label: '规则'},
-                {key: 'triggers', label: '动作'},
-                {key: 'updated_at', label: '状态/最后更新'},
+                {key: 'rule', label: '规则', class: 'th-autohide-md'},
+                {key: 'triggers', label: '动作', class: 'th-autohide-sm'},
+                {key: 'updated_at', label: '状态/最后更新', class: 'th-autohide-sm'},
                 {key: 'operations', label: '操作'}
             ],
             cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),

@@ -1,7 +1,7 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-card class="mb-2">
+            <b-card class="mb-2 search-box">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <div>
                         <b-badge :variant="$route.query.type === undefined ? 'primary':''" class="mr-1" :to="'/templates'">全部</b-badge>
@@ -17,7 +17,7 @@
             <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(name)="row">
                     <b>{{ row.item.name }}</b>
-                    <p><i>{{ row.item.description }}</i></p>
+                    <p class="th-autohide-sm"><i>{{ row.item.description }}</i></p>
                 </template>
                 <template v-slot:cell(metas)="row">
                     <b-list-group>
@@ -44,15 +44,15 @@
                     <strong> Loading...</strong>
                 </template>
                 <template v-slot:cell(operations)="row">
-                    <b-button-group class="mr-2">
+                    <b-button-group class="mr-2 th-autohide-sm">
                         <b-button size="sm" @click="row.toggleDetails">
-                            {{ row.detailsShowing ? '隐藏' : '显示' }}详情
+                            {{ row.detailsShowing ? '隐藏' : '详情' }}
                         </b-button>
                     </b-button-group>
                     <b-button-group>
                         <b-button v-if="!row.item.predefined" size="sm" variant="info" :to="{path:'/templates/' + row.item.id + '/edit'}">编辑</b-button>
-                        <b-button v-if="!row.item.predefined" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">删除</b-button>
-                        <b-button v-if="row.item.predefined" size="sm" disabled>预置</b-button>
+                        <b-button v-if="!row.item.predefined" class="th-autohide-sm" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">删除</b-button>
+                        <b-button v-if="row.item.predefined" class="th-autohide-sm" size="sm" disabled>预置</b-button>
                     </b-button-group>
                 </template>
                 <template v-slot:row-details="row">
@@ -75,10 +75,10 @@
                 templates: [],
                 isBusy: true,
                 fields: [
-                    {key: 'type', label: '类型'},
-                    {key: 'name', label: '名称'},
-                    {key: 'content', label: '模板内容'},
-                    {key: 'updated_at', label: '最后更新'},
+                    {key: 'type', label: '类型', sortable: true, class: 'th-autohide-sm'},
+                    {key: 'name', label: '名称', sortable: true, class: 'th-column-width-limit'},
+                    {key: 'content', label: '模板内容', class: 'th-autohide-md'},
+                    {key: 'updated_at', label: '最后更新', sortable: true, class: 'th-autohide-md'},
                     {key: 'operations', label: '操作'}
                 ],
             };
@@ -125,4 +125,5 @@
         display: inline-block;
         font-size: 70%;
     }
+
 </style>

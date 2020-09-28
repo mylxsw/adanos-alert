@@ -76,4 +76,23 @@
     .main-view {
         padding: 15px;
     }
+
+    .th-column-width-limit {
+        max-width: 300px;
+    }
+
+    @media screen and (max-width: 1366px) {
+        .th-autohide-md {
+            display: none;
+        }
+    }
+    @media screen and (max-width: 768px) {
+        .th-autohide-sm {
+            display: none;
+        }
+        .search-box {
+            display: none;
+        }
+    }
+
 </style>
