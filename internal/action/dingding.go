@@ -66,7 +66,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return fmt.Errorf("query robot for id=%s failed: %v", meta.RobotID, err)
 		}
 
-		payload := BuildPayload(conf, CreateRepositoryMessageQuerier(msgRepo), "dingding", rule, trigger, grp)
+		payload := CreatePayload(conf, CreateRepositoryMessageQuerier(msgRepo), "dingding", rule, trigger, grp)
 		ruleTemplateContent, err := template.Parse(d.manager, rule.Template, payload)
 		if err != nil {
 			ruleTemplateContent = fmt.Sprintf("<rule> template parse failed: %s", err)

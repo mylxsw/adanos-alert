@@ -336,7 +336,7 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 		return messages
 	}
 
-	payload := action.BuildPayload(
+	payload := action.CreatePayload(
 		conf,
 		messagesQuerier,
 		"dingding",

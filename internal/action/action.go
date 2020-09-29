@@ -186,8 +186,8 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 	})
 }
 
-// BuildPayload 创建一个 Payload
-func BuildPayload(conf *configs.Config, messageQuerier MessageQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) *Payload {
+// CreatePayload 创建一个 Payload
+func CreatePayload(conf *configs.Config, messageQuerier MessageQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) *Payload {
 	payload := &Payload{
 		Action:  action,
 		Rule:    rule,

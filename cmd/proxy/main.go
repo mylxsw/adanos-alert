@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/connector"
@@ -78,15 +80,14 @@ func main() {
 				RecoveryAfter:   c.String("recovery-after"),
 			}
 
-			return connector.Send(
-				adanosServers,
-				c.String("adanos-token"),
-				createMessageMeta(c.StringSlice("meta")),
-				c.StringSlice("tag"),
-				c.String("origin"),
-				ctl,
-				message,
-			)
+			msg := connector.NewMessage(message).
+				WithTags(c.StringSlice("tag")...).
+				WithOrigin(c.String("origin")).
+				WithMetas(createMessageMeta(c.StringSlice("meta"))).
+				WithCtl(ctl)
+
+			ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
+			return connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, msg)
 		},
 	}
 
