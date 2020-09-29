@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -44,6 +45,7 @@ func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, er
 func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":                     cutOff,
+		"cutoff_line":                CutOffLine,
 		"json_fields_cutoff":         JSONCutOffFields,
 		"map_fields_cutoff":          MapFieldsCutoff,
 		"implode":                    Implode,
@@ -90,6 +92,8 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"prefix_all_str":             prefixStrArray,
 		"suffix_all_str":             suffixStrArray,
 		"trim_prefix_map_k":          TrimPrefixMapK,
+		"line_filter_include":        LineFilterInclude,
+		"line_filter_exclude":        LineFilterExclude,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -134,6 +138,38 @@ func cutOff(maxLen int, val string) string {
 	}
 
 	return string(valRune[0:maxLen]) + "..."
+}
+
+// CutOffLine 字符串截取指定行数
+func CutOffLine(maxLine int, val string) string {
+	lines := strings.Split(val, "\n")
+	if len(lines) > maxLine {
+		return strings.Join(lines[:maxLine], "\n") + "\n..."
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func LineFilterInclude(includeStr string, val string) string {
+	lines := strings.Split(val, "\n")
+	var results []string
+	_ = coll.Filter(lines, &results, func(line string) bool {
+		matched, _ := regexp.MatchString(includeStr, line)
+		return matched || strings.Contains(line, includeStr)
+	})
+
+	return strings.Join(results, "\n")
+}
+
+func LineFilterExclude(excludeStr string, val string) string {
+	lines := strings.Split(val, "\n")
+	var results []string
+	_ = coll.Filter(lines, &results, func(line string) bool {
+		matched, _ := regexp.MatchString(excludeStr, line)
+		return !matched && !strings.Contains(line, excludeStr)
+	})
+
+	return strings.Join(results, "\n")
 }
 
 // 字符串多行缩进

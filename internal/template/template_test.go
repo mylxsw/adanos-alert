@@ -297,3 +297,16 @@ func TestJSONCutOffFields(t *testing.T) {
 	data := Serialize(TrimPrefixMapK("context.", MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel")))
 	assert.Equal(t, `{"final_channel":"亿美软通","msg":"短信发送失败，该错误不允许重试其它通道，..."}`, data)
 }
+
+func TestCutoffLine(t *testing.T) {
+	assert.Equal(t, 5+1, len(strings.Split(CutOffLine(5, jsonContent), "\n")))
+}
+
+func TestLineFilterInclude(t *testing.T) {
+	assert.Equal(t, `        "msg": "短信发送失败，该错误不允许重试其它通道，请人工介入处理",
+        "sms": {
+            "phone": "15923356841",
+            "msg": "停机或空号",`, LineFilterInclude(`"(sms|phone|msg)"`, jsonContent))
+
+	assert.Equal(t, 32, len(strings.Split(LineFilterExclude(`"(sms|phone|msg)"`, jsonContent), "\n")))
+}
