@@ -30,7 +30,9 @@ type Tag struct {
 }
 
 type TimeRange struct {
+	// StartTime 开始时间（包含该时间）
 	StartTime string `bson:"start_time" json:"start_time"`
+	// EndTime 截止时间（不包含改时间）
 	EndTime   string `bson:"end_time" json:"end_time"`
 	Interval  int64  `bson:"interval" json:"interval"`
 }
@@ -145,6 +147,7 @@ func (t Times) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
 }
 
+// ExpectReadyAtInTimeRange 根据当前时间和时间范围，计算预期时间，时间范围为前开后闭区间
 func ExpectReadyAtInTimeRange(now time.Time, timeRanges []TimeRange) time.Time {
 	todayTimeStr := now.Format(time.RFC3339)
 	zeroTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+"00:00:00"+todayTimeStr[19:])
@@ -154,14 +157,34 @@ func ExpectReadyAtInTimeRange(now time.Time, timeRanges []TimeRange) time.Time {
 		startTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.StartTime[:5]+":00"+todayTimeStr[19:])
 		endTime, _ := time.Parse(time.RFC3339, todayTimeStr[0:11]+t.EndTime[:5]+":00"+todayTimeStr[19:])
 
+		deadlineTs := now.Add(time.Duration(t.Interval) * time.Second)
 		if startTime.After(endTime) {
-			if (timeBeforeOrEq(now, endTime) && timeAfterOrEq(now, zeroTime)) || (timeBeforeOrEq(now, lastTime) && timeAfterOrEq(now, startTime)) {
-				return now.Add(time.Duration(t.Interval) * time.Second)
+			// zeroTime -1- endTime -2- startTime -3- lastTime ...
+			// 当前时间在 1/3 位置时，匹配该规则，时间范围跨天
+			// 预期执行时间如果超过该范围，则使用边界时间代替
+			if (now.Before(endTime) && timeAfterOrEq(now, zeroTime)) || (now.Before(lastTime) && timeAfterOrEq(now, startTime)) {
+				if now.Before(lastTime) && timeAfterOrEq(now, startTime) {
+					if timeAfterOrEq(deadlineTs, endTime.AddDate(0, 0, 1)) {
+						return lastTime
+					}
+				} else if now.Before(endTime) && timeAfterOrEq(now, zeroTime) {
+					if timeAfterOrEq(deadlineTs, endTime) {
+						return endTime
+					}
+				}
+
+				return deadlineTs
 			}
 		}
 
-		if timeBeforeOrEq(now, endTime) && timeAfterOrEq(now, startTime) {
-			return now.Add(time.Duration(t.Interval) * time.Second)
+		// startTime -1- endTime
+		// 当前时间在 1 的位置匹配该规则，超过范围使用边界时间代替
+		if now.Before(endTime) && timeAfterOrEq(now, startTime) {
+			if timeAfterOrEq(deadlineTs, endTime) {
+				return endTime
+			}
+
+			return deadlineTs
 		}
 	}
 

@@ -597,7 +597,7 @@ export default {
                     continue;
                 }
 
-                results.push(startT.substr(0, 5) + " ~ " + endT.substr(0, 5) + ": 每隔 " + interval + " 分钟");
+                results.push("[" + startT.substr(0, 5) + " ~ " + endT.substr(0, 5) + "): 每隔 " + interval + " 分钟");
             }
 
             return results.join("; ");
