@@ -27,21 +27,21 @@ func (a *RecoveryJob) Handle() {
 	case a.executing <- struct{}{}:
 		defer func() { <-a.executing }()
 
-		a.app.MustResolve(func(recoveryRepo repository.RecoveryRepo, msgRepo repository.MessageRepo) {
-			messages, err := recoveryRepo.RecoverableMessages(context.TODO(), time.Now())
+		a.app.MustResolve(func(recoveryRepo repository.RecoveryRepo, eventRepo repository.EventRepo) {
+			events, err := recoveryRepo.RecoverableEvents(context.TODO(), time.Now())
 			if err != nil {
-				log.Errorf("query recoverable messages from mongodb failed: %v", err)
+				log.Errorf("query recoverable events from mongodb failed: %v", err)
 				return
 			}
 
-			for _, m := range messages {
+			for _, m := range events {
 				(func(m repository.Recovery) {
 					defer func() {
 						if err := recover(); err != nil {
-							log.With(m).Errorf("add recovery message failed: %v", err)
+							log.With(m).Errorf("add recovery event failed: %v", err)
 						} else {
 							if err := recoveryRepo.Delete(context.TODO(), m.RecoveryID); err != nil {
-								log.With(m).Errorf("remove recovery message from mongodb failed: %v", err)
+								log.With(m).Errorf("remove recovery event from mongodb failed: %v", err)
 							}
 						}
 					}()
@@ -49,12 +49,12 @@ func (a *RecoveryJob) Handle() {
 						return
 					}
 
-					msgSample, err := msgRepo.Get(m.RefIDs[len(m.RefIDs)-1])
+					msgSample, err := eventRepo.Get(m.RefIDs[len(m.RefIDs)-1])
 					if err != nil {
-						log.With(m).Errorf("get recovery message sample failed: %v", err)
+						log.With(m).Errorf("get recovery event sample failed: %v", err)
 					}
 
-					msgSample.Type = repository.MessageTypeRecovery
+					msgSample.Type = repository.EventTypeRecovery
 					msgSample.ID = primitive.NilObjectID
 					msgSample.GroupID = nil
 					msgSample.CreatedAt = time.Now()
@@ -66,8 +66,8 @@ func (a *RecoveryJob) Handle() {
 						msgSample.Tags,
 					).([]string), "adanos-recovery")
 
-					if _, err := msgRepo.AddWithContext(context.TODO(), msgSample); err != nil {
-						log.With(m).Errorf("add recovery message failed: %v", err)
+					if _, err := eventRepo.AddWithContext(context.TODO(), msgSample); err != nil {
+						log.With(m).Errorf("add recovery event failed: %v", err)
 					}
 				})(m)
 			}

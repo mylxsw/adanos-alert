@@ -5,8 +5,8 @@
                 <b-card-text style="display: flex; justify-content:space-between">
                     <div>
                         <b-badge :variant="$route.query.type === undefined ? 'primary':''" class="mr-1" :to="'/templates'">全部</b-badge>
-                        <b-badge :variant="$route.query.type === 'match_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=match_rule'">分组匹配规则</b-badge>
-                        <b-badge :variant="$route.query.type === 'template' ? 'primary':''" class="mr-1" :to="'/templates?type=template'">分组展示模板</b-badge>
+                        <b-badge :variant="$route.query.type === 'match_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=match_rule'">事件组匹配规则</b-badge>
+                        <b-badge :variant="$route.query.type === 'template' ? 'primary':''" class="mr-1" :to="'/templates?type=template'">事件组展示模板</b-badge>
                         <b-badge :variant="$route.query.type === 'trigger_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=trigger_rule'">动作触发规则</b-badge>
                         <b-badge :variant="$route.query.type === 'template_dingding' ? 'primary':''" class="mr-1" :to="'/templates?type=template_dingding'">钉钉通知模板</b-badge>
                         <b-badge :variant="$route.query.type === 'template_report' ? 'primary':''" class="mr-1" :to="'/templates?type=template_report'">报告模板</b-badge>
@@ -27,8 +27,8 @@
                     </b-list-group>
                 </template>
                 <template v-slot:cell(type)="row">
-                    <b-badge v-if="row.item.type === 'match_rule'" variant="success">分组匹配规则</b-badge>
-                    <b-badge v-if="row.item.type === 'template'" variant="info">分组展示模板</b-badge>
+                    <b-badge v-if="row.item.type === 'match_rule'" variant="success">事件组匹配规则</b-badge>
+                    <b-badge v-if="row.item.type === 'template'" variant="info">事件组展示模板</b-badge>
                     <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">动作触发规则</b-badge>
                     <b-badge v-if="row.item.type === 'template_dingding'" variant="info">钉钉通知模板</b-badge>
                     <b-badge v-if="row.item.type === 'template_report'" variant="warning">报告模板</b-badge>

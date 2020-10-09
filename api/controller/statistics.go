@@ -33,7 +33,7 @@ type MessageGroupByDatetimeCount struct {
 }
 
 // DailyGroupCount 每日报警次数汇总
-func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repository.MessageGroupRepo) ([]MessageGroupByDatetimeCount, error) {
+func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repository.EventGroupRepo) ([]MessageGroupByDatetimeCount, error) {
 	timeoutCtx, _ := context.WithTimeout(ctx.Context(), 5*time.Second)
 	dailyCounts, err := groupRepo.StatByDatetimeCount(timeoutCtx, time.Now().Add(- 30*24*time.Hour), time.Now(), 24)
 	if err != nil {
@@ -80,13 +80,13 @@ func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repos
 }
 
 // UserGroupCounts 用户报警次数汇总
-func (s *StatisticsController) UserGroupCounts(ctx web.Context, groupRepo repository.MessageGroupRepo) ([]repository.MessageGroupByUserCount, error) {
+func (s *StatisticsController) UserGroupCounts(ctx web.Context, groupRepo repository.EventGroupRepo) ([]repository.EventGroupByUserCount, error) {
 	timeoutCtx, _ := context.WithTimeout(ctx.Context(), 5*time.Second)
 	return groupRepo.StatByUserCount(timeoutCtx, time.Now().Add(- 30*24*time.Hour), time.Now())
 }
 
 // RuleGroupCounts 报警规则报警次数汇总
-func (s *StatisticsController) RuleGroupCounts(ctx web.Context, groupRepo repository.MessageGroupRepo) ([]repository.MessageGroupByRuleCount, error) {
+func (s *StatisticsController) RuleGroupCounts(ctx web.Context, groupRepo repository.EventGroupRepo) ([]repository.EventGroupByRuleCount, error) {
 	timeoutCtx, _ := context.WithTimeout(ctx.Context(), 5*time.Second)
 	return groupRepo.StatByRuleCount(timeoutCtx, time.Now().Add(- 30*24*time.Hour), time.Now())
 }

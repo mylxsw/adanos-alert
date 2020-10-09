@@ -60,8 +60,8 @@
                     type: 'template',
                 },
                 type_options: [
-                    {value: 'match_rule', text: '分组匹配规则'},
-                    {value: 'template', text: '分组展示模板'},
+                    {value: 'match_rule', text: '事件组匹配规则'},
+                    {value: 'template', text: '事件组展示模板'},
                     {value: 'trigger_rule', text: '动作触发规则'},
                     {value: 'template_dingding', text: '钉钉通知模板'},
                     {value: 'template_report', text: '报告模板'},
@@ -118,7 +118,7 @@
                         hintOptions: {adanosType: 'DingTemplate'},
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '默认使用分组展示模板',
+                        placeholder: '默认使用事件组展示模板',
                         lineWrapping: true
                     }
                 }

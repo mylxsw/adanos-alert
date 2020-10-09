@@ -12,12 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MessageGroupRepo struct {
+type EventGroupRepo struct {
 	col     *mongo.Collection
 	seqRepo repository.SequenceRepo
 }
 
-func NewMessageGroupRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageGroupRepo {
+func NewEventGroupRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.EventGroupRepo {
 	grp := db.Collection("message_group")
 	_, err := grp.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1},
@@ -27,10 +27,10 @@ func NewMessageGroupRepo(db *mongo.Database, seqRepo repository.SequenceRepo) re
 		log.Errorf("can not create index for message_group.created_at: %v", err)
 	}
 
-	return &MessageGroupRepo{col: grp, seqRepo: seqRepo}
+	return &EventGroupRepo{col: grp, seqRepo: seqRepo}
 }
 
-func (m MessageGroupRepo) Add(grp repository.MessageGroup) (id primitive.ObjectID, err error) {
+func (m EventGroupRepo) Add(grp repository.EventGroup) (id primitive.ObjectID, err error) {
 	grp.CreatedAt = time.Now()
 	grp.UpdatedAt = grp.CreatedAt
 	seq, err := m.seqRepo.Next("group_seq")
@@ -46,7 +46,7 @@ func (m MessageGroupRepo) Add(grp repository.MessageGroup) (id primitive.ObjectI
 	return rs.InsertedID.(primitive.ObjectID), nil
 }
 
-func (m MessageGroupRepo) Get(id primitive.ObjectID) (grp repository.MessageGroup, err error) {
+func (m EventGroupRepo) Get(id primitive.ObjectID) (grp repository.EventGroup, err error) {
 	err = m.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&grp)
 	if err == mongo.ErrNoDocuments {
 		err = repository.ErrNotFound
@@ -54,15 +54,15 @@ func (m MessageGroupRepo) Get(id primitive.ObjectID) (grp repository.MessageGrou
 	return
 }
 
-func (m MessageGroupRepo) Find(filter bson.M) (grps []repository.MessageGroup, err error) {
-	grps = make([]repository.MessageGroup, 0)
+func (m EventGroupRepo) Find(filter bson.M) (grps []repository.EventGroup, err error) {
+	grps = make([]repository.EventGroup, 0)
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
 	}
 
 	for cur.Next(context.TODO()) {
-		var grp repository.MessageGroup
+		var grp repository.EventGroup
 		if err = cur.Decode(&grp); err != nil {
 			return
 		}
@@ -73,8 +73,8 @@ func (m MessageGroupRepo) Find(filter bson.M) (grps []repository.MessageGroup, e
 	return
 }
 
-func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.MessageGroup, next int64, err error) {
-	grps = make([]repository.MessageGroup, 0)
+func (m EventGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.EventGroup, next int64, err error) {
+	grps = make([]repository.EventGroup, 0)
 	cur, err := m.col.Find(
 		context.TODO(),
 		filter,
@@ -88,7 +88,7 @@ func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []r
 	}
 
 	for cur.Next(context.TODO()) {
-		var grp repository.MessageGroup
+		var grp repository.EventGroup
 		if err = cur.Decode(&grp); err != nil {
 			return
 		}
@@ -103,14 +103,14 @@ func (m MessageGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []r
 	return
 }
 
-func (m MessageGroupRepo) Traverse(filter bson.M, cb func(grp repository.MessageGroup) error) error {
+func (m EventGroupRepo) Traverse(filter bson.M, cb func(grp repository.EventGroup) error) error {
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return err
 	}
 
 	for cur.Next(context.TODO()) {
-		var grp repository.MessageGroup
+		var grp repository.EventGroup
 		if err = cur.Decode(&grp); err != nil {
 			return err
 		}
@@ -123,30 +123,30 @@ func (m MessageGroupRepo) Traverse(filter bson.M, cb func(grp repository.Message
 	return nil
 }
 
-func (m MessageGroupRepo) UpdateID(id primitive.ObjectID, grp repository.MessageGroup) error {
+func (m EventGroupRepo) UpdateID(id primitive.ObjectID, grp repository.EventGroup) error {
 	grp.UpdatedAt = time.Now()
 	_, err := m.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, grp)
 	return err
 }
 
-func (m MessageGroupRepo) Delete(filter bson.M) error {
+func (m EventGroupRepo) Delete(filter bson.M) error {
 	_, err := m.col.DeleteMany(context.TODO(), filter)
 	return err
 }
 
-func (m MessageGroupRepo) DeleteID(id primitive.ObjectID) error {
+func (m EventGroupRepo) DeleteID(id primitive.ObjectID) error {
 	return m.Delete(bson.M{"_id": id})
 }
 
-func (m MessageGroupRepo) Count(filter bson.M) (int64, error) {
+func (m EventGroupRepo) Count(filter bson.M) (int64, error) {
 	return m.col.CountDocuments(context.TODO(), filter)
 }
 
-func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (group repository.MessageGroup, err error) {
+func (m EventGroupRepo) CollectingGroup(rule repository.EventGroupRule) (group repository.EventGroup, err error) {
 	err = m.col.FindOneAndUpdate(
 		context.TODO(),
-		bson.M{"rule._id": rule.ID, "rule.aggregate_key": rule.AggregateKey, "rule.type": rule.Type, "status": repository.MessageGroupStatusCollecting},
-		bson.M{"$set": bson.M{"status": repository.MessageGroupStatusCollecting}},
+		bson.M{"rule._id": rule.ID, "rule.aggregate_key": rule.AggregateKey, "rule.type": rule.Type, "status": repository.EventGroupStatusCollecting},
+		bson.M{"$set": bson.M{"status": repository.EventGroupStatusCollecting}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	).Decode(&group)
 
@@ -169,7 +169,7 @@ func (m MessageGroupRepo) CollectingGroup(rule repository.MessageGroupRule) (gro
 	return
 }
 
-func (m MessageGroupRepo) LastGroup(filter bson.M) (grp repository.MessageGroup, err error) {
+func (m EventGroupRepo) LastGroup(filter bson.M) (grp repository.EventGroup, err error) {
 	rs := m.col.FindOne(context.TODO(), filter, options.FindOne().SetSort(bson.M{"updated_at": -1}))
 	err = rs.Decode(&grp)
 	if err == mongo.ErrNoDocuments {
@@ -178,7 +178,7 @@ func (m MessageGroupRepo) LastGroup(filter bson.M) (grp repository.MessageGroup,
 	return grp, err
 }
 
-func (m MessageGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]repository.MessageGroupByRuleCount, error) {
+func (m EventGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]repository.EventGroupByRuleCount, error) {
 	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
 		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
 		bson.D{{"$group", bson.M{
@@ -201,9 +201,9 @@ func (m MessageGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTim
 		return nil, err
 	}
 
-	results := make([]repository.MessageGroupByRuleCount, 0)
+	results := make([]repository.EventGroupByRuleCount, 0)
 	for aggregate.Next(ctx) {
-		var res repository.MessageGroupByRuleCount
+		var res repository.EventGroupByRuleCount
 		if err := aggregate.Decode(&res); err != nil {
 			return nil, err
 		}
@@ -214,7 +214,7 @@ func (m MessageGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTim
 	return results, nil
 }
 
-func (m MessageGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]repository.MessageGroupByUserCount, error) {
+func (m EventGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]repository.EventGroupByUserCount, error) {
 	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
 		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
 		bson.D{{"$unwind", "$actions"}},
@@ -256,9 +256,9 @@ func (m MessageGroupRepo) StatByUserCount(ctx context.Context, startTime, endTim
 		return nil, err
 	}
 
-	results := make([]repository.MessageGroupByUserCount, 0)
+	results := make([]repository.EventGroupByUserCount, 0)
 	for aggregate.Next(ctx) {
-		var res repository.MessageGroupByUserCount
+		var res repository.EventGroupByUserCount
 		if err := aggregate.Decode(&res); err != nil {
 			return nil, err
 		}
@@ -269,7 +269,7 @@ func (m MessageGroupRepo) StatByUserCount(ctx context.Context, startTime, endTim
 	return results, nil
 }
 
-func (m MessageGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]repository.MessageGroupByDatetimeCount, error) {
+func (m EventGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]repository.EventGroupByDatetimeCount, error) {
 	unixTime, _ := time.Parse(time.RFC3339, "1970-01-01T00:00:00Z00:00")
 	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
 		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
@@ -298,9 +298,9 @@ func (m MessageGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, en
 		return nil, err
 	}
 
-	results := make([]repository.MessageGroupByDatetimeCount, 0)
+	results := make([]repository.EventGroupByDatetimeCount, 0)
 	for aggregate.Next(ctx) {
-		var res repository.MessageGroupByDatetimeCount
+		var res repository.EventGroupByDatetimeCount
 		if err := aggregate.Decode(&res); err != nil {
 			return nil, err
 		}

@@ -49,7 +49,7 @@ Group: {
 		Template        string
 		SummaryTemplate string
 	}
-	Actions      []Trigger // 分组关联的所有动作
+	Actions      []Trigger // 事件组关联的所有动作
 
 	Status    string
 	CreatedAt time.Time

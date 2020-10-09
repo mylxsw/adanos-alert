@@ -31,7 +31,7 @@ type VoiceCallMeta struct {
 	Title string `json:"title"`
 }
 
-func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	return w.manager.Resolve(func(conf *configs.Config, userRepo repository.UserRepo) error {
 		voiceCall := aliyun_voice.NewVoiceCall(conf)
 

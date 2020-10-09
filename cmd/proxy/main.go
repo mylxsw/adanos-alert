@@ -64,8 +64,8 @@ func main() {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			message := readStdin(c.Int("max-lines"))
-			if message == "" {
+			stdinLines := readStdin(c.Int("max-lines"))
+			if stdinLines == "" {
 				return nil
 			}
 
@@ -74,20 +74,20 @@ func main() {
 				adanosServers = append(adanosServers, "http://localhost:19999")
 			}
 
-			ctl := misc.MessageControl{
+			ctl := misc.EventControl{
 				ID:              c.String("id"),
 				InhibitInterval: c.String("inhibit-interval"),
 				RecoveryAfter:   c.String("recovery-after"),
 			}
 
-			msg := connector.NewMessage(message).
+			evt := connector.NewEvent(stdinLines).
 				WithTags(c.StringSlice("tag")...).
 				WithOrigin(c.String("origin")).
 				WithMetas(createMessageMeta(c.StringSlice("meta"))).
 				WithCtl(ctl)
 
 			ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
-			return connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, msg)
+			return connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, evt)
 		},
 	}
 
@@ -97,8 +97,8 @@ func main() {
 	}
 }
 
-func createMessageMeta(meta []string) repository.MessageMeta {
-	metas := make(repository.MessageMeta)
+func createMessageMeta(meta []string) repository.EventMeta {
+	metas := make(repository.EventMeta)
 	if meta != nil && len(meta) > 0 {
 		for _, m := range meta {
 			segs := strings.SplitN(m, "=", 2)
@@ -109,7 +109,6 @@ func createMessageMeta(meta []string) repository.MessageMeta {
 }
 
 func readStdin(maxLines int) string {
-
 	result := ""
 
 	reader := bufio.NewReader(os.Stdin)

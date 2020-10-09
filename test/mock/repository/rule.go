@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -13,11 +14,11 @@ type RuleRepo struct {
 	Rules []repository.Rule
 }
 
-func (r *RuleRepo) Paginate(filter interface{}, offset, limit int64) (rules []repository.Rule, next int64, err error) {
+func (r *RuleRepo) Tags(ctx context.Context) ([]repository.Tag, error) {
 	panic("implement me")
 }
 
-func (r *RuleRepo) Tags() ([]repository.Tag, error) {
+func (r *RuleRepo) Paginate(filter interface{}, offset, limit int64) (rules []repository.Rule, next int64, err error) {
 	panic("implement me")
 }
 

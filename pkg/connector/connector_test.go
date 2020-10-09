@@ -13,7 +13,7 @@ func TestSend(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.TODO(), 1*time.Second)
 	assert.NoError(t, connector.NewConnector("", "http://localhost:19999").Send(
 		ctx,
-		connector.NewMessage("Hello, world").
+		connector.NewEvent("Hello, world").
 			WithMeta("occur_at", time.Now()).
 			WithMeta("user", "adanos").
 			WithTags("hello", "connector").

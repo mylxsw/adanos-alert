@@ -16,7 +16,7 @@ func (s ServiceProvider) Register(app container.Container) {
 
 func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
-		cc.Must(cr.Add("sync-message", "@every 5s", messageSyncJob))
+		cc.Must(cr.Add("sync-events", "@every 5s", eventSyncJob))
 		cc.Must(cr.Add("heartbeat", "@every 10s", heartbeatJob))
 
 		return nil

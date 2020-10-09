@@ -16,6 +16,6 @@ func NewWechatAction(manager Manager) *WechatAction {
 	return &WechatAction{manager:manager}
 }
 
-func (w WechatAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (w WechatAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	panic("implement me")
 }

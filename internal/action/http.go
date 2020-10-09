@@ -17,7 +17,7 @@ func NewHttpAction(manager Manager) *HttpAction {
 	return &HttpAction{manager: manager}
 }
 
-func (act HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (act HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	log.WithFields(log.Fields{
 		"rule":    rule,
 		"trigger": trigger,

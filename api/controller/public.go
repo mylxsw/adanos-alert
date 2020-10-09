@@ -29,7 +29,7 @@ func (p PublicController) Register(router *web.Router) {
 }
 
 // Reports 报表展示
-func (p PublicController) Reports(ctx web.Context, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo, templateRepo repository.TemplateRepo) web.Response {
+func (p PublicController) Reports(ctx web.Context, groupRepo repository.EventGroupRepo, msgRepo repository.EventRepo, templateRepo repository.TemplateRepo) web.Response {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return ctx.Error("invalid request", http.StatusUnprocessableEntity)
@@ -46,14 +46,14 @@ func (p PublicController) Reports(ctx web.Context, groupRepo repository.MessageG
 
 	var maxLimit int64 = 1000
 
-	filter := messagesFilter(ctx)
+	filter := eventsFilter(ctx)
 	filter["group_ids"] = group.ID
-	messages, _, err := msgRepo.Paginate(filter, 0, maxLimit)
+	events, _, err := msgRepo.Paginate(filter, 0, maxLimit)
 	if err != nil {
 		return ctx.Error(err.Error(), http.StatusInternalServerError)
 	}
 
-	messageCount, _ := msgRepo.Count(filter)
+	eventsCount, _ := msgRepo.Count(filter)
 
 	var templateContent string
 	if group.Rule.ReportTemplateID != primitive.NilObjectID {
@@ -64,16 +64,16 @@ func (p PublicController) Reports(ctx web.Context, groupRepo repository.MessageG
 	}
 
 	res, err := view.ReportView(p.cc, templateContent, view.GroupData{
-		Group:        group,
-		Messages:     messages,
-		MessageCount: messageCount,
-		Next:         0,
-		Offset:       0,
-		Limit:        maxLimit,
-		Path:         ctx.Request().Raw().URL.Path,
-		HasPrev:      false,
-		HasNext:      false,
-		PrevOffset:   0,
+		Group:       group,
+		Events:      events,
+		EventsCount: eventsCount,
+		Next:        0,
+		Offset:      0,
+		Limit:       maxLimit,
+		Path:        ctx.Request().Raw().URL.Path,
+		HasPrev:     false,
+		HasNext:     false,
+		PrevOffset:  0,
 	})
 	if err != nil {
 		return ctx.Error(fmt.Sprintf("template parse failed: %v", err), http.StatusInternalServerError)
@@ -83,7 +83,7 @@ func (p PublicController) Reports(ctx web.Context, groupRepo repository.MessageG
 }
 
 // Group 分组展示
-func (p PublicController) Group(ctx web.Context, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) web.Response {
+func (p PublicController) Group(ctx web.Context, groupRepo repository.EventGroupRepo, msgRepo repository.EventRepo) web.Response {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return ctx.Error("invalid request", http.StatusUnprocessableEntity)
@@ -99,27 +99,27 @@ func (p PublicController) Group(ctx web.Context, groupRepo repository.MessageGro
 	}
 
 	offset, limit := offsetAndLimit(ctx)
-	filter := messagesFilter(ctx)
+	filter := eventsFilter(ctx)
 	filter["group_ids"] = group.ID
 
-	messages, next, err := msgRepo.Paginate(filter, offset, limit)
+	events, next, err := msgRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return ctx.Error(err.Error(), http.StatusInternalServerError)
 	}
 
-	messageCount, _ := msgRepo.Count(filter)
+	eventsCount, _ := msgRepo.Count(filter)
 
 	res, err := view.GroupView(p.cc, view.GroupData{
-		Group:        group,
-		Messages:     messages,
-		MessageCount: messageCount,
-		Next:         next,
-		Offset:       offset,
-		Limit:        limit,
-		Path:         ctx.Request().Raw().URL.Path,
-		HasPrev:      offset-limit >= 0,
-		HasNext:      next > 0,
-		PrevOffset:   offset - limit,
+		Group:       group,
+		Events:      events,
+		EventsCount: eventsCount,
+		Next:        next,
+		Offset:      offset,
+		Limit:       limit,
+		Path:        ctx.Request().Raw().URL.Path,
+		HasPrev:     offset-limit >= 0,
+		HasNext:     next > 0,
+		PrevOffset:  offset - limit,
 	})
 	if err != nil {
 		return ctx.Error(fmt.Sprintf("template parse failed: %v", err), http.StatusInternalServerError)

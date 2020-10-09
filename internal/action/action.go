@@ -19,7 +19,7 @@ import (
 
 type Action interface {
 	Validate(meta string, userRefs []string) error
-	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error
+	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error
 }
 
 type Manager interface {
@@ -86,50 +86,62 @@ func (q *QueueAction) Validate(meta string, userRefs []string) error {
 	return q.manager.Run(q.action).Validate(meta, userRefs)
 }
 
-type MessageQuerier func(groupID primitive.ObjectID, limit int64) []repository.Message
+type EventQuerier func(groupID primitive.ObjectID, limit int64) []repository.Event
 type Payload struct {
-	messageQuerier     MessageQuerier
-	Action             string                  `json:"action"`
-	Rule               repository.Rule         `json:"rule"`
-	Trigger            repository.Trigger      `json:"trigger"`
-	Group              repository.MessageGroup `json:"group"`
-	RuleTemplateParsed string                  `json:"rule_template_parsed"`
-	PreviewURL         string                  `json:"preview_url"`
-	ReportURL          string                  `json:"report_url"`
+	eventQuerier       EventQuerier
+	Action             string                `json:"action"`
+	Rule               repository.Rule       `json:"rule"`
+	Trigger            repository.Trigger    `json:"trigger"`
+	Group              repository.EventGroup `json:"group"`
+	RuleTemplateParsed string                `json:"rule_template_parsed"`
+	PreviewURL         string                `json:"preview_url"`
+	ReportURL          string                `json:"report_url"`
 }
 
 // Init initialize a payload
-func (payload *Payload) Init(messageQuerier MessageQuerier) {
-	payload.messageQuerier = messageQuerier
+func (payload *Payload) Init(eventQuerier EventQuerier) {
+	payload.eventQuerier = eventQuerier
 }
 
 // MessageType return message type in group
+// This method is depressed
 func (payload *Payload) MessageType() string {
+	return payload.EventType()
+}
+
+// EventType return message type in group
+func (payload *Payload) EventType() string {
 	return string(payload.Group.Type)
 }
 
 // IsRecovery return whether the messages in group is recovery message
 func (payload *Payload) IsRecovery() bool {
-	return payload.Group.Type == repository.MessageTypeRecovery
+	return payload.Group.Type == repository.EventTypeRecovery
 }
 
 // IsRecoverable return whether the messages in group is recoverable message
 func (payload *Payload) IsRecoverable() bool {
-	return payload.Group.Type == repository.MessageTypeRecoverable
+	return payload.Group.Type == repository.EventTypeRecoverable
 }
 
 // IsPlain return whether the messages in group is plain message
 func (payload *Payload) IsPlain() bool {
-	return payload.Group.Type == repository.MessageTypePlain || payload.Group.Type == ""
+	return payload.Group.Type == repository.EventTypePlain || payload.Group.Type == ""
 }
 
 // Messages get messages for group
-func (payload *Payload) Messages(limit int64) []repository.Message {
-	return payload.messageQuerier(payload.Group.ID, limit)
+// This method is depressed
+func (payload *Payload) Messages(limit int64) []repository.Event {
+	return payload.Events(limit)
 }
 
-func CreateRepositoryMessageQuerier(msgRepo repository.MessageRepo) func(groupID primitive.ObjectID, limit int64) []repository.Message {
-	return func(groupID primitive.ObjectID, limit int64) []repository.Message {
+// Events get messages for group
+func (payload *Payload) Events(limit int64) []repository.Event {
+	return payload.eventQuerier(payload.Group.ID, limit)
+}
+
+func CreateRepositoryMessageQuerier(msgRepo repository.EventRepo) func(groupID primitive.ObjectID, limit int64) []repository.Event {
+	return func(groupID primitive.ObjectID, limit int64) []repository.Event {
 		messages, _, err := msgRepo.Paginate(bson.M{"group_ids": groupID}, 0, limit)
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -137,7 +149,7 @@ func CreateRepositoryMessageQuerier(msgRepo repository.MessageRepo) func(groupID
 				"limit":    limit,
 				"error":    err,
 			}).Errorf("query messages failed for template: %v", err)
-			return []repository.Message{}
+			return []repository.Event{}
 		}
 		return messages
 	}
@@ -152,7 +164,7 @@ func (payload *Payload) Decode(data []byte) error {
 	return json.Unmarshal(data, payload)
 }
 
-func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	return q.manager.Resolve(func(queueManager queue.Manager, em event.Manager) error {
 		payload := Payload{
 			Action:  q.action,
@@ -187,7 +199,7 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 }
 
 // CreatePayload 创建一个 Payload
-func CreatePayload(conf *configs.Config, messageQuerier MessageQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) *Payload {
+func CreatePayload(conf *configs.Config, messageQuerier EventQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) *Payload {
 	payload := &Payload{
 		Action:  action,
 		Rule:    rule,

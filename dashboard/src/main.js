@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import DateTime from "./components/DateTime";
 import HumanTime from "./components/HumanTime";
 import Paginator from "./components/Paginator";
-import MessageCard from "./components/MessageCard";
+import EventCard from "./components/EventCard";
 
 library.add(faExternalLinkAlt);
 library.add(faPlus)
@@ -26,7 +26,7 @@ Vue.use(BootstrapVueIcons);
 
 Vue.component('DateTime', DateTime);
 Vue.component('HumanTime', HumanTime);
-Vue.component('MessageCard', MessageCard)
+Vue.component('EventCard', EventCard)
 Vue.component('Paginator', Paginator);
 
 Vue.config.productionTip = false;

@@ -40,17 +40,17 @@ type GroupsResp struct {
 }
 
 type GroupsGroupResp struct {
-	repository.MessageGroup
+	repository.EventGroup
 	CollectTimeRemain int64 `json:"collect_time_remain"`
 }
 
-// Groups list all message groups
+// Groups list all event groups
 // Arguments:
 //   - offset/limit
 //   - status
 //   - rule_id
 //   - user_id
-func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
+func (g GroupController) Groups(ctx web.Context, groupRepo repository.EventGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 	filter := bson.M{}
 
@@ -95,10 +95,10 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 	groups := make([]GroupsGroupResp, len(grps))
 	for i, grp := range grps {
 		var timeRemain int64 = 0
-		if grp.Status == repository.MessageGroupStatusCollecting {
+		if grp.Status == repository.EventGroupStatusCollecting {
 			timeRemain = grp.Rule.ExpectReadyAt.Unix() - time.Now().Unix()
 		}
-		groups[i] = GroupsGroupResp{MessageGroup: grp, CollectTimeRemain: timeRemain}
+		groups[i] = GroupsGroupResp{EventGroup: grp, CollectTimeRemain: timeRemain}
 	}
 
 	return &GroupsResp{
@@ -109,15 +109,15 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.MessageGro
 }
 
 type GroupResp struct {
-	Group    repository.MessageGroup `json:"group"`
-	Messages []repository.Message    `json:"messages"`
-	Next     int64                   `json:"next"`
+	Group  repository.EventGroup `json:"group"`
+	Events []repository.Event    `json:"events"`
+	Next   int64                 `json:"next"`
 }
 
 func (g GroupController) Group(
 	ctx web.Context,
-	groupRepo repository.MessageGroupRepo,
-	messageRepo repository.MessageRepo,
+	groupRepo repository.EventGroupRepo,
+	eventRepo repository.EventRepo,
 ) (*GroupResp, error) {
 	offset := ctx.Int64Input("offset", 0)
 	limit := ctx.Int64Input("limit", 10)
@@ -132,26 +132,26 @@ func (g GroupController) Group(
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	filter := messagesFilter(ctx)
+	filter := eventsFilter(ctx)
 	filter["group_ids"] = groupID
 
-	messages, next, err := messageRepo.Paginate(filter, offset, limit)
+	events, next, err := eventRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	for i, m := range messages {
-		messages[i].Content = template.JSONBeauty(m.Content)
+	for i, m := range events {
+		events[i].Content = template.JSONBeauty(m.Content)
 	}
 
 	return &GroupResp{
-		Group:    grp,
-		Messages: messages,
-		Next:     next,
+		Group:  grp,
+		Events: events,
+		Next:   next,
 	}, nil
 }
 
 // RecoverableGroups 当前待恢复的报警组
 func (g GroupController) RecoverableGroups(recoveryRepo repository.RecoveryRepo) ([]repository.Recovery, error) {
-	return recoveryRepo.RecoverableMessages(context.TODO(), time.Now().AddDate(1, 0, 0))
+	return recoveryRepo.RecoverableEvents(context.TODO(), time.Now().AddDate(1, 0, 0))
 }

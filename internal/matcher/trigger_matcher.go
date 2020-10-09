@@ -22,36 +22,48 @@ type TriggerMatcher struct {
 
 type TriggerContext struct {
 	Helpers
-	Group   repository.MessageGroup
+	Group   repository.EventGroup
 	Trigger repository.Trigger
 
-	MessageCallback     func() []repository.Message
-	messageCallbackOnce sync.Once
-	messages            []repository.Message
+	EventCallback     func() []repository.Event
+	eventCallbackOnce sync.Once
+	events            []repository.Event
 
 	cc container.Container
 }
 
 // NewTriggerContext create a new TriggerContext
-func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.MessageGroup, messageCallback func() []repository.Message) *TriggerContext {
-	return &TriggerContext{cc: cc, Trigger: trigger, Group: group, MessageCallback: messageCallback}
+func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.EventGroup, eventCallback func() []repository.Event) *TriggerContext {
+	return &TriggerContext{cc: cc, Trigger: trigger, Group: group, EventCallback: eventCallback}
 }
 
-// Messages return all messages in group
-func (tc *TriggerContext) Messages() []repository.Message {
-	tc.messageCallbackOnce.Do(func() {
-		if tc.MessageCallback != nil {
-			tc.messages = tc.MessageCallback()
+// Messages return all events in group
+// This method is depressed
+func (tc *TriggerContext) Messages() []repository.Event {
+	return tc.Events()
+}
+
+// Messages return all events in group
+func (tc *TriggerContext) Events() []repository.Event {
+	tc.eventCallbackOnce.Do(func() {
+		if tc.EventCallback != nil {
+			tc.events = tc.EventCallback()
 		}
 	})
 
-	return tc.messages
+	return tc.events
 }
 
 // MessagesCount return the count in group
+// This method is depressed
 func (tc *TriggerContext) MessagesCount() int64 {
+	return tc.EventsCount()
+}
+
+// EventsCount return the count in group
+func (tc *TriggerContext) EventsCount() int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
 		count, _ = msgRepo.Count(bson.M{
 			"group_ids": tc.Group.ID,
 		})
@@ -60,10 +72,16 @@ func (tc *TriggerContext) MessagesCount() int64 {
 	return count
 }
 
-// MessagesMatchRegexCount get the count for messages matched regex
+// MessagesMatchRegexCount get the count for events matched regex
+// This method is depressed
 func (tc *TriggerContext) MessagesMatchRegexCount(regex string) int64 {
+	return tc.EventsMatchRegexCount(regex)
+}
+
+// EventsMatchRegexCount get the count for events matched regex
+func (tc *TriggerContext) EventsMatchRegexCount(regex string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids": tc.Group.ID,
 			"content":   primitive.Regex{Pattern: regex, Options: "im"},
@@ -75,10 +93,16 @@ func (tc *TriggerContext) MessagesMatchRegexCount(regex string) int64 {
 	return count
 }
 
-// MessagesWithTagsCount get the count for messages which has tags
+// MessagesWithTagsCount get the count for events which has tags
+// This method is depressed
 func (tc *TriggerContext) MessagesWithTagsCount(tags string) int64 {
+	return tc.EventsWithTagsCount(tags)
+}
+
+// EventsWithTagsCount get the count for events which has tags
+func (tc *TriggerContext) EventsWithTagsCount(tags string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids": tc.Group.ID,
 			"tags":      bson.M{"$in": template.StringTags(tags, ",")},
@@ -90,10 +114,16 @@ func (tc *TriggerContext) MessagesWithTagsCount(tags string) int64 {
 	return count
 }
 
-// MessagesWithMetaCount get the count for messages has a meta[key] equals to value
+// MessagesWithMetaCount get the count for events has a meta[key] equals to value
+// This method is depressed
 func (tc *TriggerContext) MessagesWithMetaCount(key, value string) int64 {
+	return tc.EventsWithMetaCount(key, value)
+}
+
+// EventsWithMetaCount get the count for events has a meta[key] equals to value
+func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.MessageRepo) {
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids":   tc.Group.ID,
 			"meta." + key: value,
@@ -108,7 +138,7 @@ func (tc *TriggerContext) MessagesWithMetaCount(key, value string) int64 {
 // TriggeredTimesInPeriod return triggered times in specified periods
 func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 {
 	var triggeredTimes int64 = 0
-	tc.cc.MustResolve(func(groupRepo repository.MessageGroupRepo) {
+	tc.cc.MustResolve(func(groupRepo repository.EventGroupRepo) {
 		filter := bson.M{
 			"actions._id": tc.Trigger.ID,
 			"updated_at":  bson.M{"$gt": time.Now().Add(-time.Duration(periodInMinutes) * time.Minute)},
@@ -131,9 +161,9 @@ func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerSta
 }
 
 // LastTriggeredGroup get last triggeredGroup
-func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.MessageGroup {
-	var lastTriggeredGroup repository.MessageGroup
-	tc.cc.MustResolve(func(groupRepo repository.MessageGroupRepo) {
+func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.EventGroup {
+	var lastTriggeredGroup repository.EventGroup
+	tc.cc.MustResolve(func(groupRepo repository.EventGroupRepo) {
 		filter := bson.M{
 			"actions._id": tc.Trigger.ID,
 		}

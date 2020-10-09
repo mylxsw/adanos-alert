@@ -17,6 +17,6 @@ type Recovery struct {
 
 type RecoveryRepo interface {
 	Register(ctx context.Context, recoveryAt time.Time, recoveryID string, refID primitive.ObjectID) (err error)
-	RecoverableMessages(ctx context.Context, deadline time.Time) ([]Recovery, error)
+	RecoverableEvents(ctx context.Context, deadline time.Time) ([]Recovery, error)
 	Delete(ctx context.Context, recoveryID string) error
 }

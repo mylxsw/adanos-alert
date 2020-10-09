@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Groups from './views/Groups';
-import Messages from "./views/Messages";
+import Events from "./views/Events";
 import Queue from './views/Queue';
 import Settings from "./views/Settings";
 import Error from "./views/Error";
@@ -28,7 +28,7 @@ Router.prototype.push = function push(location) {
 export default new Router({
     routes: [
         {path: '/', component: Groups},
-        {path: '/messages', component: Messages},
+        {path: '/events', component: Events},
         
         {path: '/rules', component: Rules},
         {path: '/rules/add', component: RuleEdit},

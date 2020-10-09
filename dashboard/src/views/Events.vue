@@ -11,14 +11,14 @@
                     </b-form>   
                 </b-card-text>
             </b-card>
-            <MessageCard v-for="(message, index) in messages" :key="index" class="mb-3"
-                         :message="message"
-                         :message_index="index"
-                         :test-matched-rules="testMatchedRules"></MessageCard>
-            <b-card v-if="messages.length === 0">
+            <EventCard v-for="(message, index) in events" :key="index" class="mb-3"
+                         :event="message"
+                         :event_index="index"
+                         :test-matched-rules="testMatchedRules"></EventCard>
+            <b-card v-if="events.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
             </b-card>
-            <paginator :per_page="2" :cur="cur" :next="next" path="/messages" :query="this.$route.query"></paginator>
+            <paginator :per_page="2" :cur="cur" :next="next" path="/events" :query="this.$route.query"></paginator>
         </b-col>
 
         <b-modal id="matched-rules-dialog" title="匹配到的规则" hide-footer size="xl">
@@ -52,7 +52,7 @@
     import axios from 'axios';
 
     export default {
-        name: 'Messages',
+        name: 'Events',
         data() {
             return {
                 search: {
@@ -69,7 +69,7 @@
                     {value: 'expired', text: '匹配规则，已过期'},
                     {value: 'ignored', text: '匹配规则，已忽略'},
                 ],
-                messages: [],
+                events: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
                 matched_rules: [],
@@ -87,7 +87,7 @@
             searchSubmit(evt) {
                 evt.preventDefault();
 
-                this.$router.push({path: '/messages', query: {
+                this.$router.push({path: '/events', query: {
                     offset: 0,
                     group_id: this.$route.query.group_id !== undefined ? this.$route.query.group_id : null,
                     status: this.search.status,
@@ -97,7 +97,7 @@
                 }}).catch(err => {this.ToastError(err);});
             },
             testMatchedRules(id) {
-                axios.post('/api/messages/' + id + '/matched-rules/', {}).then(resp => {
+                axios.post('/api/events/' + id + '/matched-rules/', {}).then(resp => {
                     this.matched_rules = resp.data;
                     this.$root.$emit('bv::show::modal', "matched-rules-dialog");
                 }).catch(error => {
@@ -108,12 +108,12 @@
                 let params = this.$route.query;
                 params.offset = this.cur;
                 
-                axios.get('/api/messages/', {
+                axios.get('/api/events/', {
                     params: params,
                 }).then(response => {
-                    this.messages = response.data.messages;
-                    for (let i in this.messages) {
-                        this.messages[i]._showDetails = true;
+                    this.events = response.data.events;
+                    for (let i in this.events) {
+                        this.events[i]._showDetails = true;
                     }
 
                     this.next = response.data.next;

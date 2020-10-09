@@ -29,7 +29,7 @@ func (a *AggregationTestSuite) SetupTest() {
 }
 
 func (a *AggregationTestSuite) TearDownTest() {
-	a.app.MustResolve(func(msgRepo repository.MessageRepo, msgGroupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) {
+	a.app.MustResolve(func(msgRepo repository.EventRepo, msgGroupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) {
 		a.NoError(msgRepo.Delete(bson.M{}))
 		a.NoError(ruleRepo.Delete(bson.M{}))
 		a.NoError(msgGroupRepo.Delete(bson.M{}))
@@ -37,9 +37,9 @@ func (a *AggregationTestSuite) TearDownTest() {
 }
 
 func (a *AggregationTestSuite) TestAggregationJob() {
-	a.app.MustResolve(func(msgRepo repository.MessageRepo, msgGroupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) {
+	a.app.MustResolve(func(msgRepo repository.EventRepo, msgGroupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) {
 		mockMsgRepo := msgRepo.(*mockRepo.MessageRepo)
-		mockMsgGroupRepo := msgGroupRepo.(*mockRepo.MessageGroupRepo)
+		mockMsgGroupRepo := msgGroupRepo.(*mockRepo.EventGroupRepo)
 		mockRuleRepo := ruleRepo.(*mockRepo.RuleRepo)
 
 		// add a rule for test
@@ -53,24 +53,24 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 
 		// add some messages 
 		for i := 0; i < 10; i++ {
-			_, err = mockMsgRepo.Add(repository.Message{
+			_, err = mockMsgRepo.Add(repository.Event{
 				Content: fmt.Sprintf("Hello, world #%d", i),
-				Meta:    repository.MessageMeta{"environment": "dev", "seq": strconv.Itoa(i)},
+				Meta:    repository.EventMeta{"environment": "dev", "seq": strconv.Itoa(i)},
 				Tags:    []string{"php", "nodejs", fmt.Sprintf("tag_%d", i/2)},
 				Origin:  "filebeat",
-				Status:  repository.MessageStatusPending,
+				Status:  repository.EventStatusPending,
 			})
 			a.NoError(err)
 		}
 
 		// add some not matched messages
 		for i := 0; i < 5; i++ {
-			_, err = mockMsgRepo.Add(repository.Message{
+			_, err = mockMsgRepo.Add(repository.Event{
 				Content: fmt.Sprintf("Hello, world #%d", i),
-				Meta:    repository.MessageMeta{"environment": "dev", "seq": strconv.Itoa(i + 10)},
+				Meta:    repository.EventMeta{"environment": "dev", "seq": strconv.Itoa(i + 10)},
 				Tags:    []string{"java", "closure", fmt.Sprintf("tag_%d", i/2)},
 				Origin:  "logstash",
-				Status:  repository.MessageStatusPending,
+				Status:  repository.EventStatusPending,
 			})
 			a.NoError(err)
 		}
@@ -81,14 +81,14 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 		// check message group
 		a.EqualValues(1, len(mockMsgGroupRepo.Groups))
 		a.EqualValues(ruleID, mockMsgGroupRepo.Groups[0].Rule.ID)
-		a.Equal(repository.MessageGroupStatusCollecting, mockMsgGroupRepo.Groups[0].Status)
+		a.Equal(repository.EventGroupStatusCollecting, mockMsgGroupRepo.Groups[0].Status)
 
 		// check message
-		groupedMsgCount, err := mockMsgRepo.Count(bson.M{"status": repository.MessageStatusGrouped})
+		groupedMsgCount, err := mockMsgRepo.Count(bson.M{"status": repository.EventStatusGrouped})
 		a.NoError(err)
 		a.EqualValues(10, groupedMsgCount)
 
-		canceledMsgCount, err := mockMsgRepo.Count(bson.M{"status": repository.MessageStatusCanceled})
+		canceledMsgCount, err := mockMsgRepo.Count(bson.M{"status": repository.EventStatusCanceled})
 		a.NoError(err)
 		a.EqualValues(5, canceledMsgCount)
 
@@ -96,12 +96,12 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 		// change create_at -10s
 		mockMsgGroupRepo.Groups[0].CreatedAt = mockMsgGroupRepo.Groups[0].CreatedAt.Add(-10 * time.Second)
 		job.NewAggregationJob(a.app).Handle()
-		a.Equal(repository.MessageGroupStatusCollecting, mockMsgGroupRepo.Groups[0].Status)
+		a.Equal(repository.EventGroupStatusCollecting, mockMsgGroupRepo.Groups[0].Status)
 
 		// change created_at -30s, reach grouping condition
 		mockMsgGroupRepo.Groups[0].CreatedAt = mockMsgGroupRepo.Groups[0].CreatedAt.Add(-20 * time.Second)
 		job.NewAggregationJob(a.app).Handle()
-		a.Equal(repository.MessageGroupStatusPending, mockMsgGroupRepo.Groups[0].Status)
+		a.Equal(repository.EventGroupStatusPending, mockMsgGroupRepo.Groups[0].Status)
 	})
 }
 

@@ -9,30 +9,30 @@ import (
 	"github.com/mylxsw/asteria/log"
 )
 
-type MessageStore interface {
+type EventStore interface {
 	Enqueue(msg *protocol.MessageRequest) error
 	Dequeue() (*protocol.MessageRequest, error)
 }
 
-// messageStore 用于本地临时存储 message
-type messageStore struct {
+// eventStore 用于本地临时存储 message
+type eventStore struct {
 	db  *ledis.DB
 	key []byte
 }
 
-// NewMessageStore create a new messageStore
-func NewMessageStore(db *ledis.DB) MessageStore {
-	return &messageStore{db: db, key: []byte("messages")}
+// NewEventStore create a new eventStore
+func NewEventStore(db *ledis.DB) EventStore {
+	return &eventStore{db: db, key: []byte("messages")}
 }
 
-// Enqueue 消息加入队列
-func (ms *messageStore) Enqueue(msg *protocol.MessageRequest) error {
+// Enqueue 事件加入队列
+func (ms *eventStore) Enqueue(msg *protocol.MessageRequest) error {
 	_, err := ms.db.LPush(ms.key, ms.serialize(msg))
 	return err
 }
 
-// Dequeue 从队列中读取消息
-func (ms *messageStore) Dequeue() (*protocol.MessageRequest, error) {
+// Dequeue 从队列中读取事件
+func (ms *eventStore) Dequeue() (*protocol.MessageRequest, error) {
 	message, err := ms.db.RPop(ms.key)
 	if err != nil {
 		log.Errorf("读取本地存储失败: %s", err)
@@ -49,11 +49,11 @@ func (ms *messageStore) Dequeue() (*protocol.MessageRequest, error) {
 	return &req, nil
 }
 
-func (ms *messageStore) serialize(msg interface{}) []byte {
+func (ms *eventStore) serialize(msg interface{}) []byte {
 	res, _ := json.Marshal(msg)
 	return res
 }
 
-func (ms *messageStore) unserialize(data []byte, res interface{}) {
+func (ms *eventStore) unserialize(data []byte, res interface{}) {
 	_ = json.Unmarshal(data, &res)
 }

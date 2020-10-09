@@ -97,7 +97,7 @@ var defaultLayout = `<html>
     <div class="bs-callout bs-callout-warning">
         <p>创建时间：{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }}</p>
         <p>规则：<code>{{ .Group.Rule.Rule }}</code></p>
-        <p>消息数量：{{ .MessageCount }}</p>
+        <p>事件数量：{{ .EventsCount }}</p>
     </div>
     {{--BODY--}}
 </div>

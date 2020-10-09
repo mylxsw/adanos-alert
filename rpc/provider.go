@@ -38,7 +38,7 @@ func (p ServiceProvider) Register(app container.Container) {
 
 func (p ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(serv *grpc.Server) {
-		protocol.RegisterMessageServer(serv, NewMessageService(app.Container()))
+		protocol.RegisterMessageServer(serv, NewEventService(app.Container()))
 		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app.Container()))
 	})
 }

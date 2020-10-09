@@ -34,7 +34,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 		router.WithMiddleware(mws...).Controllers(
 			"/api",
 			controller.NewWelcomeController(cc),
-			controller.NewMessageController(cc),
+			controller.NewEventController(cc),
 			controller.NewQueueController(cc),
 			controller.NewUserController(cc),
 			controller.NewGroupController(cc),

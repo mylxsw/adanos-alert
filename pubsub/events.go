@@ -47,7 +47,7 @@ type SystemUpDownEvent struct {
 
 // MessageGroupPendingEvent 消息分组变更状态为 Pending 事件
 type MessageGroupPendingEvent struct {
-	Group     repository.MessageGroup
+	Group     repository.EventGroup
 	CreatedAt time.Time
 }
 
@@ -56,6 +56,6 @@ type MessageGroupTriggeredEvent struct {
 	Action    string
 	Rule      repository.Rule
 	Trigger   repository.Trigger
-	Group     repository.MessageGroup
+	Group     repository.EventGroup
 	CreatedAt time.Time
 }

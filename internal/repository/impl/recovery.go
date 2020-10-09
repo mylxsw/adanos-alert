@@ -61,7 +61,7 @@ func (r RecoveryRepo) get(ctx context.Context, recoveryID string) (rec repositor
 	return
 }
 
-func (r RecoveryRepo) RecoverableMessages(ctx context.Context, deadline time.Time) ([]repository.Recovery, error) {
+func (r RecoveryRepo) RecoverableEvents(ctx context.Context, deadline time.Time) ([]repository.Recovery, error) {
 	results := make([]repository.Recovery, 0)
 	cursor, err := r.col.Find(ctx, bson.M{"recovery_at": bson.M{"$lt": deadline}})
 	if err != nil {

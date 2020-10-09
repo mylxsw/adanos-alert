@@ -6,10 +6,10 @@
             <b-collapse is-nav id="nav_dropdown_collapse">
                 <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex"></ul>
                 <b-navbar-nav>
-                    <b-nav-item href="/" exact>分组</b-nav-item>
-                    <b-nav-item :to="{path:'/messages', query: {status: 'canceled'}}" exact>
-                        消息
-                        <b-badge variant="danger" v-if="pending_message_count > 0" v-b-tooltip.hover title="没有匹配任何规则的消息">{{ pending_message_count }}</b-badge>
+                    <b-nav-item href="/" exact>事件组</b-nav-item>
+                    <b-nav-item :to="{path:'/events', query: {status: 'canceled'}}" exact>
+                        事件
+                        <b-badge variant="danger" v-if="pending_events_count > 0" v-b-tooltip.hover title="没有匹配任何规则的事件">{{ pending_events_count }}</b-badge>
                     </b-nav-item>
                     <b-nav-item to="/rules" exact>规则</b-nav-item>
                     <b-nav-item to="/users">用户</b-nav-item>
@@ -38,7 +38,7 @@
         data() {
             return {
                 version: 'v-0',
-                pending_message_count: 0,
+                pending_events_count: 0,
             }
         },
         mounted() {
@@ -48,8 +48,8 @@
 
             let self = this;
             let updateCanceledMessageCount = function () {
-                axios.get('/api/messages-count/?status=canceled').then(response => {
-                    self.pending_message_count = response.data.count;
+                axios.get('/api/events-count/?status=canceled').then(response => {
+                    self.pending_events_count = response.data.count;
                 }).catch(error => {
                     self.ToastError(error);
                 });

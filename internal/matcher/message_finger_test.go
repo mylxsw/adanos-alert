@@ -11,10 +11,10 @@ import (
 )
 
 func TestMessageFinger(t *testing.T) {
-	var msg = repository.Message{
+	var msg = repository.Event{
 		ID:      primitive.NewObjectID(),
 		Content: `{"log_level": "debug", "message": "request", "context": {"user_id": 123}}`,
-		Meta: repository.MessageMeta{
+		Meta: repository.EventMeta{
 			"environment": "dev",
 			"server":      "192.168.1.1",
 		},
@@ -24,7 +24,7 @@ func TestMessageFinger(t *testing.T) {
 	}
 
 	{
-		f, err := matcher.NewMessageFinger(`Meta["server"] + ":" + Origin`)
+		f, err := matcher.NewEventFinger(`Meta["server"] + ":" + Origin`)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)
@@ -34,7 +34,7 @@ func TestMessageFinger(t *testing.T) {
 
 	{
 
-		f, err := matcher.NewMessageFinger(``)
+		f, err := matcher.NewEventFinger(``)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)
@@ -43,7 +43,7 @@ func TestMessageFinger(t *testing.T) {
 	}
 
 	{
-		f, err := matcher.NewMessageFinger(`"hello world"`)
+		f, err := matcher.NewEventFinger(`"hello world"`)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)
@@ -52,7 +52,7 @@ func TestMessageFinger(t *testing.T) {
 	}
 
 	{
-		f, err := matcher.NewMessageFinger(`Meta["not_exist_key"]`)
+		f, err := matcher.NewEventFinger(`Meta["not_exist_key"]`)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)
@@ -61,7 +61,7 @@ func TestMessageFinger(t *testing.T) {
 	}
 
 	{
-		f, err := matcher.NewMessageFinger(`124`)
+		f, err := matcher.NewEventFinger(`124`)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)
@@ -70,7 +70,7 @@ func TestMessageFinger(t *testing.T) {
 	}
 
 	{
-		f, err := matcher.NewMessageFinger(`true`)
+		f, err := matcher.NewEventFinger(`true`)
 		assert.NoError(t, err)
 
 		finger, err := f.Run(msg)

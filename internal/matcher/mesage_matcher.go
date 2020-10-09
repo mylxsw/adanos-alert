@@ -13,51 +13,51 @@ import (
 // InvalidReturnVal is a error represents the expression return value is invalid
 var InvalidReturnVal = errors.New("invalid return value: must be a bool value")
 
-// MessageWrap is a wrapper to repository.Message
+// EventWrap is a wrapper to repository.Event
 // We will add some helper function to message
-type MessageWrap struct {
-	repository.Message
+type EventWrap struct {
+	repository.Event
 	Helpers
 }
 
-func NewMessageWrap(message repository.Message) *MessageWrap {
-	return &MessageWrap{Message: message}
+func NewEventWrap(message repository.Event) *EventWrap {
+	return &EventWrap{Event: message}
 }
 
 // JsonGet parse message.Content as a json string and return the string value for key
-func (msg *MessageWrap) JsonGet(key string, defaultValue string) string {
+func (msg *EventWrap) JsonGet(key string, defaultValue string) string {
 	return json.Gets(key, defaultValue, msg.Content)
 }
 
 // IsRecovery return whether the message is a recovery message
-func (msg *MessageWrap) IsRecovery() bool {
-	return msg.Type == repository.MessageTypeRecovery
+func (msg *EventWrap) IsRecovery() bool {
+	return msg.Type == repository.EventTypeRecovery
 }
 
 // IsRecoverable return whether the message is recoverable
-func (msg *MessageWrap) IsRecoverable() bool {
-	return msg.Type == repository.MessageTypeRecoverable
+func (msg *EventWrap) IsRecoverable() bool {
+	return msg.Type == repository.EventTypeRecoverable
 }
 
 // IsPlain return whether the message is a plain message
-func (msg *MessageWrap) IsPlain() bool {
-	return msg.Type == repository.MessageTypePlain || msg.Type == ""
+func (msg *EventWrap) IsPlain() bool {
+	return msg.Type == repository.EventTypePlain || msg.Type == ""
 }
 
-// MessageMatcher is a matcher for repository.Message
-type MessageMatcher struct {
+// EventMatcher is a matcher for repository.Event
+type EventMatcher struct {
 	matchProgram  *vm.Program
 	ignoreProgram *vm.Program
 	rule          repository.Rule
 }
 
-// NewMessageMatcher create a new MessageMatcher
+// NewEventMatcher create a new EventMatcher
 // https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md
-func NewMessageMatcher(rule repository.Rule) (*MessageMatcher, error) {
+func NewEventMatcher(rule repository.Rule) (*EventMatcher, error) {
 
 	matchProgram, err := expr.Compile(
 		misc.IfElse(rule.Rule == "", "true", rule.Rule).(string),
-		expr.Env(&MessageWrap{}),
+		expr.Env(&EventWrap{}),
 		expr.AsBool(),
 	)
 	if err != nil {
@@ -66,19 +66,19 @@ func NewMessageMatcher(rule repository.Rule) (*MessageMatcher, error) {
 
 	ignoreProgram, err := expr.Compile(
 		misc.IfElse(rule.IgnoreRule == "", "false", rule.IgnoreRule).(string),
-		expr.Env(&MessageWrap{}),
+		expr.Env(&EventWrap{}),
 		expr.AsBool(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &MessageMatcher{matchProgram: matchProgram, ignoreProgram: ignoreProgram, rule: rule}, nil
+	return &EventMatcher{matchProgram: matchProgram, ignoreProgram: ignoreProgram, rule: rule}, nil
 }
 
 // Match check whether the msg is match with the rule
-func (m *MessageMatcher) Match(msg repository.Message) (matched bool, ignored bool, err error) {
-	wrapMsg := NewMessageWrap(msg)
+func (m *EventMatcher) Match(evt repository.Event) (matched bool, ignored bool, err error) {
+	wrapMsg := NewEventWrap(evt)
 	rs, err := expr.Run(m.matchProgram, wrapMsg)
 	if err != nil {
 		return false, false, err
@@ -101,6 +101,6 @@ func (m *MessageMatcher) Match(msg repository.Message) (matched bool, ignored bo
 }
 
 // Rule return original rule object
-func (m *MessageMatcher) Rule() repository.Rule {
+func (m *EventMatcher) Rule() repository.Rule {
 	return m.rule
 }

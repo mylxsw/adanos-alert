@@ -63,9 +63,9 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
-		Name:        "判断分组中 Messages 数量是否大于某个值",
-		Description: "当前分组中有超过 10 条 Messages",
-		Content:     `MessagesCount() > 10`,
+		Name:        "判断分组中 Events 数量是否大于某个值",
+		Description: "当前分组中有超过 10 条 Events",
+		Content:     `EventsCount() > 10`,
 		Type:        repository.TemplateTypeTriggerRule,
 	},
 	{
@@ -79,33 +79,33 @@ var predefinedTemplates = []repository.Template{
 		Description: "展示报警信息列表",
 		Content: `## {{ .Rule.Name }}
 
-{{ range $i, $msg := .Messages 4 }}- 来源：**{{ $msg.Origin }}**，标签：{{ $msg.Tags  }}
-{{ cutoff 400 $msg.Content | ident "    > " }}
+{{ range $i, $evt := .Events 4 }}- 来源：**{{ $evt.Origin }}**，标签：{{ $evt.Tags  }}
+{{ cutoff 400 $evt.Content | ident "    > " }}
 {{ end }}
 
 ---
 
-[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+[共 {{ .Group.EventsCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
 		Name:        "报警信息摘要（Meta 信息）",
 		Description: "显示报警摘要，输出匹配前缀的 Meta 信息",
-		Content: `{{ range $i, $msg := .Messages 4 }}- 文件：{{ index $msg.Meta "log.file.path" }}
-{{ meta_prefix_filter $msg.Meta "message" | serialize | cutoff 400 | ident "    > "}}
+		Content: `{{ range $i, $evt := .Events 4 }}- 文件：{{ index $evt.Meta "log.file.path" }}
+{{ meta_prefix_filter $evt.Meta "message" | serialize | cutoff 400 | ident "    > "}}
 {{ end }}`,
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
 		Name:        "报警详情链接",
 		Description: "报警详细信息链接地址",
-		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Content:     `[共 {{ .Group.EventsCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
 		Name:        "报警详情链接(报告)",
 		Description: "报警详细信息链接地址，报告模式",
-		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .ReportURL }})`,
+		Content:     `[共 {{ .Group.EventsCount }} 条，查看详细]({{ .ReportURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
@@ -117,10 +117,19 @@ var predefinedTemplates = []repository.Template{
 }
 
 func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo) {
-	if !conf.Migrate {
+	if !conf.Migrate && !conf.ReMigrate {
 		return
 	}
 
+	// 删除所有预定义模板
+	if conf.ReMigrate {
+		if err := repo.Delete(bson.M{"predefined": true}); err != nil {
+			log.Errorf("delete all predefined templates failed: %v", err)
+			return
+		}
+	}
+
+	// 更新预定义模板
 	for _, t := range predefinedTemplates {
 		t.Predefined = true
 		temps, err := repo.Find(bson.M{"name": t.Name, "predefined": true})
@@ -163,12 +172,12 @@ func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo)
 				if err := repo.Update(tt.ID, tt); err != nil {
 					log.WithFields(log.Fields{
 						"temp": t,
-					}).Errorf("query predefined template failed: %v", err)
+					}).Errorf("update predefined template failed: %v", err)
+				} else {
+					log.WithFields(log.Fields{
+						"temp": t,
+					}).Warningf("update predefined template %s", t.Name)
 				}
-
-				log.WithFields(log.Fields{
-					"temp": t,
-				}).Errorf("update predefined template %s failed: %v", t.Name, err)
 			}
 		}
 	}

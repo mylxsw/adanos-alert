@@ -16,7 +16,7 @@ func NewHttpAction() *HttpAction {
 	return &HttpAction{Histories: make([]repository.Trigger, 0)}
 }
 
-func (h *HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (h *HttpAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	h.Histories = append(h.Histories, trigger)
 	return nil
 }

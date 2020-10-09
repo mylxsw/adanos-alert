@@ -96,6 +96,10 @@ func main() {
 		Name:  "enable_migrate",
 		Usage: "whether enable database migrate when app run",
 	}))
+	app.AddFlags(altsrc.NewBoolFlag(cli.BoolFlag{
+		Name:  "re_migrate",
+		Usage: "是否重新执行迁移，重新迁移会移除已有的预定义模板",
+	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "aggregation_period",
 		Usage:  "aggregation job execute period",
@@ -227,6 +231,7 @@ func main() {
 			QueueWorkerNum:        c.Int("queue_worker_num"),
 			QueryTimeout:          queryTimeout,
 			Migrate:               c.Bool("enable_migrate"),
+			ReMigrate:             c.Bool("re_migrate"),
 			PreviewURL:            c.String("preview_url"),
 			ReportURL:             c.String("report_url"),
 			KeepPeriod:            c.Int("keep_period"),
@@ -311,7 +316,7 @@ func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.cc.ResolveWithError(func(msgRepo repository.MessageRepo, auditRepo repository.AuditLogRepo) error {
+	return e.cc.ResolveWithError(func(msgRepo repository.EventRepo, auditRepo repository.AuditLogRepo) error {
 
 		auditLogID, err := auditRepo.Add(repository.AuditLog{
 			Type: repository.AuditLogTypeError,
@@ -325,9 +330,9 @@ func (e *ErrorCollectorWriter) Write(le level.Level, module string, message stri
 			return err
 		}
 
-		_, err = msgRepo.Add(repository.Message{
+		_, err = msgRepo.Add(repository.Event{
 			Content: message,
-			Meta:    repository.MessageMeta{"level": le.GetLevelName(), "module": module, "audit_id": auditLogID.Hex()},
+			Meta:    repository.EventMeta{"level": le.GetLevelName(), "module": module, "audit_id": auditLogID.Hex()},
 			Tags:    []string{"internal-error"},
 			Origin:  "internal",
 		})

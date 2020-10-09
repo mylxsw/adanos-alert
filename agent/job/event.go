@@ -11,17 +11,17 @@ import (
 	"github.com/mylxsw/asteria/log"
 )
 
-func messageSyncJob(messageStore store.MessageStore, conf *config.Config, msgRPCServer protocol.MessageClient) error {
+func eventSyncJob(eventStore store.EventStore, conf *config.Config, msgRPCServer protocol.MessageClient) error {
 	for {
-		message, err := messageStore.Dequeue()
+		message, err := eventStore.Dequeue()
 		if err != nil || message == nil {
 			break
 		}
 
 		if err := sendToServer(message, msgRPCServer, conf); err != nil {
-			log.Warningf("消息同步失败，重新加入队列: %s", err)
-			if err := messageStore.Enqueue(message); err != nil {
-				log.Warningf("消息重新写入队列失败: %s, 消息内容：%s", err, message.Data)
+			log.Warningf("事件同步失败，重新加入队列: %s", err)
+			if err := eventStore.Enqueue(message); err != nil {
+				log.Warningf("事件重新写入队列失败: %s, 事件内容：%s", err, message.Data)
 			}
 
 			// 如果写入出错，则休息1s，防止重试速度过快
@@ -44,7 +44,7 @@ func sendToServer(msg *protocol.MessageRequest, msgRPCServer protocol.MessageCli
 	log.WithFields(log.Fields{
 		"id":   resp.Id,
 		"body": msg.Data,
-	}).Debugf("消息同步成功")
+	}).Debugf("事件同步成功")
 
 	return nil
 }

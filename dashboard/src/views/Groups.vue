@@ -29,8 +29,8 @@
                         <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
                     </b-link>
                     <p>
-                        <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="分组类型">恢复</b-badge>
-                        <b-badge v-if="row.item.type === 'recoverable'" variant="warning" class="mr-2" v-b-tooltip title="分组类型">可恢复</b-badge>
+                        <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="事件组类型">恢复</b-badge>
+                        <b-badge v-if="row.item.type === 'recoverable'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
                         <b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge>
                     </p>
                 </template>
@@ -56,9 +56,9 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
-                        <b-button size="sm" variant="info" :to="{path:'/messages', query: {group_id: row.item.id}}">详情</b-button>
+                        <b-button size="sm" variant="info" :to="{path:'/events', query: {group_id: row.item.id}}">详情</b-button>
                         <b-dropdown size="sm" right text="预览" variant="primary">
-                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">分组</b-dropdown-item>
+                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">事件组</b-dropdown-item>
                             <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">报告</b-dropdown-item>
                         </b-dropdown>
                     </b-button-group>
@@ -83,10 +83,10 @@
                 isBusy: true,
                 userRefs: {},
                 fields: [
-                    {key: 'id', label: '时间/ID'},
-                    {key: 'rule_name', label: '规则'},
-                    {key: 'actions', label: '动作'},
-                    {key: 'message_count', label: '消息数量'},
+                    {key: 'id', label: '时间/事件组 ID'},
+                    {key: 'rule_name', label: '匹配规则'},
+                    {key: 'actions', label: '触发动作'},
+                    {key: 'message_count', label: '事件数'},
                     {key: 'status', label: '状态'},
                     {key: 'operations', label: '操作'}
                 ],

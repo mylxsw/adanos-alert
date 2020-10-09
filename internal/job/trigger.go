@@ -24,14 +24,14 @@ func (a TriggerJob) Handle() {
 	select {
 	case a.executing <- struct{}{}:
 		defer func() { <-a.executing }()
-		a.app.MustResolve(a.processMessageGroups)
+		a.app.MustResolve(a.processEventGroups)
 	default:
 		log.Warningf("the last trigger job is not finished yet, skip for this time")
 	}
 }
 
-func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, messageRepo repository.MessageRepo, ruleRepo repository.RuleRepo, manager action.Manager) error {
-	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusPending}, func(grp repository.MessageGroup) error {
+func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, eventRepo repository.EventRepo, ruleRepo repository.RuleRepo, manager action.Manager) error {
+	return groupRepo.Traverse(bson.M{"status": repository.EventGroupStatusPending}, func(grp repository.EventGroup) error {
 		rule, err := ruleRepo.Get(grp.Rule.ID)
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -69,8 +69,8 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 				continue
 			}
 
-			matched, err := tm.Match(matcher.NewTriggerContext(a.app, trigger, grp, func() []repository.Message {
-				messages, err := messageRepo.Find(bson.M{"group_ids": grp.ID})
+			matched, err := tm.Match(matcher.NewTriggerContext(a.app, trigger, grp, func() []repository.Event {
+				messages, err := eventRepo.Find(bson.M{"group_ids": grp.ID})
 				if err != nil {
 					log.WithFields(log.Fields{
 						"err": err.Error(),
@@ -113,10 +113,10 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 		if hasError {
 			// if trigger failed count > 3, then set message group failed
 			if maxFailedCount > 3 {
-				grp.Status = repository.MessageGroupStatusFailed
+				grp.Status = repository.EventGroupStatusFailed
 			}
 		} else {
-			grp.Status = repository.MessageGroupStatusOK
+			grp.Status = repository.EventGroupStatusOK
 		}
 
 		log.WithFields(log.Fields{
@@ -129,7 +129,7 @@ func (a TriggerJob) processMessageGroups(groupRepo repository.MessageGroupRepo, 
 	})
 }
 
-func (a TriggerJob) matchedTriggerAction(grp repository.MessageGroup, manager action.Manager, trigger repository.Trigger, rule repository.Rule, matchedTriggers []repository.Trigger, maxFailedCount int) (bool, []repository.Trigger, int) {
+func (a TriggerJob) matchedTriggerAction(grp repository.EventGroup, manager action.Manager, trigger repository.Trigger, rule repository.Rule, matchedTriggers []repository.Trigger, maxFailedCount int) (bool, []repository.Trigger, int) {
 	hasError := false
 	if err := manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
 		trigger.Status = repository.TriggerStatusFailed

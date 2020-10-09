@@ -8,32 +8,32 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 )
 
-// MessageFinger 消息指纹
-type MessageFinger struct {
+// EventFinger Event 指纹
+type EventFinger struct {
 	expr    string
 	program *vm.Program
 }
 
-// NewMessageFinger create a new MessageFinger instance
-func NewMessageFinger(fingerExpr string) (*MessageFinger, error) {
+// NewEventFinger create a new EventFinger instance
+func NewEventFinger(fingerExpr string) (*EventFinger, error) {
 	if fingerExpr == "" {
 		fingerExpr = `""`
 	}
 
-	program, err := expr.Compile(fingerExpr, expr.Env(&MessageWrap{}))
+	program, err := expr.Compile(fingerExpr, expr.Env(&EventWrap{}))
 	if err != nil {
 		return nil, err
 	}
 
-	return &MessageFinger{
+	return &EventFinger{
 		expr:    fingerExpr,
 		program: program,
 	}, nil
 }
 
-// Run 根据指定的表达式创建 message 的指纹
-func (m *MessageFinger) Run(msg repository.Message) (string, error) {
-	result, err := expr.Run(m.program, NewMessageWrap(msg))
+// Run 根据指定的表达式创建 Event 的指纹
+func (m *EventFinger) Run(msg repository.Event) (string, error) {
+	result, err := expr.Run(m.program, NewEventWrap(msg))
 	if err != nil {
 		return "", err
 	}

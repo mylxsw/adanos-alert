@@ -19,28 +19,28 @@ type triggerMatcherTestCase struct {
 func TestTriggerMatcher(t *testing.T) {
 
 	currentTs, _ := time.Parse(time.RFC3339, "2019-08-06T20:44:26+08:00")
-	grp := repository.MessageGroup{
+	grp := repository.EventGroup{
 		ID:           primitive.NewObjectID(),
 		MessageCount: 10,
 		CreatedAt:    currentTs,
 	}
-	triggerCtx := matcher.NewTriggerContext(container.New(), repository.Trigger{}, grp, func() []repository.Message {
-		return []repository.Message{
+	triggerCtx := matcher.NewTriggerContext(container.New(), repository.Trigger{}, grp, func() []repository.Event {
+		return []repository.Event{
 			{
 				Content: "Hello, world",
-				Meta:    repository.MessageMeta{"environment": "prod", "server": "192.168.1.2"},
+				Meta:    repository.EventMeta{"environment": "prod", "server": "192.168.1.2"},
 				Tags:    []string{"php", "nodejs"},
 				Origin:  "filebeat",
 			},
 			{
 				Content: "Are you ready?",
-				Meta:    repository.MessageMeta{"environment": "prod", "server": "192.168.1.3"},
+				Meta:    repository.EventMeta{"environment": "prod", "server": "192.168.1.3"},
 				Tags:    []string{"java", "nodejs"},
 				Origin:  "elasticsearch",
 			},
 			{
 				Content: "Nice day!",
-				Meta:    repository.MessageMeta{"environment": "prod", "server": "192.168.1.3"},
+				Meta:    repository.EventMeta{"environment": "prod", "server": "192.168.1.3"},
 				Tags:    []string{"java"},
 				Origin:  "elasticsearch",
 			},
@@ -48,14 +48,14 @@ func TestTriggerMatcher(t *testing.T) {
 	})
 
 	var testcases = []triggerMatcherTestCase{
-		{Cond: "Group.MessageCount > 9", Matched: true},
-		{Cond: "Group.MessageCount > 10", Matched: false},
+		{Cond: "Group.EventsCount > 9", Matched: true},
+		{Cond: "Group.EventsCount > 10", Matched: false},
 		{Cond: "Now().Sub(Group.CreatedAt).Minutes() > 10", Matched: true},
 		{Cond: "ParseTime(\"2006-01-02T15:04:05Z07:00\", \"2019-08-06T20:00:00+08:00\").Before(Group.CreatedAt)", Matched: true},
 		{Cond: "Group.CreatedAt.Hour() in 20..21", Matched: true},
 		{Cond: "Group.CreatedAt.Hour() not in 9..18", Matched: true},
-		{Cond: "len(filter(Messages(), {#.Content matches 'ready'})) > 0", Matched: true},
-		{Cond: `any(Messages(), {"php" in #.Tags}) and none(Messages(), {"swift" in #.Tags})`, Matched: true},
+		{Cond: "len(filter(Events(), {#.Content matches 'ready'})) > 0", Matched: true},
+		{Cond: `any(Events(), {"php" in #.Tags}) and none(Events(), {"swift" in #.Tags})`, Matched: true},
 	}
 
 	for _, ts := range testcases {

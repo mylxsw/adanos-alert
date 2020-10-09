@@ -12,28 +12,28 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MessageGroupRepoTestSuit struct {
+type MessageGroupTestSuite struct {
 	suite.Suite
-	repo    repository.MessageGroupRepo
+	repo    repository.EventGroupRepo
 	seqRepo repository.SequenceRepo
 }
 
-func (m *MessageGroupRepoTestSuit) TearDownTest() {
+func (m *MessageGroupTestSuite) TearDownTest() {
 	m.NoError(m.repo.Delete(bson.M{}))
 	m.NoError(m.seqRepo.Truncate("group_seq"))
 }
 
-func (m *MessageGroupRepoTestSuit) SetupTest() {
+func (m *MessageGroupTestSuite) SetupTest() {
 	db, err := Database()
 	m.NoError(err)
 
 	m.seqRepo = impl.NewSequenceRepo(db)
-	m.repo = impl.NewMessageGroupRepo(db, m.seqRepo)
+	m.repo = impl.NewEventGroupRepo(db, m.seqRepo)
 }
 
-func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
-	grp := repository.MessageGroup{
-		Status: repository.MessageGroupStatusCollecting,
+func (m *MessageGroupTestSuite) TestMessageGroup() {
+	grp := repository.EventGroup{
+		Status: repository.EventGroupStatusCollecting,
 	}
 
 	id, err := m.repo.Add(grp)
@@ -50,14 +50,14 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	m.Error(err)
 	m.Equal(repository.ErrNotFound, err)
 
-	grp.Status = repository.MessageGroupStatusPending
+	grp.Status = repository.EventGroupStatusPending
 	id2, err := m.repo.Add(grp)
 	m.NoError(err)
 	m.NotEmpty(id2.String())
 	m.NotEqual(id.String(), id2.String())
 
 	for i := 0; i < 10; i++ {
-		grp.Status = repository.MessageGroupStatusOK
+		grp.Status = repository.EventGroupStatusOK
 		id3, err := m.repo.Add(grp)
 		m.NoError(err)
 		m.NotEmpty(id3.String())
@@ -70,26 +70,26 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 	m.NoError(err)
 	m.EqualValues(11, count)
 
-	grps, err := m.repo.Find(bson.M{"status": repository.MessageGroupStatusOK})
+	grps, err := m.repo.Find(bson.M{"status": repository.EventGroupStatusOK})
 	m.NoError(err)
 	m.EqualValues(10, len(grps))
 
-	grps, next, err := m.repo.Paginate(bson.M{"status": repository.MessageGroupStatusOK}, 0, 10)
+	grps, next, err := m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, 0, 10)
 	m.NoError(err)
 	m.EqualValues(10, len(grps))
 	m.EqualValues(10, next)
 
-	grps, next, err = m.repo.Paginate(bson.M{"status": repository.MessageGroupStatusOK}, next, 10)
+	grps, next, err = m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, next, 10)
 	m.NoError(err)
 	m.Empty(grps)
 	m.EqualValues(0, next)
 
-	m.NoError(m.repo.Traverse(bson.M{"status": repository.MessageGroupStatusOK}, func(grp repository.MessageGroup) error {
-		grp.Status = repository.MessageGroupStatusFailed
+	m.NoError(m.repo.Traverse(bson.M{"status": repository.EventGroupStatusOK}, func(grp repository.EventGroup) error {
+		grp.Status = repository.EventGroupStatusFailed
 		return m.repo.UpdateID(grp.ID, grp)
 	}))
 
-	count, err = m.repo.Count(bson.M{"status": repository.MessageGroupStatusFailed})
+	count, err = m.repo.Count(bson.M{"status": repository.EventGroupStatusFailed})
 	m.NoError(err)
 	m.EqualValues(10, count)
 
@@ -105,14 +105,14 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 		UpdatedAt:   time.Now(),
 	}
 
-	groupRule := rule.ToGroupRule()
+	groupRule := rule.ToGroupRule("", repository.EventTypePlain)
 	m.Equal(rule.ID, groupRule.ID)
 	m.Equal(rule.Name, groupRule.Name)
 	m.Equal(rule.Rule, groupRule.Rule)
 
 	collectingGroup, err := m.repo.CollectingGroup(groupRule)
 	m.NoError(err)
-	m.Equal(repository.MessageGroupStatusCollecting, collectingGroup.Status)
+	m.Equal(repository.EventGroupStatusCollecting, collectingGroup.Status)
 	m.Equal(groupRule.Rule, collectingGroup.Rule.Rule)
 	m.NotEmpty(collectingGroup.CreatedAt)
 
@@ -134,5 +134,5 @@ func (m *MessageGroupRepoTestSuit) TestMessageGroup() {
 }
 
 func TestMessageGroupRepo(t *testing.T) {
-	suite.Run(t, new(MessageGroupRepoTestSuit))
+	suite.Run(t, new(MessageGroupTestSuite))
 }

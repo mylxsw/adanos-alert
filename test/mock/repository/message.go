@@ -11,18 +11,18 @@ import (
 )
 
 type MessageRepo struct {
-	Messages []repository.Message
+	Messages []repository.Event
 }
 
-func (m *MessageRepo) AddWithContext(ctx context.Context, msg repository.Message) (id primitive.ObjectID, err error) {
+func (m *MessageRepo) AddWithContext(ctx context.Context, msg repository.Event) (id primitive.ObjectID, err error) {
 	panic("implement me")
 }
 
-func NewMessageRepo() repository.MessageRepo {
-	return &MessageRepo{Messages: make([]repository.Message, 0)}
+func NewMessageRepo() repository.EventRepo {
+	return &MessageRepo{Messages: make([]repository.Event, 0)}
 }
 
-func (m *MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
+func (m *MessageRepo) Add(msg repository.Event) (id primitive.ObjectID, err error) {
 	msg.ID = primitive.NewObjectID()
 	msg.CreatedAt = time.Now()
 
@@ -30,7 +30,7 @@ func (m *MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err er
 	return msg.ID, nil
 }
 
-func (m *MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err error) {
+func (m *MessageRepo) Get(id primitive.ObjectID) (msg repository.Event, err error) {
 	for _, msg := range m.Messages {
 		if msg.ID == id {
 			return msg, nil
@@ -40,11 +40,11 @@ func (m *MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err er
 	return msg, repository.ErrNotFound
 }
 
-func (m *MessageRepo) Find(filter interface{}) (messages []repository.Message, err error) {
+func (m *MessageRepo) Find(filter interface{}) (messages []repository.Event, err error) {
 	panic("implement me")
 }
 
-func (m *MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Message, next int64, err error) {
+func (m *MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Event, next int64, err error) {
 	panic("implement me")
 }
 
@@ -57,7 +57,7 @@ func (m *MessageRepo) DeleteID(id primitive.ObjectID) error {
 	return m.Delete(bson.M{"_id": id})
 }
 
-func (m *MessageRepo) Traverse(filter interface{}, cb func(msg repository.Message) error) error {
+func (m *MessageRepo) Traverse(filter interface{}, cb func(msg repository.Event) error) error {
 	for _, msg := range m.filter(filter) {
 		if err := cb(msg); err != nil {
 			return err
@@ -67,7 +67,7 @@ func (m *MessageRepo) Traverse(filter interface{}, cb func(msg repository.Messag
 	return nil
 }
 
-func (m *MessageRepo) UpdateID(id primitive.ObjectID, update repository.Message) error {
+func (m *MessageRepo) UpdateID(id primitive.ObjectID, update repository.Event) error {
 	for i, msg := range m.Messages {
 		if msg.ID == id {
 			m.Messages[i] = update
@@ -82,8 +82,8 @@ func (m *MessageRepo) Count(filter interface{}) (int64, error) {
 	return int64(len(m.filter(filter))), nil
 }
 
-func (m *MessageRepo) filter(filter interface{}) (messages []repository.Message) {
-	err := coll.MustNew(m.Messages).Filter(func(msg repository.Message) bool {
+func (m *MessageRepo) filter(filter interface{}) (messages []repository.Event) {
+	err := coll.MustNew(m.Messages).Filter(func(msg repository.Event) bool {
 		if status, ok := filter.(bson.M)["status"]; ok && msg.Status != status {
 			return false
 		}

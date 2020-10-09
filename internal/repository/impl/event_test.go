@@ -11,29 +11,29 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MessageTestSuit struct {
+type EventTestSuite struct {
 	suite.Suite
-	repo    repository.MessageRepo
+	repo    repository.EventRepo
 	seqRepo repository.SequenceRepo
 }
 
-func (s *MessageTestSuit) SetupTest() {
+func (s *EventTestSuite) SetupTest() {
 	db, err := Database()
 	s.NoError(err)
 
 	s.seqRepo = impl.NewSequenceRepo(db)
-	s.repo = impl.NewMessageRepo(db, s.seqRepo)
+	s.repo = impl.NewEventRepo(db, s.seqRepo)
 }
 
-func (s *MessageTestSuit) TearDownTest() {
+func (s *EventTestSuite) TearDownTest() {
 	s.NoError(s.repo.Delete(bson.M{}))
 	s.NoError(s.seqRepo.Truncate("message_seq"))
 }
 
-func (s *MessageTestSuit) TestMessageCURD() {
-	msg := repository.Message{
+func (s *EventTestSuite) TestEventCURD() {
+	msg := repository.Event{
 		Content: "message content",
-		Meta: repository.MessageMeta{
+		Meta: repository.EventMeta{
 			"level":       "error",
 			"environment": "dev",
 		},
@@ -66,7 +66,7 @@ func (s *MessageTestSuit) TestMessageCURD() {
 	s.EqualValues(101, count)
 
 	groupId := primitive.NewObjectID()
-	s.NoError(s.repo.Traverse(bson.M{"meta.filename": "/var/log/message"}, func(msg repository.Message) error {
+	s.NoError(s.repo.Traverse(bson.M{"meta.filename": "/var/log/message"}, func(msg repository.Event) error {
 		msg.GroupID = []primitive.ObjectID{groupId}
 		return s.repo.UpdateID(msg.ID, msg)
 	}))
@@ -91,6 +91,6 @@ func (s *MessageTestSuit) TestMessageCURD() {
 	s.EqualValues(0, next)
 }
 
-func TestMessageRepo(t *testing.T) {
-	suite.Run(t, new(MessageTestSuit))
+func TestEventRepo(t *testing.T) {
+	suite.Run(t, new(EventTestSuite))
 }

@@ -161,8 +161,8 @@ var file_rpc_protocol_message_proto_goTypes = []interface{}{
 	(*MessageRequest)(nil), // 1: protocol.MessageRequest
 }
 var file_rpc_protocol_message_proto_depIdxs = []int32{
-	1, // 0: protocol.Message.Push:input_type -> protocol.MessageRequest
-	0, // 1: protocol.Message.Push:output_type -> protocol.IDResponse
+	1, // 0: protocol.Event.Push:input_type -> protocol.MessageRequest
+	0, // 1: protocol.Event.Push:output_type -> protocol.IDResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -229,7 +229,7 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// MessageClient is the client API for Message service.
+// MessageClient is the client API for Event service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MessageClient interface {
@@ -246,14 +246,14 @@ func NewMessageClient(cc grpc.ClientConnInterface) MessageClient {
 
 func (c *messageClient) Push(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*IDResponse, error) {
 	out := new(IDResponse)
-	err := c.cc.Invoke(ctx, "/protocol.Message/Push", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/protocol.Event/Push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MessageServer is the server API for Message service.
+// MessageServer is the server API for Event service.
 type MessageServer interface {
 	Push(context.Context, *MessageRequest) (*IDResponse, error)
 }
@@ -280,7 +280,7 @@ func _Message_Push_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protocol.Message/Push",
+		FullMethod: "/protocol.Event/Push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MessageServer).Push(ctx, req.(*MessageRequest))
@@ -289,7 +289,7 @@ func _Message_Push_Handler(srv interface{}, ctx context.Context, dec func(interf
 }
 
 var _Message_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "protocol.Message",
+	ServiceName: "protocol.Event",
 	HandlerType: (*MessageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -8,7 +8,7 @@ import (
 type ServiceProvider struct{}
 
 func (s ServiceProvider) Register(app container.Container) {
-	app.MustSingleton(NewMessageStore)
+	app.MustSingleton(NewEventStore)
 }
 
 func (s ServiceProvider) Boot(app infra.Glacier) {

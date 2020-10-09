@@ -168,7 +168,7 @@ func (r RuleForm) Validate(req web.Request) error {
 		return errors.New("status is invalid, must be enabled/disabled")
 	}
 
-	_, err := matcher.NewMessageMatcher(repository.Rule{Rule: r.Rule, IgnoreRule: r.IgnoreRule})
+	_, err := matcher.NewEventMatcher(repository.Rule{Rule: r.Rule, IgnoreRule: r.IgnoreRule})
 	if err != nil {
 		return fmt.Errorf("rule is invalid: %w", err)
 	}
@@ -200,7 +200,7 @@ func (r RuleForm) Validate(req web.Request) error {
 		}
 	}
 
-	if _, err := matcher.NewMessageFinger(r.AggregateRule); err != nil {
+	if _, err := matcher.NewEventFinger(r.AggregateRule); err != nil {
 		return fmt.Errorf("group rule is invalid")
 	}
 
@@ -208,7 +208,7 @@ func (r RuleForm) Validate(req web.Request) error {
 }
 
 // Check validate the rule
-func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo repository.MessageRepo) web.Response {
+func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo repository.EventRepo) web.Response {
 	content := ctx.Input("content")
 	msgID := ctx.Input("msg_id")
 
@@ -229,7 +229,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 				"msg":   misc.IfElse(ignored, "该消息被忽略", "该消息不会被忽略"),
 			})
 		} else {
-			_, err = matcher.NewMessageMatcher(repository.Rule{Rule: "true", IgnoreRule: content})
+			_, err = matcher.NewEventMatcher(repository.Rule{Rule: "true", IgnoreRule: content})
 		}
 	case repository.TemplateTypeMatchRule:
 		if msgID != "" {
@@ -250,7 +250,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 				),
 			})
 		} else {
-			_, err = matcher.NewMessageMatcher(repository.Rule{Rule: content})
+			_, err = matcher.NewEventMatcher(repository.Rule{Rule: content})
 		}
 	case repository.TemplateTypeTriggerRule:
 		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
@@ -265,7 +265,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 			})
 		}
 	case "aggregate_rule":
-		finger, err1 := matcher.NewMessageFinger(content)
+		finger, err1 := matcher.NewEventFinger(content)
 		if err1 == nil {
 			if msgID != "" {
 				msg, err1 := r.getMessageByID(msgID, msgRepo)
@@ -298,7 +298,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 	})
 }
 
-func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID string, msgRepo repository.MessageRepo, content string) *action.Payload {
+func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID string, msgRepo repository.EventRepo, content string) *action.Payload {
 	triggers := []repository.Trigger{
 		{
 			ID:           primitive.NewObjectID(),
@@ -322,13 +322,13 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	messagesQuerier := func(groupID primitive.ObjectID, limit int64) []repository.Message {
+	messagesQuerier := func(groupID primitive.ObjectID, limit int64) []repository.Event {
 		msg, err := r.getMessageByID(msgID, msgRepo)
 		if err != nil {
-			return []repository.Message{}
+			return []repository.Event{}
 		}
 
-		messages := make([]repository.Message, 0)
+		messages := make([]repository.Event, 0)
 		for i := int64(0); i < limit; i++ {
 			messages = append(messages, msg)
 		}
@@ -342,15 +342,15 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 		"dingding",
 		rule,
 		triggers[0],
-		repository.MessageGroup{
+		repository.EventGroup{
 			ID:           primitive.NewObjectID(),
 			SeqNum:       1000,
-			Type:         repository.MessageTypePlain,
+			Type:         repository.EventTypePlain,
 			MessageCount: 3,
 			AggregateKey: "AggregateKey",
-			Rule:         rule.ToGroupRule("", repository.MessageTypePlain),
+			Rule:         rule.ToGroupRule("", repository.EventTypePlain),
 			Actions:      triggers,
-			Status:       repository.MessageGroupStatusOK,
+			Status:       repository.EventGroupStatusOK,
 			CreatedAt:    time.Now(),
 			UpdatedAt:    time.Now(),
 		},
@@ -631,23 +631,23 @@ func (r RuleController) Delete(ctx web.Context, em event.Manager, repo repositor
 	return repo.DeleteID(id)
 }
 
-func (r RuleController) getMessageByID(messageID string, msgRepo repository.MessageRepo) (repository.Message, error) {
+func (r RuleController) getMessageByID(messageID string, msgRepo repository.EventRepo) (repository.Event, error) {
 	msgID, err := primitive.ObjectIDFromHex(messageID)
 	if err != nil {
-		return repository.Message{}, fmt.Errorf("invalid message_id: %v", err)
+		return repository.Event{}, fmt.Errorf("invalid message_id: %v", err)
 	}
 
 	return msgRepo.Get(msgID)
 }
 
 // testMessageMatchRule test if the message and rule can be matched
-func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.MessageRepo) (matched bool, ignored bool, err error) {
+func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.EventRepo) (matched bool, ignored bool, err error) {
 	message, err := r.getMessageByID(messageID, msgRepo)
 	if err != nil {
 		return false, false, err
 	}
 
-	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: rule})
+	m, err := matcher.NewEventMatcher(repository.Rule{Rule: rule})
 	if err != nil {
 		return false, false, fmt.Errorf("invalid rule: %v", err)
 	}
@@ -661,13 +661,13 @@ func (r RuleController) testMessageMatchRule(rule string, messageID string, msgR
 }
 
 // testMessageIgnoreRule test if the message and rule can be ignored
-func (r RuleController) testMessageIgnoreRule(rule string, messageID string, msgRepo repository.MessageRepo) (bool, error) {
+func (r RuleController) testMessageIgnoreRule(rule string, messageID string, msgRepo repository.EventRepo) (bool, error) {
 	message, err := r.getMessageByID(messageID, msgRepo)
 	if err != nil {
 		return false, err
 	}
 
-	m, err := matcher.NewMessageMatcher(repository.Rule{Rule: "true", IgnoreRule: rule})
+	m, err := matcher.NewEventMatcher(repository.Rule{Rule: "true", IgnoreRule: rule})
 	if err != nil {
 		return false, fmt.Errorf("invalid rule: %v", err)
 	}
@@ -694,7 +694,7 @@ func (r RuleController) Tags(ctx web.Context, repo repository.RuleRepo) web.Resp
 }
 
 // MessageSample 根据规则id查询一个匹配的消息样本
-func (r RuleController) MessageSample(ctx web.Context, groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo) (*repository.Message, error) {
+func (r RuleController) MessageSample(ctx web.Context, groupRepo repository.EventGroupRepo, msgRepo repository.EventRepo) (*repository.Event, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.Input("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)

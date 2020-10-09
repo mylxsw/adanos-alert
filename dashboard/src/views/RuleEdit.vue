@@ -86,7 +86,7 @@
                     </b-card>
                 </b-card-group>
 
-                <MessageCard class="mb-3" title="消息示例" :fold="true" v-if="test_message !== null" :message="test_message" :message_index="0" :onlyShow="true"></MessageCard>
+                <EventCard class="mb-3" title="事件示例" :fold="true" v-if="test_event !== null" :event="test_event" :event_index="0" :onlyShow="true"></EventCard>
 
                 <b-card-group class="mb-3">
                     <b-card>
@@ -101,8 +101,8 @@
                         </template>
                         <b-card-text v-if="rule_card_fold">...</b-card-text>
                         <b-card-text v-if="!rule_card_fold">
-                            <p class="text-muted">分组匹配规则，作用于单条 message，用于判断该 message 是否与当前规则匹配。
-                                <br/>如果 message 没有匹配任何规则，将会被标记为 <code>已取消</code>。</p>
+                            <p class="text-muted">事件组匹配规则，作用于单条事件，用于判断该事件是否与当前规则匹配。
+                                <br/>如果事件没有匹配任何规则，将会被标记为 <code>已取消</code>。</p>
                             <b-btn-group class="mb-2">
                                 <b-btn variant="warning" v-b-modal.match_rule_selector>插入模板</b-btn>
                                 <b-btn variant="dark" @click="rule_help = !rule_help">帮助</b-btn>
@@ -125,7 +125,7 @@
                             </b-form-group>
                             <b-form-group class="mt-2" >
                                 <codemirror v-model="form.aggregate_rule" class="adanos-code-textarea"
-                                            description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组消息按照某个可变值分组，类似于 SQL 中的 GroupBy"
+                                            description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组事件按照某个可变值分组，类似于 SQL 中的 GroupBy"
                                             :options="options.aggregate_rule"></codemirror>
                             </b-form-group>
 
@@ -142,7 +142,7 @@
                                     </b-form-group>
                                     <b-form-group label-cols="2">
                                         <codemirror v-model="form.ignore_rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
-                                        <small class="form-text text-muted">当匹配规则后，会检查消息是否与忽略规则匹配，匹配则忽略该消息，常用于临时忽略某些不需要报警的消息。</small>
+                                        <small class="form-text text-muted">当匹配规则后，会检查事件是否与忽略规则匹配，匹配则忽略该事件，常用于临时忽略某些不需要报警的事件。</small>
                                         <small class="form-text text-muted">
                                             语法提示 <code>Alt+/</code>，语法参考 <a
                                             href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -169,7 +169,7 @@
                         </template>
                         <b-card-text v-if="template_card_fold">...</b-card-text>
                         <b-card-text v-if="!template_card_fold">
-                            <p class="text-muted">概要模板，用于各通知方式的默认展示模板，Adanos 会按照该模板将分组信息发送给接收人。</p>
+                            <p class="text-muted">概要模板，用于各通知方式的默认展示模板，Adanos 会按照该模板将事件组发送给接收人。</p>
                             <b-btn-group class="mb-2">
                                 <b-btn variant="warning" v-b-modal.template_selector>插入模板</b-btn>
                                 <b-btn variant="dark" @click="template_help = !template_help">帮助</b-btn>
@@ -211,7 +211,7 @@
                         </template>
                         <b-card-text v-if="action_card_fold">...</b-card-text>
                         <b-card-text v-if="!action_card_fold">
-                            <p class="text-muted">分组达到报警周期后，会按照这里的规则来将分组信息通知给对应的通道。</p>
+                            <p class="text-muted">事件组达到报警周期后，会按照这里的规则来将事件组通知给对应的通道。</p>
                             <b-card :header="trigger.id" :border-variant="trigger.is_else_trigger ? 'warning':'dark'" :header-bg-variant="trigger.is_else_trigger ? 'warning':'dark'"
                                     header-text-variant="white" class="mb-3" v-bind:key="i"
                                     v-for="(trigger, i) in form.triggers">
@@ -341,7 +341,7 @@
                 <b-button to="/rules">返回</b-button>
             </b-form>
 
-            <b-modal id="match_rule_selector" title="选择分组匹配规则模板" hide-footer size="xl">
+            <b-modal id="match_rule_selector" title="选择事件组匹配规则模板" hide-footer size="xl">
                 <b-table sticky-header="500px" responsive :items="templates.match_rule" :fields="template_fields">
                     <template v-slot:cell(content)="row">
                         <code class="adanos-pre-fold">{{ row.item.content }}</code>
@@ -366,7 +366,7 @@
                     </template>
                 </b-table>
             </b-modal>
-            <b-modal id="template_selector" title="选择分组展示模板" hide-footer size="xl">
+            <b-modal id="template_selector" title="选择事件组展示模板" hide-footer size="xl">
                 <b-table sticky-header="500px" responsive :items="templates.template" :fields="template_fields">
                     <template v-slot:cell(content)="row">
                         <code class="adanos-pre-fold">{{ row.item.content }}</code>
@@ -566,7 +566,7 @@ export default {
                     hintOptions: {adanosType: 'DingTemplate'},
                     completeSingle: false,
                     lineNumbers: true,
-                    placeholder: '默认使用分组展示模板',
+                    placeholder: '默认使用事件组展示模板',
                     lineWrapping: true
                 }
             },
@@ -576,8 +576,8 @@ export default {
                 templateRules: helpers.templates,
                 dingdingTemplateRules: helpers.templates,
             },
-            test_message_id: this.$route.query.test_message_id !== undefined ? this.$route.query.test_message_id : null,
-            test_message: null,
+            test_event_id: this.$route.query.test_event_id !== undefined ? this.$route.query.test_event_id : null,
+            test_event: null,
 
             basic_card_fold: false,
             rule_card_fold: false,
@@ -668,7 +668,7 @@ export default {
          * 发送规则检查请求
          */
         sendCheckRequest(type, content) {
-            let msg_id = this.test_message_id;
+            let msg_id = this.test_event_id;
             axios.post('/api/rules-test/rule-check/' + type + '/', {content: content, msg_id: msg_id}).then(resp => {
                 if (resp.data.error === null || resp.data.error === "") {
                     this.SuccessBox(this.$createElement('pre', {class: 'adanos-message-box-code'}, resp.data.msg));
@@ -737,7 +737,7 @@ export default {
             this.$bvModal.hide('template_selector');
         },
         /**
-         * 分组匹配规则模板选择
+         * 事件组匹配规则模板选择
          * @param template
          */
         applyTemplateForMatchRule(template) {
@@ -959,10 +959,10 @@ export default {
             this.ToastError(error)
         });
 
-        if (this.test_message_id !== null && this.test_message_id !== '') {
-            axios.get('/api/messages/' + this.test_message_id + '/').then(resp => {
-                this.test_message = resp.data;
-                if (this.test_message !== null && this.test_message.id !== undefined) {
+        if (this.test_event_id !== null && this.test_event_id !== '') {
+            axios.get('/api/events/' + this.test_event_id + '/').then(resp => {
+                this.test_event = resp.data;
+                if (this.test_event !== null && this.test_event.id !== undefined) {
                     for (let k in resp.data.meta) {
                         helpers.groupMatchRules.push({text: 'Meta["'+ k + '"]', displayText: 'Meta["'+ k + '"]'});
                         helpers.templates.push({text: k, displayText: k});
@@ -975,9 +975,9 @@ export default {
         } else if (this.$route.params.id !== undefined) {
             // 编辑时获取一个样本来展示
             axios.get('/api/rules-meta/message-sample/?id=' + this.$route.params.id).then(resp => {
-                this.test_message = resp.data;
-                if (this.test_message !== null && this.test_message.id !== undefined) {
-                    this.test_message_id = this.test_message.id;
+                this.test_event = resp.data;
+                if (this.test_event !== null && this.test_event.id !== undefined) {
+                    this.test_event_id = this.test_event.id;
                     for (let k in resp.data.meta) {
                         helpers.groupMatchRules.push({text: 'Meta["'+ k + '"]', displayText: 'Meta["'+ k + '"]'});
                         helpers.templates.push({text: k, displayText: k});

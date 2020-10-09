@@ -168,11 +168,11 @@ func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.cc.ResolveWithError(func(msgStore store.MessageStore) error {
+	return e.cc.ResolveWithError(func(msgStore store.EventStore) error {
 		ips, _ := network.GetLanIPs()
-		data, _ := json.Marshal(misc.CommonMessage{
+		data, _ := json.Marshal(misc.CommonEvent{
 			Content: message,
-			Meta: repository.MessageMeta{
+			Meta: repository.EventMeta{
 				"module": module,
 				"level":  le.GetLevelName(),
 				"ip":     ips,

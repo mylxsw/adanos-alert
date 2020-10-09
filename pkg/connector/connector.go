@@ -26,54 +26,54 @@ func NewConnector(token string, servers ...string) *Connector {
 }
 
 // Send send a message to adanos server
-func (conn *Connector) Send(ctx context.Context, msg *Message) error {
-	return Send(ctx, conn.servers, conn.token, msg.meta, msg.tags, msg.origin, msg.ctl, msg.content)
+func (conn *Connector) Send(ctx context.Context, evt *Event) error {
+	return Send(ctx, conn.servers, conn.token, evt.meta, evt.tags, evt.origin, evt.ctl, evt.content)
 }
 
-// Message is a adanos alert message
-type Message struct {
+// Event is a adanos alert message
+type Event struct {
 	meta    map[string]interface{}
 	tags    []string
 	origin  string
-	ctl     misc.MessageControl
+	ctl     misc.EventControl
 	content string
 }
 
-// NewMessage create a new Message
-func NewMessage(content string) *Message {
-	return &Message{content: content, tags: make([]string, 0), meta: make(map[string]interface{})}
+// NewEvent create a new Event
+func NewEvent(content string) *Event {
+	return &Event{content: content, tags: make([]string, 0), meta: make(map[string]interface{})}
 }
 
-func (m *Message) WithTags(tags ...string) *Message {
+func (m *Event) WithTags(tags ...string) *Event {
 	m.tags = append(m.tags, tags...)
 	return m
 }
 
-func (m *Message) WithOrigin(origin string) *Message {
+func (m *Event) WithOrigin(origin string) *Event {
 	m.origin = origin
 	return m
 }
 
-func (m *Message) WithCtl(ctl misc.MessageControl) *Message {
+func (m *Event) WithCtl(ctl misc.EventControl) *Event {
 	m.ctl = ctl
 	return m
 }
 
-func (m *Message) WithMetas(metas map[string]interface{}) *Message {
+func (m *Event) WithMetas(metas map[string]interface{}) *Event {
 	for k, v := range metas {
 		m.meta[k] = v
 	}
 	return m
 }
 
-func (m *Message) WithMeta(key string, value interface{}) *Message {
+func (m *Event) WithMeta(key string, value interface{}) *Event {
 	m.meta[key] = value
 	return m
 }
 
 // Send send a message to adanos servers
-func Send(ctx context.Context, servers []string, token string, meta map[string]interface{}, tags []string, origin string, ctl misc.MessageControl, message string) error {
-	commonMessage := misc.CommonMessage{
+func Send(ctx context.Context, servers []string, token string, meta map[string]interface{}, tags []string, origin string, ctl misc.EventControl, message string) error {
+	commonMessage := misc.CommonEvent{
 		Content: message,
 		Meta:    meta,
 		Tags:    tags,
@@ -84,7 +84,7 @@ func Send(ctx context.Context, servers []string, token string, meta map[string]i
 
 	var err error
 	for _, s := range servers {
-		if err = sendMessageToServer(ctx, commonMessage, data, s, token); err == nil {
+		if err = sendEventToServer(ctx, commonMessage, data, s, token); err == nil {
 			break
 		}
 
@@ -94,8 +94,8 @@ func Send(ctx context.Context, servers []string, token string, meta map[string]i
 	return err
 }
 
-func sendMessageToServer(ctx context.Context, commonMessage misc.CommonMessage, data []byte, adanosServer, adanosToken string) error {
-	reqURL := fmt.Sprintf("%s/api/messages/", strings.TrimRight(adanosServer, "/"))
+func sendEventToServer(ctx context.Context, commonMessage misc.CommonEvent, data []byte, adanosServer, adanosToken string) error {
+	reqURL := fmt.Sprintf("%s/api/events/", strings.TrimRight(adanosServer, "/"))
 
 	log.WithFields(log.Fields{
 		"message": commonMessage,

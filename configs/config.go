@@ -27,6 +27,7 @@ type Config struct {
 	KeepPeriod            int           `json:"keep_period"`
 
 	Migrate         bool            `json:"migrate"`
+	ReMigrate       bool            `json:"re_migrate"`
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
 }
 

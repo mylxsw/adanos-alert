@@ -27,7 +27,7 @@ func routers(cc container.Container) func(router *web.Router, mw web.RequestMidd
 		mws = append(mws, mw.AccessLog(log.Module("api")), mw.CORS("*"))
 		router.WithMiddleware(mws...).Controllers(
 			"/api",
-			NewMessageController(cc),
+			NewEventController(cc),
 		)
 	}
 }

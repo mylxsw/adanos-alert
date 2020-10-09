@@ -19,10 +19,10 @@ type messageMatcherTestCase struct {
 
 func TestMessageMatcher_Match(t *testing.T) {
 
-	var msg = repository.Message{
+	var msg = repository.Event{
 		ID:      primitive.NewObjectID(),
 		Content: `{"log_level": "debug", "message": "request", "context": {"user_id": 123}}`,
-		Meta: repository.MessageMeta{
+		Meta: repository.EventMeta{
 			"environment": "dev",
 			"server":      "192.168.1.1",
 		},
@@ -52,7 +52,7 @@ func TestMessageMatcher_Match(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		mt, err := matcher.NewMessageMatcher(repository.Rule{Rule: tc.Rule, IgnoreRule: tc.IgnoredRule})
+		mt, err := matcher.NewEventMatcher(repository.Rule{Rule: tc.Rule, IgnoreRule: tc.IgnoredRule})
 		assert.NoError(t, err)
 		matched, ignored, err := mt.Match(msg)
 		assert.NoError(t, err)
@@ -62,6 +62,6 @@ func TestMessageMatcher_Match(t *testing.T) {
 		assert.Equal(t, tc.Rule, mt.Rule().Rule)
 	}
 
-	_, err := matcher.NewMessageMatcher(repository.Rule{Rule: `xxxxxxx`})
+	_, err := matcher.NewEventMatcher(repository.Rule{Rule: `xxxxxxx`})
 	assert.Error(t, err)
 }

@@ -13,22 +13,22 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/strarr"
 )
 
-type CommonMessage struct {
-	Content string                 `json:"content"`
-	Meta    repository.MessageMeta `json:"meta"`
-	Tags    []string               `json:"tags"`
-	Origin  string                 `json:"origin"`
+type CommonEvent struct {
+	Content string               `json:"content"`
+	Meta    repository.EventMeta `json:"meta"`
+	Tags    []string             `json:"tags"`
+	Origin  string               `json:"origin"`
 
-	Control MessageControl `json:"control"`
+	Control EventControl `json:"control"`
 }
 
-type MessageControl struct {
+type EventControl struct {
 	ID              string `json:"id"`               // 消息标识，用于去重
 	InhibitInterval string `json:"inhibit_interval"` // 抑制周期，周期内相同 ID 的消息直接丢弃
 	RecoveryAfter   string `json:"recovery_after"`   // 自动恢复周期，该事件后一直没有发生相同标识的 消息，则自动生成一条恢复消息
 }
 
-func (mc MessageControl) GetInhibitInterval() time.Duration {
+func (mc EventControl) GetInhibitInterval() time.Duration {
 	duration, err := time.ParseDuration(mc.InhibitInterval)
 	if err != nil {
 		return 0
@@ -37,7 +37,7 @@ func (mc MessageControl) GetInhibitInterval() time.Duration {
 	return duration
 }
 
-func (mc MessageControl) GetRecoveryAfter() time.Duration {
+func (mc EventControl) GetRecoveryAfter() time.Duration {
 	duration, err := time.ParseDuration(mc.RecoveryAfter)
 	if err != nil {
 		return 0
@@ -46,54 +46,54 @@ func (mc MessageControl) GetRecoveryAfter() time.Duration {
 	return duration
 }
 
-func (msg CommonMessage) Serialize() string {
-	data, _ := json.Marshal(msg)
+func (evt CommonEvent) Serialize() string {
+	data, _ := json.Marshal(evt)
 	return string(data)
 }
 
-func (msg CommonMessage) GetRepoMessage() repository.Message {
-	return repository.Message{
-		Content: msg.Content,
-		Meta:    msg.Meta,
-		Tags:    msg.Tags,
-		Origin:  msg.Origin,
+func (evt CommonEvent) CreateRepoEvent() repository.Event {
+	return repository.Event{
+		Content: evt.Content,
+		Meta:    evt.Meta,
+		Tags:    evt.Tags,
+		Origin:  evt.Origin,
 		Type: IfElse(
-			msg.Control.ID != "" && msg.Control.GetRecoveryAfter() > 0,
-			repository.MessageTypeRecoverable,
-			repository.MessageTypePlain,
-		).(repository.MessageType),
+			evt.Control.ID != "" && evt.Control.GetRecoveryAfter() > 0,
+			repository.EventTypeRecoverable,
+			repository.EventTypePlain,
+		).(repository.EventType),
 	}
 }
 
-func (msg CommonMessage) GetControlMessage() MessageControl {
-	return msg.Control
+func (evt CommonEvent) GetControl() EventControl {
+	return evt.Control
 }
 
-type RepoMessage interface {
-	GetRepoMessage() repository.Message
-	GetControlMessage() MessageControl
+type RepoEvent interface {
+	CreateRepoEvent() repository.Event
+	GetControl() EventControl
 }
 
-func LogstashToCommonMessage(content []byte, contentField string) (*CommonMessage, error) {
+func LogstashToCommonEvent(content []byte, contentField string) (*CommonEvent, error) {
 	flattenJSON, err := flatten.FlattenString(string(content), "", flatten.DotStyle)
 	if err != nil {
 		return nil, fmt.Errorf("invalid json: %s", err)
 	}
 
-	var meta repository.MessageMeta
+	var meta repository.EventMeta
 	if err := json.Unmarshal([]byte(flattenJSON), &meta); err != nil {
 		return nil, fmt.Errorf("parse json failed: %s", err)
 	}
 
-	msg, ok := meta[contentField]
+	evt, ok := meta[contentField]
 	if ok {
 		delete(meta, contentField)
 	} else {
-		msg = "None"
+		evt = "None"
 	}
 
-	return &CommonMessage{
-		Content: fmt.Sprintf("%v", msg),
+	return &CommonEvent{
+		Content: fmt.Sprintf("%v", evt),
 		Meta:    logstashMetaFilter(meta),
 		Tags:    nil,
 		Origin:  "logstash",
@@ -115,8 +115,8 @@ var excludeLogstashPrefix = []string{
 }
 
 // logstashMetaFilter 过滤掉不需要存储的 logstash 专有字段
-func logstashMetaFilter(meta repository.MessageMeta) repository.MessageMeta {
-	res := make(repository.MessageMeta)
+func logstashMetaFilter(meta repository.EventMeta) repository.EventMeta {
+	res := make(repository.EventMeta)
 	for k, v := range meta {
 		if strarr.HasPrefixes(k, excludeLogstashPrefix) {
 			continue
@@ -128,7 +128,7 @@ func logstashMetaFilter(meta repository.MessageMeta) repository.MessageMeta {
 	return res
 }
 
-type GrafanaMessage struct {
+type GrafanaEvent struct {
 	EvalMatches []GrafanaEvalMatch `json:"evalMatches"`
 	ImageURL    string             `json:"imageUrl"`
 	Message     string             `json:"message"`
@@ -139,12 +139,12 @@ type GrafanaMessage struct {
 	Title       string             `json:"title"`
 }
 
-func (g GrafanaMessage) ToRepo() repository.Message {
+func (g GrafanaEvent) ToRepo() repository.Event {
 	message, _ := json.Marshal(g)
 
-	return repository.Message{
+	return repository.Event{
 		Content: string(message),
-		Meta: repository.MessageMeta{
+		Meta: repository.EventMeta{
 			"rule_id":   strconv.Itoa(int(g.RuleID)),
 			"rule_name": g.RuleName,
 			"state":     g.State,
@@ -161,14 +161,14 @@ type GrafanaEvalMatch struct {
 	Tags   map[string]string
 }
 
-func GrafanaToCommonMessage(content []byte) (*CommonMessage, error) {
-	var grafanaMessage GrafanaMessage
+func GrafanaToCommonEvent(content []byte) (*CommonEvent, error) {
+	var grafanaMessage GrafanaEvent
 	if err := json.Unmarshal(content, &grafanaMessage); err != nil {
 		return nil, errors.New("invalid request")
 	}
 
 	repoMessage := grafanaMessage.ToRepo()
-	return &CommonMessage{
+	return &CommonEvent{
 		Content: repoMessage.Content,
 		Meta:    repoMessage.Meta,
 		Tags:    repoMessage.Tags,
@@ -176,18 +176,18 @@ func GrafanaToCommonMessage(content []byte) (*CommonMessage, error) {
 	}, nil
 }
 
-type PrometheusMessage struct {
-	Status       string                 `json:"status"`
-	Labels       repository.MessageMeta `json:"labels"`
-	Annotations  repository.MessageMeta `json:"annotations"`
-	StartsAt     time.Time              `json:"startsAt"`
-	EndsAt       time.Time              `json:"endsAt"`
-	GeneratorURL string                 `json:"generatorURL"`
+type PrometheusEvent struct {
+	Status       string               `json:"status"`
+	Labels       repository.EventMeta `json:"labels"`
+	Annotations  repository.EventMeta `json:"annotations"`
+	StartsAt     time.Time            `json:"startsAt"`
+	EndsAt       time.Time            `json:"endsAt"`
+	GeneratorURL string               `json:"generatorURL"`
 }
 
-func (pm PrometheusMessage) GetRepoMessage() repository.Message {
+func (pm PrometheusEvent) CreateRepoEvent() repository.Event {
 	data, _ := json.Marshal(pm)
-	return repository.Message{
+	return repository.Event{
 		Content: string(data),
 		Meta:    pm.Labels,
 		Tags:    nil,
@@ -195,10 +195,10 @@ func (pm PrometheusMessage) GetRepoMessage() repository.Message {
 	}
 }
 
-func (pm PrometheusMessage) GetControlMessage() MessageControl {
-	mc := MessageControl{}
-	if msgID, ok := pm.Labels["adanos_id"]; ok {
-		mc.ID = fmt.Sprintf("%v", msgID)
+func (pm PrometheusEvent) GetControl() EventControl {
+	mc := EventControl{}
+	if evtID, ok := pm.Labels["adanos_id"]; ok {
+		mc.ID = fmt.Sprintf("%v", evtID)
 
 		recoveryAfter, err := time.ParseDuration(fmt.Sprintf("%v", pm.Labels["adanos_recovery_after"]))
 		if err != nil || recoveryAfter < 0 {
@@ -222,44 +222,44 @@ func (pm PrometheusMessage) GetControlMessage() MessageControl {
 	return mc
 }
 
-func PrometheusToCommonMessages(content []byte) ([]*CommonMessage, error) {
-	var prometheusMessages []PrometheusMessage
+func PrometheusToCommonEvents(content []byte) ([]*CommonEvent, error) {
+	var prometheusMessages []PrometheusEvent
 	if err := json.Unmarshal(content, &prometheusMessages); err != nil {
 		return nil, errors.New("invalid request")
 	}
 
-	commonMessages := make([]*CommonMessage, 0)
+	commonMessages := make([]*CommonEvent, 0)
 	for _, pm := range prometheusMessages {
-		repoMessage := pm.GetRepoMessage()
-		commonMessages = append(commonMessages, &CommonMessage{
+		repoMessage := pm.CreateRepoEvent()
+		commonMessages = append(commonMessages, &CommonEvent{
 			Content: repoMessage.Content,
 			Meta:    repoMessage.Meta,
 			Tags:    repoMessage.Tags,
 			Origin:  repoMessage.Origin,
-			Control: pm.GetControlMessage(),
+			Control: pm.GetControl(),
 		})
 	}
 
 	return commonMessages, nil
 }
 
-type PrometheusAlertMessage struct {
+type PrometheusAlertEvent struct {
 	Version  string `json:"version"`
 	GroupKey string `json:"groupKey"`
 
-	Receiver string              `json:"receiver"`
-	Status   string              `json:"status"`
-	Alerts   []PrometheusMessage `json:"alerts"`
+	Receiver string            `json:"receiver"`
+	Status   string            `json:"status"`
+	Alerts   []PrometheusEvent `json:"alerts"`
 
-	GroupLabels       repository.MessageMeta `json:"groupLabels"`
-	CommonLabels      repository.MessageMeta `json:"commonLabels"`
-	CommonAnnotations repository.MessageMeta `json:"commonAnnotations"`
+	GroupLabels       repository.EventMeta `json:"groupLabels"`
+	CommonLabels      repository.EventMeta `json:"commonLabels"`
+	CommonAnnotations repository.EventMeta `json:"commonAnnotations"`
 
 	ExternalURL string `json:"externalURL"`
 }
 
-func (pam PrometheusAlertMessage) ToRepo() repository.Message {
-	meta := make(repository.MessageMeta)
+func (pam PrometheusAlertEvent) ToRepo() repository.Event {
+	meta := make(repository.EventMeta)
 	for k, v := range pam.GroupLabels {
 		meta[k] = v
 	}
@@ -271,7 +271,7 @@ func (pam PrometheusAlertMessage) ToRepo() repository.Message {
 	meta["status"] = pam.Status
 
 	data, _ := json.Marshal(pam)
-	return repository.Message{
+	return repository.Event{
 		Content: string(data),
 		Meta:    meta,
 		Tags:    nil,
@@ -279,14 +279,14 @@ func (pam PrometheusAlertMessage) ToRepo() repository.Message {
 	}
 }
 
-func PrometheusAlertToCommonMessage(content []byte) (*CommonMessage, error) {
-	var prometheusMessage PrometheusAlertMessage
+func PrometheusAlertToCommonEvent(content []byte) (*CommonEvent, error) {
+	var prometheusMessage PrometheusAlertEvent
 	if err := json.Unmarshal(content, &prometheusMessage); err != nil {
 		return nil, errors.New("invalid request")
 	}
 
 	repoMessage := prometheusMessage.ToRepo()
-	return &CommonMessage{
+	return &CommonEvent{
 		Content: repoMessage.Content,
 		Meta:    repoMessage.Meta,
 		Tags:    repoMessage.Tags,
@@ -294,8 +294,8 @@ func PrometheusAlertToCommonMessage(content []byte) (*CommonMessage, error) {
 	}, nil
 }
 
-func OpenFalconToCommonMessage(tos, content string) *CommonMessage {
-	meta := make(repository.MessageMeta)
+func OpenFalconToCommonEvent(tos, content string) *CommonEvent {
+	meta := make(repository.EventMeta)
 	im := template.ParseOpenFalconImMessage(content)
 	meta["status"] = im.Status
 	meta["priority"] = strconv.Itoa(im.Priority)
@@ -304,7 +304,7 @@ func OpenFalconToCommonMessage(tos, content string) *CommonMessage {
 	meta["body"] = im.Body
 	meta["format_time"] = im.FormatTime
 
-	return &CommonMessage{
+	return &CommonEvent{
 		Content: content,
 		Meta:    meta,
 		Tags:    []string{tos},

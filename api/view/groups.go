@@ -13,16 +13,16 @@ import (
 )
 
 type GroupData struct {
-	Group        repository.MessageGroup
-	Messages     []repository.Message
-	MessageCount int64
-	Next         int64
-	Offset       int64
-	Limit        int64
-	Path         string
-	HasPrev      bool
-	HasNext      bool
-	PrevOffset   int64
+	Group       repository.EventGroup
+	Events      []repository.Event
+	EventsCount int64
+	Next        int64
+	Offset      int64
+	Limit       int64
+	Path        string
+	HasPrev     bool
+	HasNext     bool
+	PrevOffset  int64
 }
 
 var defaultTemplateContent string

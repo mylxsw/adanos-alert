@@ -47,14 +47,14 @@ func NewDingdingAction(manager Manager) *DingdingAction {
 	return &dingdingAction
 }
 
-func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 
 	var meta DingdingMeta
 	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {
 		return fmt.Errorf("parse dingding meta failed: %v", err)
 	}
 
-	return d.manager.Resolve(func(conf *configs.Config, msgRepo repository.MessageRepo, robotRepo repository.DingdingRobotRepo) error {
+	return d.manager.Resolve(func(conf *configs.Config, msgRepo repository.EventRepo, robotRepo repository.DingdingRobotRepo) error {
 		// get robot for dingding
 		robotID, err := primitive.ObjectIDFromHex(meta.RobotID)
 		if err != nil {

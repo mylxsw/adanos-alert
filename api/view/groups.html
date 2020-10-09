@@ -8,17 +8,17 @@
         <a class="btn btn-primary" href="{{ .Path }}?offset={{ .Next }}" role="button">下一页</a>
     {{ end }}
 </div>
-{{ range $i, $msg := .Messages }}
+{{ range $i, $evt := .Events }}
     <div class="panel panel-default">
-        <div class="panel-heading"><span class="panel-seq" id="{{ $msg.SeqNum }}"><a href="#{{ $msg.SeqNum }}">#{{ $msg.SeqNum }}</a></span> <b>{{ datetime "2006-01-02 15:04:05" $msg.CreatedAt }}</b></div>
+        <div class="panel-heading"><span class="panel-seq" id="{{ $evt.SeqNum }}"><a href="#{{ $evt.SeqNum }}">#{{ $evt.SeqNum }}</a></span> <b>{{ datetime "2006-01-02 15:04:05" $evt.CreatedAt }}</b></div>
         <div class="panel-body">
             <div class="meta">
                 <div class="container-fluid">
-                    {{ if len $msg.Tags | gt 0 }}
+                    {{ if len $evt.Tags | gt 0 }}
                         <div class="row">
                             <div class="col-sm-3"><span class="label label-success">标签</span></div>
                             <div class="col-sm-9">
-                                {{ range $i, $m := $msg.Tags }}
+                                {{ range $i, $m := $evt.Tags }}
                                     <span class="label label-info">{{ $m }}</span>
                                 {{ end }}
                             </div>
@@ -27,10 +27,10 @@
                     <div class="row">
                         <div class="col-sm-3"><span class="label label-primary">来源</span></div>
                         <div class="col-sm-9">
-                            {{ $msg.Origin }}
+                            {{ $evt.Origin }}
                         </div>
                     </div>
-                    {{ range $i, $m := sort_map_human $msg.Meta }}
+                    {{ range $i, $m := sort_map_human $evt.Meta }}
                         {{ if format "%v" $m.Value | ne "" }}
                             <div class="row adanos-can-fold">
                                 <div class="col-sm-3"><span class="label label-info">{{ $m.Key }}</span></div>
@@ -43,14 +43,14 @@
                 </div>
             </div>
             <div class="alert-body">
-                {{ range $i, $m := json_flatten $msg.Content 3 }}
+                {{ range $i, $m := json_flatten $evt.Content 3 }}
                     <div class="json-line">
                         <span class="json-key">{{ $m.Key }}</span>
                         <pre class="json-value">{{ if eq $m.Key "stack" }}{{ range $j, $k := json_flatten $m.Value 1 }}
                                 {{ $k.Key }} : {{ $k.Value }}{{ end }}{{ else }}{{ $m.Value }}{{ end }}</pre>
                     </div>
                 {{ else }}
-                    <pre>{{ json $msg.Content }}</pre>
+                    <pre>{{ json $evt.Content }}</pre>
                 {{ end }}
             </div>
         </div>

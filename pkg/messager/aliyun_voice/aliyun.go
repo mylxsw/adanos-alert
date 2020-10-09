@@ -18,7 +18,7 @@ import (
 
 // AliyunResponse is a response object for aliyun request
 type AliyunResponse struct {
-	Message   string `json:"Message"`
+	Message   string `json:"Event"`
 	RequestID string `json:"RequestId"`
 	Code      string `json:"Code"`
 }

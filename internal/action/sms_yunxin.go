@@ -16,6 +16,6 @@ func NewSmsYunxinAction(manager Manager) *SmsYunxin {
 	return &SmsYunxin{manager: manager}
 }
 
-func (w SmsYunxin) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.MessageGroup) error {
+func (w SmsYunxin) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	panic("implement me")
 }

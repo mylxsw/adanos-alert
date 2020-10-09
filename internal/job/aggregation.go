@@ -33,24 +33,24 @@ func (a *AggregationJob) Handle() {
 	select {
 	case a.executing <- struct{}{}:
 		defer func() { <-a.executing }()
-		// traverse all ungrouped messages to group
-		a.app.MustResolve(a.groupingMessages)
-		// change message group status to pending when it reach the aggregate condition
-		a.app.MustResolve(a.pendingMessageGroup)
+		// traverse all ungrouped events to group
+		a.app.MustResolve(a.groupingEvents)
+		// change event group status to pending when it reach the aggregate condition
+		a.app.MustResolve(a.pendingEventGroup)
 	default:
 		log.Warningf("the last aggregation job is not finished yet, skip for this time")
 	}
 }
 
-func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupRepo repository.MessageGroupRepo, ruleRepo repository.RuleRepo) error {
+func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) error {
 	matchers, err := initializeMatchers(ruleRepo)
 	if err != nil {
 		log.Error(err.Error())
 		return err
 	}
 
-	collectingGroups := make(map[string]repository.MessageGroup)
-	err = msgRepo.Traverse(bson.M{"status": repository.MessageStatusPending}, func(msg repository.Message) error {
+	collectingGroups := make(map[string]repository.EventGroup)
+	err = eventRepo.Traverse(bson.M{"status": repository.EventStatusPending}, func(msg repository.Event) error {
 		messageCanIgnore := false
 		for _, m := range matchers {
 			matched, ignored, err := m.Match(msg)
@@ -63,7 +63,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 				if ignored {
 					messageCanIgnore = true
 				} else {
-					aggregateKey := BuildMessageFinger(m.Rule().AggregateRule, msg)
+					aggregateKey := BuildEventFinger(m.Rule().AggregateRule, msg)
 					key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, msg.Type)
 					if _, ok := collectingGroups[key]; !ok {
 						grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, msg.Type))
@@ -80,7 +80,7 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 					}
 
 					msg.GroupID = append(msg.GroupID, collectingGroups[key].ID)
-					msg.Status = repository.MessageStatusGrouped
+					msg.Status = repository.EventStatusGrouped
 				}
 			}
 		}
@@ -92,11 +92,11 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 		// false | grouped  -> grouped
 
 		// if message not match any rules, set message as canceled
-		if msg.Status == repository.MessageStatusPending {
+		if msg.Status == repository.EventStatusPending {
 			msg.Status = misc.IfElse(messageCanIgnore,
-				repository.MessageStatusIgnored,
-				repository.MessageStatusCanceled,
-			).(repository.MessageStatus)
+				repository.EventStatusIgnored,
+				repository.EventStatusCanceled,
+			).(repository.EventStatus)
 		}
 
 		log.WithFields(log.Fields{
@@ -104,14 +104,14 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 			"status": msg.Status,
 		}).Debug("change message status")
 
-		return msgRepo.UpdateID(msg.ID, msg)
+		return eventRepo.UpdateID(msg.ID, msg)
 	})
 	if err != nil {
 		return err
 	}
 
 	// 将能够与规则匹配的 Canceled 的 message 转换为 Expired
-	return msgRepo.Traverse(bson.M{"status": repository.MessageStatusCanceled}, func(msg repository.Message) error {
+	return eventRepo.Traverse(bson.M{"status": repository.EventStatusCanceled}, func(msg repository.Event) error {
 		for _, m := range matchers {
 			matched, _, err := m.Match(msg)
 			if err != nil {
@@ -120,16 +120,16 @@ func (a *AggregationJob) groupingMessages(msgRepo repository.MessageRepo, groupR
 
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
-				msg.Status = repository.MessageStatusExpired
+				msg.Status = repository.EventStatusExpired
 				break
 			}
 		}
 
-		return msgRepo.UpdateID(msg.ID, msg)
+		return eventRepo.UpdateID(msg.ID, msg)
 	})
 }
 
-func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher, error) {
+func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.EventMatcher, error) {
 	// get all rules
 	rules, err := ruleRepo.Find(bson.M{"status": repository.RuleStatusEnabled})
 	if err != nil {
@@ -137,9 +137,9 @@ func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher
 	}
 
 	// create matchers from rules
-	var matchers []*matcher.MessageMatcher
-	if err := coll.MustNew(rules).Map(func(ru repository.Rule) *matcher.MessageMatcher {
-		mat, err := matcher.NewMessageMatcher(ru)
+	var matchers []*matcher.EventMatcher
+	if err := coll.MustNew(rules).Map(func(ru repository.Rule) *matcher.EventMatcher {
+		mat, err := matcher.NewEventMatcher(ru)
 		if err != nil {
 			log.Errorf("invalid rule: %v", err)
 		}
@@ -152,8 +152,8 @@ func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.MessageMatcher
 	return matchers, nil
 }
 
-func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRepo, msgRepo repository.MessageRepo, em event.Manager) error {
-	return groupRepo.Traverse(bson.M{"status": repository.MessageGroupStatusCollecting}, func(grp repository.MessageGroup) error {
+func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, msgRepo repository.EventRepo, em event.Manager) error {
+	return groupRepo.Traverse(bson.M{"status": repository.EventGroupStatusCollecting}, func(grp repository.EventGroup) error {
 		if !grp.Ready() {
 			return nil
 		}
@@ -167,7 +167,7 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 		}
 
 		grp.MessageCount = msgCount
-		grp.Status = repository.MessageGroupStatusPending
+		grp.Status = repository.EventGroupStatusPending
 
 		log.WithFields(log.Fields{
 			"grp_id": grp.ID.Hex(),
@@ -185,15 +185,15 @@ func (a *AggregationJob) pendingMessageGroup(groupRepo repository.MessageGroupRe
 	})
 }
 
-func BuildMessageFinger(groupRule string, msg repository.Message) string {
-	finger, err := matcher.NewMessageFinger(groupRule)
+func BuildEventFinger(groupRule string, evt repository.Event) string {
+	finger, err := matcher.NewEventFinger(groupRule)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"rule": groupRule,
 		}).Errorf("parse group rule failed: %v", err)
 		return "[error]invalid_rule"
 	}
-	groupKey, err := finger.Run(msg)
+	groupKey, err := finger.Run(evt)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"rule": groupRule,
@@ -209,9 +209,9 @@ type MatchedRule struct {
 	AggregateKey string          `json:"aggregate_key"`
 }
 
-// BuildMessageMatchTest 创建 message 与规则的匹配测试，用于检测 message 能够匹配哪些规则
-func BuildMessageMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Message) ([]MatchedRule, error) {
-	return func(msg repository.Message) ([]MatchedRule, error) {
+// BuildEventMatchTest 创建 event 与规则的匹配测试，用于检测 event 能够匹配哪些规则
+func BuildEventMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Event) ([]MatchedRule, error) {
+	return func(msg repository.Event) ([]MatchedRule, error) {
 		matchedRules := make([]MatchedRule, 0)
 
 		matchers, err := initializeMatchers(ruleRepo)
@@ -230,7 +230,7 @@ func BuildMessageMatchTest(ruleRepo repository.RuleRepo) func(msg repository.Mes
 			if matched {
 				matchedRules = append(matchedRules, MatchedRule{
 					Rule:         m.Rule(),
-					AggregateKey: BuildMessageFinger(m.Rule().AggregateRule, msg),
+					AggregateKey: BuildEventFinger(m.Rule().AggregateRule, msg),
 				})
 			}
 		}

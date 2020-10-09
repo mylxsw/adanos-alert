@@ -12,12 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MessageRepo struct {
+type EventRepo struct {
 	col     *mongo.Collection
 	seqRepo repository.SequenceRepo
 }
 
-func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.MessageRepo {
+func NewEventRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repository.EventRepo {
 	col := db.Collection("message")
 
 	if _, err := col.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
@@ -34,13 +34,13 @@ func NewMessageRepo(db *mongo.Database, seqRepo repository.SequenceRepo) reposit
 		log.Errorf("can not create index for message.group_ids: %v", err)
 	}
 
-	return &MessageRepo{col: col, seqRepo: seqRepo}
+	return &EventRepo{col: col, seqRepo: seqRepo}
 }
 
-func (m MessageRepo) AddWithContext(ctx context.Context, msg repository.Message) (id primitive.ObjectID, err error) {
+func (m EventRepo) AddWithContext(ctx context.Context, msg repository.Event) (id primitive.ObjectID, err error) {
 	msg.CreatedAt = time.Now()
 	if msg.Status == "" {
-		msg.Status = repository.MessageStatusPending
+		msg.Status = repository.EventStatusPending
 	}
 
 	seq, err := m.seqRepo.Next("message_seq")
@@ -49,7 +49,7 @@ func (m MessageRepo) AddWithContext(ctx context.Context, msg repository.Message)
 	}
 
 	if msg.Type == "" {
-		msg.Type = repository.MessageTypePlain
+		msg.Type = repository.EventTypePlain
 	}
 
 	rs, err := m.col.InsertOne(ctx, msg)
@@ -60,11 +60,11 @@ func (m MessageRepo) AddWithContext(ctx context.Context, msg repository.Message)
 	return rs.InsertedID.(primitive.ObjectID), err
 }
 
-func (m MessageRepo) Add(msg repository.Message) (id primitive.ObjectID, err error) {
+func (m EventRepo) Add(msg repository.Event) (id primitive.ObjectID, err error) {
 	return m.AddWithContext(context.TODO(), msg)
 }
 
-func (m MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err error) {
+func (m EventRepo) Get(id primitive.ObjectID) (msg repository.Event, err error) {
 	err = m.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&msg)
 	if err == mongo.ErrNoDocuments {
 		return msg, repository.ErrNotFound
@@ -73,15 +73,15 @@ func (m MessageRepo) Get(id primitive.ObjectID) (msg repository.Message, err err
 	return msg, err
 }
 
-func (m MessageRepo) Find(filter interface{}) (messages []repository.Message, err error) {
-	messages = make([]repository.Message, 0)
+func (m EventRepo) Find(filter interface{}) (messages []repository.Event, err error) {
+	messages = make([]repository.Event, 0)
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return
 	}
 
 	for cur.Next(context.TODO()) {
-		var msg repository.Message
+		var msg repository.Event
 		if err = cur.Decode(&msg); err != nil {
 			return
 		}
@@ -92,15 +92,15 @@ func (m MessageRepo) Find(filter interface{}) (messages []repository.Message, er
 	return
 }
 
-func (m MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Message, next int64, err error) {
-	messages = make([]repository.Message, 0)
+func (m EventRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Event, next int64, err error) {
+	messages = make([]repository.Event, 0)
 	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetLimit(limit).SetSort(bson.M{"created_at": -1}).SetSkip(offset))
 	if err != nil {
 		return
 	}
 
 	for cur.Next(context.TODO()) {
-		var msg repository.Message
+		var msg repository.Event
 		if err = cur.Decode(&msg); err != nil {
 			return
 		}
@@ -115,23 +115,23 @@ func (m MessageRepo) Paginate(filter interface{}, offset, limit int64) (messages
 	return messages, next, err
 }
 
-func (m MessageRepo) Delete(filter interface{}) error {
+func (m EventRepo) Delete(filter interface{}) error {
 	_, err := m.col.DeleteMany(context.TODO(), filter)
 	return err
 }
 
-func (m MessageRepo) DeleteID(id primitive.ObjectID) error {
+func (m EventRepo) DeleteID(id primitive.ObjectID) error {
 	return m.Delete(bson.M{"_id": id})
 }
 
-func (m MessageRepo) Traverse(filter interface{}, cb func(msg repository.Message) error) error {
+func (m EventRepo) Traverse(filter interface{}, cb func(msg repository.Event) error) error {
 	cur, err := m.col.Find(context.TODO(), filter)
 	if err != nil {
 		return err
 	}
 
 	for cur.Next(context.TODO()) {
-		var msg repository.Message
+		var msg repository.Event
 		if err = cur.Decode(&msg); err != nil {
 			return err
 		}
@@ -144,11 +144,11 @@ func (m MessageRepo) Traverse(filter interface{}, cb func(msg repository.Message
 	return nil
 }
 
-func (m MessageRepo) UpdateID(id primitive.ObjectID, update repository.Message) error {
+func (m EventRepo) UpdateID(id primitive.ObjectID, update repository.Event) error {
 	_, err := m.col.ReplaceOne(context.TODO(), bson.M{"_id": id}, update)
 	return err
 }
 
-func (m MessageRepo) Count(filter interface{}) (int64, error) {
+func (m EventRepo) Count(filter interface{}) (int64, error) {
 	return m.col.CountDocuments(context.TODO(), filter)
 }

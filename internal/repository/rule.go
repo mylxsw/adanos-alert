@@ -68,9 +68,9 @@ type Rule struct {
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
 }
 
-// ToGroupRule convert Rule to MessageGroupRule
-func (rule Rule) ToGroupRule(aggregateKey string, msgType MessageType) MessageGroupRule {
-	groupRule := MessageGroupRule{
+// ToGroupRule convert Rule to EventGroupRule
+func (rule Rule) ToGroupRule(aggregateKey string, msgType EventType) EventGroupRule {
+	groupRule := EventGroupRule{
 		ID:               rule.ID,
 		Name:             rule.Name,
 		Rule:             rule.Rule,
