@@ -29,6 +29,8 @@ const (
 	EventTypeRecoverable EventType = "recoverable"
 	// EventTypeRecovery 恢复消息
 	EventTypeRecovery EventType = "recovery"
+	// EventTypeRecovered 消息已恢复
+	EventTypeRecovered EventType = "recovered"
 )
 
 type Event struct {

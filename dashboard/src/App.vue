@@ -12,13 +12,16 @@
                         <b-badge variant="danger" v-if="pending_events_count > 0" v-b-tooltip.hover title="没有匹配任何规则的事件">{{ pending_events_count }}</b-badge>
                     </b-nav-item>
                     <b-nav-item to="/rules" exact>规则</b-nav-item>
-                    <b-nav-item to="/users">用户</b-nav-item>
-                    <b-nav-item to="/dingding-robots">钉钉</b-nav-item>
                     <b-nav-item to="/templates">模板</b-nav-item>
                     <b-nav-item to="/queues">队列</b-nav-item>
                     <b-nav-item to="/agents">Agent</b-nav-item>
                     <b-nav-item to="/reports">报表</b-nav-item>
                     <b-nav-item to="/audit">审计</b-nav-item>
+                    <b-nav-item to="/users">用户</b-nav-item>
+                    <b-nav-item-dropdown text="动作" right>
+                        <b-dropdown-item to="/dingding-robots">钉钉</b-dropdown-item>
+                        <b-dropdown-item>阿里云语音通知</b-dropdown-item>
+                    </b-nav-item-dropdown>
                     <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
             </b-collapse>
