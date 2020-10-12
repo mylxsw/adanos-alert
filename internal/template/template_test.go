@@ -288,11 +288,6 @@ func TestNumberBeauty(t *testing.T) {
 	assert.Equal(t, "111,133,448,958,232 | 111,133,448,958,232.00", parsed)
 }
 
-func TestSQLFinger(t *testing.T) {
-	assert.Equal(t, "xxxxxx adsfa", SQLFinger("XXXXxx adsfa"))
-	assert.Equal(t, "select id , name from users where id in ( ... ) and age > ?", SQLFinger("Select id, name from users where id in (1, 2,3 ,4 ) and age > 19"))
-}
-
 func TestJSONCutOffFields(t *testing.T) {
 	data := Serialize(TrimPrefixMapK("context.", MetaFilterPrefix(JSONCutOffFields(20, jsonContent), "context.msg", "context.final_channel")))
 	assert.Equal(t, `{"final_channel":"亿美软通","msg":"短信发送失败，该错误不允许重试其它通道，..."}`, data)

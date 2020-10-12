@@ -14,11 +14,11 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
-	"github.com/pingcap/parser"
 	"github.com/vjeantet/grok"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -74,7 +74,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"integer":                    toInteger,
 		"float":                      toFloat,
 		"mysql_slowlog":              parseMySQLSlowlog,
-		"sql_finger":                 SQLFinger,
+		"sql_finger":                 misc.SQLFinger,
 		"open_falcon_im":             ParseOpenFalconImMessage,
 		"string_mask":                StringMask,
 		"string_tags":                StringTags,
@@ -121,11 +121,6 @@ func parseMySQLSlowlog(slowlog string) map[string]string {
 	values, _ := g.Parse(`(?m)^(# Time: \d+ \d+:\d+:\d+\n)?#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:%{DATA:clienthost})?\[(?:%{IPV4:clientip})?\]\n#\s+Thread_id:\s+%{NUMBER:thread_id}\s+Schema:\s+%{WORD:schema}\s+QC_hit:\s+%{WORD:qc_hit}\n#\s*Query_time:\s+%{NUMBER:query_time}\s+Lock_time:\s+%{NUMBER:lock_time}\s+Rows_sent:\s+%{NUMBER:rows_sent}\s+Rows_examined:\s+%{NUMBER:rows_examined}\n(# Rows_affected: %{NUMBER:rows_affected}  Bytes_sent: %{NUMBER:bytes_sent}\n)?%{EXPLAIN:explain}\s*(?:use %{DATA:database};\s*\n)?SET\s+timestamp=%{NUMBER:occur_time};\n\s*%{SQL:sql};\s*(?:\n#\s+Time)?.*$`, slowlog)
 
 	return values
-}
-
-// SQLFinger 生成 SQL 指纹
-func SQLFinger(sqlStr string) string {
-	return strings.ReplaceAll(parser.Normalize(sqlStr), " . ", ".")
 }
 
 // cutOff 字符串截断

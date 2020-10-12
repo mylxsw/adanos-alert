@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pingcap/parser"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 )
 
 // Helpers 用于规则引擎的助手函数
@@ -55,7 +55,7 @@ func (Helpers) ParseTime(layout string, value string) time.Time {
 
 // SQLFinger 将 SQL 转换为其指纹
 func (Helpers) SQLFinger(sqlStr string) string {
-	return parser.Normalize(sqlStr)
+	return misc.SQLFinger(sqlStr)
 }
 
 // TrimSuffix 字符串去除后缀
@@ -67,4 +67,3 @@ func (Helpers) TrimSuffix(s, suffix string) string {
 func (Helpers) TrimPrefix(s, prefix string) string {
 	return strings.TrimPrefix(s, prefix)
 }
-
