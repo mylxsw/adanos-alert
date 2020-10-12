@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/connector"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
@@ -61,7 +60,7 @@ func main() {
 			},
 			&cli.IntFlag{
 				Name:  "max-lines",
-				Value: 100,
+				Value: 1000,
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -75,7 +74,7 @@ func main() {
 				adanosServers = append(adanosServers, "http://localhost:19999")
 			}
 
-			ctl := extension.EventControl{
+			ctl := connector.EventControl{
 				ID:              c.String("id"),
 				InhibitInterval: c.String("inhibit-interval"),
 				RecoveryAfter:   c.String("recovery-after"),
