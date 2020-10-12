@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
@@ -187,7 +188,7 @@ func (m *EventController) errorWrap(ctx web.Context, id primitive.ObjectID, err 
 // Add common message
 
 func (m *EventController) AddCommonEvent(ctx web.Context, eventService service.EventService) web.Response {
-	var commonMessage misc.CommonEvent
+	var commonMessage extension.CommonEvent
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
@@ -198,7 +199,7 @@ func (m *EventController) AddCommonEvent(ctx web.Context, eventService service.E
 
 // AddLogstashEvent Add logstash message
 func (m *EventController) AddLogstashEvent(ctx web.Context, eventService service.EventService) web.Response {
-	commonMessage, err := misc.LogstashToCommonEvent(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
+	commonMessage, err := extension.LogstashToCommonEvent(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -209,7 +210,7 @@ func (m *EventController) AddLogstashEvent(ctx web.Context, eventService service
 
 // AddGrafanaEvent Add grafana message
 func (m *EventController) AddGrafanaEvent(ctx web.Context, eventService service.EventService) web.Response {
-	commonMessage, err := misc.GrafanaToCommonEvent(ctx.Request().Body())
+	commonMessage, err := extension.GrafanaToCommonEvent(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -220,7 +221,7 @@ func (m *EventController) AddGrafanaEvent(ctx web.Context, eventService service.
 
 // AddPrometheusEvent add prometheus alert message
 func (m *EventController) AddPrometheusEvent(ctx web.Context, eventService service.EventService) web.Response {
-	commonMessages, err := misc.PrometheusToCommonEvents(ctx.Request().Body())
+	commonMessages, err := extension.PrometheusToCommonEvents(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -241,7 +242,7 @@ func (m *EventController) AddPrometheusEvent(ctx web.Context, eventService servi
 
 // AddPrometheusAlertEvent add prometheus-alert message
 func (m *EventController) AddPrometheusAlertEvent(ctx web.Context, eventService service.EventService) web.Response {
-	commonMessage, err := misc.PrometheusAlertToCommonEvent(ctx.Request().Body())
+	commonMessage, err := extension.PrometheusAlertToCommonEvent(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -259,7 +260,7 @@ func (m *EventController) AddOpenFalconEvent(ctx web.Context, eventService servi
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	id, err := eventService.Add(ctx.Context(), *misc.OpenFalconToCommonEvent(tos, content))
+	id, err := eventService.Add(ctx.Context(), *extension.OpenFalconToCommonEvent(tos, content))
 	return m.errorWrap(ctx, id, err)
 }
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/connector"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
@@ -74,7 +75,7 @@ func main() {
 				adanosServers = append(adanosServers, "http://localhost:19999")
 			}
 
-			ctl := misc.EventControl{
+			ctl := extension.EventControl{
 				ID:              c.String("id"),
 				InhibitInterval: c.String("inhibit-interval"),
 				RecoveryAfter:   c.String("recovery-after"),

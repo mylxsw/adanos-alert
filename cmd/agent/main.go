@@ -15,6 +15,7 @@ import (
 	"github.com/mylxsw/adanos-alert/agent/config"
 	"github.com/mylxsw/adanos-alert/agent/job"
 	"github.com/mylxsw/adanos-alert/agent/store"
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
@@ -170,7 +171,7 @@ func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
 	return e.cc.ResolveWithError(func(msgStore store.EventStore) error {
 		ips, _ := network.GetLanIPs()
-		data, _ := json.Marshal(misc.CommonEvent{
+		data, _ := json.Marshal(extension.CommonEvent{
 			Content: message,
 			Meta: repository.EventMeta{
 				"module": module,

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/mylxsw/adanos-alert/pkg/misc"
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/container"
@@ -25,7 +25,7 @@ func NewEventService(cc container.Container) *EventService {
 
 // Push add a new message
 func (ms *EventService) Push(ctx context.Context, request *protocol.MessageRequest) (*protocol.IDResponse, error) {
-	var commonMessage misc.CommonEvent
+	var commonMessage extension.CommonEvent
 	if err := json.Unmarshal([]byte(request.Data), &commonMessage); err != nil {
 		return nil, err
 	}

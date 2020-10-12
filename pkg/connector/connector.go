@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mylxsw/adanos-alert/pkg/misc"
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/asteria/log"
 	"github.com/pkg/errors"
 )
@@ -27,7 +27,7 @@ func NewConnector(token string, servers ...string) *Connector {
 
 // Send send a message to adanos server
 func (conn *Connector) Send(ctx context.Context, evt *Event) error {
-	return Send(ctx, conn.servers, conn.token, evt.meta, evt.tags, evt.origin, evt.ctl, evt.content)
+	return Send(ctx, conn.servers, conn.token, evt.meta, evt.tags, evt.origin, evt.ctl.toExtensionEventControl(), evt.content)
 }
 
 // Event is a adanos alert message
@@ -35,8 +35,22 @@ type Event struct {
 	meta    map[string]interface{}
 	tags    []string
 	origin  string
-	ctl     misc.EventControl
+	ctl     EventControl
 	content string
+}
+
+type EventControl struct {
+	ID              string `json:"id"`               // 消息标识，用于去重
+	InhibitInterval string `json:"inhibit_interval"` // 抑制周期，周期内相同 ID 的消息直接丢弃
+	RecoveryAfter   string `json:"recovery_after"`   // 自动恢复周期，该事件后一直没有发生相同标识的 消息，则自动生成一条恢复消息
+}
+
+func (ec EventControl) toExtensionEventControl() extension.EventControl {
+	return extension.EventControl{
+		ID:              ec.ID,
+		InhibitInterval: ec.InhibitInterval,
+		RecoveryAfter:   ec.RecoveryAfter,
+	}
 }
 
 // NewEvent create a new Event
@@ -54,7 +68,7 @@ func (m *Event) WithOrigin(origin string) *Event {
 	return m
 }
 
-func (m *Event) WithCtl(ctl misc.EventControl) *Event {
+func (m *Event) WithCtl(ctl EventControl) *Event {
 	m.ctl = ctl
 	return m
 }
@@ -72,19 +86,19 @@ func (m *Event) WithMeta(key string, value interface{}) *Event {
 }
 
 // Send send a message to adanos servers
-func Send(ctx context.Context, servers []string, token string, meta map[string]interface{}, tags []string, origin string, ctl misc.EventControl, message string) error {
-	commonMessage := misc.CommonEvent{
+func Send(ctx context.Context, servers []string, token string, meta map[string]interface{}, tags []string, origin string, ctl extension.EventControl, message string) error {
+	evt := extension.CommonEvent{
 		Content: message,
 		Meta:    meta,
 		Tags:    tags,
 		Origin:  origin,
 		Control: ctl,
 	}
-	data, _ := json.Marshal(commonMessage)
+	data, _ := json.Marshal(evt)
 
 	var err error
 	for _, s := range servers {
-		if err = sendEventToServer(ctx, commonMessage, data, s, token); err == nil {
+		if err = sendEventToServer(ctx, evt, data, s, token); err == nil {
 			break
 		}
 
@@ -94,11 +108,11 @@ func Send(ctx context.Context, servers []string, token string, meta map[string]i
 	return err
 }
 
-func sendEventToServer(ctx context.Context, commonMessage misc.CommonEvent, data []byte, adanosServer, adanosToken string) error {
+func sendEventToServer(ctx context.Context, evt extension.CommonEvent, data []byte, adanosServer, adanosToken string) error {
 	reqURL := fmt.Sprintf("%s/api/events/", strings.TrimRight(adanosServer, "/"))
 
 	log.WithFields(log.Fields{
-		"message": commonMessage,
+		"event": evt,
 	}).Debugf("request: %v", reqURL)
 
 	client := &http.Client{}

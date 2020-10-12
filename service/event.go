@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,7 +14,7 @@ import (
 
 type EventService interface {
 	// Add add a new event to repository
-	Add(ctx context.Context, msg misc.CommonEvent) (primitive.ObjectID, error)
+	Add(ctx context.Context, msg extension.CommonEvent) (primitive.ObjectID, error)
 }
 
 type eventService struct {
@@ -29,7 +29,7 @@ func NewEventService(cc container.Container) EventService {
 	return ms
 }
 
-func (m *eventService) Add(ctx context.Context, msg misc.CommonEvent) (primitive.ObjectID, error) {
+func (m *eventService) Add(ctx context.Context, msg extension.CommonEvent) (primitive.ObjectID, error) {
 	controlMessage := msg.GetControl()
 
 	var msgID primitive.ObjectID

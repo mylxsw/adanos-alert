@@ -1,4 +1,4 @@
-package misc
+package extension
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"github.com/jeremywohl/flatten"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pkg/strarr"
 )
 
@@ -57,7 +58,7 @@ func (evt CommonEvent) CreateRepoEvent() repository.Event {
 		Meta:    evt.Meta,
 		Tags:    evt.Tags,
 		Origin:  evt.Origin,
-		Type: IfElse(
+		Type: misc.IfElse(
 			evt.Control.ID != "" && evt.Control.GetRecoveryAfter() > 0,
 			repository.EventTypeRecoverable,
 			repository.EventTypePlain,

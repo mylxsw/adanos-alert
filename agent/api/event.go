@@ -6,6 +6,7 @@ import (
 
 	"github.com/ledisdb/ledisdb/ledis"
 	"github.com/mylxsw/adanos-alert/agent/store"
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
@@ -42,7 +43,7 @@ func (m *EventController) Register(router *web.Router) {
 	})
 }
 
-func (m *EventController) saveEvent(msgRepo store.EventStore, commonMessage misc.CommonEvent, ctx web.Context) error {
+func (m *EventController) saveEvent(msgRepo store.EventStore, commonMessage extension.CommonEvent, ctx web.Context) error {
 	commonMessage.Meta["adanos_agent_version"] = m.cc.MustGet(infra.VersionKey).(string)
 	commonMessage.Meta["adanos_agent_ip"] = misc.ServerIP()
 	m.cc.MustResolve(func(db *ledis.DB) {
@@ -70,7 +71,7 @@ func (m *EventController) errorWrap(ctx web.Context, err error) web.Response {
 }
 
 func (m *EventController) AddCommonEvent(ctx web.Context, messageStore store.EventStore) web.Response {
-	var commonMessage misc.CommonEvent
+	var commonMessage extension.CommonEvent
 	if err := ctx.Unmarshal(&commonMessage); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
@@ -80,7 +81,7 @@ func (m *EventController) AddCommonEvent(ctx web.Context, messageStore store.Eve
 
 // AddLogstashEvent Add logstash message
 func (m *EventController) AddLogstashEvent(ctx web.Context, messageStore store.EventStore) web.Response {
-	commonMessage, err := misc.LogstashToCommonEvent(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
+	commonMessage, err := extension.LogstashToCommonEvent(ctx.Request().Body(), ctx.InputWithDefault("content-field", "message"))
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -90,7 +91,7 @@ func (m *EventController) AddLogstashEvent(ctx web.Context, messageStore store.E
 
 // Add grafana message
 func (m *EventController) AddGrafanaEvent(ctx web.Context, messageStore store.EventStore) web.Response {
-	commonMessage, err := misc.GrafanaToCommonEvent(ctx.Request().Body())
+	commonMessage, err := extension.GrafanaToCommonEvent(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -100,7 +101,7 @@ func (m *EventController) AddGrafanaEvent(ctx web.Context, messageStore store.Ev
 
 // add prometheus alert message
 func (m *EventController) AddPrometheusEvent(ctx web.Context, messageStore store.EventStore) web.Response {
-	commonMessages, err := misc.PrometheusToCommonEvents(ctx.Request().Body())
+	commonMessages, err := extension.PrometheusToCommonEvents(ctx.Request().Body())
 	if err != nil {
 		return m.errorWrap(ctx, err)
 	}
@@ -119,7 +120,7 @@ func (m *EventController) AddPrometheusEvent(ctx web.Context, messageStore store
 
 // add prometheus-alert message
 func (m *EventController) AddPrometheusAlertEvent(ctx web.Context, messageStore store.EventStore) web.Response {
-	commonMessage, err := misc.PrometheusAlertToCommonEvent(ctx.Request().Body())
+	commonMessage, err := extension.PrometheusAlertToCommonEvent(ctx.Request().Body())
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -136,5 +137,5 @@ func (m *EventController) AddOpenFalconEvent(ctx web.Context, messageStore store
 		return ctx.JSONError("invalid request, content required", http.StatusUnprocessableEntity)
 	}
 
-	return m.errorWrap(ctx, m.saveEvent(messageStore, *misc.OpenFalconToCommonEvent(tos, content), ctx))
+	return m.errorWrap(ctx, m.saveEvent(messageStore, *extension.OpenFalconToCommonEvent(tos, content), ctx))
 }
