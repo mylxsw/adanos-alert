@@ -122,12 +122,6 @@ let helpers = {
         {text: 'json_gets "KEY" "DEFAULT" JSONSTR', displayText: 'json_gets(key string, defaultValue string, body string) string  |  将 body 解析为 json，然后获取 key 的值(可以使用逗号分割多个key作为备选)，失败返回 defaultValue'},
         {text: 'json_array "KEY" JSONSTR', displayText: 'json_array(key string, body string) []string  |  将 body 解析为 json，然后获取 key 的值（数组值）'},
         {text: 'json_flatten JSONSTR MAX_LEVEL', displayText: 'json_flatten(body string, maxLevel int) []jsonutils.KvPair  |  将 body 解析为 json，然后转换为键值对返回'},
-        {text: 'starts_with STR "START_STR"', displayText: 'starts_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 开头'},
-        {text: 'ends_with STR "START_END"', displayText: 'ends_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 结尾'},
-        {text: 'trim STR "CUTSTR"', displayText: 'trim(s string, cutset string) string  |  去掉字符串 s 两边的 cutset 字符'},
-        {text: 'trim_left STR "CUTSTR"', displayText: 'trim_left(s string, cutset string) string  |  去掉字符串 s 左侧的 cutset 字符'},
-        {text: 'trim_right STR "CUTSTR"', displayText: 'trim_right(s string, cutset string) string  |  去掉字符串 s 右侧的 cutset 字符'},
-        {text: 'trim_space STR', displayText: 'trim_space(s string) string  |  去掉字符串 s 两边的空格'},
         {text: 'format "FORMAT" VAL', displayText: 'format(format string, a ...interface{}) string  |  格式化展示，调用 fmt.Sprintf'},
         {text: 'number_beauty VAL', displayText: 'number_beauty(num interface{}) string  |  数字格式化展示，自动添加千分位分隔符'},
         {text: 'integer STR', displayText: 'integer(str string) int  |  字符串转整数 '},
@@ -138,8 +132,6 @@ let helpers = {
         {text: 'string_mask STR LEFT', displayText: 'string_mask(content string, left int) string  |  在左右两侧只保留 left 个字符，中间所有字符替换为 *'},
         {text: 'string_tags TAG_STR SEPARATOR', displayText: 'string_tags(tags string, sep string) []string  |  将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除'},
         {text: 'remove_empty_line STR', displayText: 'remove_empty_line(content string) string | 移除字符串中的空行'},
-        {text: 'meta_filter STR FILTER_STR', displayText: 'meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} | 过滤Meta，只保留允许的Key'},
-        {text: 'meta_prefix_filter STR FILTER_PREFIX', displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefix ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'},
         {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
         {text: 'error_notice MSG', displayText: 'error_notice(msg string) string | 红色字体显示"msg"两字'},
         {text: 'success_notice MSG', displayText: 'success_notice(msg string) string | 绿色字体显示"msg"两字'},
@@ -152,6 +144,23 @@ let helpers = {
         {text: 'json_fields_cutoff LENGTH JSON_STR', displayText: 'json_fields_cutoff(length int, body string) map[string]interface{} | 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度'},
         {text: 'map_fields_cutoff LENGTH MAP', displayText: 'map_fields_cutoff(length int, source map[string]interface{}) map[string]interface{} | 对 Map 的每个 KV 截取指定长度'},
         {text: 'trim_prefix_map_k PREFIX SOURCE', displayText: 'trim_prefix_map_k(prefix string, source map[string]interface{}) map[string]interface{} | 移除 Map 中所有 Key 的前缀'},
+
+        {text: 'meta_filter STR FILTER_STR', displayText: 'meta_filter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} | 过滤Meta，只保留允许的Key'},
+        {text: 'meta_filter_exclude STR FILTER_STR', displayText: 'meta_filter_exclude(meta map[string]interface{}, disableKeys ...string) map[string]interface{} | 过滤Meta，移除不允许的Key'},
+        {text: 'meta_prefix_filter STR FILTER_PREFIX', displayText: 'meta_prefix_filter(meta map[string]interface{}, allowPrefixes ...string) map[string]interface{} | 过滤Meta，只保留包含指定 prefix 的Key'},
+        {text: 'meta_prefix_filter_exclude STR FILTER_PREFIX', displayText: 'meta_prefix_filter_exclude(meta map[string]interface{}, disablePrefixes ...string) map[string]interface{} | 过滤Meta，移除匹配 prefix 的 Key'},
+
+        {text: 'starts_with STR "START_STR"', displayText: 'starts_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 开头'},
+        {text: 'ends_with STR "START_END"', displayText: 'ends_with(haystack string, needles ...string) bool  |  判断 haystack 是否以 needles 结尾'},
+        {text: 'trim STR "CUTSTR"', displayText: 'trim(s string, cutset string) string  |  去掉字符串 s 两边的 cutset 字符'},
+        {text: 'trim_left STR "CUTSTR"', displayText: 'trim_left(s string, cutset string) string  |  去掉字符串 s 左侧的 cutset 字符'},
+        {text: 'trim_right STR "CUTSTR"', displayText: 'trim_right(s string, cutset string) string  |  去掉字符串 s 右侧的 cutset 字符'},
+        {text: 'trim_space STR', displayText: 'trim_space(s string) string  |  去掉字符串 s 两边的空格'},
+
+        {text: 'str_upper STR', displayText: 'str_upper(s string) string  |  字符串转大写'},
+        {text: 'str_lower STR', displayText: 'str_lower(s string) string  |  字符串转小写'},
+        {text: 'str_replace STR OLD NEW', displayText: 'str_replace(s string, old string, new string) string  |  字符串替换， 将 s 中所有的 old 替换为 new'},
+        {text: 'str_repeat STR COUNT', displayText: 'str_repeat(s string, count int) string  | 字符串 s 重复 count 次'},
 
         {text: '.Action', displayText: '.Action | 字段类型：string | 所属对象：ROOT' },
         {text: '.RuleTemplateParsed', displayText: '.RuleTemplateParsed | 字段类型：string | 所属对象：ROOT' },
@@ -265,7 +274,7 @@ let hintHandler = function (editor) {
         token.string = token.string.slice(0, cur.ch - token.start);
     }
 
-    if (token.string.match(/^[.`"\w@][\w$#]*$/g)) {
+    if (token.string.match(/^[.`"\w@][.\w$#]*$/g)) {
         search = token.string;
         start = token.start;
         end = token.end;
@@ -274,16 +283,22 @@ let hintHandler = function (editor) {
         search = "";
     }
 
+    search = search.toLowerCase()
+
     let list = [];
-    if (search.charAt(0) === '"' || search.charAt(0) === '.' || search.charAt(0) === "'" || search.trim() === '') {
+    if (search.trim() === '') {
         list = sources;
     } else {
+        if (search.charAt(0) === '"' || search.charAt(0) === '.' || search.charAt(0) === "'") {
+            search = search.substring(1);
+        }
+
         for (let s in sources) {
             let str = sources[s];
             if (typeof str !== "string") {
                 str = str.text;
             }
-            if (str.indexOf(search) >= 0) {
+            if (str.toLowerCase().indexOf(search) >= 0) {
                 list.push(sources[s]);
             }
         }

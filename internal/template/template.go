@@ -63,12 +63,6 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"json_gets":                  pkgJSON.Gets,
 		"json_array":                 pkgJSON.GetArray,
 		"json_flatten":               jsonFlatten,
-		"starts_with":                startsWith,
-		"ends_with":                  endsWith,
-		"trim":                       strings.Trim,
-		"trim_right":                 strings.TrimSuffix,
-		"trim_left":                  strings.TrimPrefix,
-		"trim_space":                 strings.TrimSpace,
 		"format":                     fmt.Sprintf,
 		"number_beauty":              NumberBeauty,
 		"integer":                    toInteger,
@@ -76,24 +70,41 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"mysql_slowlog":              parseMySQLSlowlog,
 		"sql_finger":                 misc.SQLFinger,
 		"open_falcon_im":             ParseOpenFalconImMessage,
-		"string_mask":                StringMask,
-		"string_tags":                StringTags,
-		"remove_empty_line":          RemoveEmptyLine,
+
+		"serialize":            Serialize,
+		"sort_map_human":       SortMapByKeyHuman,
+		"error_notice":         errorNotice,
+		"success_notice":       successNotice,
+		"error_success_notice": errorOrSuccessNotice,
+		"condition":            conditionStr,
+		"recoverable_notice":   recoverableNotice,
+		"user_metas":           BuildUserMetasFunc(cc),
+
 		"meta_filter":                MetaFilter,
+		"meta_filter_exclude":        MetaFilterExclude,
 		"meta_prefix_filter":         MetaFilterPrefix,
-		"serialize":                  Serialize,
-		"sort_map_human":             SortMapByKeyHuman,
-		"error_notice":               errorNotice,
-		"success_notice":             successNotice,
-		"error_success_notice":       errorOrSuccessNotice,
-		"condition":                  conditionStr,
-		"recoverable_notice":         recoverableNotice,
-		"user_metas":                 BuildUserMetasFunc(cc),
-		"prefix_all_str":             prefixStrArray,
-		"suffix_all_str":             suffixStrArray,
-		"trim_prefix_map_k":          TrimPrefixMapK,
-		"line_filter_include":        LineFilterInclude,
-		"line_filter_exclude":        LineFilterExclude,
+		"meta_prefix_filter_exclude": MetaFilterPrefixExclude,
+
+		"prefix_all_str":      prefixStrArray,
+		"suffix_all_str":      suffixStrArray,
+		"trim_prefix_map_k":   TrimPrefixMapK,
+		"line_filter_include": LineFilterInclude,
+		"line_filter_exclude": LineFilterExclude,
+
+		"starts_with":       startsWith,
+		"ends_with":         endsWith,
+		"trim":              strings.Trim,
+		"trim_right":        strings.TrimSuffix,
+		"trim_left":         strings.TrimPrefix,
+		"trim_space":        strings.TrimSpace,
+		"remove_empty_line": RemoveEmptyLine,
+
+		"string_mask": StringMask,
+		"string_tags": StringTags,
+		"str_upper":   strings.ToUpper,
+		"str_lower":   strings.ToLower,
+		"str_replace": strings.ReplaceAll,
+		"str_repeat":  strings.Repeat,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -345,11 +356,35 @@ func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]int
 	return res
 }
 
+// MetaFilterExclude 过滤 Meta，排除不允许的key
+func MetaFilterExclude(meta map[string]interface{}, excludeKeys ...string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range meta {
+		if !strarr.In(k, excludeKeys) {
+			res[k] = v
+		}
+	}
+
+	return res
+}
+
 // MetaFilter 过滤 Meta，只保留以 allowKeyPrefix 开头的项
 func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
 		if strarr.HasPrefixes(k, allowKeyPrefix) {
+			res[k] = v
+		}
+	}
+
+	return res
+}
+
+// MetaFilterPrefixExclude 过滤 Meta，排除以 disableKeyPrefix 开头的项
+func MetaFilterPrefixExclude(meta map[string]interface{}, disableKeyPrefixes ...string) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range meta {
+		if !strarr.HasPrefixes(k, disableKeyPrefixes) {
 			res[k] = v
 		}
 	}
