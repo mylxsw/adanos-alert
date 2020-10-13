@@ -18,10 +18,21 @@
                                              v-model="form.description"></b-form-textarea>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="template_content" label="内容"
+                        <b-form-group label-cols="2" id="template_content" label="模板内容"
                                       label-for="template_content_input">
-                            <codemirror v-model="form.content" class="mt-3 adanos-code-textarea" :options="options[form.type]"></codemirror>
+                            <b-card bg-variant="light">
+                                <b-card-body style="max-height: 500px; overflow-y: auto;">
+                                    <ul style="font-size: 90%">
+                                        <li v-for="(hp, i) in this.helper[this.form.type]" v-bind:key="i">
+                                            <b-badge variant="primary">{{ hp.text }}</b-badge> <span class="ml-3 font-weight-lighter">({{ hp.displayText.split("|", 2)[0] }})</span>
+                                            <p class="ml-3 text-muted font-italic">{{ hp.displayText.split("|", 2)[1] }}</p>
+                                        </li>
+                                    </ul>
+                                </b-card-body>
+                            </b-card>
+                            <codemirror v-model="form.content" class="mt-3 adanos-code-textarea" :options="codemirrorOption"></codemirror>
                         </b-form-group>
+
                     </b-card>
                 </b-card-group>
 
@@ -67,10 +78,11 @@
                     {value: 'template_report', text: '报告模板'},
                 ],
                 helper: {
-                    groupMatchRules: helpers.groupMatchRules.concat(...helpers.matchRules),
-                    triggerMatchRules: helpers.triggerMatchRules.concat(...helpers.matchRules),
-                    templateRules: helpers.templates,
-                    dingdingTemplateRules: helpers.templates,
+                    match_rule: helpers.groupMatchRules.concat(...helpers.matchRules),
+                    trigger_rule: helpers.triggerMatchRules.concat(...helpers.matchRules),
+                    template: helpers.templates,
+                    template_dingding: helpers.templates,
+                    template_report: helpers.templates,
                 },
                 options: {
                     match_rule: {
@@ -123,6 +135,11 @@
                     }
                 }
             };
+        },
+        computed: {
+            codemirrorOption() {
+                return this.options[this.form.type]
+            }
         },
         methods: {
             onSubmit(evt) {
