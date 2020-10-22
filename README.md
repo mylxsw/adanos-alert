@@ -21,3 +21,10 @@ Adanos-alert is a alert manager with multi alert channel support
 ![](https://ssl.aicode.cc/markdown/20200406224209.png)
 
 ![](https://ssl.aicode.cc/markdown/20200406224319.png)
+
+## 关联项目
+
+- [adanos-mail-connector](https://github.com/mylxsw/adanos-mail-connector) 可以伪装成为 SMTP 服务器，将邮件转换为 Adanos 事件发送给 Adanos-alert Server
+- [Glacier Framework](https://github.com/mylxsw/glacier) Go 语言应用开发框架
+- [Container](https://github.com/mylxsw/container) Go 语言运行时依赖注入框架
+- [Asteria](https://github.com/mylxsw/asteria) 结构化日志库
