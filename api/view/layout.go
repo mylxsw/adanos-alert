@@ -102,6 +102,12 @@ var defaultLayout = `<html>
     {{--BODY--}}
 </div>
 
+<script>
+$(function() {
+    $('.alert-body table').addClass("table table-hover");
+});
+</script>
+
 </body>
 </html>
 `
