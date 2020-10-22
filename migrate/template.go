@@ -85,7 +85,7 @@ var predefinedTemplates = []repository.Template{
 
 ---
 
-[共 {{ .Group.EventsCount }} 条，查看详细]({{ .PreviewURL }})`,
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
@@ -99,13 +99,13 @@ var predefinedTemplates = []repository.Template{
 	{
 		Name:        "报警详情链接",
 		Description: "报警详细信息链接地址",
-		Content:     `[共 {{ .Group.EventsCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
 		Name:        "报警详情链接(报告)",
 		Description: "报警详细信息链接地址，报告模式",
-		Content:     `[共 {{ .Group.EventsCount }} 条，查看详细]({{ .ReportURL }})`,
+		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .ReportURL }})`,
 		Type:        repository.TemplateTypeTemplate,
 	},
 	{
