@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"reflect"
 	"regexp"
 	"sort"
@@ -12,6 +13,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
@@ -19,7 +22,9 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
+	"github.com/russross/blackfriday/v2"
 	"github.com/vjeantet/grok"
+	"github.com/yosssi/gohtml"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -105,6 +110,11 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"str_lower":   strings.ToLower,
 		"str_replace": strings.ReplaceAll,
 		"str_repeat":  strings.Repeat,
+
+		"md2html":           Markdown2html,
+		"dom_filter_html":   DOMFilterHTML,
+		"dom_filter_html_n": DOMFilterHTMLIndex,
+		"html_beauty":       FormatHTML,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -633,4 +643,44 @@ func conditionStr(s1, s2 string, cond bool) string {
 	}
 
 	return s2
+}
+
+// Markdown2html 将 Markdown 转换为 HTML
+func Markdown2html(mc string) string {
+	unsafe := blackfriday.Run([]byte(mc))
+	return string(bluemonday.UGCPolicy().SanitizeBytes(unsafe))
+}
+
+// DOMFilterHTMLIndex 从 HTML DOM 对象中查询第 index 个匹配 selector 的元素内容
+func DOMFilterHTMLIndex(selector string, index int, html string) string {
+	eles := DOMFilterHTML(selector, html)
+	if len(eles) > index {
+		return eles[index]
+	}
+
+	return ""
+}
+
+// DOMFilterHTML 从 HTML DOM 对象中查询所有匹配 selector 的元素
+func DOMFilterHTML(selector string, original string) []string {
+	reader, err := goquery.NewDocumentFromReader(bytes.NewBufferString(original))
+	if err != nil {
+		return []string{}
+	}
+
+	res := make([]string, 0)
+	reader.Find(selector).Each(func(i int, s *goquery.Selection) {
+		h, err := s.Html()
+
+		if err == nil && strings.TrimSpace(h) != "" {
+			res = append(res, html.UnescapeString(strings.TrimSpace(h)))
+		}
+	})
+
+	return res
+}
+
+// FormatHTML 格式化 HTML 内容
+func FormatHTML(html string) string {
+	return gohtml.Format(html)
 }

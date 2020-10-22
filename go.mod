@@ -3,6 +3,7 @@ module github.com/mylxsw/adanos-alert
 go 1.12
 
 require (
+	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonmedv/expr v1.8.2
@@ -18,6 +19,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
+	github.com/microcosm-cc/bluemonday v1.0.4
 	github.com/mylxsw/asteria v0.0.0-20200709071207-26dd334a6e51
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
@@ -29,6 +31,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.8+incompatible
 	github.com/stretchr/testify v1.6.1
@@ -40,9 +43,9 @@ require (
 	github.com/vjeantet/grok v1.0.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
+	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	go.mongodb.org/mongo-driver v1.0.4
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
-	golang.org/x/net v0.0.0-20191007182048-72f939374954 // indirect
 	golang.org/x/sys v0.0.0-20200922070232-aee5d888a860 // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0

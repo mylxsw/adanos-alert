@@ -10,6 +10,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/action"
+	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
@@ -47,6 +48,11 @@ func (r RuleController) Register(router *web.Router) {
 
 	router.Group("/rules-test/", func(router *web.Router) {
 		router.Post("/rule-check/{type}/", r.Check).Name("rules:test:check")
+	})
+
+	router.Group("/evaluate/", func(router *web.Router) {
+		router.Post("/event/", r.EvaluateEvent).Name("evaluate:event")
+		router.Post("/sample/", r.EvaluateSampleEvent).Name("evaluate:sample")
 	})
 }
 
@@ -268,7 +274,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 		finger, err1 := matcher.NewEventFinger(content)
 		if err1 == nil {
 			if msgID != "" {
-				msg, err1 := r.getMessageByID(msgID, msgRepo)
+				msg, err1 := r.getEventByID(msgID, msgRepo)
 				if err1 == nil {
 					res, err1 := finger.Run(msg)
 					if err1 == nil {
@@ -323,7 +329,7 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 		UpdatedAt:   time.Now(),
 	}
 	messagesQuerier := func(groupID primitive.ObjectID, limit int64) []repository.Event {
-		msg, err := r.getMessageByID(msgID, msgRepo)
+		msg, err := r.getEventByID(msgID, msgRepo)
 		if err != nil {
 			return []repository.Event{}
 		}
@@ -631,7 +637,7 @@ func (r RuleController) Delete(ctx web.Context, em event.Manager, repo repositor
 	return repo.DeleteID(id)
 }
 
-func (r RuleController) getMessageByID(messageID string, msgRepo repository.EventRepo) (repository.Event, error) {
+func (r RuleController) getEventByID(messageID string, msgRepo repository.EventRepo) (repository.Event, error) {
 	msgID, err := primitive.ObjectIDFromHex(messageID)
 	if err != nil {
 		return repository.Event{}, fmt.Errorf("invalid message_id: %v", err)
@@ -642,7 +648,7 @@ func (r RuleController) getMessageByID(messageID string, msgRepo repository.Even
 
 // testMessageMatchRule test if the message and rule can be matched
 func (r RuleController) testMessageMatchRule(rule string, messageID string, msgRepo repository.EventRepo) (matched bool, ignored bool, err error) {
-	message, err := r.getMessageByID(messageID, msgRepo)
+	message, err := r.getEventByID(messageID, msgRepo)
 	if err != nil {
 		return false, false, err
 	}
@@ -662,7 +668,7 @@ func (r RuleController) testMessageMatchRule(rule string, messageID string, msgR
 
 // testMessageIgnoreRule test if the message and rule can be ignored
 func (r RuleController) testMessageIgnoreRule(rule string, messageID string, msgRepo repository.EventRepo) (bool, error) {
-	message, err := r.getMessageByID(messageID, msgRepo)
+	message, err := r.getEventByID(messageID, msgRepo)
 	if err != nil {
 		return false, err
 	}
@@ -719,4 +725,46 @@ func (r RuleController) MessageSample(ctx web.Context, groupRepo repository.Even
 	}
 
 	return &messages[0], nil
+}
+
+func (r RuleController) EvaluateEvent(ctx web.Context, evtRepo repository.EventRepo) web.Response {
+	content := ctx.Input("content")
+	eventID := ctx.Input("event_id")
+
+	evt, err := r.getEventByID(eventID, evtRepo)
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+	}
+
+	return r.evaluateEvent(ctx, evt, content)
+}
+
+func (r RuleController) evaluateEvent(ctx web.Context, evt repository.Event, content string) web.Response {
+	eventFinger, err := matcher.NewEventFinger(content)
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusUnprocessableEntity)
+	}
+
+	res, err := eventFinger.Run(evt)
+	if err != nil {
+		return ctx.JSONError(err.Error(), 422)
+	}
+
+	return ctx.JSON(bson.M{
+		"res": res,
+	})
+}
+
+type EvaluateSampleReq struct {
+	Event   extension.CommonEvent `json:"event"`
+	Content string                `json:"content"`
+}
+
+func (r RuleController) EvaluateSampleEvent(ctx web.Context, evtRepo repository.EventRepo) web.Response {
+	var evaluateSampleReq EvaluateSampleReq
+	if err := ctx.Unmarshal(&evaluateSampleReq); err != nil {
+		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
+	}
+
+	return r.evaluateEvent(ctx, evaluateSampleReq.Event.CreateRepoEvent(), evaluateSampleReq.Content)
 }

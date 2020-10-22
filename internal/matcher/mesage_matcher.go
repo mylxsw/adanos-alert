@@ -1,7 +1,9 @@
 package matcher
 
 import (
+	jsonEnc "encoding/json"
 	"errors"
+	"sync"
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
@@ -18,10 +20,21 @@ var InvalidReturnVal = errors.New("invalid return value: must be a bool value")
 type EventWrap struct {
 	repository.Event
 	Helpers
+	fullJSONOnce sync.Once
+	fullJSON     string
 }
 
 func NewEventWrap(message repository.Event) *EventWrap {
 	return &EventWrap{Event: message}
+}
+
+// FullJSON return whole event as json document
+func (msg *EventWrap) FullJSON() string {
+	msg.fullJSONOnce.Do(func() {
+		res, _ := jsonEnc.Marshal(msg)
+		msg.fullJSON = string(res)
+	})
+	return msg.fullJSON
 }
 
 // JsonGet parse message.Content as a json string and return the string value for key

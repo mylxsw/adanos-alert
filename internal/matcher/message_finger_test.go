@@ -1,6 +1,7 @@
 package matcher_test
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -21,6 +22,15 @@ func TestMessageFinger(t *testing.T) {
 		Tags:      []string{"php", "nodejs"},
 		Origin:    "Filebeat",
 		CreatedAt: time.Now(),
+	}
+
+	{
+		f, err := matcher.NewEventFinger(`FullJSON()`)
+		assert.NoError(t, err)
+
+		finger, err := f.Run(msg)
+		assert.NoError(t, err)
+		assert.True(t, strings.HasPrefix(finger, "{"))
 	}
 
 	{

@@ -10,7 +10,7 @@ let helpers = {
         {text: "IsRecovery()", displayText: "IsRecovery() bool  | 判断当前事件是否是恢复事件"},
         {text: "IsRecoverable()", displayText: "IsRecoverable() bool | 判断当前事件是否可恢复"},
         {text: "IsPlain()", displayText: "IsPlain() bool | 判断当前事件是否是普通事件"},
-
+        {text: "FullJSON()", displayText: "FullJSON() string | 将整个事件编码为一个统一的 JSON 对象，返回字符串表示"},
     ],
     triggerMatchRules: [
         {text: "Events()", displayText: "Events() []repository.Message | 获取事件组中所有的 Events"},
@@ -161,6 +161,11 @@ let helpers = {
         {text: 'str_lower STR', displayText: 'str_lower(s string) string  |  字符串转小写'},
         {text: 'str_replace STR OLD NEW', displayText: 'str_replace(s string, old string, new string) string  |  字符串替换， 将 s 中所有的 old 替换为 new'},
         {text: 'str_repeat STR COUNT', displayText: 'str_repeat(s string, count int) string  | 字符串 s 重复 count 次'},
+
+        {text: 'md2html MARKDOWN', displayText: 'md2html(markdown string) string  | 将 Markdown 转换为 HTML'},
+        {text: 'html_beauty HTML', displayText: 'html_beauty(html string) string  | HTML 格式化'},
+        {text: 'dom_filter_html selector STR', displayText: 'dom_filter_html(selector string, str string) []string  | 从 HTML DOM 提取匹配 selector 选择器的内容，以字符串数组形式返回'},
+        {text: 'dom_filter_html_n selector N STR', displayText: 'dom_filter_html_n(selector string, n int, str string) string  | 从 HTML DOM 提取匹配 selector 选择器的内容，返回第 n 个（n 从 0 开始）'},
 
         {text: '.Action', displayText: '.Action | 字段类型：string | 所属对象：ROOT' },
         {text: '.RuleTemplateParsed', displayText: '.RuleTemplateParsed | 字段类型：string | 所属对象：ROOT' },

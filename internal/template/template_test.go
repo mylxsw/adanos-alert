@@ -305,3 +305,106 @@ func TestLineFilterInclude(t *testing.T) {
 
 	assert.Equal(t, 32, len(strings.Split(LineFilterExclude(`"(sms|phone|msg)"`, jsonContent), "\n")))
 }
+
+func TestMarkdown2html(t *testing.T) {
+	mc := `# Hello, world
+
+| a | b |
+| --- | --- |
+| 123 | 456 |
+
+<script>alert('xss')</script>
+`
+	expected := `<h1>
+  Hello, world
+</h1>
+<table>
+  <thead>
+    <tr>
+      <th>
+        a
+      </th>
+      <th>
+        b
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        123
+      </td>
+      <td>
+        456
+      </td>
+    </tr>
+  </tbody>
+</table>`
+	assert.Equal(t, expected, FormatHTML(Markdown2html(mc)))
+}
+
+func TestDOMQueryHTMLFirst(t *testing.T) {
+	htmlContent := `<html>
+ <head></head>
+ <body>
+  <h2 style="color:#FF0000"> Execution '30' of flow 'ppp' of project 'demo' has failed on Test</h2>
+  <table>
+   <tbody>
+    <tr>
+     <td>Start Time</td>
+     <td>2020/10/21 22:30:00 CST</td>
+    </tr>
+    <tr>
+     <td>End Time</td>
+     <td>2020/10/21 22:30:00 CST</td>
+    </tr>
+    <tr>
+     <td>Duration</td>
+     <td>0 sec</td>
+    </tr>
+    <tr>
+     <td>Status</td>
+     <td>FAILED</td>
+    </tr>
+   </tbody>
+  </table>
+  <a href="http://localhost:8081/executor?execid=30">ppp Execution Link</a>
+  <h3>Reason</h3>
+  <ul>
+   <li><a href="http://localhost:8081/executor?execid=30&job=ppp">Failed job 'ppp' Link</a></li>
+   <li>Not running on the assigned executor (any more)</li>
+  </ul>
+  <h3>Executions from past 72 hours (26 out 26) failed</h3>
+  <table>
+   <tbody>
+    <tr>
+     <td>Execution Id</td>
+     <td>30</td>
+    </tr>
+    <tr>
+     <td>Start Time</td>
+     <td>2020/10/21 22:30:00 CST</td>
+    </tr>
+    <tr>
+     <td>End Time</td>
+     <td>2020/10/21 22:30:00 CST</td>
+    </tr>
+    <tr>
+     <td>Status</td>
+     <td>FAILED</td>
+    </tr>
+   </tbody>
+  </table>
+ </body>
+</html>`
+
+	assert.Equal(t, `<li>
+  <a href="http://localhost:8081/executor?execid=30&job=ppp">
+    Failed job 'ppp' Link
+  </a>
+</li>
+<li>
+  Not running on the assigned executor (any more)
+</li>`, FormatHTML(DOMFilterHTMLIndex("ul", 0, htmlContent)))
+	assert.Equal(t, "Executions from past 72 hours (26 out 26) failed", DOMFilterHTMLIndex("h3", 1, htmlContent))
+}
