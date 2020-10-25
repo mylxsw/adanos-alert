@@ -30,15 +30,15 @@ Dashboard 访问地址 http://localhost:19999
 
 Adanos Alert 平台与其他系统之间的关系
 
-![Adanos Alert 平台与其他系统之间的关系](https://ssl.aicode.cc/prometheus/20201025171118-adanos-arch-1.png)
+![Adanos Alert 平台与其他系统之间的关系](https://ssl.aicode.cc/prometheus/20201025172918.png)
 
 Adanos Alert 平台各组件之间的关系
 
-![Adanos Alert 平台各组件之间的关系](https://ssl.aicode.cc/prometheus/20201025171322.png)
+![Adanos Alert 平台各组件之间的关系](https://ssl.aicode.cc/prometheus/20201025172846.png)
 
 Adanos Alert Server 内部结构
 
-![Adanos Alert Server 内部结构](https://ssl.aicode.cc/prometheus/20201025171354.png)
+![Adanos Alert Server 内部结构](https://ssl.aicode.cc/prometheus/20201025172817.png)
 
 ## Related Projects
 
