@@ -10,19 +10,37 @@
 
 Adanos-alert is a alert manager with multi alert channel support
 
+## Build 
+
+使用下面的命令直接完成编译并运行
+
+```bash
+make run
+```
+
+Dashboard 访问地址 http://localhost:19999
+
+![预览图](https://ssl.aicode.cc/prometheus/20201025172345.png)
+
 ## Dependency
 
 - esc: https://github.com/mjibson/esc
 
-## Preview
+## Architecture
 
-![](https://ssl.aicode.cc/markdown/20200406223929.png)
+Adanos Alert 平台与其他系统之间的关系
 
-![](https://ssl.aicode.cc/markdown/20200406224209.png)
+![Adanos Alert 平台与其他系统之间的关系](https://ssl.aicode.cc/prometheus/20201025171118-adanos-arch-1.png)
 
-![](https://ssl.aicode.cc/markdown/20200406224319.png)
+Adanos Alert 平台各组件之间的关系
 
-## 关联项目
+![Adanos Alert 平台各组件之间的关系](https://ssl.aicode.cc/prometheus/20201025171322.png)
+
+Adanos Alert Server 内部结构
+
+![Adanos Alert Server 内部结构](https://ssl.aicode.cc/prometheus/20201025171354.png)
+
+## Related Projects
 
 - [adanos-mail-connector](https://github.com/mylxsw/adanos-mail-connector) 可以伪装成为 SMTP 服务器，将邮件转换为 Adanos 事件发送给 Adanos-alert Server
 - [Glacier Framework](https://github.com/mylxsw/glacier) Go 语言应用开发框架
