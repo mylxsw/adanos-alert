@@ -16,6 +16,7 @@ import DingdingRobotEdit from "./views/DingdingRobotEdit";
 import Agents from "./views/Agents"
 import Report from "./views/Report"
 import Audit from "./views/Audit"
+import Debug from "./views/Debug"
 
 
 Vue.use(Router);
@@ -52,5 +53,6 @@ export default new Router({
         {path: '/agents', component: Agents},
         {path: '/reports', component: Report},
         {path: '/audit', component: Audit},
+        {path: '/debug', component: Debug},
     ]
 });

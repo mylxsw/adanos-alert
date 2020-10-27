@@ -110,6 +110,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"str_lower":   strings.ToLower,
 		"str_replace": strings.ReplaceAll,
 		"str_repeat":  strings.Repeat,
+		"str_concat":  StrConcat,
 
 		"md2html":           Markdown2html,
 		"dom_filter_html":   DOMFilterHTML,
@@ -683,4 +684,9 @@ func DOMFilterHTML(selector string, original string) []string {
 // FormatHTML 格式化 HTML 内容
 func FormatHTML(html string) string {
 	return gohtml.Format(html)
+}
+
+// StrConcat 字符串拼接
+func StrConcat(str ...string) string {
+	return strings.Join(str, "")
 }

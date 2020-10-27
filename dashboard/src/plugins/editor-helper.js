@@ -58,9 +58,9 @@ let helpers = {
     ],
     matchRules: [
         {text: "matches", displayText: "\"foo\" matches \"^b.+\" 正则匹配"},
-        {text: "contains", displayText: "contains | 字符串包含"},
-        {text: "startsWith", displayText: "startsWith | 前缀匹配"},
-        {text: "endsWith", displayText: "endsWith | 后缀匹配"},
+        {text: "contains", displayText: "str contains \"xxx\" | 字符串包含"},
+        {text: "startsWith", displayText: "str startsWith prefix | 前缀匹配"},
+        {text: "endsWith", displayText: "str endsWith prefix | 后缀匹配"},
         {text: "in", displayText: "user.Group in [\"human_resources\", \"marketing\"] | 包含"},
         {text: "not in", displayText: "user.Group not in [\"human_resources\", \"marketing\"] | 不包含"},
         {text: "or", displayText: "or | 或者"},
@@ -161,6 +161,7 @@ let helpers = {
         {text: 'str_lower STR', displayText: 'str_lower(s string) string  |  字符串转小写'},
         {text: 'str_replace STR OLD NEW', displayText: 'str_replace(s string, old string, new string) string  |  字符串替换， 将 s 中所有的 old 替换为 new'},
         {text: 'str_repeat STR COUNT', displayText: 'str_repeat(s string, count int) string  | 字符串 s 重复 count 次'},
+        {text: 'str_concat STR1 STR2', displayText: 'str_concat(s ...string) string  | 多个字符串拼接'},
 
         {text: 'md2html MARKDOWN', displayText: 'md2html(markdown string) string  | 将 Markdown 转换为 HTML'},
         {text: 'html_beauty HTML', displayText: 'html_beauty(html string) string  | HTML 格式化'},
@@ -268,6 +269,11 @@ let hintHandler = function (editor) {
         case 'DingTemplate':
             sources.push(...helpers.templates);
             sources.push(...helpers.triggerTemplates);
+            break;
+        case 'AllMatchRule':
+            sources.push(...helpers.groupMatchRules);
+            sources.push(...helpers.triggerMatchRules);
+            sources.push(...helpers.matchRules);
             break;
         default:
     }

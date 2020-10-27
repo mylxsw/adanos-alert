@@ -51,8 +51,7 @@ func (r RuleController) Register(router *web.Router) {
 	})
 
 	router.Group("/evaluate/", func(router *web.Router) {
-		router.Post("/event/", r.EvaluateEvent).Name("evaluate:event")
-		router.Post("/sample/", r.EvaluateSampleEvent).Name("evaluate:sample")
+		router.Post("/expression-sample/", r.EvaluateExpressionSample).Name("evaluate:sample")
 	})
 }
 
@@ -727,18 +726,6 @@ func (r RuleController) MessageSample(ctx web.Context, groupRepo repository.Even
 	return &messages[0], nil
 }
 
-func (r RuleController) EvaluateEvent(ctx web.Context, evtRepo repository.EventRepo) web.Response {
-	content := ctx.Input("content")
-	eventID := ctx.Input("event_id")
-
-	evt, err := r.getEventByID(eventID, evtRepo)
-	if err != nil {
-		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
-	}
-
-	return r.evaluateEvent(ctx, evt, content)
-}
-
 func (r RuleController) evaluateEvent(ctx web.Context, evt repository.Event, content string) web.Response {
 	eventFinger, err := matcher.NewEventFinger(content)
 	if err != nil {
@@ -755,16 +742,17 @@ func (r RuleController) evaluateEvent(ctx web.Context, evt repository.Event, con
 	})
 }
 
-type EvaluateSampleReq struct {
-	Event   extension.CommonEvent `json:"event"`
-	Content string                `json:"content"`
+type EvalSampleReq struct {
+	EventSample extension.CommonEvent `json:"event_sample"`
+	EventID     string                `json:"event_id"`
+	Expression  string                `json:"expression"`
 }
 
-func (r RuleController) EvaluateSampleEvent(ctx web.Context, evtRepo repository.EventRepo) web.Response {
-	var evaluateSampleReq EvaluateSampleReq
-	if err := ctx.Unmarshal(&evaluateSampleReq); err != nil {
+func (r RuleController) EvaluateExpressionSample(ctx web.Context) web.Response {
+	var evalSample EvalSampleReq
+	if err := ctx.Unmarshal(&evalSample); err != nil {
 		return ctx.JSONError(fmt.Sprintf("invalid request: %v", err), http.StatusUnprocessableEntity)
 	}
 
-	return r.evaluateEvent(ctx, evaluateSampleReq.Event.CreateRepoEvent(), evaluateSampleReq.Content)
+	return r.evaluateEvent(ctx, evalSample.EventSample.CreateRepoEvent(), evalSample.Expression)
 }

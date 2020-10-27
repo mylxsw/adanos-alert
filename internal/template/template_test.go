@@ -408,3 +408,7 @@ func TestDOMQueryHTMLFirst(t *testing.T) {
 </li>`, FormatHTML(DOMFilterHTMLIndex("ul", 0, htmlContent)))
 	assert.Equal(t, "Executions from past 72 hours (26 out 26) failed", DOMFilterHTMLIndex("h3", 1, htmlContent))
 }
+
+func TestStrConcat(t *testing.T) {
+	assert.Equal(t, "s1s2s3", StrConcat("s1", "s2", "s3"))
+}

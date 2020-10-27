@@ -28,6 +28,7 @@
                 <b-button :to="{path:'/rules/add', query: {test_event_id: event.id}}" target="_blank" class="ml-2" size="sm" variant="primary">
                     创建规则
                 </b-button>
+                <b-button size="sm" class="ml-2" :to="{path:'/debug', query: {event_id: event.id}}" target="_blank">Debug</b-button>
             </div>
         </template>
 

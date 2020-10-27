@@ -18,9 +18,10 @@
                     <b-nav-item to="/reports">报表</b-nav-item>
                     <b-nav-item to="/audit">审计</b-nav-item>
                     <b-nav-item to="/users">用户</b-nav-item>
-                    <b-nav-item-dropdown text="动作" right>
+                    <b-nav-item-dropdown text="插件" right>
                         <b-dropdown-item to="/dingding-robots">钉钉</b-dropdown-item>
-                        <b-dropdown-item>阿里云语音通知</b-dropdown-item>
+                        <b-dropdown-item>阿里云语音通知（暂未开放）</b-dropdown-item>
+                        <b-dropdown-item to="/debug">Debug</b-dropdown-item>
                     </b-nav-item-dropdown>
                     <b-nav-item to="/settings">设置</b-nav-item>
                 </b-navbar-nav>
