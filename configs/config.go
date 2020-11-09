@@ -24,7 +24,9 @@ type Config struct {
 	QueueJobMaxRetryTimes int           `json:"queue_job_max_retry_times"`
 	QueueWorkerNum        int           `json:"queue_worker_num"`
 	QueryTimeout          time.Duration `json:"query_timeout"`
-	KeepPeriod            int           `json:"keep_period"`
+
+	KeepPeriod      int `json:"keep_period"`
+	AuditKeepPeriod int `json:"audit_keep_period"`
 
 	Migrate         bool            `json:"migrate"`
 	ReMigrate       bool            `json:"re_migrate"`

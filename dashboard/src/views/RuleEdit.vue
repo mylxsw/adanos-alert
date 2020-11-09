@@ -124,15 +124,14 @@
                                 </b-btn-group>
                             </b-form-group>
                             <b-form-group class="mt-2" >
-                                <codemirror v-model="form.aggregate_rule" class="adanos-code-textarea"
-                                            description="聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组事件按照某个可变值分组，类似于 SQL 中的 GroupBy"
-                                            :options="options.aggregate_rule"></codemirror>
+                                <codemirror v-model="form.aggregate_rule" class="adanos-code-textarea" :options="options.aggregate_rule"></codemirror>
+                                <small class="form-text text-muted">聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组事件按照某个可变值分组，类似于 SQL 中的 GroupBy。</small>
                             </b-form-group>
 
                             <b-button v-b-toggle.advance variant="secondary" class="mt-2">高级</b-button>
                             <b-collapse id="advance" visible class="mt-2">
                                 <b-card>
-                                    <b-form-group label-cols="2" label="忽略规则">
+                                    <b-form-group label-cols="2" label="忽略规则（可选）">
                                         <b-btn-group class="mb-2">
                                             <b-btn variant="dark" @click="ignore_rule_help = !ignore_rule_help">帮助</b-btn>
                                         </b-btn-group>
@@ -149,6 +148,15 @@
                                             target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                                         </small>
                                         <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
+                                    </b-form-group>
+                                    <b-form-group class="mt-4" label-cols="2" label="关联条件（可选）" label-for="relation_cond_input">
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" @click="checkAggregateRule(form.relation_rule)">检查</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group class="mt-2" label-cols="2">
+                                        <codemirror v-model="form.relation_rule" class="adanos-code-textarea" :options="options.aggregate_rule"></codemirror>
+                                        <small class="form-text text-muted">用于为事件建立关联，可以通过该关联关系快速查找到历史上类似的事件，这里的规则语法和聚合条件规则完全一致。</small>
                                     </b-form-group>
                                 </b-card>
                             </b-collapse>
@@ -478,6 +486,7 @@ export default {
                 description: '',
                 tags: [],
                 aggregate_rule: '',
+                relation_rule: '',
                 ready_type: 'interval',
                 daily_times: ['09:00:00'],
                 time_ranges: [
@@ -843,6 +852,7 @@ export default {
             requestData.ignore_rule = this.form.ignore_rule;
             requestData.tags = this.form.tags;
             requestData.aggregate_rule = this.form.aggregate_rule;
+            requestData.relation_rule = this.form.relation_rule;
             requestData.template = this.form.template;
             requestData.report_template_id = this.form.report_template_id;
             requestData.triggers = this.form.triggers.map(function (value) {
@@ -890,6 +900,7 @@ export default {
                 this.form.ignore_rule = response.data.ignore_rule;
                 this.form.tags = response.data.tags;
                 this.form.aggregate_rule = response.data.aggregate_rule;
+                this.form.relation_rule = response.data.relation_rule;
                 this.form.template = response.data.template;
                 this.form.report_template_id = response.data.report_template_id;
 

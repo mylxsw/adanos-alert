@@ -73,6 +73,7 @@ type RuleForm struct {
 	Tags        []string `json:"tags"`
 
 	AggregateRule string `json:"aggregate_rule"`
+	RelationRule  string `json:"relation_rule"`
 
 	ReadyType  string                 `json:"ready_type"`
 	Interval   int64                  `json:"interval"`
@@ -206,7 +207,11 @@ func (r RuleForm) Validate(req web.Request) error {
 	}
 
 	if _, err := matcher.NewEventFinger(r.AggregateRule); err != nil {
-		return fmt.Errorf("group rule is invalid")
+		return fmt.Errorf("aggregate rule is invalid")
+	}
+
+	if _, err := matcher.NewEventFinger(r.RelationRule); err != nil {
+		return fmt.Errorf("relation rule is invalid")
 	}
 
 	return nil
@@ -250,8 +255,8 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 				"error": nil,
 				"msg": fmt.Sprintf(
 					"%s%s",
-					misc.IfElse(matched, "与当前 message 匹配", "与当前 message 不匹配"),
-					misc.IfElse(matched && ignored, "，但是该消息被忽略", ""),
+					misc.IfElse(matched, "与当前 Event 匹配", "与当前 Event 不匹配"),
+					misc.IfElse(matched && ignored, "，但是该 Event 被忽略", ""),
 				),
 			})
 		} else {
@@ -279,7 +284,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 					if err1 == nil {
 						return ctx.JSON(web.M{
 							"error": nil,
-							"msg":   fmt.Sprintf("当前 message 聚合 Key 为 %s", res),
+							"msg":   fmt.Sprintf("当前 Event 应用规则后的返回值为 %s", res),
 						})
 					} else {
 						err = err1
@@ -410,6 +415,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
 		AggregateRule:    ruleForm.AggregateRule,
+		RelationRule:     ruleForm.RelationRule,
 		Template:         ruleForm.Template,
 		SummaryTemplate:  ruleForm.SummaryTemplate,
 		ReportTemplateID: reportTempID,
@@ -495,6 +501,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
 		AggregateRule:    ruleForm.AggregateRule,
+		RelationRule:     ruleForm.RelationRule,
 		Template:         ruleForm.Template,
 		SummaryTemplate:  ruleForm.SummaryTemplate,
 		ReportTemplateID: reportTempID,

@@ -13,7 +13,7 @@
             </b-card>
             <EventCard v-for="(message, index) in events" :key="index" class="mb-3"
                          :event="message"
-                         :event_index="index"
+                         :event_index="index" :reproduce-event="reproduceEvent"
                          :test-matched-rules="testMatchedRules"></EventCard>
             <b-card v-if="events.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
@@ -90,11 +90,25 @@
                 this.$router.push({path: '/events', query: {
                     offset: 0,
                     group_id: this.$route.query.group_id !== undefined ? this.$route.query.group_id : null,
+                    relation_id: this.$route.query.relation_id !== undefined ? this.$route.query.relation_id : null,
                     status: this.search.status,
                     tags: this.search.tags.join(),
                     meta: this.search.meta,
                     origin: this.search.origin,
                 }}).catch(err => {this.ToastError(err);});
+            },
+            reproduceEvent(id) {
+                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                    if (value !== true) {
+                        return;
+                    }
+
+                    axios.post('/api/events/' + id + '/reproduce/', {}).then(resp => {
+                        this.ToastSuccess('重新投递 Event 成功，Event ID: ' + resp.data.id);
+                    }).catch(error => {
+                        this.ErrorBox(error);
+                    });
+                });
             },
             testMatchedRules(id) {
                 axios.post('/api/events/' + id + '/matched-rules/', {}).then(resp => {

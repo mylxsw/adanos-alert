@@ -33,17 +33,20 @@ type TimeRange struct {
 	// StartTime 开始时间（包含该时间）
 	StartTime string `bson:"start_time" json:"start_time"`
 	// EndTime 截止时间（不包含改时间）
-	EndTime   string `bson:"end_time" json:"end_time"`
-	Interval  int64  `bson:"interval" json:"interval"`
+	EndTime  string `bson:"end_time" json:"end_time"`
+	Interval int64  `bson:"interval" json:"interval"`
 }
 
 // Rule is a rule definition
 type Rule struct {
-	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name          string             `bson:"name" json:"name"`
-	Description   string             `bson:"description" json:"description"`
-	Tags          []string           `bson:"tags" json:"tags"`
-	AggregateRule string             `bson:"aggregate_rule" json:"aggregate_rule"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name        string             `bson:"name" json:"name"`
+	Description string             `bson:"description" json:"description"`
+	Tags        []string           `bson:"tags" json:"tags"`
+	// AggregateRule 聚合规则，同一个规则匹配的事件，会按照该规则返回的值进行更加精细的分组
+	AggregateRule string `bson:"aggregate_rule" json:"aggregate_rule"`
+	// RelationRule 关联规则，匹配的事件会被创建关联关系
+	RelationRule string `bson:"relation_rule" json:"relation_rule"`
 
 	// ReadType 就绪类型，支持 interval/daily_time
 	ReadyType  string      `bson:"ready_type" json:"ready_type"`

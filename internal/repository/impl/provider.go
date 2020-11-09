@@ -21,6 +21,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewKVRepo)
 	app.MustSingleton(NewEventRepo)
 	app.MustSingleton(NewEventGroupRepo)
+	app.MustSingleton(NewEventRelationRepo)
 	app.MustSingleton(NewUserRepo)
 	app.MustSingleton(NewRuleRepo)
 	app.MustSingleton(NewQueueRepo)
@@ -47,14 +48,16 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 				}
 			})
 
-			_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
-				deadLineDate := time.Now().AddDate(0, 0, -7*2)
-				log.Infof("clear expired audit logs before %v", deadLineDate)
+			if conf.AuditKeepPeriod > 0 {
+				_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
+					deadLineDate := time.Now().AddDate(0, 0, -conf.AuditKeepPeriod)
+					log.Infof("clear expired audit logs before %v", deadLineDate)
 
-				if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
-					log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
-				}
-			})
+					if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
+						log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
+					}
+				})
+			}
 
 			if conf.KeepPeriod > 0 {
 				_ = cr.Add("remove_expired_events", "@midnight", func() {

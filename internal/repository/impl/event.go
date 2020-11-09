@@ -34,6 +34,13 @@ func NewEventRepo(db *mongo.Database, seqRepo repository.SequenceRepo) repositor
 		log.Errorf("can not create index for message.group_ids: %v", err)
 	}
 
+	if _, err := col.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.M{"relation_ids": 1},
+		Options: options.Index().SetUnique(false),
+	}); err != nil {
+		log.Errorf("can not create index for message.relation_ids: %v", err)
+	}
+
 	return &EventRepo{col: col, seqRepo: seqRepo}
 }
 

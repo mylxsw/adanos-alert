@@ -25,6 +25,7 @@
         <template v-slot:footer v-if="!onlyShow">
             <div class="float-right">
                 <b-button size="sm" class="ml-2" variant="warning" @click="testMatchedRules(event.id)" v-if="testMatchedRules">测试</b-button>
+                <b-button size="sm" class="ml-2" variant="success" @click="reproduceEvent(event.id)" v-if="reproduceEvent">重发</b-button>
                 <b-button :to="{path:'/rules/add', query: {test_event_id: event.id}}" target="_blank" class="ml-2" size="sm" variant="primary">
                     创建规则
                 </b-button>
@@ -37,6 +38,12 @@
                 <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">事件组 ID</b></b-col>
                 <b-col sm="9" style="text-align: left">
                     <b-link v-for="(g, index) in event.group_ids" :key="index" class="mr-1" :to="{path:'/events', query: {group_id: g}}">{{ g }}</b-link>
+                </b-col>
+            </b-row>
+            <b-row style="max-width: 100rem;" class="adanos-meta-line" v-if="event.relation_ids != null && event.relation_ids.length > 0">
+                <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">相关事件</b></b-col>
+                <b-col sm="9" style="text-align: left">
+                    <b-link v-for="(g, index) in event.relation_ids" :key="index" class="mr-1" :to="{path:'/events', query: {relation_id: g}}">{{ g }}</b-link>
                 </b-col>
             </b-row>
             <b-row style="max-width: 100rem;" class="adanos-meta-line">
@@ -65,6 +72,7 @@
             event: Object,
             event_index: Number,
             testMatchedRules: Function,
+            reproduceEvent: Function,
             onlyShow: Boolean,
             title: String,
             fold: Boolean,

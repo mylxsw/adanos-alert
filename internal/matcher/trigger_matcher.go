@@ -43,7 +43,7 @@ func (tc *TriggerContext) Messages() []repository.Event {
 	return tc.Events()
 }
 
-// Messages return all events in group
+// Events return all events in group
 func (tc *TriggerContext) Events() []repository.Event {
 	tc.eventCallbackOnce.Do(func() {
 		if tc.EventCallback != nil {

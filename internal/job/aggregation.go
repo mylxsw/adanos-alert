@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -42,7 +43,7 @@ func (a *AggregationJob) Handle() {
 	}
 }
 
-func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) error {
+func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRepo repository.EventRelationRepo, groupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) error {
 	matchers, err := initializeMatchers(ruleRepo)
 	if err != nil {
 		log.Error(err.Error())
@@ -50,26 +51,42 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRep
 	}
 
 	collectingGroups := make(map[string]repository.EventGroup)
-	err = eventRepo.Traverse(bson.M{"status": repository.EventStatusPending}, func(msg repository.Event) error {
+	err = eventRepo.Traverse(bson.M{"status": repository.EventStatusPending}, func(evt repository.Event) error {
 		messageCanIgnore := false
 		for _, m := range matchers {
-			matched, ignored, err := m.Match(msg)
+			matched, ignored, err := m.Match(evt)
 			if err != nil {
 				continue
 			}
 
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
+				// 对于匹配规则的消息，首先判断是否能够为消息建立关联
+				if m.Rule().RelationRule != "" {
+					if relationSummary := BuildEventFinger(m.Rule().RelationRule, evt); relationSummary != "" {
+						if evtRel, err := evtRelRepo.AddOrUpdateEventRelation(context.TODO(), relationSummary, m.Rule().ID); err != nil {
+							log.WithFields(log.Fields{
+								"evt":  evt,
+								"rule": m.Rule(),
+								"err":  err,
+							}).Errorf("create event relation failed: %v", err)
+						} else {
+							evt.RelationID = append(evt.RelationID, evtRel.ID)
+						}
+					}
+				}
+
+				// 为消息分组
 				if ignored {
 					messageCanIgnore = true
 				} else {
-					aggregateKey := BuildEventFinger(m.Rule().AggregateRule, msg)
-					key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, msg.Type)
+					aggregateKey := BuildEventFinger(m.Rule().AggregateRule, evt)
+					key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, evt.Type)
 					if _, ok := collectingGroups[key]; !ok {
-						grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, msg.Type))
+						grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, evt.Type))
 						if err != nil {
 							log.WithFields(log.Fields{
-								"msg":  msg,
+								"evt":  evt,
 								"rule": m.Rule(),
 								"err":  err.Error(),
 							}).Errorf("create collecting group failed: %v", err)
@@ -79,8 +96,8 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRep
 						collectingGroups[key] = grp
 					}
 
-					msg.GroupID = append(msg.GroupID, collectingGroups[key].ID)
-					msg.Status = repository.EventStatusGrouped
+					evt.GroupID = append(evt.GroupID, collectingGroups[key].ID)
+					evt.Status = repository.EventStatusGrouped
 				}
 			}
 		}
@@ -92,8 +109,8 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRep
 		// false | grouped  -> grouped
 
 		// if message not match any rules, set message as canceled
-		if msg.Status == repository.EventStatusPending {
-			msg.Status = misc.IfElse(messageCanIgnore,
+		if evt.Status == repository.EventStatusPending {
+			evt.Status = misc.IfElse(messageCanIgnore,
 				repository.EventStatusIgnored,
 				repository.EventStatusCanceled,
 			).(repository.EventStatus)
@@ -101,12 +118,12 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRep
 
 		if log.DebugEnabled() {
 			log.WithFields(log.Fields{
-				"msg_id": msg.ID.Hex(),
-				"status": msg.Status,
+				"evt_id": evt.ID.Hex(),
+				"status": evt.Status,
 			}).Debug("change message status")
 		}
 
-		return eventRepo.UpdateID(msg.ID, msg)
+		return eventRepo.UpdateID(evt.ID, evt)
 	})
 	if err != nil {
 		return err

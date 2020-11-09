@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -41,6 +42,7 @@ func (m *EventController) Register(router *web.Router) {
 		router.Get("/", m.Events).Name("events:all")
 		router.Get("/{id}/", m.Event).Name("events:one")
 		router.Post("/{id}/matched-rules/", m.TestMatchedRules).Name("events:matched-rules")
+		router.Post("/{id}/reproduce/", m.ReproduceEvent).Name("events:reproduce-event")
 
 		router.Post("/", m.AddCommonEvent).Name("events:add:common")
 		router.Post("/logstash/", m.AddLogstashEvent).Name("events:add:logstash")
@@ -130,6 +132,15 @@ func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) 
 		filter["group_ids"] = groupID
 	}
 
+	relationIDHex := ctx.Input("relation_id")
+	if relationIDHex != "" {
+		relationID, err := primitive.ObjectIDFromHex(relationIDHex)
+		if err != nil {
+			return nil, web.WrapJSONError(fmt.Errorf("invalid relation_id: %w", err), http.StatusUnprocessableEntity)
+		}
+		filter["relation_ids"] = relationID
+	}
+
 	if log.DebugEnabled() {
 		log.WithFields(log.Fields{"filter": filter}).Debug("events filter")
 	}
@@ -157,24 +168,45 @@ func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) 
 }
 
 // Event return one message
-func (m *EventController) Event(ctx web.Context, msgRepo repository.EventRepo) (*repository.Event, error) {
+func (m *EventController) Event(ctx web.Context, eventRepo repository.EventRepo) (*repository.Event, error) {
 	id, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("invalid id: %w", err), http.StatusUnprocessableEntity)
 	}
 
-	message, err := msgRepo.Get(id)
+	event, err := eventRepo.Get(id)
 	if err != nil {
 		if err == repository.ErrNotFound {
-			return nil, web.WrapJSONError(fmt.Errorf("no such message: %w", err), http.StatusNotFound)
+			return nil, web.WrapJSONError(fmt.Errorf("no such event: %w", err), http.StatusNotFound)
 		}
 
 		return nil, err
 	}
 
-	message.Content = template.JSONBeauty(message.Content)
+	event.Content = template.JSONBeauty(event.Content)
 
-	return &message, nil
+	return &event, nil
+}
+
+func (m *EventController) ReproduceEvent(ctx web.Context, eventRepo repository.EventRepo, eventService service.EventService) web.Response {
+	event, err := m.Event(ctx, eventRepo)
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+	}
+
+	id, err := eventService.Add(context.TODO(), extension.CommonEvent{
+		Content: event.Content,
+		Meta:    event.Meta,
+		Tags:    append(event.Tags, "adanos-reproduced"),
+		Origin:  event.Origin,
+	})
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+	}
+
+	return ctx.JSON(web.M{
+		"id": id.Hex(),
+	})
 }
 
 func (m *EventController) errorWrap(ctx web.Context, id primitive.ObjectID, err error) web.Response {

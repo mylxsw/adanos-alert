@@ -125,6 +125,12 @@ func main() {
 		EnvVar: "ADANOS_KEEP_PERIOD",
 		Value:  0,
 	}))
+	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
+		Name:   "audit_keep_period",
+		Usage:  "保留多长时间的审计日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 audit_keep_period 天的审计日志",
+		EnvVar: "ADANOS_AUDIT_KEEP_PERIOD",
+		Value:  0,
+	}))
 
 	app.AddFlags(altsrc.NewIntFlag(cli.IntFlag{
 		Name:   "queue_worker_num",
@@ -235,6 +241,7 @@ func main() {
 			PreviewURL:            c.String("preview_url"),
 			ReportURL:             c.String("report_url"),
 			KeepPeriod:            c.Int("keep_period"),
+			AuditKeepPeriod:       c.Int("audit_keep_period"),
 			AliyunVoiceCall: configs.AliyunVoiceCall{
 				BaseURI:            "http://dyvmsapi.aliyuncs.com/",
 				AccessKey:          c.String("aliyun_access_key"),

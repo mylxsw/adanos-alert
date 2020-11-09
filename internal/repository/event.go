@@ -20,7 +20,7 @@ const (
 	EventStatusCanceled EventStatus = "canceled"
 	// EventStatusExpired 已过期（有匹配的规则，但是当时没有匹配）
 	EventStatusExpired EventStatus = "expired"
-	// MessageStatusDead 死信（匹配规则，但是被主动忽略）
+	// EventStatusIgnored 死信（匹配规则，但是被主动忽略）
 	EventStatusIgnored EventStatus = "ignored"
 
 	// EventTypePlain 普通消息
@@ -31,19 +31,22 @@ const (
 	EventTypeRecovery EventType = "recovery"
 )
 
+// Event 事件
 type Event struct {
-	ID        primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	SeqNum    int64                `bson:"seq_num" json:"seq_num"`
-	Content   string               `bson:"content" json:"content"`
-	Meta      EventMeta            `bson:"meta" json:"meta"`
-	Tags      []string             `bson:"tags" json:"tags"`
-	Origin    string               `bson:"origin" json:"origin"`
-	GroupID   []primitive.ObjectID `bson:"group_ids" json:"group_ids"`
-	Type      EventType            `bson:"type" json:"type"`
-	Status    EventStatus          `bson:"status" json:"status"`
-	CreatedAt time.Time            `bson:"created_at" json:"created_at"`
+	ID         primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	RelationID []primitive.ObjectID `bson:"relation_ids" json:"relation_ids"`
+	SeqNum     int64                `bson:"seq_num" json:"seq_num"`
+	Content    string               `bson:"content" json:"content"`
+	Meta       EventMeta            `bson:"meta" json:"meta"`
+	Tags       []string             `bson:"tags" json:"tags"`
+	Origin     string               `bson:"origin" json:"origin"`
+	GroupID    []primitive.ObjectID `bson:"group_ids" json:"group_ids"`
+	Type       EventType            `bson:"type" json:"type"`
+	Status     EventStatus          `bson:"status" json:"status"`
+	CreatedAt  time.Time            `bson:"created_at" json:"created_at"`
 }
 
+// EventRepo 事件管理仓库接口
 type EventRepo interface {
 	AddWithContext(ctx context.Context, msg Event) (id primitive.ObjectID, err error)
 	Add(msg Event) (id primitive.ObjectID, err error)
