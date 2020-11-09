@@ -142,9 +142,11 @@ func initPredefinedTemplates(conf *configs.Config, repo repository.TemplateRepo)
 				continue
 			}
 
-			log.WithFields(log.Fields{
-				"temp": t,
-			}).Debugf("add predefined template %s with id %s", t.Name, id.Hex())
+			if log.DebugEnabled() {
+				log.WithFields(log.Fields{
+					"temp": t,
+				}).Debugf("add predefined template %s with id %s", t.Name, id.Hex())
+			}
 		} else if err != nil {
 			log.WithFields(log.Fields{
 				"temp": t,

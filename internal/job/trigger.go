@@ -119,10 +119,12 @@ func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, even
 			grp.Status = repository.EventGroupStatusOK
 		}
 
-		log.WithFields(log.Fields{
-			"grp_id": grp.ID,
-			"status": grp.Status,
-		}).Debug("change group status for matchedTriggers")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"grp_id": grp.ID,
+				"status": grp.Status,
+			}).Debug("change group status for matchedTriggers")
+		}
 
 		grp.Actions = mergeActions(grp.Actions, matchedTriggers)
 		return groupRepo.UpdateID(grp.ID, grp)
@@ -145,11 +147,14 @@ func (a TriggerJob) matchedTriggerAction(grp repository.EventGroup, manager acti
 		maxFailedCount = trigger.FailedCount
 	}
 
-	log.WithFields(log.Fields{
-		"trigger_id": trigger.ID,
-		"status":     trigger.Status,
-		"grp_id":     grp.ID,
-	}).Debug("change trigger status")
+	if log.DebugEnabled() {
+		log.WithFields(log.Fields{
+			"trigger_id": trigger.ID,
+			"status":     trigger.Status,
+			"grp_id":     grp.ID,
+		}).Debug("change trigger status")
+	}
+
 	return hasError, matchedTriggers, maxFailedCount
 }
 

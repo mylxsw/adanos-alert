@@ -103,11 +103,13 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return err
 		}
 
-		log.WithFields(log.Fields{
-			"title":   rule.Name,
-			"content": notifyContent,
-			"mobiles": mobiles,
-		}).Debug("send message to dingding succeed")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"title":   rule.Name,
+				"content": notifyContent,
+				"mobiles": mobiles,
+			}).Debug("send message to dingding succeed")
+		}
 
 		return nil
 	})

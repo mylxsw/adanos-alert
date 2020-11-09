@@ -57,7 +57,9 @@ func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repos
 	startDate := dailyCounts[0].Datetime
 	endDate := dailyCounts[len(dailyCounts)-1].Datetime
 
-	log.Debugf("%v: %v", startDate, endDate)
+	if log.DebugEnabled() {
+		log.Debugf("%v: %v", startDate, endDate)
+	}
 
 	results := make([]MessageGroupByDatetimeCount, 0)
 

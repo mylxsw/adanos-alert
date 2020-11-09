@@ -22,7 +22,10 @@ func NewHeartbeatService(cc container.Container) *HeartbeatService {
 }
 
 func (h *HeartbeatService) Ping(ctx context.Context, request *protocol.PingRequest) (*protocol.PongResponse, error) {
-	log.Debugf("agent heartbeat received, id=%s, ip=%s, version=%s, ts=%v", request.AgentID, request.AgentIP, request.ClientVersion, request.AgentTs)
+	if log.DebugEnabled() {
+		log.Debugf("agent heartbeat received, id=%s, ip=%s, version=%s, ts=%v", request.AgentID, request.AgentIP, request.ClientVersion, request.AgentTs)
+	}
+
 	h.cc.MustResolve(func(agent repository.AgentRepo) {
 		lastStat, _ := json.Marshal(request.GetAgent())
 		if _, err := agent.Update(repository.Agent{

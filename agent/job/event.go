@@ -41,10 +41,12 @@ func sendToServer(msg *protocol.MessageRequest, msgRPCServer protocol.MessageCli
 		return fmt.Errorf("RPC请求失败: %s", err)
 	}
 
-	log.WithFields(log.Fields{
-		"id":   resp.Id,
-		"body": msg.Data,
-	}).Debugf("事件同步成功")
+	if log.DebugEnabled() {
+		log.WithFields(log.Fields{
+			"id":   resp.Id,
+			"body": msg.Data,
+		}).Debugf("事件同步成功")
+	}
 
 	return nil
 }

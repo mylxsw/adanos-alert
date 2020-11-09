@@ -114,13 +114,18 @@ func (manager *queueManager) StartWorker(ctx context.Context, workID string) {
 	manager.info.WorkerNum++
 	manager.lock.Unlock()
 
-	log.Debugf("queue worker [%s] started", workID)
+	if log.DebugEnabled() {
+		log.Debugf("queue worker [%s] started", workID)
+	}
+
 	defer func() {
 		manager.lock.Lock()
 		manager.info.WorkerNum--
 		manager.lock.Unlock()
 
-		log.Debugf("queue worker [%s] stopped", workID)
+		if log.DebugEnabled() {
+			log.Debugf("queue worker [%s] stopped", workID)
+		}
 	}()
 
 	ticker := time.NewTicker(2 * time.Second)

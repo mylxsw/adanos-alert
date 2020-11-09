@@ -269,12 +269,14 @@ func main() {
 	app.Main(func(conf *configs.Config, router *mux.Router, em event.Manager) {
 		rand.Seed(time.Now().Unix())
 
-		log.WithFields(log.Fields{
-			"config": conf,
-		}).Debug("configuration")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"config": conf,
+			}).Debug("configuration")
 
-		for _, r := range web.GetAllRoutes(router) {
-			log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
+			for _, r := range web.GetAllRoutes(router) {
+				log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
+			}
 		}
 
 		em.Publish(pubsub.SystemUpDownEvent{

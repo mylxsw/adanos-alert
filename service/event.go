@@ -57,11 +57,14 @@ func (m *eventService) Add(ctx context.Context, msg extension.CommonEvent) (prim
 				}
 			} else {
 				// 事件被抑制，直接丢弃
-				log.WithFields(log.Fields{
-					"key": key,
-					"ctl": msg.GetControl(),
-					"msg": msg.CreateRepoEvent(),
-				}).Debugf("event is discard because it's been inhibited")
+				if log.DebugEnabled() {
+					log.WithFields(log.Fields{
+						"key": key,
+						"ctl": msg.GetControl(),
+						"msg": msg.CreateRepoEvent(),
+					}).Debugf("event is discard because it's been inhibited")
+				}
+
 				return primitive.NilObjectID, nil
 			}
 		}

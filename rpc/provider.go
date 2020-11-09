@@ -52,10 +52,14 @@ func (p ServiceProvider) Daemon(_ context.Context, app infra.Glacier) {
 
 		gf.AddShutdownHandler(func() {
 			serv.GracefulStop()
-			log.Debug("grpc server has been stopped")
+			if log.DebugEnabled() {
+				log.Debug("grpc server has been stopped")
+			}
 		})
 
-		log.Debugf("grpc server started, listening on %s", conf.GRPCListen)
+		if log.DebugEnabled() {
+			log.Debugf("grpc server started, listening on %s", conf.GRPCListen)
+		}
 		if err := serv.Serve(listener); err != nil {
 			log.Errorf("GRPC Server has been stopped: %v", err)
 		}

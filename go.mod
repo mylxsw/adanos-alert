@@ -14,16 +14,18 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/gorilla/mux v1.7.4
+	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/schema v1.2.0 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/mylxsw/asteria v0.0.0-20200709071207-26dd334a6e51
+	github.com/mylxsw/asteria v0.0.0-20201109073030-ef64164c7661
 	github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8
 	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
-	github.com/mylxsw/glacier v0.0.0-20200820103600-705c319bcccc
+	github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect

@@ -136,7 +136,9 @@ func NewLockRepo(db *mongo.Database) repository.LockRepo {
 	if err != nil {
 		log.Errorf("create unique index for lock collection failed: %v", err)
 	} else {
-		log.Debugf("ensure unique index (%s) for lock collection", name)
+		if log.DebugEnabled() {
+			log.Debugf("ensure unique index (%s) for lock collection", name)
+		}
 	}
 
 	return &LockRepo{col: col}

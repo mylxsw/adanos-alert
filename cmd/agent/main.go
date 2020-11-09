@@ -139,13 +139,15 @@ func main() {
 			agentID, _ = db.Get([]byte("agent-id"))
 		}
 
-		log.WithFields(log.Fields{
-			"config":   conf,
-			"agent_id": string(agentID),
-		}).Debug("configuration")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"config":   conf,
+				"agent_id": string(agentID),
+			}).Debug("configuration")
 
-		for _, r := range web.GetAllRoutes(router) {
-			log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
+			for _, r := range web.GetAllRoutes(router) {
+				log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
+			}
 		}
 	})
 

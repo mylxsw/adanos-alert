@@ -40,7 +40,9 @@ func heartbeatJob(cc container.Container, db *ledis.DB, conf *config.Config, hs 
 		return nil
 	}
 
-	log.Debugf("心跳上报成功，服务端版本: %s, 服务端时间戳: %v", pong.ServerVersion, pong.ServerTs)
+	if log.DebugEnabled() {
+		log.Debugf("心跳上报成功，服务端版本: %s, 服务端时间戳: %v", pong.ServerVersion, pong.ServerTs)
+	}
 	return nil
 }
 

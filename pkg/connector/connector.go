@@ -111,9 +111,11 @@ func Send(ctx context.Context, servers []string, token string, meta map[string]i
 func sendEventToServer(ctx context.Context, evt extension.CommonEvent, data []byte, adanosServer, adanosToken string) error {
 	reqURL := fmt.Sprintf("%s/api/events/", strings.TrimRight(adanosServer, "/"))
 
-	log.WithFields(log.Fields{
-		"event": evt,
-	}).Debugf("request: %v", reqURL)
+	if log.DebugEnabled() {
+		log.WithFields(log.Fields{
+			"event": evt,
+		}).Debugf("request: %v", reqURL)
+	}
 
 	client := &http.Client{}
 	req, err := http.NewRequestWithContext(ctx, "POST", reqURL, bytes.NewReader(data))
@@ -136,6 +138,8 @@ func sendEventToServer(ctx context.Context, evt extension.CommonEvent, data []by
 		return errors.Wrap(err, "read response body failed")
 	}
 
-	log.Debugf("response: %v", string(respBody))
+	if log.DebugEnabled() {
+		log.Debugf("response: %v", string(respBody))
+	}
 	return nil
 }

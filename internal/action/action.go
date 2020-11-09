@@ -189,10 +189,12 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 			return err
 		}
 
-		log.WithFields(log.Fields{
-			"action": q.action,
-			"id":     id,
-		}).Debug("enqueue a action to queue")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"action": q.action,
+				"id":     id,
+			}).Debug("enqueue a action to queue")
+		}
 
 		return nil
 	})

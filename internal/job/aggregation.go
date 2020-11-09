@@ -99,10 +99,12 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, groupRep
 			).(repository.EventStatus)
 		}
 
-		log.WithFields(log.Fields{
-			"msg_id": msg.ID.Hex(),
-			"status": msg.Status,
-		}).Debug("change message status")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"msg_id": msg.ID.Hex(),
+				"status": msg.Status,
+			}).Debug("change message status")
+		}
 
 		return eventRepo.UpdateID(msg.ID, msg)
 	})
@@ -169,10 +171,12 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 		grp.MessageCount = msgCount
 		grp.Status = repository.EventGroupStatusPending
 
-		log.WithFields(log.Fields{
-			"grp_id": grp.ID.Hex(),
-			"status": grp.Status,
-		}).Debug("change group status")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"grp_id": grp.ID.Hex(),
+				"status": grp.Status,
+			}).Debug("change group status")
+		}
 
 		err = groupRepo.UpdateID(grp.ID, grp)
 

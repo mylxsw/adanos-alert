@@ -130,7 +130,9 @@ func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) 
 		filter["group_ids"] = groupID
 	}
 
-	log.WithFields(log.Fields{"filter": filter}).Debug("events filter")
+	if log.DebugEnabled() {
+		log.WithFields(log.Fields{"filter": filter}).Debug("events filter")
+	}
 
 	events, next, err := msgRepo.Paginate(filter, offset, limit)
 	if err != nil {

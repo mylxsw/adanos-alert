@@ -90,7 +90,9 @@ func (d *DistributeLockManager) lock() error {
 	d.lockID = lock.LockID
 	d.locked = true
 
-	log.Debugf("got distribute lock, owner=%s", d.owner)
+	if log.DebugEnabled() {
+		log.Debugf("got distribute lock, owner=%s", d.owner)
+	}
 
 	return nil
 }
@@ -110,7 +112,9 @@ func (d *DistributeLockManager) TryUnLock() error {
 	d.locked = false
 	d.lockID = primitive.NilObjectID
 
-	log.Debugf("distribute lock has been released")
+	if log.DebugEnabled() {
+		log.Debugf("distribute lock has been released")
+	}
 
 	return nil
 }

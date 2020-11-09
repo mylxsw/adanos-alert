@@ -58,10 +58,12 @@ func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.T
 			}).Errorf("send message to aliyun voice failed: %v", err)
 		}
 
-		log.WithFields(log.Fields{
-			"title":   title,
-			"mobiles": mobiles,
-		}).Debug("send message to aliyun voice succeed")
+		if log.DebugEnabled() {
+			log.WithFields(log.Fields{
+				"title":   title,
+				"mobiles": mobiles,
+			}).Debug("send message to aliyun voice succeed")
+		}
 
 		return nil
 	})
