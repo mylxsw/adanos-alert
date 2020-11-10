@@ -31,6 +31,7 @@ func (r RuleRepo) Tags(ctx context.Context) ([]repository.Tag, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer aggregate.Close(ctx)
 
 	tags := make([]repository.Tag, 0)
 	for aggregate.Next(ctx) {
@@ -74,6 +75,7 @@ func (r RuleRepo) Paginate(filter interface{}, offset, limit int64) (rules []rep
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var rule repository.Rule
@@ -97,6 +99,7 @@ func (r RuleRepo) Find(filter bson.M) (rules []repository.Rule, err error) {
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var rule repository.Rule
@@ -115,6 +118,7 @@ func (r RuleRepo) Traverse(filter bson.M, cb func(rule repository.Rule) error) e
 	if err != nil {
 		return err
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var rule repository.Rule

@@ -86,6 +86,7 @@ func (m EventRepo) Find(filter interface{}) (messages []repository.Event, err er
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event
@@ -105,6 +106,7 @@ func (m EventRepo) Paginate(filter interface{}, offset, limit int64) (messages [
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event
@@ -136,6 +138,7 @@ func (m EventRepo) Traverse(filter interface{}, cb func(msg repository.Event) er
 	if err != nil {
 		return err
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event

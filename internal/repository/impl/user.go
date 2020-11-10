@@ -58,6 +58,7 @@ func (u UserRepo) Find(filter bson.M) (users []repository.User, err error) {
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var user repository.User
@@ -77,6 +78,7 @@ func (u UserRepo) Paginate(filter bson.M, offset, limit int64) (users []reposito
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var user repository.User

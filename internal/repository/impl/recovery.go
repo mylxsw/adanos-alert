@@ -67,6 +67,7 @@ func (r RecoveryRepo) RecoverableEvents(ctx context.Context, deadline time.Time)
 	if err != nil {
 		return results, err
 	}
+	defer cursor.Close(context.TODO())
 
 	for cursor.Next(ctx) {
 		var rec repository.Recovery

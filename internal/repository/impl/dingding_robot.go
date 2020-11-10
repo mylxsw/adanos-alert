@@ -46,6 +46,7 @@ func (u DingdingRobotRepo) Find(filter bson.M) (robots []repository.DingdingRobo
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var robot repository.DingdingRobot
@@ -65,6 +66,7 @@ func (u DingdingRobotRepo) Paginate(filter bson.M, offset, limit int64) (robots 
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var robot repository.DingdingRobot

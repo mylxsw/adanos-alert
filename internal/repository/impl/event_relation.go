@@ -62,6 +62,7 @@ func (m *EventRelationRepo) Paginate(ctx context.Context, filter interface{}, of
 	if err != nil {
 		return
 	}
+	defer cur.Close(ctx)
 
 	for cur.Next(ctx) {
 		var evtRel repository.EventRelation

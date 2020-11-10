@@ -60,6 +60,7 @@ func (a AgentRepo) Find(filter bson.M) (agents []repository.Agent, err error) {
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var agent repository.Agent

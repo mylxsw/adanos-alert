@@ -60,6 +60,7 @@ func (m EventGroupRepo) Find(filter bson.M) (grps []repository.EventGroup, err e
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var grp repository.EventGroup
@@ -86,6 +87,7 @@ func (m EventGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []rep
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var grp repository.EventGroup
@@ -108,6 +110,7 @@ func (m EventGroupRepo) Traverse(filter bson.M, cb func(grp repository.EventGrou
 	if err != nil {
 		return err
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var grp repository.EventGroup
@@ -200,6 +203,7 @@ func (m EventGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTime 
 	if err != nil {
 		return nil, err
 	}
+	defer aggregate.Close(ctx)
 
 	results := make([]repository.EventGroupByRuleCount, 0)
 	for aggregate.Next(ctx) {
@@ -255,6 +259,7 @@ func (m EventGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime 
 	if err != nil {
 		return nil, err
 	}
+	defer aggregate.Close(ctx)
 
 	results := make([]repository.EventGroupByUserCount, 0)
 	for aggregate.Next(ctx) {
@@ -297,6 +302,7 @@ func (m EventGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endT
 	if err != nil {
 		return nil, err
 	}
+	defer aggregate.Close(ctx)
 
 	results := make([]repository.EventGroupByDatetimeCount, 0)
 	for aggregate.Next(ctx) {

@@ -52,6 +52,7 @@ func (alr *AuditLogRepo) Paginate(filter bson.M, offset, limit int64) (als []rep
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var al repository.AuditLog

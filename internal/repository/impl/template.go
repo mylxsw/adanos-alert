@@ -46,6 +46,7 @@ func (t TemplateRepo) Find(filter bson.M) (templates []repository.Template, err 
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var temp repository.Template
@@ -65,6 +66,7 @@ func (t TemplateRepo) Paginate(filter bson.M, offset, limit int64) (templates []
 	if err != nil {
 		return
 	}
+	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
 		var temp repository.Template
