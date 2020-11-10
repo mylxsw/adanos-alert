@@ -22,6 +22,7 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewEventRepo)
 	app.MustSingleton(NewEventGroupRepo)
 	app.MustSingleton(NewEventRelationRepo)
+	app.MustSingleton(NewEventRelationNoteRepo)
 	app.MustSingleton(NewUserRepo)
 	app.MustSingleton(NewRuleRepo)
 	app.MustSingleton(NewQueueRepo)

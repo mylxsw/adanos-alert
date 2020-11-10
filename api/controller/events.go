@@ -52,6 +52,12 @@ func (m *EventController) Register(router *web.Router) {
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 	})
 
+	router.Group("/event-relations", func(router *web.Router) {
+		router.Get("/{id}/", m.QueryEventRelation).Name("event-relations:one")
+		router.Get("/{id}/notes/", m.QueryEventRelationNotes).Name("event-relations:notes")
+		router.Post("/{id}/notes/", m.AddEventRelationNote).Name("event-relations:notes:add")
+	})
+
 	router.Group("/events-count/", func(router *web.Router) {
 		router.Get("/", m.Count).Name("events:count")
 	})
@@ -101,8 +107,8 @@ func (m *EventController) Count(ctx web.Context, msgRepo repository.EventRepo) w
 	})
 }
 
-// MessagesResp is a response object for Events API
-type MessagesResp struct {
+// EventsResp is a response object for Events API
+type EventsResp struct {
 	Events []repository.Event `json:"events"`
 	Next   int64              `json:"next"`
 	Search EventSearch        `json:"search"`
@@ -118,7 +124,7 @@ type EventSearch struct {
 }
 
 // Events return all messages
-func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) (*MessagesResp, error) {
+func (m *EventController) Events(ctx web.Context, evtRepo repository.EventRepo) (*EventsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
 
 	filter := eventsFilter(ctx)
@@ -141,11 +147,20 @@ func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) 
 		filter["relation_ids"] = relationID
 	}
 
+	evtIDHex := ctx.Input("event_id")
+	if evtIDHex != "" {
+		evtID, err := primitive.ObjectIDFromHex(evtIDHex)
+		if err != nil {
+			return nil, web.WrapJSONError(fmt.Errorf("invalid event_id: %w", err), http.StatusUnprocessableEntity)
+		}
+		filter["_id"] = evtID
+	}
+
 	if log.DebugEnabled() {
 		log.WithFields(log.Fields{"filter": filter}).Debug("events filter")
 	}
 
-	events, next, err := msgRepo.Paginate(filter, offset, limit)
+	events, next, err := evtRepo.Paginate(filter, offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(fmt.Errorf("query failed: %v", err), http.StatusInternalServerError)
 	}
@@ -154,7 +169,7 @@ func (m *EventController) Events(ctx web.Context, msgRepo repository.EventRepo) 
 		events[i].Content = template.JSONBeauty(m.Content)
 	}
 
-	return &MessagesResp{
+	return &EventsResp{
 		Events: events,
 		Next:   next,
 		Search: EventSearch{
@@ -315,4 +330,71 @@ func (m *EventController) TestMatchedRules(ctx web.Context, msgRepo repository.E
 	}
 
 	return job.BuildEventMatchTest(ruleRepo)(message)
+}
+
+// QueryEventRelation 查询事件关联
+func (m *EventController) QueryEventRelation(ctx web.Context, evtRelationRepo repository.EventRelationRepo) (*repository.EventRelation, error) {
+	relID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid relation id")
+	}
+
+	rel, err := evtRelationRepo.Get(context.TODO(), relID)
+	if err != nil {
+		return nil, errors.Wrap(err, "query relation failed")
+	}
+
+	return &rel, nil
+}
+
+// EventRelationNotesResp 事件关联备注响应对象
+type EventRelationNotesResp struct {
+	Notes []repository.EventRelationNote `json:"notes"`
+	Next  int64                          `json:"next"`
+}
+
+// QueryEventRelationNotes 查询事件关联的备注
+func (m *EventController) QueryEventRelationNotes(ctx web.Context, evtRelationNoteRepo repository.EventRelationNoteRepo) (*EventRelationNotesResp, error) {
+	relID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid relation id")
+	}
+
+	offset, limit := offsetAndLimit(ctx)
+	notes, next, err := evtRelationNoteRepo.PaginateNotes(context.TODO(), relID, bson.M{}, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventRelationNotesResp{
+		Notes: notes,
+		Next:  next,
+	}, nil
+}
+
+// AddEventRelationNote 添加事件关联备注
+func (m *EventController) AddEventRelationNote(ctx web.Context, evtRelationNoteRepo repository.EventRelationNoteRepo) web.Response {
+	relID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusUnprocessableEntity)
+	}
+
+	note := ctx.Input("note")
+	eventID, _ := primitive.ObjectIDFromHex(ctx.Input("event_id"))
+
+	id, err := evtRelationNoteRepo.AddNote(context.TODO(), repository.EventRelationNote{
+		RelationID: relID,
+		EventID:    eventID,
+		Note:       note,
+		// TODO 创建人功能暂时不可用，需要待用户权限体系建立后使用
+		CreatorID:   primitive.NilObjectID,
+		CreatorName: "Default",
+	})
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusUnprocessableEntity)
+	}
+
+	return ctx.JSON(web.M{
+		"id": id,
+	})
 }

@@ -9,8 +9,8 @@ import (
 
 // EventRelation 事件关联
 type EventRelation struct {
-	ID            primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	MatchedRuleID primitive.ObjectID `bson:"matched_rule_id" json:"matched_rule_id,omitempty"`
+	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	MatchedRuleID primitive.ObjectID `bson:"matched_rule_id,omitempty" json:"matched_rule_id,omitempty"`
 	Summary       string             `bson:"summary" json:"summary,omitempty"`
 	EventCount    int64              `bson:"event_count" json:"event_count,omitempty"`
 	CreatedAt     time.Time          `bson:"created_at" json:"created_at,omitempty"`

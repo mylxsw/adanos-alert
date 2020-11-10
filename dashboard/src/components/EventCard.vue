@@ -24,12 +24,17 @@
 
         <template v-slot:footer v-if="!onlyShow">
             <div class="float-right">
-                <b-button size="sm" class="ml-2" variant="warning" @click="testMatchedRules(event.id)" v-if="testMatchedRules">测试</b-button>
-                <b-button size="sm" class="ml-2" variant="success" @click="reproduceEvent(event.id)" v-if="reproduceEvent">重发</b-button>
-                <b-button :to="{path:'/rules/add', query: {test_event_id: event.id}}" target="_blank" class="ml-2" size="sm" variant="primary">
-                    创建规则
-                </b-button>
-                <b-button size="sm" class="ml-2" :to="{path:'/debug', query: {event_id: event.id}}" target="_blank">Debug</b-button>
+                <b-btn-group>
+                    <b-button size="sm" variant="info" @click="testMatchedRules(event.id)" v-if="testMatchedRules">匹配测试</b-button>
+                    <b-button size="sm" variant="secondary" :to="{path:'/debug', query: {event_id: event.id}}" target="_blank">Debug</b-button>
+                    <b-button size="sm" variant="warning" @click="reproduceEvent(event.id)" v-if="reproduceEvent">重发</b-button>
+                </b-btn-group>
+
+                <b-button class="ml-2" :to="{path:'/rules/add', query: {test_event_id: event.id}}" target="_blank" size="sm" variant="dark">创建规则</b-button>
+
+                <b-btn-group class="ml-2" v-if="event.relation_ids != null && event.relation_ids.length > 0">
+                    <b-button size="sm" variant="primary" @click="eventNote(event.id)" v-if="eventNote">备注</b-button>
+                </b-btn-group>
             </div>
         </template>
 
@@ -37,13 +42,17 @@
             <b-row style="max-width: 100rem;" class="adanos-meta-line" v-if="event.group_ids != null && event.group_ids.length > 0">
                 <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">事件组 ID</b></b-col>
                 <b-col sm="9" style="text-align: left">
-                    <b-link v-for="(g, index) in event.group_ids" :key="index" class="mr-1" :to="{path:'/events', query: {group_id: g}}">{{ g }}</b-link>
+                    <b-badge class="mr-2" v-for="(g, index) in event.group_ids" :key="index" variant="white">
+                        <b-link :to="{path:'/events', query: {group_id: g}}">{{ g }}</b-link>
+                    </b-badge>
                 </b-col>
             </b-row>
             <b-row style="max-width: 100rem;" class="adanos-meta-line" v-if="event.relation_ids != null && event.relation_ids.length > 0">
                 <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">相关事件</b></b-col>
                 <b-col sm="9" style="text-align: left">
-                    <b-link v-for="(g, index) in event.relation_ids" :key="index" class="mr-1" :to="{path:'/events', query: {relation_id: g}}">{{ g }}</b-link>
+                    <b-badge class="mr-2" v-for="(g, index) in event.relation_ids" :key="index" variant="white">
+                        <b-link :to="{path:'/events', query: {relation_id: g}}">{{ g }}</b-link>
+                    </b-badge>
                 </b-col>
             </b-row>
             <b-row style="max-width: 100rem;" class="adanos-meta-line">
@@ -73,6 +82,7 @@
             event_index: Number,
             testMatchedRules: Function,
             reproduceEvent: Function,
+            eventNote: Function,
             onlyShow: Boolean,
             title: String,
             fold: Boolean,

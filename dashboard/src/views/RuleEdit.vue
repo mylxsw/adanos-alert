@@ -118,6 +118,7 @@
                                 target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
                             </small>
                             <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
+                            <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
                             <b-form-group class="mt-4" label-cols="2" label="聚合条件（可选）" label-for="aggregate_cond_input">
                                 <b-btn-group class="mb-2 float-right">
                                     <b-btn variant="primary" @click="checkAggregateRule(form.aggregate_rule)">检查</b-btn>
@@ -127,7 +128,7 @@
                                 <codemirror v-model="form.aggregate_rule" class="adanos-code-textarea" :options="options.aggregate_rule"></codemirror>
                                 <small class="form-text text-muted">聚合条件表达式语法与匹配规则一致，用于对符合匹配规则的一组事件按照某个可变值分组，类似于 SQL 中的 GroupBy。</small>
                             </b-form-group>
-
+                            <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
                             <b-button v-b-toggle.advance variant="secondary" class="mt-2">高级</b-button>
                             <b-collapse id="advance" visible class="mt-2">
                                 <b-card>
@@ -149,7 +150,8 @@
                                         </small>
                                         <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
                                     </b-form-group>
-                                    <b-form-group class="mt-4" label-cols="2" label="关联条件（可选）" label-for="relation_cond_input">
+                                    <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
+                                    <b-form-group label-cols="2" label="关联条件（可选）" label-for="relation_cond_input">
                                         <b-btn-group class="mb-2 float-right">
                                             <b-btn variant="primary" @click="checkAggregateRule(form.relation_rule)">检查</b-btn>
                                         </b-btn-group>
@@ -193,7 +195,7 @@
                                                                 target="_blank">https://golang.org/pkg/text/template/</a>
                             </small>
                             <TemplateHelp v-if="template_help" :helpers="helper.templateRules"/>
-
+                            <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
                             <b-button v-b-toggle.advance-template variant="secondary" class="mt-2">高级</b-button>
                             <b-collapse id="advance-template" class="mt-2">
                                 <b-card>
@@ -244,7 +246,7 @@
                                     </div>
                                 </b-form-group>
                                 <b-form-group label-cols="2" v-if="!trigger.pre_condition_fold">
-                                    <codemirror v-model="trigger.pre_condition" class="mt-3 adanos-code-textarea"
+                                    <codemirror v-model="trigger.pre_condition" class="mt-1 adanos-code-textarea"
                                                 :options="options.trigger_rule"></codemirror>
                                     <small class="form-text text-muted">
                                         语法提示 <code>Alt+/</code>，语法参考 <a
@@ -777,7 +779,7 @@ export default {
                 name: '',
                 pre_condition: '',
                 is_else_trigger: isElseTrigger,
-                pre_condition_fold: true,
+                pre_condition_fold: isElseTrigger,
                 action: 'dingding',
                 meta: '',
                 meta_arr: {template: '', robot_id: null, title: '{{ .Rule.Title }}'},
@@ -937,7 +939,7 @@ export default {
                 }
 
                 this.form.status = response.data.status === 'enabled';
-                if (this.form.ignore_rule.trim() === '') {
+                if (this.form.ignore_rule.trim() === '' && this.form.relation_rule === '') {
                     // 解决高级规则默认不展示时，编辑器窗口初始化不完整问题
                     this.$root.$emit('bv::toggle::collapse', 'advance')
                 }

@@ -67,3 +67,13 @@ func (Helpers) TrimSuffix(s, suffix string) string {
 func (Helpers) TrimPrefix(s, prefix string) string {
 	return strings.TrimPrefix(s, prefix)
 }
+
+// CutoffLine 字符串截取指定行数
+func (Helpers) CutoffLine(val string, maxLine int) string {
+	lines := strings.Split(val, "\n")
+	if len(lines) > maxLine {
+		return strings.Join(lines[:maxLine], "\n")
+	}
+
+	return strings.Join(lines, "\n")
+}

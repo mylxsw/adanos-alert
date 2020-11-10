@@ -8,7 +8,7 @@ mongo_db: "{{ adanos_mongo_db }}"
 api_token: "{{ adanos_api_token }}"
 enable_migrate: {{ adanos_enable_migrate }}
 listen: "{{ adanos_listen }}"
-keep_period: 14
+keep_period: 60
 
 aliyun_voice_called_show_number: "{{ adanos_aliyun_voice_called_show_number }}"
 aliyun_voice_tts_code: "{{ adanos_aliyun_voice_tts_code }}"

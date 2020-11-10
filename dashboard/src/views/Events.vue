@@ -11,9 +11,56 @@
                     </b-form>   
                 </b-card-text>
             </b-card>
+
+            <b-card class="mb-2" border-variant="warning" v-if="relationInfo != null" header="相关事件摘要" header-bg-variant="warning">
+                <b-card-body>
+                    <b-row style="max-width: 100rem;" class="adanos-meta-line">
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">事件摘要</b></b-col>
+                        <b-col sm="9" style="text-align: left">
+                            {{ relationInfo.summary }}
+                        </b-col>
+                    </b-row>
+                    <b-row style="max-width: 100rem;" class="adanos-meta-line">
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">出现次数</b></b-col>
+                        <b-col sm="9" style="text-align: left">
+                            {{ relationInfo.event_count }}
+                        </b-col>
+                    </b-row>
+                    <b-row style="max-width: 100rem;" class="adanos-meta-line">
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">首次出现时间</b></b-col>
+                        <b-col sm="9" style="text-align: left">
+                            <date-time :value="relationInfo.created_at"></date-time>
+                        </b-col>
+                    </b-row>
+                    <b-row style="max-width: 100rem;" class="adanos-meta-line">
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">最近出现时间</b></b-col>
+                        <b-col sm="9" style="text-align: left">
+                            <date-time :value="relationInfo.updated_at"></date-time>
+                        </b-col>
+                    </b-row>
+
+                    <div class="mt-4" v-if="relationNotes != null">
+                        <b-media v-for="(note, index) in relationNotes.notes" :key="index" class="mt-3">
+                            <template #aside>
+                                <b-avatar variant="success" icon="people-fill"></b-avatar>
+                            </template>
+
+                            <p>
+                                <date-time :value="note.created_at"></date-time>
+                                <b-link class="mr-1 float-right" :to="{path:'/events', query: {event_id: note.event_id}}" target="_blank" title="关联事件">
+                                    <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
+                                </b-link>
+                            </p>
+                            <p class="text-break font-weight-light text-muted">{{ note.note }}</p>
+                        </b-media>
+                    </div>
+
+                </b-card-body>
+            </b-card>
+
             <EventCard v-for="(message, index) in events" :key="index" class="mb-3"
                          :event="message"
-                         :event_index="index" :reproduce-event="reproduceEvent"
+                         :event_index="index" :reproduce-event="reproduceEvent" :eventNote="openEventNoteDialog"
                          :test-matched-rules="testMatchedRules"></EventCard>
             <b-card v-if="events.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
@@ -44,6 +91,15 @@
                     <p><b-badge variant="success" v-if="row.item.aggregate_key" v-b-tooltip.hover title="实际匹配的聚合 Key">{{ row.item.aggregate_key }}</b-badge></p>
                 </template>
             </b-table>
+        </b-modal>
+
+        <b-modal id="event-note-dialog" title="事件备注" hide-footer size="xl">
+            <b-form @submit="onEventNoteSubmit">
+                <b-form-group id="event_note" label-for="event_note_input">
+                    <b-form-textarea id="event_note_input" placeholder="输入事件备注内容" v-model="event_note_form.note" rows="6"/>
+                </b-form-group>
+                <b-button type="submit" variant="primary" class="mr-2 float-right">保存</b-button>
+            </b-form>
         </b-modal>
     </b-row>
 </template>
@@ -78,6 +134,12 @@
                     {key: 'rule', label: '规则'},
                     {key: 'aggregate_rule', label: '聚合条件'},
                 ],
+                relationInfo: {},
+                relationNotes: [],
+                event_note_form: {
+                    note: '',
+                    event_id: null,
+                }
             };
         },
         watch: {
@@ -118,6 +180,26 @@
                     this.ErrorBox(error);
                 });
             },
+            openEventNoteDialog(eventId) {
+                this.event_note_form.event_id = eventId;
+                this.$root.$emit('bv::show::modal', "event-note-dialog");
+            },
+            onEventNoteSubmit(evt) {
+                evt.preventDefault();
+
+                if (this.event_note_form.note.trim() === '') {
+                    this.ErrorBox('备注内容不能为空');
+                    return ;
+                }
+
+                axios.post('/api/event-relations/' + this.$route.query.relation_id + '/notes/', this.event_note_form).then(() => {
+                    this.ToastSuccess('操作成功');
+                    this.$root.$emit('bv::hide::modal', "event-note-dialog");
+                    this.loadMore();
+                }).catch(error => {
+                    this.ErrorBox(error)
+                });
+            },
             loadMore() {
                 let params = this.$route.query;
                 params.offset = this.cur;
@@ -141,6 +223,18 @@
                 }).catch(error => {
                     this.ToastError(error)
                 });
+
+                this.relationInfo = null;
+                this.relationNotes = null;
+                if (this.$route.query.relation_id !== undefined) {
+                    axios.get('/api/event-relations/' + this.$route.query.relation_id + '/').then(response => {
+                        this.relationInfo = response.data;
+                    }).catch(error => {this.ToastError(error)})
+
+                    axios.get('/api/event-relations/' + this.$route.query.relation_id + '/notes/').then(response => {
+                        this.relationNotes = response.data;
+                    }).catch(error => {this.ToastError(error)})
+                }
             }
         },
         mounted() {

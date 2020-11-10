@@ -82,6 +82,7 @@ let helpers = {
         {text: 'SQLFinger(SQL_STR)', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"},
         {text: 'TrimSuffix(STR, SUFFIX)', displayText: 'TrimSuffix(str, suffix string) string | 去除字符串后缀'},
         {text: 'TrimPrefix(STR, PREFIX)', displayText: 'TrimPrefix(str, prefix string) string | 去除字符串前缀'},
+        {text: 'CutoffLine(STR, MAX)', displayText: 'CutoffLine(val string, maxLine int) string | 字符串截取 maxLine 行'},
     ],
     templates: [
         {text: '.Events EVENT_COUNT', displayText: 'Events(limit int64) []repository.Message | 从事件组中获取 EVENT_COUNT 个 Events'},

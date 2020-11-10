@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -21,14 +22,14 @@ func NewAgentRepo(db *mongo.Database) repository.AgentRepo {
 	return &AgentRepo{col: col}
 }
 
-func (a AgentRepo) Update(agent repository.Agent) (primitive.ObjectID, error) {
+func (a AgentRepo) Update(agent repository.Agent) (repository.ID, error) {
 	if agent.AgentID == "" {
-		return primitive.NilObjectID, errors.New("agent_id is required")
+		return "", errors.New("agent_id is required")
 	}
 
 	agents, err := a.Find(bson.M{"agent_id": agent.AgentID})
 	if err != nil {
-		return primitive.NilObjectID, err
+		return "", err
 	}
 
 	if len(agents) == 0 {
@@ -37,20 +38,25 @@ func (a AgentRepo) Update(agent repository.Agent) (primitive.ObjectID, error) {
 
 		rs, err := a.col.InsertOne(context.TODO(), agent)
 		if err != nil {
-			return primitive.NilObjectID, err
+			return "", err
 		}
 
-		return rs.InsertedID.(primitive.ObjectID), nil
+		return repository.ID(rs.InsertedID.(primitive.ObjectID).Hex()), nil
 	}
 	agent.CreatedAt = agents[0].CreatedAt
 	agent.UpdatedAt = time.Now()
 
 	_, err = a.col.ReplaceOne(context.TODO(), bson.M{"_id": agents[0].ID}, agent)
-	return agents[0].ID, err
+	return repository.ID(agents[0].ID.Hex()), err
 }
 
-func (a AgentRepo) Get(id primitive.ObjectID) (agent repository.Agent, err error) {
-	err = a.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&agent)
+func (a AgentRepo) Get(id repository.ID) (agent repository.Agent, err error) {
+	mID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return agent, fmt.Errorf("invalid id: %w", err)
+	}
+
+	err = a.col.FindOne(context.TODO(), bson.M{"_id": mID}).Decode(&agent)
 	return
 }
 
@@ -79,6 +85,11 @@ func (a AgentRepo) Delete(filter bson.M) error {
 	return err
 }
 
-func (a AgentRepo) DeleteID(id primitive.ObjectID) error {
-	return a.Delete(bson.M{"_id": id})
+func (a AgentRepo) DeleteID(id repository.ID) error {
+	mID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return fmt.Errorf("invalid id: %w", err)
+	}
+
+	return a.Delete(bson.M{"_id": mID})
 }

@@ -5,3 +5,5 @@ import (
 )
 
 var ErrNotFound = errors.New("not found")
+
+type ID string

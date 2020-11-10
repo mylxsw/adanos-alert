@@ -1,14 +1,11 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AgentController struct {
@@ -51,10 +48,5 @@ func (c AgentController) All(repo repository.AgentRepo) ([]AgentResp, error) {
 }
 
 func (c AgentController) Remove(req web.Request, repo repository.AgentRepo) error {
-	id, err := primitive.ObjectIDFromHex(req.PathVar("id"))
-	if err != nil {
-		return web.WrapJSONError(err, http.StatusUnprocessableEntity)
-	}
-
-	return repo.DeleteID(id)
+	return repo.DeleteID(repository.ID(req.PathVar("id")))
 }

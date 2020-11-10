@@ -32,7 +32,7 @@ func (m *EventRelationRepo) AddOrUpdateEventRelation(ctx context.Context, summar
 	err = m.col.FindOneAndUpdate(
 		ctx,
 		bson.M{"matched_rule_id": matchedRuleID, "summary": summary},
-		bson.M{"$inc": bson.M{"event_count": 1}, "updated_at": time.Now()},
+		bson.M{"$inc": bson.M{"event_count": 1}, "$set": bson.M{"updated_at": time.Now()}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	).Decode(&eventRel)
 
