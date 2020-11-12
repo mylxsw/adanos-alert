@@ -33,6 +33,9 @@ build:
 build-proxy:
 	go build -race -ldflags "$(LDFLAGS)" -o build/debug/adanos-proxy cmd/proxy/main.go
 
+build-proxy-dist:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o build/release/adanos-proxy cmd/proxy/main.go
+
 build-deploy-bin:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o .ansible/roles/server/files/adanos-alert-server cmd/server/main.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o .ansible/roles/agent/files/adanos-alert-agent cmd/agent/main.go
