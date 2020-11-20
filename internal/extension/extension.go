@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
-	"github.com/mylxsw/adanos-alert/pkg/strarr"
+	"github.com/mylxsw/go-utils/str"
 )
 
 type CommonEvent struct {
@@ -119,7 +119,7 @@ var excludeLogstashPrefix = []string{
 func logstashMetaFilter(meta repository.EventMeta) repository.EventMeta {
 	res := make(repository.EventMeta)
 	for k, v := range meta {
-		if strarr.HasPrefixes(k, excludeLogstashPrefix) {
+		if str.HasPrefixes(k, excludeLogstashPrefix) {
 			continue
 		}
 

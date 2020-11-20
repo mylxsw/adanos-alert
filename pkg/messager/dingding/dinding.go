@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mylxsw/adanos-alert/pkg/strarr"
+	"github.com/mylxsw/go-utils/str"
 )
 
 // DingdingMessage is a message holds all informations for a dingding sender
@@ -48,7 +48,7 @@ func (m MarkdownMessage) Encode() ([]byte, error) {
 // NewMarkdownMessage create a new MarkdownMessage
 func NewMarkdownMessage(title string, body string, mobiles []string) MarkdownMessage {
 	mobilesFromBody := ExtractAtSomeones(body)
-	mobiles = strarr.Diff(mobiles, mobilesFromBody)
+	mobiles = str.Diff(mobiles, mobilesFromBody)
 	if len(mobiles) > 0 {
 		var atSomeone = ""
 		for _, mobile := range mobiles {
@@ -65,7 +65,7 @@ func NewMarkdownMessage(title string, body string, mobiles []string) MarkdownMes
 			Text:  body,
 		},
 		At: MessageAtSomebody{
-			Mobiles: strarr.Union(mobilesFromBody, mobiles),
+			Mobiles: str.Union(mobilesFromBody, mobiles),
 		},
 	}
 }
@@ -78,7 +78,7 @@ func ExtractAtSomeones(body string) []string {
 		results = append(results, strings.TrimSpace(strings.TrimLeft(s, "@")))
 	}
 
-	return strarr.Distinct(results)
+	return str.Distinct(results)
 }
 
 // MarkdownMessageBody is markdown body

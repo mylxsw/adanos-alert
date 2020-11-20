@@ -18,10 +18,10 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
-	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
+	"github.com/mylxsw/go-utils/str"
 	"github.com/russross/blackfriday/v2"
 	"github.com/vjeantet/grok"
 	"github.com/yosssi/gohtml"
@@ -359,7 +359,7 @@ func RemoveEmptyLine(content string) string {
 func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if strarr.In(k, allowKeys) {
+		if str.In(k, allowKeys) {
 			res[k] = v
 		}
 	}
@@ -371,7 +371,7 @@ func MetaFilter(meta map[string]interface{}, allowKeys ...string) map[string]int
 func MetaFilterExclude(meta map[string]interface{}, excludeKeys ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if !strarr.In(k, excludeKeys) {
+		if !str.In(k, excludeKeys) {
 			res[k] = v
 		}
 	}
@@ -383,7 +383,7 @@ func MetaFilterExclude(meta map[string]interface{}, excludeKeys ...string) map[s
 func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if strarr.HasPrefixes(k, allowKeyPrefix) {
+		if str.HasPrefixes(k, allowKeyPrefix) {
 			res[k] = v
 		}
 	}
@@ -395,7 +395,7 @@ func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map
 func MetaFilterPrefixExclude(meta map[string]interface{}, disableKeyPrefixes ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
-		if !strarr.HasPrefixes(k, disableKeyPrefixes) {
+		if !str.HasPrefixes(k, disableKeyPrefixes) {
 			res[k] = v
 		}
 	}
@@ -539,7 +539,7 @@ func BuildUserMetasFunc(cc SimpleContainer) func(queryK, queryV string, field st
 	userRepo := userRepoR.(repository.UserRepo)
 	return func(queryK, queryV string, field string) []string {
 		filter := bson.M{}
-		if strarr.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
+		if str.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
 			filter[queryK] = queryV
 		} else {
 			filter["metas.key"] = queryK

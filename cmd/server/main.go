@@ -72,7 +72,7 @@ func main() {
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "mongo_uri",
-		Usage:  "Mongodb connection uri",
+		Usage:  "Mongodb connection uri，参考 https://docs.mongodb.com/manual/reference/connection-string/",
 		EnvVar: "MONGODB_HOST",
 		Value:  "mongodb://localhost:27017",
 	}))

@@ -212,6 +212,8 @@ github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3 h1:s9iAbD8YanxG6rn1
 github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3/go.mod h1:704aHbgS7VTqwdZCq+RbUu5O3+HKJMjp0RxOV2U+PGw=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988 h1:eUlVMPyxeWUogeqwAkat6eE+3eY5fjP/UAXyhAf/7Jw=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988/go.mod h1:aJAUawotu1IMtEPXInIm6qwiAEIMSGRAMH6otakYCWw=
+github.com/mylxsw/go-utils v0.0.0-20201115042153-375970fbacce h1:kUadidiyO40mpDXnl8TzlXSBeUocuBbljZwXQIYigH4=
+github.com/mylxsw/go-utils v0.0.0-20201115042153-375970fbacce/go.mod h1:wl/2SxAVyxDnzItIjIX/M/7HTdkDlJyG7BpamtqTPts=
 github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134 h1:uYT1HZC8kyKGtAR/Los/azrD8uROgkM8HHuhN2bzPmI=
 github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134/go.mod h1:Skt4GaATnUdq3MArrHK32UsSC9tq8GB0ZToWkF420Os=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
@@ -441,6 +443,8 @@ google.golang.org/protobuf v1.21.0/go.mod h1:47Nbq4nVaFHyn7ilMalzfO3qCViNmqZ2kzi
 google.golang.org/protobuf v1.23.0 h1:4MY060fB1DLGMB/7MBTLnwQUY6+F09GEiz6SsrNqyzM=
 google.golang.org/protobuf v1.23.0/go.mod h1:EGpADcykh3NcUnDUJcl1+ZksZNG86OlYog2l/sGQquU=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
+gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc h1:2gGKlE2+asNV9m7xrywl36YYNnBG5ZQ0r/BOOxqPpmk=
+gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc/go.mod h1:m7x9LTH6d71AHyAX77c9yqWCCa3UKHcVEj9y7hAtKDk=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
@@ -452,6 +456,8 @@ gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f/go.mod h1:Co6ibVJAznAaIkqp8
 gopkg.in/errgo.v2 v2.1.0/go.mod h1:hNsd1EY+bozCKY1Ytp96fpM3vjJbqLJn88ws8XvfDNI=
 gopkg.in/fsnotify.v1 v1.4.7 h1:xOHLXZwVvI9hhs+cLKq5+I5onOuwQLhQwiu63xxlHs4=
 gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
+gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df h1:n7WqCuqOuCbNr617RXOY0AWRXxgwEyPp2z+p0+hgMuE=
+gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df/go.mod h1:LRQQ+SO6ZHR7tOkpBDuZnXENFzX8qRjMDMyPD6BRkCw=
 gopkg.in/ini.v1 v1.44.2/go.mod h1:M3Cogqpuv0QCi3ExAY5V4uOt4qb/R3xZubo9m8lK5wg=
 gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 h1:VpOs+IwYnYBaFnrNAeB8UUWtL3vEUnzSCL1nVjPhqrw=
 gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22/go.mod h1:yeKp02qBN3iKW1OzL3MGk2IdtZzaj7SFntXj72NppTA=

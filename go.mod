@@ -27,6 +27,7 @@ require (
 	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
 	github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
+	github.com/mylxsw/go-utils v0.0.0-20201115042153-375970fbacce
 	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
@@ -51,6 +52,8 @@ require (
 	golang.org/x/sys v0.0.0-20200922070232-aee5d888a860 // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

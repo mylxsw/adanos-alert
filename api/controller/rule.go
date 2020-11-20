@@ -15,11 +15,11 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
-	"github.com/mylxsw/adanos-alert/pkg/strarr"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/web"
+	"github.com/mylxsw/go-utils/str"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -382,7 +382,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 	for _, t := range ruleForm.Triggers {
 
 		users := make([]primitive.ObjectID, 0)
-		for _, u := range strarr.Distinct(t.UserRefs) {
+		for _, u := range str.Distinct(t.UserRefs) {
 			uid, err := primitive.ObjectIDFromHex(u)
 			if err == nil {
 				users = append(users, uid)
@@ -409,7 +409,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		Description:      ruleForm.Description,
 		Tags:             ruleForm.Tags,
 		ReadyType:        ruleForm.ReadyType,
-		DailyTimes:       strarr.Distinct(ruleForm.DailyTimes),
+		DailyTimes:       str.Distinct(ruleForm.DailyTimes),
 		Interval:         ruleForm.Interval,
 		TimeRanges:       ruleForm.TimeRanges,
 		Rule:             ruleForm.Rule,
@@ -465,7 +465,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 	triggers := make([]repository.Trigger, 0)
 	for _, t := range ruleForm.Triggers {
 		users := make([]primitive.ObjectID, 0)
-		for _, u := range strarr.Distinct(t.UserRefs) {
+		for _, u := range str.Distinct(t.UserRefs) {
 			uid, err := primitive.ObjectIDFromHex(u)
 			if err == nil {
 				users = append(users, uid)
@@ -495,7 +495,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		Description:      ruleForm.Description,
 		Tags:             ruleForm.Tags,
 		ReadyType:        ruleForm.ReadyType,
-		DailyTimes:       strarr.Distinct(ruleForm.DailyTimes),
+		DailyTimes:       str.Distinct(ruleForm.DailyTimes),
 		Interval:         ruleForm.Interval,
 		TimeRanges:       ruleForm.TimeRanges,
 		Rule:             ruleForm.Rule,

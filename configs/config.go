@@ -31,6 +31,14 @@ type Config struct {
 	Migrate         bool            `json:"migrate"`
 	ReMigrate       bool            `json:"re_migrate"`
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
+	EmailSMTP       EmailSMTP       `json:"email_smtp"`
+}
+
+type EmailSMTP struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"-"`
 }
 
 type AliyunVoiceCall struct {
