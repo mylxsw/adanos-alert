@@ -100,6 +100,26 @@ func (m EventRepo) Find(filter interface{}) (messages []repository.Event, err er
 	return
 }
 
+func (m EventRepo) FindIDs(ctx context.Context, filter interface{}, limit int64) ([]primitive.ObjectID, error) {
+	ids := make([]primitive.ObjectID, 0)
+	cur, err := m.col.Find(ctx, filter, options.Find().SetLimit(limit).SetProjection(bson.D{{"_id", 1}}))
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var evt repository.Event
+		if err := cur.Decode(&evt); err != nil {
+			return nil, err
+		}
+
+		ids = append(ids, evt.ID)
+	}
+
+	return ids, nil
+}
+
 func (m EventRepo) Paginate(filter interface{}, offset, limit int64) (messages []repository.Event, next int64, err error) {
 	messages = make([]repository.Event, 0)
 	cur, err := m.col.Find(context.TODO(), filter, options.Find().SetLimit(limit).SetSort(bson.M{"created_at": -1}).SetSkip(offset))

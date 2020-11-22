@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // EventType 事件类型
@@ -58,4 +59,12 @@ type MessageGroupTriggeredEvent struct {
 	Trigger   repository.Trigger
 	Group     repository.EventGroup
 	CreatedAt time.Time
+}
+
+// EventGroupReduceEvent 事件组缩减事件
+type EventGroupReduceEvent struct {
+	GroupID     primitive.ObjectID
+	KeepCount   int64
+	DeleteCount int64
+	CreatedAt   time.Time
 }

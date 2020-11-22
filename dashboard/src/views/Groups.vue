@@ -61,6 +61,9 @@
                             <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">事件组</b-dropdown-item>
                             <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">报告</b-dropdown-item>
                         </b-dropdown>
+                        <b-button size="sm" variant="danger" 
+                            @click="clearGroup(row.item.id)"
+                            v-if="row.item.status != 'collecting' && row.item.status != 'pending'">清理</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -110,6 +113,19 @@
                 return user_refs.map((u) => {
                     return this.userRefs[u] !== undefined ? this.userRefs[u] : '-';
                 }).join(', ')
+            },
+            clearGroup(id) {
+                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                    if (value !== true) {
+                        return;
+                    }
+
+                    axios.delete('/api/groups/' + id + '/reduce/').then((resp) => {
+                        this.SuccessBox('操作成功，删除事件数为 ' + resp.data.deleted_count);
+                    }).catch(error => {
+                        this.ErrorBox(error);
+                    });
+                });
             },
             formatAction(action) {
                 let actions = {

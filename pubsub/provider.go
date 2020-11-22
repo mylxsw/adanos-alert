@@ -55,6 +55,14 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 				Body: fmt.Sprintf("[%s] System is changed to %s", ev.CreatedAt.Format(time.RFC3339), misc.IfElse(ev.Up, "up", "down")),
 			})
 		})
+
+		// 事件组事件清理
+		em.Listen(func(ev EventGroupReduceEvent) {
+			auditRepo.Add(repository.AuditLog{
+				Type: repository.AuditLogTypeAction,
+				Body: fmt.Sprintf("[%s] EventGroup's (%s) event count reduced to %d, deleted count=%d", ev.CreatedAt.Format(time.RFC3339), ev.GroupID.Hex(), ev.KeepCount, ev.DeleteCount),
+			})
+		})
 	})
 }
 

@@ -52,6 +52,7 @@ type EventRepo interface {
 	Add(msg Event) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (msg Event, err error)
 	Find(filter interface{}) (messages []Event, err error)
+	FindIDs(ctx context.Context, filter interface{}, limit int64) ([]primitive.ObjectID, error)
 	Paginate(filter interface{}, offset, limit int64) (messages []Event, next int64, err error)
 	Delete(filter interface{}) error
 	DeleteID(id primitive.ObjectID) error
