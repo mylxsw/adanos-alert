@@ -25,7 +25,7 @@
                 </template>
                 <template v-slot:cell(rule_name)="row">
                     <span v-b-tooltip.hover :title="row.item.rule.rule">{{ row.item.rule.name }}</span>
-                    <b-link :to="'/rules/' + row.item.rule.id + '/edit'" target="_blank" class="ml-2">
+                    <b-link :to="'/rules/?id=' + row.item.rule.id" target="_blank" class="ml-2">
                         <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
                     </b-link>
                     <p>

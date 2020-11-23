@@ -171,13 +171,13 @@ func initializeMatchers(ruleRepo repository.RuleRepo) ([]*matcher.EventMatcher, 
 	return matchers, nil
 }
 
-func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, msgRepo repository.EventRepo, em event.Manager) error {
+func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, evtRepo repository.EventRepo, em event.Manager) error {
 	return groupRepo.Traverse(bson.M{"status": repository.EventGroupStatusCollecting}, func(grp repository.EventGroup) error {
 		if !grp.Ready() {
 			return nil
 		}
 
-		msgCount, err := msgRepo.Count(bson.M{"group_ids": grp.ID})
+		evtCount, err := evtRepo.Count(bson.M{"group_ids": grp.ID})
 		if err != nil {
 			log.WithFields(log.Fields{
 				"grp": grp,
@@ -185,8 +185,13 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 			}).Errorf("query message count failed: %v", err)
 		}
 
-		grp.MessageCount = msgCount
-		grp.Status = repository.EventGroupStatusPending
+		if evtCount == 0 {
+			grp.Status = repository.EventGroupStatusCanceled
+		} else {
+			grp.Status = repository.EventGroupStatusPending
+		}
+
+		grp.MessageCount = evtCount
 
 		if log.DebugEnabled() {
 			log.WithFields(log.Fields{
@@ -197,10 +202,12 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 
 		err = groupRepo.UpdateID(grp.ID, grp)
 
-		em.Publish(pubsub.MessageGroupPendingEvent{
-			Group:     grp,
-			CreatedAt: time.Now(),
-		})
+		if evtCount > 0 {
+			em.Publish(pubsub.MessageGroupPendingEvent{
+				Group:     grp,
+				CreatedAt: time.Now(),
+			})
+		}
 
 		return err
 	})

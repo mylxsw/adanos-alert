@@ -31,6 +31,7 @@
                 </b-btn-group>
 
                 <b-button class="ml-2" :to="{path:'/rules/add', query: {test_event_id: event.id}}" target="_blank" size="sm" variant="dark">创建规则</b-button>
+                <b-button class="ml-2" size="sm" variant="danger" v-if="deleteEvent" @click="deleteEvent(event_index, event.id)">删除</b-button>
 
                 <b-btn-group class="ml-2" v-if="event.relation_ids != null && event.relation_ids.length > 0">
                     <b-button size="sm" variant="primary" @click="eventNote(event.id)" v-if="eventNote">备注</b-button>
@@ -83,6 +84,7 @@
             testMatchedRules: Function,
             reproduceEvent: Function,
             eventNote: Function,
+            deleteEvent: Function,
             onlyShow: Boolean,
             title: String,
             fold: Boolean,

@@ -190,6 +190,7 @@ func (g GroupController) CutGroupEvents(webCtx web.Context, evtGrpRepo repositor
 			GroupID:     grp.ID,
 			KeepCount:   keepCount,
 			DeleteCount: deletedCount,
+			CreatedAt:   time.Now(),
 		})
 	}
 

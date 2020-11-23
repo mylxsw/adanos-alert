@@ -546,6 +546,16 @@ type RuleSearch struct {
 // Rules return all rules
 func (r RuleController) Rules(ctx web.Context, ruleRepo repository.RuleRepo, userRepo repository.UserRepo) (*RulesResp, error) {
 	filter := bson.M{}
+	idStr := ctx.Input("id")
+	if idStr != "" {
+		id, err := primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			return nil, web.WrapJSONError(err, http.StatusUnprocessableEntity)
+		}
+
+		filter["_id"] = id
+	}
+
 	name := ctx.Input("name")
 	if name != "" {
 		filter["name"] = bson.M{"$regex": name}

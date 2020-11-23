@@ -41,6 +41,8 @@ func (m *EventController) Register(router *web.Router) {
 	router.Group("/events", func(router *web.Router) {
 		router.Get("/", m.Events).Name("events:all")
 		router.Get("/{id}/", m.Event).Name("events:one")
+		router.Delete("/{id}/", m.DeleteEvent).Name("events:delete")
+		
 		router.Post("/{id}/matched-rules/", m.TestMatchedRules).Name("events:matched-rules")
 		router.Post("/{id}/reproduce/", m.ReproduceEvent).Name("events:reproduce-event")
 
@@ -397,4 +399,18 @@ func (m *EventController) AddEventRelationNote(ctx web.Context, evtRelationNoteR
 	return ctx.JSON(web.M{
 		"id": id,
 	})
+}
+
+// DeleteEvent 删除事件
+func (m *EventController) DeleteEvent(ctx web.Context, evtRepo repository.EventRepo) web.Response {
+	eventID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	if err != nil {
+		return ctx.JSONError("invalid event id", http.StatusUnprocessableEntity)
+	}
+
+	if err := evtRepo.DeleteID(eventID); err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+	}
+
+	return ctx.JSON(web.M{})
 }

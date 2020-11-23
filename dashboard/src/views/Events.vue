@@ -60,7 +60,7 @@
 
             <EventCard v-for="(message, index) in events" :key="index" class="mb-3"
                          :event="message"
-                         :event_index="index" :reproduce-event="reproduceEvent" :eventNote="openEventNoteDialog"
+                         :event_index="index" :reproduce-event="reproduceEvent" :eventNote="openEventNoteDialog" :deleteEvent="deleteEvent"
                          :test-matched-rules="testMatchedRules"></EventCard>
             <b-card v-if="events.length === 0">
                 <b-card-body>There are no records to show</b-card-body>
@@ -167,6 +167,21 @@
 
                     axios.post('/api/events/' + id + '/reproduce/', {}).then(resp => {
                         this.ToastSuccess('重新投递 Event 成功，Event ID: ' + resp.data.id);
+                    }).catch(error => {
+                        this.ErrorBox(error);
+                    });
+                });
+            },
+            deleteEvent(index, id) {
+                let self = this;
+                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                    if (value !== true) {
+                        return;
+                    }
+
+                    axios.delete('/api/events/' + id + '/', {}).then(() => {
+                        self.events.splice(index, 1);
+                        this.ToastSuccess('事件删除成功');
                     }).catch(error => {
                         this.ErrorBox(error);
                     });
