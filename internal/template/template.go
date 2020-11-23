@@ -2,6 +2,7 @@ package template
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -26,6 +27,7 @@ import (
 	"github.com/vjeantet/grok"
 	"github.com/yosssi/gohtml"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SimpleContainer interface {
@@ -83,7 +85,11 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"error_success_notice": errorOrSuccessNotice,
 		"condition":            conditionStr,
 		"recoverable_notice":   recoverableNotice,
+
 		"user_metas":           BuildUserMetasFunc(cc),
+		"events_relation_ids":  extractRelationIDs,
+		"events_relations":     buildEventsRelationsFunc(cc),
+		"event_relation_notes": buildEventRelationNotesFunc(cc),
 
 		"meta_filter":                MetaFilter,
 		"meta_filter_exclude":        MetaFilterExclude,
@@ -525,6 +531,66 @@ func recoverableNotice(recovered bool, msg string) string {
 	}
 
 	return errorNotice(msg)
+}
+
+// extractRelationIDs 从多个事件中提取包含的事件关联 ID
+func extractRelationIDs(events []repository.Event) []primitive.ObjectID {
+	return distinctObjectIDs(coll.MustNew(events).Filter(func(evt repository.Event) bool {
+		return len(evt.RelationID) > 0
+	}).Map(func(evt repository.Event) []primitive.ObjectID {
+		return evt.RelationID
+	}).Reduce(func(carry []primitive.ObjectID, item []primitive.ObjectID) []primitive.ObjectID {
+		return append(carry, item...)
+	}, []primitive.ObjectID{}).([]primitive.ObjectID))
+}
+
+// buildEventsRelationsFunc 创建事件关联查询函数
+func buildEventsRelationsFunc(cc SimpleContainer) func(relationIDs []primitive.ObjectID) []repository.EventRelation {
+	evtRelationRepoR, _ := cc.Get(new(repository.EventRelationRepo))
+	evtRelationRepo := evtRelationRepoR.(repository.EventRelationRepo)
+	return func(relationIDs []primitive.ObjectID) []repository.EventRelation {
+		if len(relationIDs) == 0 {
+			return []repository.EventRelation{}
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+
+		relations, _, _ := evtRelationRepo.Paginate(ctx, bson.M{"_id": bson.M{"$in": relationIDs}}, 0, 10)
+		return relations
+	}
+}
+
+// buildEventRelationNotesFunc 创建事件关联备注查询函数
+func buildEventRelationNotesFunc(cc SimpleContainer) func(relationID primitive.ObjectID) []repository.EventRelationNote {
+	evtRelNoteRepoR, _ := cc.Get(new(repository.EventRelationNoteRepo))
+	evtRelNoteRepo := evtRelNoteRepoR.(repository.EventRelationNoteRepo)
+	return func(relationID primitive.ObjectID) []repository.EventRelationNote {
+		if relationID.IsZero() {
+			return []repository.EventRelationNote{}
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+
+		notes, _, _ := evtRelNoteRepo.PaginateNotes(ctx, relationID, bson.M{}, 0, 5)
+		return notes
+	}
+}
+
+// distinctObjectIDs remove duplicate elements from array
+func distinctObjectIDs(input []primitive.ObjectID) []primitive.ObjectID {
+	u := make([]primitive.ObjectID, 0, len(input))
+	m := make(map[primitive.ObjectID]bool)
+
+	for _, val := range input {
+		if _, ok := m[val]; !ok {
+			m[val] = true
+			u = append(u, val)
+		}
+	}
+
+	return u
 }
 
 // BuildUserMetasFunc 构建查询用户元信息的函数

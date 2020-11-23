@@ -139,7 +139,12 @@ let helpers = {
         {text: 'error_success_notice IS_SUCCESS MSG', displayText: 'error_success_notice(success bool, msg string) string | 显示"msg"两字，如果 success 为 true，显示绿色，否则显示红色'},
         {text: 'condition S1 S2 CONDITION', displayText: 'condition(s1, s2 string, condition bool) | 条件输出字符串，符合条件，输出 s1，否则 s2'},
         {text: 'recoverable_notice .IsRecovery MSG', displayText: 'recoverable_notice(recovered bool, msg string) string | 显示"msg"两字，如果 recovered 为 true，显示绿色，并且自动添加 【已恢复】两字，否则显示红色'},
+
         {text: 'user_metas QUERY_K QUERY_V FIELD', displayText: 'user_metas(queryK, queryV string, field string) []string | 查询 queryK=queryV 的用户 field 元信息，查询结果是个字符串数组'},
+        {text: 'events_relation_ids EVENTS', displayText: 'events_relation_ids(events []repository.Event) []primitive.ObjectID | 从多个事件中提取包含的事件关联 ID'},
+        {text: 'events_relations RELATION_IDS', displayText: 'events_relations(relationIDs []primitive.ObjectID) []repository.EventRelation | 根据多个事件关联 ID 批量查询事件关联'},
+        {text: 'event_relation_notes RELATION_ID', displayText: 'event_relation_notes(relationID primitive.ObjectID) []repository.EventRelationNote | 根据事件关联 ID 查询事件相关的备注'},
+
         {text: 'prefix_all_str PREFIX ARR', displayText: 'prefix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加前缀'},
         {text: 'suffix_all_str SUFFIX ARR', displayText: 'suffix_all_str(prefix string, arr []string) []string | 为字符串数组中每一个元素添加后缀'},
         {text: 'json_fields_cutoff LENGTH JSON_STR', displayText: 'json_fields_cutoff(length int, body string) map[string]interface{} | 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度'},
