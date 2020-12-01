@@ -9,6 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
@@ -140,7 +141,7 @@ func (payload *Payload) Events(limit int64) []repository.Event {
 	return payload.eventQuerier(payload.Group.ID, limit)
 }
 
-func CreateRepositoryMessageQuerier(msgRepo repository.EventRepo) func(groupID primitive.ObjectID, limit int64) []repository.Event {
+func CreateRepositoryEventQuerier(msgRepo repository.EventRepo) func(groupID primitive.ObjectID, limit int64) []repository.Event {
 	return func(groupID primitive.ObjectID, limit int64) []repository.Event {
 		messages, _, err := msgRepo.Paginate(bson.M{"group_ids": groupID}, 0, limit)
 		if err != nil {
@@ -201,14 +202,14 @@ func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 }
 
 // CreatePayload 创建一个 Payload
-func CreatePayload(conf *configs.Config, messageQuerier EventQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) *Payload {
+func CreatePayload(conf *configs.Config, eventQuerier EventQuerier, action string, rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) *Payload {
 	payload := &Payload{
 		Action:  action,
 		Rule:    rule,
 		Trigger: trigger,
 		Group:   grp,
 	}
-	payload.Init(messageQuerier)
+	payload.Init(eventQuerier)
 
 	if conf.PreviewURL != "" {
 		payload.PreviewURL = fmt.Sprintf(conf.PreviewURL, grp.ID.Hex())
@@ -218,4 +219,27 @@ func CreatePayload(conf *configs.Config, messageQuerier EventQuerier, action str
 	}
 
 	return payload
+}
+
+// createPayloadAndSummary 创建 Payload 并且生成 summary
+func createPayloadAndSummary(cc template.SimpleContainer, actionName string, conf *configs.Config, evtRepo repository.EventRepo, rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) (*Payload, string) {
+	payload := CreatePayload(conf, CreateRepositoryEventQuerier(evtRepo), actionName, rule, trigger, grp)
+	payload.RuleTemplateParsed = parseTemplate(cc, rule.Template, payload)
+
+	return payload, payload.RuleTemplateParsed
+}
+
+// parseTemplate 模板解释
+func parseTemplate(cc template.SimpleContainer, temp string, payload *Payload) string {
+	summary, err := template.Parse(cc, temp, payload)
+	if err != nil {
+		summary = fmt.Sprintf("<internal> template parse failed: %s", err)
+		log.WithFields(log.Fields{
+			"err":      err.Error(),
+			"template": temp,
+			"payload":  payload,
+		}).Errorf("<internal> template parse failed: %v", err)
+	}
+
+	return summary
 }

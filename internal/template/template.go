@@ -604,43 +604,11 @@ func BuildUserMetasFunc(cc SimpleContainer) func(queryK, queryV string, field st
 
 	userRepo := userRepoR.(repository.UserRepo)
 	return func(queryK, queryV string, field string) []string {
-		filter := bson.M{}
-		if str.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
-			filter[queryK] = queryV
-		} else {
-			filter["metas.key"] = queryK
-			filter["metas.value"] = queryV
-		}
-
-		users, err := userRepo.Find(filter)
+		metas, err := userRepo.GetUserMetas(queryK, queryV, field)
 		if err != nil {
 			return []string{}
 		}
-
-		var res []string
-		_ = coll.MustNew(users).Map(func(u repository.User) string {
-			switch field {
-			case "name":
-				return u.Name
-			case "phone":
-				return u.Phone
-			case "email":
-				return u.Email
-			case "role":
-				return u.Role
-			case "status":
-				return string(u.Status)
-			default:
-				for _, m := range u.Metas {
-					if m.Key == field {
-						return m.Value
-					}
-				}
-
-				return ""
-			}
-		}).Filter(func(v string) bool { return v != "" }).All(&res)
-		return res
+		return metas
 	}
 }
 

@@ -8,7 +8,6 @@ import (
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/messager/dingding"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
@@ -66,37 +65,17 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			return fmt.Errorf("query robot for id=%s failed: %v", meta.RobotID, err)
 		}
 
-		payload := CreatePayload(conf, CreateRepositoryMessageQuerier(msgRepo), "dingding", rule, trigger, grp)
-		ruleTemplateContent, err := template.Parse(d.manager, rule.Template, payload)
-		if err != nil {
-			ruleTemplateContent = fmt.Sprintf("<rule> template parse failed: %s", err)
-			log.WithFields(log.Fields{
-				"err":      err.Error(),
-				"template": rule.Template,
-				"payload":  payload,
-			}).Errorf("<rule> template parse failed: %v", err)
-		}
-
-		notifyContent := ruleTemplateContent
+		payload, summary := createPayloadAndSummary(d.manager, "dingding", conf, msgRepo, rule, trigger, grp)
 		if strings.TrimSpace(meta.Template) != "" {
-			payload.RuleTemplateParsed = ruleTemplateContent
-			notifyContent, err = template.Parse(d.manager, meta.Template, payload)
-			if err != nil {
-				notifyContent = fmt.Sprintf("<trigger> template parse failed: %s", err)
-				log.WithFields(log.Fields{
-					"err":      err.Error(),
-					"template": rule.Template,
-					"payload":  payload,
-				}).Errorf("<trigger> template parse failed: %v", err)
-			}
+			summary = parseTemplate(d.manager, meta.Template, payload)
 		}
 
 		mobiles := extractPhonesFromUserRefs(d.userRepo, trigger.UserRefs)
-		msg := dingding.NewMarkdownMessage(rule.Name, notifyContent, mobiles)
+		msg := dingding.NewMarkdownMessage(rule.Name, summary, mobiles)
 		if err := dingding.NewDingding(robot.Token, robot.Secret).Send(msg); err != nil {
 			log.WithFields(log.Fields{
 				"title":   rule.Name,
-				"content": notifyContent,
+				"content": summary,
 				"mobiles": mobiles,
 				"err":     err,
 			}).Errorf("send message to dingding failed: %v", err)
@@ -106,7 +85,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		if log.DebugEnabled() {
 			log.WithFields(log.Fields{
 				"title":   rule.Name,
-				"content": notifyContent,
+				"content": summary,
 				"mobiles": mobiles,
 			}).Debug("send message to dingding succeed")
 		}

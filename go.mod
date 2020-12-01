@@ -6,14 +6,17 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/andygrunwald/go-jira v1.13.0 // indirect
 	github.com/antonmedv/expr v1.8.2
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v1.0.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/fatih/structs v1.1.0 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
@@ -42,6 +45,7 @@ require (
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
 	github.com/swaggo/swag v1.6.2
 	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/trivago/tgo v1.0.7 // indirect
 	github.com/urfave/cli v1.22.2
 	github.com/vjeantet/grok v1.0.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

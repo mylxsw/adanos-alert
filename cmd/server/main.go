@@ -175,6 +175,21 @@ func main() {
 		Name:  "log_path",
 		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
 	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "jira_url",
+		EnvVar: "ADANOS_JIRA_URL",
+		Usage:  "Jira 服务器地址，如 http://127.0.0.1:8080",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "jira_username",
+		EnvVar: "ADANOS_JIRA_USERNAME",
+		Usage:  "Jira 连接账号",
+	}))
+	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+		Name:   "jira_password",
+		EnvVar: "ADANOS_JIRA_PASSWORD",
+		Usage:  "Jira 连接密码",
+	}))
 
 	app.WithHttpServer(listener.FlagContext("listen"))
 
@@ -249,6 +264,11 @@ func main() {
 				TTSCode:            c.String("aliyun_voice_tts_code"),
 				TTSTemplateVarName: c.String("aliyun_voice_tts_param"),
 				CalledShowNumber:   c.String("aliyun_voice_called_show_number"),
+			},
+			Jira: configs.Jira{
+				BaseURL:  c.String("jira_url"),
+				Username: c.String("jira_username"),
+				Password: c.String("jira_password"),
 			},
 		}
 	})

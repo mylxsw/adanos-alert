@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/coll"
+	"github.com/mylxsw/go-utils/str"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -122,4 +124,44 @@ func (u UserRepo) Update(id primitive.ObjectID, user repository.User) error {
 
 func (u UserRepo) Count(filter bson.M) (int64, error) {
 	return u.col.CountDocuments(context.TODO(), filter)
+}
+
+func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {
+	filter := bson.M{}
+	if str.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
+		filter[queryK] = queryV
+	} else {
+		filter["metas.key"] = queryK
+		filter["metas.value"] = queryV
+	}
+
+	users, err := u.Find(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []string
+	_ = coll.MustNew(users).Map(func(u repository.User) string {
+		switch field {
+		case "name":
+			return u.Name
+		case "phone":
+			return u.Phone
+		case "email":
+			return u.Email
+		case "role":
+			return u.Role
+		case "status":
+			return string(u.Status)
+		default:
+			for _, m := range u.Metas {
+				if m.Key == field {
+					return m.Value
+				}
+			}
+
+			return ""
+		}
+	}).Filter(func(v string) bool { return v != "" }).All(&res)
+	return res, nil
 }

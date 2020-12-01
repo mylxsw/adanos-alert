@@ -24,6 +24,7 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 		manager.Register("phone_call_aliyun", NewPhoneCallAliyunAction(manager))
 		manager.Register("sms_aliyun", NewSmsAliyunAction(manager))
 		manager.Register("sms_yunxin", NewSmsYunxinAction(manager))
+		manager.Register("jira", NewJiraAction(manager))
 
 		queueManager.RegisterHandler("action", func(item repository.QueueJob) error {
 			var payload Payload

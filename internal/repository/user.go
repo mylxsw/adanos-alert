@@ -19,6 +19,18 @@ type UserMeta struct {
 	Value string `bson:"value" json:"value" schema:"value"`
 }
 
+type UserMetas []UserMeta
+
+func (ums UserMetas) Get(key string) string {
+	for _, v := range ums {
+		if v.Key == key {
+			return v.Value
+		}
+	}
+
+	return ""
+}
+
 type User struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
@@ -29,7 +41,7 @@ type User struct {
 	Password string `bson:"password" json:"password"`
 	Role     string `bson:"role" json:"role"`
 
-	Metas []UserMeta `bson:"metas" json:"metas"`
+	Metas UserMetas `bson:"metas" json:"metas"`
 
 	Status UserStatus `bson:"status" json:"status"`
 
@@ -47,4 +59,6 @@ type UserRepo interface {
 	Delete(filter bson.M) error
 	Update(id primitive.ObjectID, user User) error
 	Count(filter bson.M) (int64, error)
+
+	GetUserMetas(queryK, queryV, field string) ([]string, error)
 }

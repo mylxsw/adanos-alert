@@ -30,8 +30,10 @@ type Config struct {
 
 	Migrate         bool            `json:"migrate"`
 	ReMigrate       bool            `json:"re_migrate"`
+
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
 	EmailSMTP       EmailSMTP       `json:"email_smtp"`
+	Jira            Jira            `json:"jira"`
 }
 
 type EmailSMTP struct {
@@ -48,6 +50,12 @@ type AliyunVoiceCall struct {
 	TTSCode            string `json:"tts_code"`
 	TTSTemplateVarName string `json:"tts_template_var_name"`
 	BaseURI            string `json:"base_uri"`
+}
+
+type Jira struct {
+	BaseURL  string `json:"base_url"`
+	Username string `json:"username"`
+	Password string `json:"-"`
 }
 
 func (conf *Config) Serialize() string {
