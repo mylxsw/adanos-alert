@@ -22,8 +22,7 @@
                         <b-form-group label-cols="2" label="属性">
                             <b-btn variant="success" class="mb-3" @click="propertyAdd()">添加</b-btn>
                             <b-input-group v-bind:key="index" v-for="(meta, index) in form.metas" class="mb-3">
-                                <b-form-input v-model="form.metas[index].key" placeholder="属性名"
-                                              list="properties"></b-form-input>
+                                <b-form-input v-model="form.metas[index].key" placeholder="属性名" list="properties"></b-form-input>
                                 <b-form-input v-model="form.metas[index].value" placeholder="属性值"></b-form-input>
                                 <b-input-group-append>
                                     <b-btn variant="danger" @click="propertyDelete(index)">删除</b-btn>

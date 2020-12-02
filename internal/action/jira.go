@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/messager/jira"
 	"github.com/mylxsw/asteria/log"
+	"github.com/russross/blackfriday"
 )
 
 type JiraAction struct {
@@ -27,6 +30,26 @@ func (act JiraAction) Validate(meta string, userRefs []string) error {
 		return errors.New("invalid users, only support one user")
 	}
 
+	if strings.TrimSpace(jiraMeta.Issue.ProjectKey) == "" {
+		return errors.New("project_key is required")
+	}
+
+	//if jiraMeta.Constraints != nil {
+	//	for _, cst := range jiraMeta.Constraints {
+	//		cstd, ok := jiraMeta.Issue.CustomFields[cst.ID]
+	//		if ok {
+	//			switch cst.Type {
+	//			case "number":
+	//				_, err := strconv.ParseFloat(cstd.(string), 64)
+	//				if err != nil {
+	//					return fmt.Errorf("invalid custom field (%s:%s), must be %s: %v", cst.Name, cst.ID, cst.Type, err)
+	//				}
+	//			default:
+	//			}
+	//		}
+	//	}
+	//}
+
 	return nil
 }
 
@@ -35,7 +58,8 @@ func NewJiraAction(manager Manager) *JiraAction {
 }
 
 type JiraMeta struct {
-	Issue jira.Issue `json:"issue"`
+	Issue       jira.Issue         `json:"issue"`
+	Constraints []jira.CustomField `json:"constraints"`
 }
 
 func (act JiraAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
@@ -54,6 +78,7 @@ func (act JiraAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 		if meta.Issue.Description != "" {
 			description = parseTemplate(act.manager, meta.Issue.Description, payload)
 		}
+		description = string(blackfriday.MarkdownCommon([]byte(description)))
 
 		summary := rule.Name
 		if meta.Issue.Summary != "" {
@@ -63,6 +88,25 @@ func (act JiraAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 		customFields := make(map[string]interface{})
 		for k, v := range meta.Issue.CustomFields {
 			customFields[k] = parseTemplate(act.manager, fmt.Sprintf("%v", v), payload)
+		}
+
+		for _, cst := range meta.Constraints {
+			cstd, ok := customFields[cst.ID]
+			if ok {
+				switch cst.Type {
+				case "number":
+					num, err := strconv.ParseFloat(cstd.(string), 64)
+					if err != nil {
+						log.WithFields(log.Fields{
+							"trigger_id": trigger.ID.Hex(),
+							"rule_id":    rule.ID.Hex(),
+						}).Errorf("invalid custom field (%s:%s), must be %s: %v", cst.Name, cst.ID, cst.Type, err)
+					}
+
+					customFields[cst.ID] = num
+				default:
+				}
+			}
 		}
 
 		issue := jira.Issue{

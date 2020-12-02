@@ -12,13 +12,13 @@ import (
 
 // Issue 一个 Jira Issue
 type Issue struct {
-	CustomFields map[string]interface{}
-	ProjectKey   string
-	Summary      string
-	Description  string
-	IssueType    string
-	Priority     string
-	Assignee     string
+	CustomFields map[string]interface{} `json:"custom_fields"`
+	ProjectKey   string                 `json:"project_key"`
+	Summary      string                 `json:"summary"`
+	Description  string                 `json:"description"`
+	IssueType    string                 `json:"issue_type"`
+	Priority     string                 `json:"priority"`
+	Assignee     string                 `json:"assignee"`
 }
 
 // Client 用于操作 jira 的客户端对象
@@ -47,8 +47,8 @@ func NewClient(baseURL string, username, password string) (*Client, error) {
 
 // IssueResp 查询到的 Issue，附加状态
 type IssueResp struct {
-	Issue  Issue
-	Status string
+	Issue  Issue  `json:"issue"`
+	Status string `json:"status"`
 }
 
 // GetIssue 获取一个 Issue
@@ -119,8 +119,8 @@ func (client Client) CreateComment(ctx context.Context, issueID string, comment 
 
 // IssueType is a jira issue type object
 type IssueType struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // GetIssueTypes return all issue types for a project
@@ -143,8 +143,8 @@ func (client Client) GetIssueTypes(ctx context.Context, projectKey string) ([]Is
 
 // IssuePriority is a jira issue priority object
 type IssuePriority struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // GetPriorities return all priorities supported by jira
@@ -165,8 +165,39 @@ func (client Client) GetPriorities(ctx context.Context) ([]IssuePriority, error)
 	return priorities, nil
 }
 
+// CustomField 自定义字段
+type CustomField struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+// GetCustomFields 获取所有的自定义字段
+func (client Client) GetCustomFields(ctx context.Context) ([]CustomField, error) {
+	fields, resp, err := client.client.Field.GetListWithContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", err, client.extractResponse(resp))
+	}
+
+	customFields := make([]CustomField, 0)
+	for _, f := range fields {
+		if f.Custom {
+			customFields = append(customFields, CustomField{
+				ID:   f.ID,
+				Name: f.Name,
+				Type: f.Schema.Type,
+			})
+		}
+	}
+
+	return customFields, nil
+}
+
 // extractResponse 解析服务端返回的响应内容
 func (client Client) extractResponse(resp *jira.Response) string {
+	defer func() {
+		recover()
+	}()
 	body, _ := ioutil.ReadAll(resp.Body)
 	return string(body)
 }

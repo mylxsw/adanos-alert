@@ -16,19 +16,15 @@
                         <b-card-text v-if="basic_card_fold">...</b-card-text>
                         <b-card-text v-if="!basic_card_fold">
                             <b-form-group label-cols="2" id="rule_name" label="名称*" label-for="name_input">
-                                <b-form-input id="name_input" type="text" v-model="form.name" required
-                                              placeholder="输入规则名称"/>
+                                <b-form-input id="name_input" type="text" v-model="form.name" required placeholder="输入规则名称"/>
                             </b-form-group>
 
                             <b-form-group label-cols="2" id="rule_description" label="描述" label-for="description_input">
-                                <b-form-textarea id="description_input" placeholder="输入规则描述"
-                                                 v-model="form.description"/>
+                                <b-form-textarea id="description_input" placeholder="输入规则描述" v-model="form.description"/>
                             </b-form-group>
 
                             <b-form-group label-cols="2" id="rule_tags" label="标签" label-for="tags_input">
-                                <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills
-                                             separator=" "
-                                             v-model="form.tags"></b-form-tags>
+                                <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills separator=" " v-model="form.tags"></b-form-tags>
                             </b-form-group>
 
                             <b-form-group label-cols="2" label="频率*">
@@ -40,37 +36,25 @@
                                             <b-form-select-option value="time_range">时间范围</b-form-select-option>
                                         </b-form-select>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" id="rule_interval" label="周期"
-                                                  label-for="rule_interval_input"
-                                                  v-if="form.ready_type === 'interval'"
+                                    <b-form-group label-cols="2" id="rule_interval" label="周期" label-for="rule_interval_input" v-if="form.ready_type === 'interval'"
                                                   :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
-                                        <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5"
-                                                      v-model="form.interval" required/>
+                                        <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5" v-model="form.interval" required/>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
                                         <b-btn variant="success" class="mb-3" @click="dailyTimeAdd()">添加</b-btn>
-                                        <b-input-group v-bind:key="i" v-for="(daily_time, i) in form.daily_times"
-                                                       style="margin-bottom: 10px;">
-                                            <b-form-timepicker v-model="form.daily_times[i]" :hour12="false"
-                                                               :show-seconds="false"></b-form-timepicker>
+                                        <b-input-group v-bind:key="i" v-for="(daily_time, i) in form.daily_times"  style="margin-bottom: 10px;">
+                                            <b-form-timepicker v-model="form.daily_times[i]" :hour12="false" :show-seconds="false"></b-form-timepicker>
                                             <b-input-group-append>
                                                 <b-btn variant="danger" @click="dailyTimeDelete(i)">删除</b-btn>
                                             </b-input-group-append>
                                         </b-input-group>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" label="时间范围" v-if="form.ready_type === 'time_range'"
-                                                  :description="timeRangeDesc">
+                                    <b-form-group label-cols="2" label="时间范围" v-if="form.ready_type === 'time_range'" :description="timeRangeDesc">
                                         <b-btn variant="success" class="mb-3" @click="timeRangeAdd()">添加</b-btn>
-                                        <b-input-group v-bind:key="i" v-for="(time_range, i) in form.time_ranges"
-                                                       style="margin-bottom: 10px;">
-                                            <b-form-timepicker v-model="form.time_ranges[i].start_time" :hour12="false"
-                                                               :show-seconds="false"
-                                                               placeholder="起始时间"></b-form-timepicker>
-                                            <b-form-timepicker v-model="form.time_ranges[i].end_time" :hour12="false"
-                                                               :show-seconds="false"
-                                                               placeholder="截止时间"></b-form-timepicker>
-                                            <b-form-input type="number" min="1" max="1440" step="1"
-                                                          v-model="form.time_ranges[i].interval"/>
+                                        <b-input-group v-bind:key="i" v-for="(time_range, i) in form.time_ranges"  style="margin-bottom: 10px;">
+                                            <b-form-timepicker v-model="form.time_ranges[i].start_time" :hour12="false" :show-seconds="false" placeholder="起始时间"></b-form-timepicker>
+                                            <b-form-timepicker v-model="form.time_ranges[i].end_time" :hour12="false" :show-seconds="false" placeholder="截止时间"></b-form-timepicker>
+                                            <b-form-input type="number" min="1" max="1440" step="1"  v-model="form.time_ranges[i].interval"/>
                                             <b-input-group-append>
                                                 <b-btn variant="danger" @click="timeRangeDelete(i)">删除</b-btn>
                                             </b-input-group-append>
@@ -110,8 +94,7 @@
                             <b-btn-group class="mb-2 float-right">
                                 <b-btn variant="primary" class="float-right" @click="checkRule(form.template)">检查</b-btn>
                             </b-btn-group>
-                            <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea"
-                                        :options="options.group_match_rule"></codemirror>
+                            <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
                             <small class="form-text text-muted">
                                 语法提示 <code>Alt+/</code>，语法参考 <a
                                 href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -188,11 +171,10 @@
                                 <b-btn variant="primary" class="float-right" @click="checkTemplate(form.template)">检查
                                 </b-btn>
                             </b-btn-group>
-                            <codemirror v-model="form.template" class="mt-3 adanos-code-textarea"
-                                        :options="options.template"></codemirror>
+                            <codemirror v-model="form.template" class="mt-3 adanos-code-textarea" :options="options.template"></codemirror>
                             <small class="form-text text-muted">
-                                语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
-                                                                target="_blank">https://golang.org/pkg/text/template/</a>
+                                语法提示 <code>Alt+/</code>，语法参考
+                                <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                             </small>
                             <TemplateHelp v-if="template_help" :helpers="helper.templateRules"/>
                             <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
@@ -281,48 +263,81 @@
                                         </b-btn-group>
                                     </b-form-group>
                                     <b-form-group v-if="!trigger.template_fold">
-                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea"
-                                                    :options="options.ding_template"></codemirror>
+                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
                                         <small class="form-text text-muted">
-                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/"
-                                                                            target="_blank">https://golang.org/pkg/text/template/</a>
+                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
                                         </small>
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i"
-                                                  v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                    <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
                                         <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
-                                                       class="mb-3">
-                                            <b-form-select v-model="trigger.user_refs[index]"
-                                                           :options="user_options"/>
+                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
+                                            <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
                                             <b-input-group-append>
                                                 <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
                                             </b-input-group-append>
                                         </b-input-group>
                                     </b-form-group>
                                 </div>
+                                <div v-else-if="trigger.action === 'jira'" class="adanos-sub-form">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_project_' + i" label="项目" :label-for="'trigger_meta_project_' + i">
+                                        <b-form-input :id="'trigger_meta_project_' + i" v-model="trigger.meta_arr.project_key" placeholder="项目 Key" @change="loadJiraCascadeOptions(i)"/>
+                                    </b-form-group>
+
+                                    <b-form-group label-cols="2" :id="'trigger_meta_issue_type_' + i" label="Issue 类型" :label-for="'trigger_meta_issue_type_' + i">
+                                        <b-form-select :id="'trigger_meta_issue_type_' + i" v-model="trigger.meta_arr.issue_type" placeholder="Issue 类型" :options="trigger.issue_type_options"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_priority_' + i" label="优先级" :label-for="'trigger_meta_priority_' + i">
+                                        <b-form-select :id="'trigger_meta_priority_' + i" v-model="trigger.meta_arr.priority" placeholder="优先级" :options="trigger.priority_options"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_assignee_' + i" label="经办人" :label-for="'trigger_meta_assignee_' + i">
+                                        <b-form-select :id="'trigger_meta_assignee_' + i" v-model="trigger.meta_arr.assignee" :options="user_options"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_summary_' + i" label="摘要" :label-for="'trigger_meta_summary_' + i">
+                                        <b-form-input :id="'trigger_meta_summary_' + i" v-model="trigger.meta_arr.summary" placeholder="摘要"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="自定义字段" :label-for="'trigger_custom_fields_' + i">
+                                        <b-btn variant="info" class="mb-3" @click="customFieldAdd(i)">添加字段</b-btn>
+                                        <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.custom_fields" class="mb-3">
+                                            <b-form-select v-model="trigger.meta_arr.custom_fields[index].key" placeholder="字段名" :options="jira_custom_fields"></b-form-select>
+                                            <b-form-input v-model="trigger.meta_arr.custom_fields[index].value" placeholder="字段值"></b-form-input>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="customFieldDelete(i, index)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="描述"
+                                                  :label-for="'trigger_meta_template_' + i">
+                                        <b-btn-group class="mb-2" v-if="!trigger.template_fold">
+                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
+                                        </b-btn-group>
+                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                            <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group v-if="!trigger.template_fold">
+                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
+                                        <small class="form-text text-muted">
+                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                                        </small>
+                                        <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
+                                    </b-form-group>
+                                </div>
                                 <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
-                                    <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题"
-                                                  :label-for="'trigger_meta_content_' + i">
-                                        <b-form-textarea :id="'trigger_meta_content_' + i"
-                                                         class="adanos-code-textarea  text-monospace"
-                                                         v-model="trigger.meta_arr.title"
-                                                         placeholder="通知标题，默认为规则名称"/>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题" :label-for="'trigger_meta_content_' + i">
+                                        <b-form-textarea :id="'trigger_meta_content_' + i" class="adanos-code-textarea  text-monospace" v-model="trigger.meta_arr.title" placeholder="通知标题，默认为规则名称"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID"
-                                                  :label-for="'trigger_meta_template_id_' + i">
-                                        <b-form-input :id="'trigger_meta_template_id_' + i"
-                                                      v-model="trigger.meta_arr.template_id"
-                                                      placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID" :label-for="'trigger_meta_template_id_' + i">
+                                        <b-form-input :id="'trigger_meta_template_id_' + i" v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i"
-                                                  v-if="['dingding', 'email', 'phone_call_aliyun', 'sms_aliyun', 'sms_yunxin', 'wechat'].indexOf(trigger.action) !== -1">
+                                    <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i">
                                         <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs"
-                                                       class="mb-3">
-                                            <b-form-select v-model="trigger.user_refs[index]"
-                                                           :options="user_options"/>
+                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
+                                            <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
                                             <b-input-group-append>
                                                 <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
                                             </b-input-group-append>
@@ -331,8 +346,7 @@
 
                                 </div>
                                 <div class="adanos-sub-form" v-else>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数"
-                                                  :label-for="'trigger_meta_' + i">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数" :label-for="'trigger_meta_' + i">
                                         <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
                                     </b-form-group>
                                 </div>
@@ -467,13 +481,12 @@ import TriggerHelp from "../components/TriggerHelp";
 
 import {codemirror, CodeMirror} from 'vue-codemirror-lite';
 import 'codemirror/addon/display/placeholder.js';
+import {helpers, hintHandler} from '@/plugins/editor-helper';
 
 require('codemirror/mode/go/go');
 require('codemirror/mode/markdown/markdown');
 require('codemirror/addon/hint/show-hint.js')
 require('codemirror/addon/hint/show-hint.css')
-
-import {helpers, hintHandler} from '@/plugins/editor-helper';
 
 CodeMirror.registerHelper("hint", "go", hintHandler);
 CodeMirror.registerHelper("hint", "markdown", hintHandler);
@@ -510,6 +523,7 @@ export default {
             action_options: [
                 {value: 'dingding', text: '钉钉'},
                 {value: 'phone_call_aliyun', text: '阿里云语音通知'},
+                {value: 'jira', text: 'Jira'},
 
                 // {value: 'http', text: 'HTTP'},
                 // {value: 'email', text: '邮件'},
@@ -594,6 +608,9 @@ export default {
             rule_card_fold: false,
             template_card_fold: false,
             action_card_fold: false,
+            // 自定义字段（用于Jira内容提示）
+            jira_custom_fields: [],
+            jira_custom_field_map: {},
         };
     },
     computed: {
@@ -760,6 +777,18 @@ export default {
             this.$bvModal.hide('match_rule_selector');
         },
         /**
+         * 添加自定义字段
+         */
+        customFieldAdd(triggerIndex) {
+            this.form.triggers[triggerIndex].meta_arr.custom_fields.push({key: 'customfield_', value: ''});
+        },
+        /**
+         * 删除自定义字段
+         */
+        customFieldDelete(triggerIndex, index) {
+            this.form.triggers[triggerIndex].meta_arr.custom_fields.splice(index, 1);
+        },
+        /**
          * 为动作添加用户
          */
         userAdd(triggerIndex) {
@@ -782,7 +811,19 @@ export default {
                 pre_condition_fold: isElseTrigger,
                 action: 'dingding',
                 meta: '',
-                meta_arr: {template: '', robot_id: null, title: '{{ .Rule.Title }}'},
+                issue_type_options: [],
+                priority_options: [],
+                meta_arr: {
+                    template: '',
+                    robot_id: null,
+                    title: '{{ .Rule.Title }}',
+                    project_key: '',
+                    summary: '{{ .Rule.Title }}',
+                    issueType: '',
+                    priority: '',
+                    assignee: '',
+                    custom_fields: []
+                },
                 id: '',
                 user_refs: [],
                 help: false,
@@ -844,6 +885,41 @@ export default {
             });
         },
         /**
+         * 加载 Jira 级联选项
+         */
+        loadJiraCascadeOptions(i) {
+            let projectKey = this.form.triggers[i].meta_arr['project_key'];
+            if (projectKey.trim() === '') {
+                this.form.triggers[i].priority_options = [];
+                this.form.triggers[i].issue_type_options = [];
+                return ;
+            }
+
+            axios.get('/api/jira/issue/options/', {params: {project_key: projectKey}}).then(resp => {
+                let issueTypes = resp.data.issue_types;
+                let priorities = resp.data.priorities;
+
+                let issueTypeOptions = [];
+                if (issueTypes != null) {
+                    for (let i in issueTypes) {
+                        issueTypeOptions.push({text: issueTypes[i].name, value: issueTypes[i].id})
+                    }
+                }
+
+                let prioritiesOptions = [];
+                if (priorities != null) {
+                    for (let i in priorities) {
+                        prioritiesOptions.push({text: priorities[i].name, value: priorities[i].id})
+                    }
+                }
+
+                this.form.triggers[i].priority_options = prioritiesOptions;
+                this.form.triggers[i].issue_type_options = issueTypeOptions;
+            }).catch((error) => {
+                this.ToastError(error);
+            })
+        },
+        /**
          * 创建请求对象
          */
         createRequest() {
@@ -857,9 +933,38 @@ export default {
             requestData.relation_rule = this.form.relation_rule;
             requestData.template = this.form.template;
             requestData.report_template_id = this.form.report_template_id;
-            requestData.triggers = this.form.triggers.map(function (value) {
-                value.meta = JSON.stringify(value.meta_arr);
-                return value;
+            requestData.triggers = this.form.triggers.map((trigger) => {
+                switch (trigger.action) {
+                    case 'jira': {
+                        let constraints = [];
+                        let customFields = {};
+                        for (let i in trigger.meta_arr.custom_fields) {
+                            if (this.jira_custom_field_map !== null) {
+                                constraints.push(this.jira_custom_field_map[trigger.meta_arr.custom_fields[i].key]);
+                            }
+                            customFields[trigger.meta_arr.custom_fields[i].key] = trigger.meta_arr.custom_fields[i].value;
+                        }
+
+                        trigger.meta = JSON.stringify({
+                            issue: {
+                                project_key: trigger.meta_arr.project_key,
+                                summary: trigger.meta_arr.summary,
+                                issue_type: trigger.meta_arr.issue_type,
+                                priority: trigger.meta_arr.priority,
+                                description: trigger.meta_arr.template,
+                                custom_fields: customFields,
+                            },
+                            constraints: constraints,
+                        });
+                        trigger.user_refs = trigger.meta_arr.assignee !== '' ? [trigger.meta_arr.assignee] : null;
+                        break;
+                    }
+                    default: {
+                        trigger.meta = JSON.stringify(trigger.meta_arr);
+                    }
+                }
+
+                return trigger;
             });
             requestData.status = this.form.status ? 'enabled' : 'disabled';
 
@@ -914,17 +1019,38 @@ export default {
                     }
                 }
                 this.form.time_ranges = response.data.time_ranges;
-
+                let triggerJiraLoaders = [];
                 for (let i in response.data.triggers) {
                     let trigger = response.data.triggers[i];
                     trigger.help = false;
                     trigger.template_help = false;
                     trigger.meta_arr = {};
+                    trigger.priority_options = [];
+                    trigger.issue_type_options = [];
 
                     trigger.pre_condition_fold = !(trigger.pre_condition !== null && trigger.pre_condition !== "" && trigger.pre_condition !== 'true');
 
                     try {
-                        trigger.meta_arr = JSON.parse(trigger.meta);
+                        let parsedMeta = JSON.parse(trigger.meta);
+                        switch (trigger.action) {
+                            case 'jira':{
+                                trigger.meta_arr = parsedMeta['issue'];
+                                trigger.meta_arr.template = trigger.meta_arr.description;
+                                trigger.meta_arr.assignee = (trigger.user_refs != null && trigger.user_refs.length > 0) ? trigger.user_refs[0] : '';
+                                let customFields = [];
+                                for (let k in parsedMeta['issue']['custom_fields']) {
+                                    customFields.push({key: k, value: parsedMeta['issue']['custom_fields'][k]})
+                                }
+                                trigger.meta_arr.custom_fields = customFields;
+
+                                // 触发 jira 选项更新
+                                triggerJiraLoaders.push(i);
+                                break;
+                            }
+                            default: {
+                                trigger.meta_arr = parsedMeta;
+                            }
+                        }
                     } catch (e) {
                         // eslint-disable-next-line no-console
                         console.log(e);
@@ -938,11 +1064,16 @@ export default {
                     this.form.triggers.push(trigger);
                 }
 
+                for (let i in triggerJiraLoaders) {
+                    this.loadJiraCascadeOptions(triggerJiraLoaders[i]);
+                }
+
                 this.form.status = response.data.status === 'enabled';
                 if (this.form.ignore_rule.trim() === '' && this.form.relation_rule === '') {
                     // 解决高级规则默认不展示时，编辑器窗口初始化不完整问题
                     this.$root.$emit('bv::toggle::collapse', 'advance')
                 }
+
             }).catch((error) => {
                 this.ToastError(error)
             });
@@ -972,6 +1103,22 @@ export default {
             this.ToastError(error)
         });
 
+        // 加载辅助元素（不重要的）
+        window.setTimeout(() => {
+            axios.all([
+                axios.get('/api/jira/issue/custom-fields/'),
+            ]).then(axios.spread((cfResp) => {
+                if (cfResp.data.fields !== null) {
+                    let fields = cfResp.data.fields;
+                    for (let i in fields) {
+                        this.jira_custom_field_map[fields[i].id] = fields[i];
+                        this.jira_custom_fields.push({html: fields[i].name + '(' + fields[i].id.replace(/^customfield_+/, '') + '): ' + fields[i].type, value: fields[i].id})
+                    }
+                }
+            })).catch((error) => this.ToastError(error));
+        }, 0);
+
+        // 事件样本加载
         if (this.test_event_id !== null && this.test_event_id !== '') {
             axios.get('/api/events/' + this.test_event_id + '/').then(resp => {
                 this.test_event = resp.data;

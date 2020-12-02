@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/andygrunwald/go-jira v1.13.0 // indirect
+	github.com/andygrunwald/go-jira v1.13.0
 	github.com/antonmedv/expr v1.8.2
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/buger/jsonparser v1.0.0
@@ -37,6 +37,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/russross/blackfriday v1.6.0
 	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.8+incompatible
