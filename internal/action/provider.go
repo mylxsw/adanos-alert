@@ -17,7 +17,7 @@ func (s ServiceProvider) Register(app container.Container) {
 
 func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.MustResolve(func(manager Manager, queueManager queue.Manager) {
-		manager.Register("http", NewHttpAction(manager))
+		manager.Register("http", NewHTTPAction(manager))
 		manager.Register("dingding", NewDingdingAction(manager))
 		manager.Register("email", NewEmailAction(manager))
 		manager.Register("wechat", NewWechatAction(manager))

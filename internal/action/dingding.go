@@ -15,16 +15,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// DingdingAction 钉钉发送动作
 type DingdingAction struct {
 	manager  Manager
 	userRepo repository.UserRepo
 }
 
+// DingdingMeta 钉钉发送元数据
 type DingdingMeta struct {
 	Template string `json:"template"`
 	RobotID  string `json:"robot_id"`
 }
 
+// Validate 校验动作参数
 func (d DingdingAction) Validate(meta string, userRefs []string) error {
 	var dingdingMeta DingdingMeta
 	if err := json.Unmarshal([]byte(meta), &dingdingMeta); err != nil {
@@ -38,6 +41,7 @@ func (d DingdingAction) Validate(meta string, userRefs []string) error {
 	return nil
 }
 
+// NewDingdingAction create a new dingdingAction
 func NewDingdingAction(manager Manager) *DingdingAction {
 	dingdingAction := DingdingAction{manager: manager}
 	manager.MustResolve(func(userRepo repository.UserRepo) {
@@ -46,6 +50,7 @@ func NewDingdingAction(manager Manager) *DingdingAction {
 	return &dingdingAction
 }
 
+// Handle 钉钉动作处理
 func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 
 	var meta DingdingMeta

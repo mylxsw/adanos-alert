@@ -85,11 +85,12 @@ let helpers = {
         {text: 'CutoffLine(STR, MAX)', displayText: 'CutoffLine(val string, maxLine int) string | 字符串截取 maxLine 行'},
     ],
     templates: [
-        {text: '.Events EVENT_COUNT', displayText: 'Events(limit int64) []repository.Message | 从事件组中获取 EVENT_COUNT 个 Events'},
+        {text: '.Events EVENT_COUNT', displayText: 'Events(limit int64) []repository.Event | 从事件组中获取 EVENT_COUNT 个 Events'},
         {text: ".IsRecovery", displayText: "IsRecovery() bool  | 判断当前事件组中的事件是否是恢复事件"},
         {text: ".IsRecoverable", displayText: "IsRecoverable() bool | 判断当前事件组中的事件是否可恢复"},
         {text: ".IsPlain", displayText: "IsPlain() bool | 判断当前事件组中的事件是否是普通事件"},
         {text: ".EventType", displayText: "EventType() string | 判断当前事件组中的事件类型：recovery/plain/recoverable"},
+        {text: ".FirstEvent", displayText: "FirstEvent() repository.Event | 从当前事件组中获取第一个事件"},
         {text: '{{ }}', displayText: '{{ }} |  Golang 代码块'},
         {text: '{{ range $i, $msg := ARRAY }}\n {{ $i }} {{ $msg }} \n{{ end }}', displayText: '{{ range }}  | Golang 遍历对象'},
         {text: '{{ range $i, $msg := .Messages 4 }} {{ end }}', displayText: '{{ range $i, $msg := .Messages 4 }} {{ end }} | Golang 遍历 Messages，只取 4 条作为摘要'},

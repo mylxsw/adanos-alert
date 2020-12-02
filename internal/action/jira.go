@@ -16,10 +16,12 @@ import (
 	"github.com/russross/blackfriday"
 )
 
+// JiraAction Jira 发送动作
 type JiraAction struct {
 	manager Manager
 }
 
+// Validate 参数校验
 func (act JiraAction) Validate(meta string, userRefs []string) error {
 	var jiraMeta JiraMeta
 	if err := json.Unmarshal([]byte(meta), &jiraMeta); err != nil {
@@ -53,15 +55,18 @@ func (act JiraAction) Validate(meta string, userRefs []string) error {
 	return nil
 }
 
+// NewJiraAction create a new jira Action
 func NewJiraAction(manager Manager) *JiraAction {
 	return &JiraAction{manager: manager}
 }
 
+// JiraMeta Jira 动作元数据
 type JiraMeta struct {
 	Issue       jira.Issue         `json:"issue"`
 	Constraints []jira.CustomField `json:"constraints"`
 }
 
+// Handle 动作处理
 func (act JiraAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	var meta JiraMeta
 	if err := json.Unmarshal([]byte(trigger.Meta), &meta); err != nil {

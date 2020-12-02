@@ -18,11 +18,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Action 触发动作接口
 type Action interface {
 	Validate(meta string, userRefs []string) error
 	Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error
 }
 
+// Manager 动作管理器接口
 type Manager interface {
 	Resolve(f interface{}) error
 	MustResolve(f interface{})
@@ -38,6 +40,7 @@ type actionManager struct {
 	actions map[string]Action
 }
 
+// NewManager create a new Manager
 func NewManager(cc container.Container) Manager {
 	return &actionManager{cc: cc, actions: make(map[string]Action)}
 }
@@ -78,16 +81,21 @@ func (manager *actionManager) Register(name string, action Action) {
 	manager.actions[name] = action
 }
 
+// QueueAction 动作队列
 type QueueAction struct {
 	action  string
 	manager Manager
 }
 
+// Validate 校验动作参数
 func (q *QueueAction) Validate(meta string, userRefs []string) error {
 	return q.manager.Run(q.action).Validate(meta, userRefs)
 }
 
+// EventQuerier 事件查询接口
 type EventQuerier func(groupID primitive.ObjectID, limit int64) []repository.Event
+
+// Payload 事件描述生成时使用的对象，用于模板解析
 type Payload struct {
 	eventQuerier       EventQuerier
 	Action             string                `json:"action"`
@@ -141,6 +149,12 @@ func (payload *Payload) Events(limit int64) []repository.Event {
 	return payload.eventQuerier(payload.Group.ID, limit)
 }
 
+// FirstEvent get first event
+func (payload *Payload) FirstEvent() repository.Event {
+	return payload.Events(1)[0]
+}
+
+// CreateRepositoryEventQuerier 创建仓库事件查询器
 func CreateRepositoryEventQuerier(msgRepo repository.EventRepo) func(groupID primitive.ObjectID, limit int64) []repository.Event {
 	return func(groupID primitive.ObjectID, limit int64) []repository.Event {
 		messages, _, err := msgRepo.Paginate(bson.M{"group_ids": groupID}, 0, limit)
@@ -156,15 +170,18 @@ func CreateRepositoryEventQuerier(msgRepo repository.EventRepo) func(groupID pri
 	}
 }
 
+// Encode 将 Payload 编码
 func (payload *Payload) Encode() []byte {
 	data, _ := json.Marshal(payload)
 	return data
 }
 
+// Decode 从字符串解析出 Payload 对象
 func (payload *Payload) Decode(data []byte) error {
 	return json.Unmarshal(data, payload)
 }
 
+// Handle 动作处理
 func (q *QueueAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
 	return q.manager.Resolve(func(queueManager queue.Manager, em event.Manager) error {
 		payload := Payload{

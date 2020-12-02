@@ -327,6 +327,43 @@
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
                                 </div>
+                                <div v-else-if="trigger.action === 'http'" class="adanos-sub-form">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_method_' + i" label="请求方式" :label-for="'trigger_meta_method_' + i">
+                                        <b-form-select :id="'trigger_meta_method_' + i" v-model="trigger.meta_arr.method" placeholder="请求方式" :options="['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'PURGE']"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_url_' + i" label="URL" :label-for="'trigger_meta_url_' + i">
+                                        <b-form-input :id="'trigger_meta_url_' + i" v-model="trigger.meta_arr.url" placeholder="URL"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" label="请求头" :label-for="'trigger_headers_' + i">
+                                        <b-btn variant="info" class="mb-3" @click="httpHeaderAdd(i)">添加字段</b-btn>
+                                        <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.headers" class="mb-3">
+                                            <b-form-input v-model="trigger.meta_arr.headers[index].key" placeholder="字段名"></b-form-input>
+                                            <b-form-input v-model="trigger.meta_arr.headers[index].value" placeholder="字段值"></b-form-input>
+                                            <b-input-group-append>
+                                                <b-btn variant="danger" @click="httpHeaderDelete(i, index)">删除</b-btn>
+                                            </b-input-group-append>
+                                        </b-input-group>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="请求体" :label-for="'trigger_meta_template_' + i">
+                                        <b-btn-group class="mb-2" v-if="!trigger.template_fold">
+                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
+                                        </b-btn-group>
+                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                            <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group v-if="!trigger.template_fold">
+                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
+                                        <small class="form-text text-muted">
+                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                                        </small>
+                                        <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
+                                    </b-form-group>
+                                </div>
                                 <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
                                     <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题" :label-for="'trigger_meta_content_' + i">
                                         <b-form-textarea :id="'trigger_meta_content_' + i" class="adanos-code-textarea  text-monospace" v-model="trigger.meta_arr.title" placeholder="通知标题，默认为规则名称"/>
@@ -523,9 +560,8 @@ export default {
             action_options: [
                 {value: 'dingding', text: '钉钉'},
                 {value: 'phone_call_aliyun', text: '阿里云语音通知'},
-                {value: 'jira', text: 'Jira'},
-
-                // {value: 'http', text: 'HTTP'},
+                {value: 'jira', text: 'JIRA'},
+                {value: 'http', text: 'HTTP'},
                 // {value: 'email', text: '邮件'},
                 // {value: 'wechat', text: '微信'},
                 // {value: 'sms_aliyun', text: '阿里云短信'},
@@ -789,6 +825,18 @@ export default {
             this.form.triggers[triggerIndex].meta_arr.custom_fields.splice(index, 1);
         },
         /**
+         * 添加请求头
+         */
+        httpHeaderAdd(triggerIndex) {
+            this.form.triggers[triggerIndex].meta_arr.headers.push({key: '', value: ''});
+        },
+        /**
+         * 删除请求头
+         */
+        httpHeaderDelete(triggerIndex, index) {
+            this.form.triggers[triggerIndex].meta_arr.headers.splice(index, 1);
+        },
+        /**
          * 为动作添加用户
          */
         userAdd(triggerIndex) {
@@ -813,23 +861,32 @@ export default {
                 meta: '',
                 issue_type_options: [],
                 priority_options: [],
-                meta_arr: {
-                    template: '',
-                    robot_id: null,
-                    title: '{{ .Rule.Title }}',
-                    project_key: '',
-                    summary: '{{ .Rule.Title }}',
-                    issueType: '',
-                    priority: '',
-                    assignee: '',
-                    custom_fields: []
-                },
+                meta_arr: this.createTriggerMeta(),
                 id: '',
                 user_refs: [],
                 help: false,
                 template_help: false,
                 template_fold: true,
             });
+        },
+        /**
+         * 创建 Trigger Meta
+         */
+        createTriggerMeta() {
+            return {
+                template: '',
+                robot_id: null,
+                title: '{{ .Rule.Title }}',
+                project_key: '',
+                summary: '{{ .Rule.Title }}',
+                issueType: '',
+                priority: '',
+                assignee: '',
+                custom_fields: [],
+                method: 'POST',
+                url: '',
+                headers: [],
+            };
         },
         /**
          * 删除动作
@@ -959,6 +1016,15 @@ export default {
                         trigger.user_refs = trigger.meta_arr.assignee !== '' ? [trigger.meta_arr.assignee] : null;
                         break;
                     }
+                    case 'http': {
+                        trigger.meta  = JSON.stringify({
+                            method: trigger.meta_arr.method,
+                            url: trigger.meta_arr.url,
+                            headers: trigger.meta_arr.headers,
+                            body: trigger.meta_arr.template,
+                        });
+                        break;
+                    }
                     default: {
                         trigger.meta = JSON.stringify(trigger.meta_arr);
                     }
@@ -1024,7 +1090,9 @@ export default {
                     let trigger = response.data.triggers[i];
                     trigger.help = false;
                     trigger.template_help = false;
-                    trigger.meta_arr = {};
+
+                    // 注意：这里的所有字段都必须要有，否则更新值后 UI 不会同步更新
+                    trigger.meta_arr = this.createTriggerMeta();
                     trigger.priority_options = [];
                     trigger.issue_type_options = [];
 
@@ -1034,7 +1102,7 @@ export default {
                         let parsedMeta = JSON.parse(trigger.meta);
                         switch (trigger.action) {
                             case 'jira':{
-                                trigger.meta_arr = parsedMeta['issue'];
+                                trigger.meta_arr = Object.assign(trigger.meta_arr, parsedMeta['issue']);
                                 trigger.meta_arr.template = trigger.meta_arr.description;
                                 trigger.meta_arr.assignee = (trigger.user_refs != null && trigger.user_refs.length > 0) ? trigger.user_refs[0] : '';
                                 let customFields = [];
@@ -1047,8 +1115,13 @@ export default {
                                 triggerJiraLoaders.push(i);
                                 break;
                             }
+                            case 'http': {
+                                trigger.meta_arr = Object.assign(trigger.meta_arr, parsedMeta);
+                                trigger.meta_arr.template = parsedMeta.body;
+                                break;
+                            }
                             default: {
-                                trigger.meta_arr = parsedMeta;
+                                trigger.meta_arr = Object.assign(trigger.meta_arr, parsedMeta);
                             }
                         }
                     } catch (e) {
