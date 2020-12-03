@@ -943,11 +943,11 @@ export default {
          */
         createTriggerMeta() {
             return {
-                template: '',
+                template: '{{ .RuleTemplateParsed }}',
                 robot_id: null,
-                title: '{{ .Rule.Title }}',
+                title: '{{ .Rule.Name }}',
                 project_key: '',
-                summary: '{{ .Rule.Title }}',
+                summary: '{{ .Rule.Name }}',
                 issue_type: '',
                 priority: '',
                 assignee: '',
