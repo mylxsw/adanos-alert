@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -46,6 +47,12 @@ type Event struct {
 	CreatedAt  time.Time            `bson:"created_at" json:"created_at"`
 }
 
+// EventByDatetimeCount 时间范围内的事件数量
+type EventByDatetimeCount struct {
+	Datetime time.Time `bson:"datetime" json:"datetime"`
+	Total    int64     `bson:"total" json:"total"`
+}
+
 // EventRepo 事件管理仓库接口
 type EventRepo interface {
 	AddWithContext(ctx context.Context, msg Event) (id primitive.ObjectID, err error)
@@ -59,4 +66,5 @@ type EventRepo interface {
 	Traverse(filter interface{}, cb func(msg Event) error) error
 	UpdateID(id primitive.ObjectID, update Event) error
 	Count(filter interface{}) (int64, error)
+	CountByDatetime(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]EventByDatetimeCount, error)
 }

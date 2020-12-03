@@ -42,7 +42,7 @@ func (m *EventController) Register(router *web.Router) {
 		router.Get("/", m.Events).Name("events:all")
 		router.Get("/{id}/", m.Event).Name("events:one")
 		router.Delete("/{id}/", m.DeleteEvent).Name("events:delete")
-		
+
 		router.Post("/{id}/matched-rules/", m.TestMatchedRules).Name("events:matched-rules")
 		router.Post("/{id}/reproduce/", m.ReproduceEvent).Name("events:reproduce-event")
 
@@ -93,13 +93,37 @@ func eventsFilter(ctx web.Context) bson.M {
 		filter["status"] = bson.M{"$in": status}
 	}
 
+	relationIDHex := ctx.Input("relation_id")
+	if relationIDHex != "" {
+		relationID, err := primitive.ObjectIDFromHex(relationIDHex)
+		if err == nil {
+			filter["relation_ids"] = relationID
+		}
+	}
+
+	groupIDHex := ctx.Input("group_id")
+	if groupIDHex != "" {
+		groupID, err := primitive.ObjectIDFromHex(groupIDHex)
+		if err == nil {
+			filter["group_ids"] = groupID
+		}
+	}
+
+	evtIDHex := ctx.Input("event_id")
+	if evtIDHex != "" {
+		evtID, err := primitive.ObjectIDFromHex(evtIDHex)
+		if err == nil {
+			filter["_id"] = evtID
+		}
+	}
+
 	return filter
 }
 
 // Count return message count for your conditions
-func (m *EventController) Count(ctx web.Context, msgRepo repository.EventRepo) web.Response {
+func (m *EventController) Count(ctx web.Context, evtRepo repository.EventRepo) web.Response {
 	filter := eventsFilter(ctx)
-	eventCount, err := msgRepo.Count(filter)
+	eventCount, err := evtRepo.Count(filter)
 	if err != nil {
 		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
 	}
@@ -130,33 +154,6 @@ func (m *EventController) Events(ctx web.Context, evtRepo repository.EventRepo) 
 	offset, limit := offsetAndLimit(ctx)
 
 	filter := eventsFilter(ctx)
-	groupIDHex := ctx.Input("group_id")
-	if groupIDHex != "" {
-		groupID, err := primitive.ObjectIDFromHex(groupIDHex)
-		if err != nil {
-			return nil, web.WrapJSONError(fmt.Errorf("invalid group_id: %w", err), http.StatusUnprocessableEntity)
-		}
-
-		filter["group_ids"] = groupID
-	}
-
-	relationIDHex := ctx.Input("relation_id")
-	if relationIDHex != "" {
-		relationID, err := primitive.ObjectIDFromHex(relationIDHex)
-		if err != nil {
-			return nil, web.WrapJSONError(fmt.Errorf("invalid relation_id: %w", err), http.StatusUnprocessableEntity)
-		}
-		filter["relation_ids"] = relationID
-	}
-
-	evtIDHex := ctx.Input("event_id")
-	if evtIDHex != "" {
-		evtID, err := primitive.ObjectIDFromHex(evtIDHex)
-		if err != nil {
-			return nil, web.WrapJSONError(fmt.Errorf("invalid event_id: %w", err), http.StatusUnprocessableEntity)
-		}
-		filter["_id"] = evtID
-	}
 
 	if log.DebugEnabled() {
 		log.WithFields(log.Fields{"filter": filter}).Debug("events filter")

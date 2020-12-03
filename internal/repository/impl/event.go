@@ -182,3 +182,50 @@ func (m EventRepo) UpdateID(id primitive.ObjectID, update repository.Event) erro
 func (m EventRepo) Count(filter interface{}) (int64, error) {
 	return m.col.CountDocuments(context.TODO(), filter)
 }
+
+func (m EventRepo) CountByDatetime(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]repository.EventByDatetimeCount, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+
+	filter["created_at"] = bson.M{"$gt": startTime, "$lte": endTime}
+	unixTime, _ := time.Parse(time.RFC3339, "1970-01-01T00:00:00Z00:00")
+
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", filter}},
+		bson.D{{"$group", bson.M{
+			"_id": bson.M{
+				"$subtract": bson.A{
+					bson.M{"$subtract": bson.A{"$created_at", unixTime}},
+					bson.M{"$mod": bson.A{
+						bson.M{"$subtract": bson.A{"$created_at", unixTime}},
+						1000 * 60 * 60 * hour,
+					}},
+				},
+			},
+			"count": bson.M{"$sum": 1},
+		}}},
+		bson.D{{"$project", bson.M{
+			"datetime": bson.M{"$add": bson.A{unixTime, "$_id"}},
+			"total":    "$count",
+			"_id":      0,
+		}}},
+		bson.D{{"$sort", bson.M{"datetime": 1}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer aggregate.Close(ctx)
+
+	results := make([]repository.EventByDatetimeCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.EventByDatetimeCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}

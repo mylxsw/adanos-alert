@@ -6,6 +6,11 @@
                     <v-charts :options="alertByDatetime" style="width: 100%;"></v-charts>
                 </b-card-body>
             </b-card>
+            <b-card class="mb-2" header="事件发生时间段分布" >
+                <b-card-body>
+                    <v-charts :options="eventsByDatetime" style="width: 100%;"></v-charts>
+                </b-card-body>
+            </b-card>
 
         </b-col>
     </b-row>
@@ -14,12 +19,15 @@
 <script>
     import Echarts from 'vue-echarts';
     import 'echarts/lib/chart/line';
-
+    
     import 'echarts/lib/component/tooltip'
     import 'echarts/lib/component/axis';
     import 'echarts/lib/component/legend';
     import 'echarts/lib/component/toolbox';
     import 'echarts/lib/component/polar';
+
+    import 'echarts/lib/chart/scatter';
+    import 'echarts/lib/component/singleAxis';
 
     import axios from "axios";
 
@@ -50,6 +58,28 @@
                             type: 'line'
                         }
                     ]
+                },
+                eventsByDatetime: {
+                    tooltip: {position: 'top'},
+                    singleAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: [],
+                        axisLabel: {interval: 4},
+                    },
+                    series: {
+                        coordinateSystem: 'singleAxis',
+                        type: 'scatter',
+                        data: [],
+                        symbolSize: function(dataItem) {
+                            let val = dataItem * 3;
+                            if (val >= 300) {
+                                return 300;
+                            }
+                            
+                            return val;
+                        }
+                    }
                 }
             };
         },
@@ -61,9 +91,14 @@
             axios.get('/api/statistics/daily-group-counts/').then(response => {
                 this.alertByDatetime.xAxis.data = response.data.map(s => s.datetime);
                 this.alertByDatetime.series[0].data = response.data.map(s => s.total)
-            }).catch(error => {
-                this.ToastError(error);
-            });
+            }).catch(error => {this.ToastError(error)});
+
+            axios.get('/api/statistics/events/period-counts/').then(resp => {
+                this.eventsByDatetime.singleAxis.data = resp.data.map(s => s.datetime);
+                this.eventsByDatetime.series.data = resp.data.map(s => s.total);
+                this.eventsByDatetime.singleAxis.axisLabel.interval = parseInt(resp.data.length / 10);
+                console.log(this.eventsByDatetime.singleAxis.axisLabel.interval);
+            }).catch(error => {this.ToastError(error)});
         }
     }
 </script>

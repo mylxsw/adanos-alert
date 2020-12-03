@@ -29,7 +29,7 @@ func (q *QueueTestSuit) SetupTest() {
 
 func (q *QueueTestSuit) TestEnqueueDequeue() {
 	// test empty queue
-	_, err := q.repo.Dequeue()
+	_, err := q.repo.Dequeue(context.TODO())
 	q.Error(err)
 	q.Equal(repository.ErrNotFound, err)
 
@@ -48,14 +48,14 @@ func (q *QueueTestSuit) TestEnqueueDequeue() {
 		time.Sleep(10 * time.Millisecond)
 
 		// test dequeue one item
-		item2, err := q.repo.Dequeue()
+		item2, err := q.repo.Dequeue(context.TODO())
 		q.NoError(err)
 		q.EqualValues(item.Name, item2.Name)
 		q.EqualValues(repository.QueueItemStatusRunning, item2.Status)
 
 		// test empty queue
 		{
-			_, err := q.repo.Dequeue()
+			_, err := q.repo.Dequeue(context.TODO())
 			q.Error(err)
 			q.Equal(repository.ErrNotFound, err)
 		}

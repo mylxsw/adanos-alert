@@ -13,7 +13,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.8",
     "bootstrap-vue": "^2.15.0",
     "core-js": "^2.6.11",
-    "echarts": "^4.8.0",
+    "echarts": "^4.9.0",
     "markdown-it": "^10.0.0",
     "moment": "^2.24.0",
     "vue": "^2.6.10",
