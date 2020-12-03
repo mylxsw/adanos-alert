@@ -138,6 +138,7 @@ export default {
                 'sms_aliyun': '阿里云短信',
                 'sms_yunxin': '网易云信',
                 'http': 'HTTP',
+                'jira': 'JIRA',
             };
 
             return actions[action];

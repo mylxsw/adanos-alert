@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,10 +35,10 @@ type QueueRepo interface {
 	// Enqueue add a item to queue
 	// if the item is new(id is empty), add it to queue
 	// if the item is already existed, replace it
-	Enqueue(item QueueJob) (primitive.ObjectID, error)
-	Dequeue() (QueueJob, error)
-	UpdateID(id primitive.ObjectID, jobItem QueueJob) error
-	Update(filter bson.M, item QueueJob) error
+	Enqueue(ctx context.Context, item QueueJob) (primitive.ObjectID, error)
+	Dequeue(ctx context.Context) (QueueJob, error)
+	UpdateID(ctx context.Context, id primitive.ObjectID, jobItem QueueJob) error
+	Update(ctx context.Context, filter bson.M, item QueueJob) error
 	Paginate(filter bson.M, offset, limit int64) (items []QueueJob, next int64, err error)
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error

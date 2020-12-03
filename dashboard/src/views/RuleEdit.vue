@@ -242,6 +242,8 @@
                                     <b-form-select :id="'trigger_action_' + i" v-model="trigger.action"
                                                    :options="action_options"/>
                                 </b-form-group>
+
+                                <!-- DINGDING ACTION START -->
                                 <div v-if="trigger.action === 'dingding'" class="adanos-sub-form">
                                     <b-form-group label-cols="2" label="机器人*" :label-for="'trigger_meta_robot_' + i">
                                         <b-form-select :id="'trigger_meta_robot_' + i" v-model="trigger.meta_arr.robot_id"
@@ -270,79 +272,114 @@
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
-                                        <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
-                                            <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
-                                            <b-input-group-append>
-                                                <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
-                                            </b-input-group-append>
-                                        </b-input-group>
+                                        <div class="adanos-form-group-box">
+                                            <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                            <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
+                                                <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
+                                                <b-input-group-append>
+                                                    <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                                </b-input-group-append>
+                                            </b-input-group>
+                                            <small class="form-text text-muted">
+                                                发送钉钉消息时，将会自动 @ 这里选择的接收人，请确保接收人在接收消息的钉钉群内。
+                                            </small>
+                                        </div>
                                     </b-form-group>
                                 </div>
+                                <!-- DINGDING ACTION END -->
+
+                                <!-- JIRA ACTION START -->
                                 <div v-else-if="trigger.action === 'jira'" class="adanos-sub-form">
-                                    <b-form-group label-cols="2" :id="'trigger_meta_project_' + i" label="项目" :label-for="'trigger_meta_project_' + i">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_project_' + i" label="项目*" :label-for="'trigger_meta_project_' + i">
                                         <b-form-input :id="'trigger_meta_project_' + i" v-model="trigger.meta_arr.project_key" placeholder="项目 Key" @change="loadJiraCascadeOptions(i)"/>
                                     </b-form-group>
 
-                                    <b-form-group label-cols="2" :id="'trigger_meta_issue_type_' + i" label="Issue 类型" :label-for="'trigger_meta_issue_type_' + i">
-                                        <b-form-select :id="'trigger_meta_issue_type_' + i" v-model="trigger.meta_arr.issue_type" placeholder="Issue 类型" :options="trigger.issue_type_options"/>
-                                    </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_priority_' + i" label="优先级" :label-for="'trigger_meta_priority_' + i">
-                                        <b-form-select :id="'trigger_meta_priority_' + i" v-model="trigger.meta_arr.priority" placeholder="优先级" :options="trigger.priority_options"/>
-                                    </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_assignee_' + i" label="经办人" :label-for="'trigger_meta_assignee_' + i">
-                                        <b-form-select :id="'trigger_meta_assignee_' + i" v-model="trigger.meta_arr.assignee" :options="user_options"/>
-                                    </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_summary_' + i" label="摘要" :label-for="'trigger_meta_summary_' + i">
-                                        <b-form-input :id="'trigger_meta_summary_' + i" v-model="trigger.meta_arr.summary" placeholder="摘要"/>
-                                    </b-form-group>
-                                    <b-form-group label-cols="2" label="自定义字段" :label-for="'trigger_custom_fields_' + i">
-                                        <b-btn variant="info" class="mb-3" @click="customFieldAdd(i)">添加字段</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.custom_fields" class="mb-3">
-                                            <b-form-select v-model="trigger.meta_arr.custom_fields[index].key" placeholder="字段名" :options="jira_custom_fields"></b-form-select>
-                                            <b-form-input v-model="trigger.meta_arr.custom_fields[index].value" placeholder="字段值"></b-form-input>
-                                            <b-input-group-append>
-                                                <b-btn variant="danger" @click="customFieldDelete(i, index)">删除</b-btn>
-                                            </b-input-group-append>
-                                        </b-input-group>
-                                    </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="描述"
-                                                  :label-for="'trigger_meta_template_' + i">
-                                        <b-btn-group class="mb-2" v-if="!trigger.template_fold">
-                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
-                                            <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
-                                        </b-btn-group>
-                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+                                    <b-overlay :show="trigger.meta_arr.project_key === ''" rounded="sm">
+                                        <b-form-group label-cols="2" :id="'trigger_meta_issue_type_' + i" label="Issue 类型" :label-for="'trigger_meta_issue_type_' + i">
+                                            <b-form-select :id="'trigger_meta_issue_type_' + i" v-model="trigger.meta_arr.issue_type" placeholder="Issue 类型" :options="trigger.issue_type_options"/>
+                                        </b-form-group>
+                                        <b-form-group label-cols="2" :id="'trigger_meta_priority_' + i" label="优先级" :label-for="'trigger_meta_priority_' + i">
+                                            <b-form-select :id="'trigger_meta_priority_' + i" v-model="trigger.meta_arr.priority" placeholder="优先级" :options="trigger.priority_options"/>
+                                            <small class="form-text text-muted">这里的优先级是 JIRA 支持的所有优先级，该项目并不是全部都支持，请参考 JIRA 创建 Issue 页面配置。</small>
+                                        </b-form-group>
+                                        <b-form-group label-cols="2" :id="'trigger_meta_assignee_' + i" label="经办人" :label-for="'trigger_meta_assignee_' + i">
+                                            <b-form-select :id="'trigger_meta_assignee_' + i" v-model="trigger.meta_arr.assignee" :options="user_options"/>
+                                            <small class="form-text text-muted">请确保在用户管理中为用户添加了 jira 属性，该属性值对应 JIRA 中的用户名。</small>
+                                        </b-form-group>
+                                        <b-form-group label-cols="2" :id="'trigger_meta_summary_' + i" label="摘要" :label-for="'trigger_meta_summary_' + i">
+                                            <b-form-input :id="'trigger_meta_summary_' + i" v-model="trigger.meta_arr.summary" placeholder="摘要"/>
+                                            <small class="form-text text-muted">摘要内容支持模板语法。</small>
+                                        </b-form-group>
+                                        <b-form-group label-cols="2" label="自定义字段" :label-for="'trigger_custom_fields_' + i">
+                                            <div class="adanos-form-group-box">
+                                                <b-btn variant="info" class="mb-3" @click="customFieldAdd(i)">添加字段</b-btn>
+                                                <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.custom_fields" class="mb-3">
+                                                    <b-form-select v-model="trigger.meta_arr.custom_fields[index].key" placeholder="字段名" :options="jira_custom_fields"></b-form-select>
+                                                    <b-form-input v-model="trigger.meta_arr.custom_fields[index].value" placeholder="字段值"></b-form-input>
+                                                    <b-input-group-append>
+                                                        <b-btn variant="danger" @click="customFieldDelete(i, index)">删除</b-btn>
+                                                    </b-input-group-append>
+                                                </b-input-group>
+                                                <small class="form-text text-muted">
+                                                    这里列出的是 JIRA 支持的所有自定义字段，当前选择的项目并非全部都支持，请参考 JIRA 创建 Issue 页面配置，字段值部分支持模板语法。
+                                                </small>
+                                            </div>
+                                        </b-form-group>
+                                        <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="描述" :label-for="'trigger_meta_template_' + i">
+                                            <b-btn-group class="mb-2" v-if="!trigger.template_fold">
+                                                <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                                <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
+                                            </b-btn-group>
+                                            <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
 
-                                        <b-btn-group class="mb-2 float-right">
-                                            <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
-                                            <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
-                                        </b-btn-group>
-                                    </b-form-group>
-                                    <b-form-group v-if="!trigger.template_fold">
-                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
-                                        <small class="form-text text-muted">
-                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
-                                        </small>
-                                        <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
-                                    </b-form-group>
+                                            <b-btn-group class="mb-2 float-right">
+                                                <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                                <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
+                                            </b-btn-group>
+                                        </b-form-group>
+                                        <b-form-group v-if="!trigger.template_fold">
+                                            <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
+                                            <small class="form-text text-muted">
+                                                语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                                            </small>
+                                            <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
+                                        </b-form-group>
+
+                                        <template #overlay>
+                                            <div class="text-center">
+                                                <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
+                                                <p id="cancel-label">请先填写有效的项目 Key...</p>
+                                            </div>
+                                        </template>
+                                    </b-overlay>
                                 </div>
+                                <!-- JIRA ACTION END -->
+
+                                <!-- HTTP ACTION START -->
                                 <div v-else-if="trigger.action === 'http'" class="adanos-sub-form">
-                                    <b-form-group label-cols="2" :id="'trigger_meta_method_' + i" label="请求方式" :label-for="'trigger_meta_method_' + i">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_method_' + i" label="请求方式*" :label-for="'trigger_meta_method_' + i">
                                         <b-form-select :id="'trigger_meta_method_' + i" v-model="trigger.meta_arr.method" placeholder="请求方式" :options="['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'PURGE']"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_url_' + i" label="URL" :label-for="'trigger_meta_url_' + i">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_url_' + i" label="URL*" :label-for="'trigger_meta_url_' + i">
                                         <b-form-input :id="'trigger_meta_url_' + i" v-model="trigger.meta_arr.url" placeholder="URL"/>
+                                        <small class="form-text text-muted">
+                                            URL 支持模板语法。
+                                        </small>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="请求头" :label-for="'trigger_headers_' + i">
-                                        <b-btn variant="info" class="mb-3" @click="httpHeaderAdd(i)">添加字段</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.headers" class="mb-3">
-                                            <b-form-input v-model="trigger.meta_arr.headers[index].key" placeholder="字段名"></b-form-input>
-                                            <b-form-input v-model="trigger.meta_arr.headers[index].value" placeholder="字段值"></b-form-input>
-                                            <b-input-group-append>
-                                                <b-btn variant="danger" @click="httpHeaderDelete(i, index)">删除</b-btn>
-                                            </b-input-group-append>
-                                        </b-input-group>
+                                        <div class="adanos-form-group-box">
+                                            <b-btn variant="info" class="mb-3" @click="httpHeaderAdd(i)">添加字段</b-btn>
+                                            <b-input-group v-bind:key="index" v-for="(cf, index) in trigger.meta_arr.headers" class="mb-3">
+                                                <b-form-input v-model="trigger.meta_arr.headers[index].key" placeholder="字段名" list="http-header-options"></b-form-input>
+                                                <b-form-input v-model="trigger.meta_arr.headers[index].value" placeholder="字段值" list="http-header-values"></b-form-input>
+                                                <b-input-group-append>
+                                                    <b-btn variant="danger" @click="httpHeaderDelete(i, index)">删除</b-btn>
+                                                </b-input-group-append>
+                                            </b-input-group>
+                                            <small class="form-text text-muted">
+                                                请求头字段值部分支持模板语法。
+                                            </small>
+                                        </div>
                                     </b-form-group>
                                     <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="请求体" :label-for="'trigger_meta_template_' + i">
                                         <b-btn-group class="mb-2" v-if="!trigger.template_fold">
@@ -364,6 +401,9 @@
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
                                 </div>
+                                <!-- HTTP ACTION END -->
+
+                                <!-- PHONE_CALL_ALIYUN ACTION START -->
                                 <div v-else-if="trigger.action === 'phone_call_aliyun'" class="adanos-sub-form">
                                     <b-form-group label-cols="2" :id="'trigger_meta_content_' + i" label="通知标题" :label-for="'trigger_meta_content_' + i">
                                         <b-form-textarea :id="'trigger_meta_content_' + i" class="adanos-code-textarea  text-monospace" v-model="trigger.meta_arr.title" placeholder="通知标题，默认为规则名称"/>
@@ -372,16 +412,22 @@
                                         <b-form-input :id="'trigger_meta_template_id_' + i" v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i">
-                                        <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
-                                        <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
-                                            <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
-                                            <b-input-group-append>
-                                                <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
-                                            </b-input-group-append>
-                                        </b-input-group>
+                                        <div class="adanos-form-group-box">
+                                            <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                            <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
+                                                <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
+                                                <b-input-group-append>
+                                                    <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                                </b-input-group-append>
+                                            </b-input-group>
+                                            <small class="form-text text-muted">
+                                                这些接收人将会收到电话通知。
+                                            </small>
+                                        </div>
                                     </b-form-group>
-
                                 </div>
+                                <!-- PHONE_CALL_ALIYUN ACTION END -->
+
                                 <div class="adanos-sub-form" v-else>
                                     <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数" :label-for="'trigger_meta_' + i">
                                         <b-form-input :id="'trigger_meta_' + i" v-model="trigger.meta_arr.value"/>
@@ -401,6 +447,29 @@
                 <b-button type="submit" variant="primary" class="mr-2">保存</b-button>
                 <b-button to="/rules">返回</b-button>
             </b-form>
+
+            <datalist id="http-header-options">
+                <option>Content-Type</option>
+                <option>Content-Encoding</option>
+                <option>Content-Language</option>
+                <option>Host</option>
+                <option>Referer</option>
+                <option>User-Agent</option>
+                <option>Authorization</option>
+                <option>Accept</option>
+                <option>Accept-Charset</option>
+                <option>Accept-Encoding</option>
+                <option>Accept-Language</option>
+                <option>Cookie</option>
+                <option>X-Requested-With</option>
+            </datalist>
+            <datalist id="http-header-values">
+                <option>application/json</option>
+                <option>text/plain</option>
+                <option>text/html</option>
+                <option>application/x-www-form-urlencoded</option>
+                <option>Basic {{ "\{\{" }} base64 "username:password" {{ "\}\}" }}</option>
+            </datalist>
 
             <b-modal id="match_rule_selector" title="选择事件组匹配规则模板" hide-footer size="xl">
                 <b-table sticky-header="500px" responsive :items="templates.match_rule" :fields="template_fields">
@@ -859,8 +928,8 @@ export default {
                 pre_condition_fold: isElseTrigger,
                 action: 'dingding',
                 meta: '',
-                issue_type_options: [],
-                priority_options: [],
+                issue_type_options: [{text: '--- 无 ---', value: ''}],
+                priority_options: [{text: '--- 无 ---', value: ''}],
                 meta_arr: this.createTriggerMeta(),
                 id: '',
                 user_refs: [],
@@ -879,7 +948,7 @@ export default {
                 title: '{{ .Rule.Title }}',
                 project_key: '',
                 summary: '{{ .Rule.Title }}',
-                issueType: '',
+                issue_type: '',
                 priority: '',
                 assignee: '',
                 custom_fields: [],
@@ -947,8 +1016,8 @@ export default {
         loadJiraCascadeOptions(i) {
             let projectKey = this.form.triggers[i].meta_arr['project_key'];
             if (projectKey.trim() === '') {
-                this.form.triggers[i].priority_options = [];
-                this.form.triggers[i].issue_type_options = [];
+                this.form.triggers[i].priority_options = [{text: '--- 无 ---', value: ''}];
+                this.form.triggers[i].issue_type_options = [{text: '--- 无 ---', value: ''}];
                 return ;
             }
 
@@ -956,14 +1025,14 @@ export default {
                 let issueTypes = resp.data.issue_types;
                 let priorities = resp.data.priorities;
 
-                let issueTypeOptions = [];
+                let issueTypeOptions = [{text: '--- 无 ---', value: ''}];
                 if (issueTypes != null) {
                     for (let i in issueTypes) {
                         issueTypeOptions.push({text: issueTypes[i].name, value: issueTypes[i].id})
                     }
                 }
 
-                let prioritiesOptions = [];
+                let prioritiesOptions = [{text: '--- 无 ---', value: ''}];
                 if (priorities != null) {
                     for (let i in priorities) {
                         prioritiesOptions.push({text: priorities[i].name, value: priorities[i].id})
@@ -1176,7 +1245,7 @@ export default {
             this.ToastError(error)
         });
 
-        // 加载辅助元素（不重要的）
+        // 加载辅助元素（可延迟）
         window.setTimeout(() => {
             axios.all([
                 axios.get('/api/jira/issue/custom-fields/'),
@@ -1266,7 +1335,12 @@ export default {
     border: 1px solid #eee;
     height: auto;
 }
-
+.adanos-form-group-box {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background: #fff2c9;
+}
 .adanos-message-box-code {
     max-height: 400px;
     overflow-y: scroll;

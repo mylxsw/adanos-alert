@@ -29,7 +29,7 @@ func NewQueueRepo(db *mongo.Database) repository.QueueRepo {
 	return &QueueRepo{col: queue}
 }
 
-func (q *QueueRepo) Enqueue(item repository.QueueJob) (id primitive.ObjectID, err error) {
+func (q *QueueRepo) Enqueue(ctx context.Context, item repository.QueueJob) (id primitive.ObjectID, err error) {
 	if item.ID.IsZero() {
 		item.CreatedAt = time.Now()
 		item.UpdatedAt = item.CreatedAt
@@ -39,7 +39,7 @@ func (q *QueueRepo) Enqueue(item repository.QueueJob) (id primitive.ObjectID, er
 		if item.NextExecuteAt.IsZero() {
 			item.NextExecuteAt = item.CreatedAt
 		}
-		rs, err := q.col.InsertOne(context.TODO(), item)
+		rs, err := q.col.InsertOne(ctx, item)
 		if err != nil {
 			return id, err
 		}
@@ -54,16 +54,16 @@ func (q *QueueRepo) Enqueue(item repository.QueueJob) (id primitive.ObjectID, er
 		item.NextExecuteAt = item.UpdatedAt
 	}
 
-	if _, err := q.col.ReplaceOne(context.TODO(), bson.M{"_id": item.ID}, item); err != nil {
+	if _, err := q.col.ReplaceOne(ctx, bson.M{"_id": item.ID}, item); err != nil {
 		return item.ID, err
 	}
 
 	return item.ID, nil
 }
 
-func (q *QueueRepo) Dequeue() (item repository.QueueJob, err error) {
+func (q *QueueRepo) Dequeue(ctx context.Context) (item repository.QueueJob, err error) {
 	rs := q.col.FindOneAndUpdate(
-		context.TODO(),
+		ctx,
 		bson.M{"status": repository.QueueItemStatusWait, "next_execute_at": bson.M{"$lt": time.Now()}},
 		bson.M{"$set": bson.M{
 			"status":     repository.QueueItemStatusRunning,
@@ -137,13 +137,13 @@ func (q *QueueRepo) Count(filter bson.M) (int64, error) {
 	return q.col.CountDocuments(context.TODO(), filter)
 }
 
-func (q *QueueRepo) Update(filter bson.M, item repository.QueueJob) error {
+func (q *QueueRepo) Update(ctx context.Context, filter bson.M, item repository.QueueJob) error {
 	item.UpdatedAt = time.Now()
 
-	_, err := q.col.ReplaceOne(context.TODO(), filter, item)
+	_, err := q.col.ReplaceOne(ctx, filter, item)
 	return err
 }
 
-func (q *QueueRepo) UpdateID(id primitive.ObjectID, jobItem repository.QueueJob) error {
-	return q.Update(bson.M{"_id": id}, jobItem)
+func (q *QueueRepo) UpdateID(ctx context.Context, id primitive.ObjectID, jobItem repository.QueueJob) error {
+	return q.Update(ctx, bson.M{"_id": id}, jobItem)
 }

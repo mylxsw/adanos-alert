@@ -1,6 +1,7 @@
 package impl_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func (q *QueueTestSuit) TestEnqueueDequeue() {
 	}
 
 	// add a item to queue
-	insertID, err := q.repo.Enqueue(item)
+	insertID, err := q.repo.Enqueue(context.TODO(), item)
 	q.NoError(err)
 	q.NotEmpty(insertID)
 

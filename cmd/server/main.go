@@ -17,6 +17,7 @@ import (
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/listener"
+	"github.com/mylxsw/go-utils/str"
 
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
@@ -345,7 +346,7 @@ func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.cc.ResolveWithError(func(msgRepo repository.EventRepo, auditRepo repository.AuditLogRepo) error {
+	return e.cc.ResolveWithError(func(evtRepo repository.EventRepo, auditRepo repository.AuditLogRepo) error {
 
 		auditLogID, err := auditRepo.Add(repository.AuditLog{
 			Type: repository.AuditLogTypeError,
@@ -353,13 +354,13 @@ func (e *ErrorCollectorWriter) Write(le level.Level, module string, message stri
 				"level":  le.GetLevelName(),
 				"module": module,
 			},
-			Body: message,
+			Body: str.Cutoff(500, message),
 		})
 		if err != nil {
 			return err
 		}
 
-		_, err = msgRepo.Add(repository.Event{
+		_, err = evtRepo.Add(repository.Event{
 			Content: message,
 			Meta:    repository.EventMeta{"level": le.GetLevelName(), "module": module, "audit_id": auditLogID.Hex()},
 			Tags:    []string{"internal-error"},

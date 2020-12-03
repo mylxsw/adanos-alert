@@ -1,6 +1,9 @@
 package matcher
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 	"strings"
 	"time"
@@ -76,4 +79,19 @@ func (Helpers) CutoffLine(val string, maxLine int) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// MD5 对 data 进行 Hash，生成 MD5 值
+func (Helpers) MD5(data interface{}) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%v", data))))
+}
+
+// Sha1 对 data 进行 Hash，生成 Sha1 值
+func (Helpers) Sha1(data interface{}) string {
+	return fmt.Sprintf("%x", sha1.Sum([]byte(fmt.Sprintf("%v", data))))
+}
+
+// Base64 将 data 编码为 base64
+func (Helpers) Base64(data interface{}) string {
+	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v", data)))
 }

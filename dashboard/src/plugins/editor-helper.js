@@ -83,6 +83,9 @@ let helpers = {
         {text: 'TrimSuffix(STR, SUFFIX)', displayText: 'TrimSuffix(str, suffix string) string | 去除字符串后缀'},
         {text: 'TrimPrefix(STR, PREFIX)', displayText: 'TrimPrefix(str, prefix string) string | 去除字符串前缀'},
         {text: 'CutoffLine(STR, MAX)', displayText: 'CutoffLine(val string, maxLine int) string | 字符串截取 maxLine 行'},
+        {text: 'MD5 DATA', displayText: 'MD5(data interface{}) string  | 生成 data 的 md5 值'},
+        {text: 'Sha1 DATA', displayText: 'Sha1(data interface{}) string  | 生成 data 的 sha1 值'},
+        {text: 'Base64 DATA', displayText: 'Base64(data interface{}) string  | 生成 data 的 base64 编码值'},
     ],
     templates: [
         {text: '.Events EVENT_COUNT', displayText: 'Events(limit int64) []repository.Event | 从事件组中获取 EVENT_COUNT 个 Events'},
@@ -135,6 +138,7 @@ let helpers = {
         {text: 'string_tags TAG_STR SEPARATOR', displayText: 'string_tags(tags string, sep string) []string  |  将字符串 tags 用 sep 作为分隔符，切割成多个 tag，空的 tag 会被排除'},
         {text: 'remove_empty_line STR', displayText: 'remove_empty_line(content string) string | 移除字符串中的空行'},
         {text: 'serialize VAL', displayText: 'serialize(data interface{}) string | 对象序列化为字符串，用于展示'},
+        {text: 'json_encode VAL', displayText: 'json_encode(data interface{}) string | 对象序列化为字符串，用于展示'},
         {text: 'error_notice MSG', displayText: 'error_notice(msg string) string | 红色字体显示"msg"两字'},
         {text: 'success_notice MSG', displayText: 'success_notice(msg string) string | 绿色字体显示"msg"两字'},
         {text: 'error_success_notice IS_SUCCESS MSG', displayText: 'error_success_notice(success bool, msg string) string | 显示"msg"两字，如果 success 为 true，显示绿色，否则显示红色'},
@@ -170,10 +174,17 @@ let helpers = {
         {text: 'str_repeat STR COUNT', displayText: 'str_repeat(s string, count int) string  | 字符串 s 重复 count 次'},
         {text: 'str_concat STR1 STR2', displayText: 'str_concat(s ...string) string  | 多个字符串拼接'},
 
+        {text: 'html2md HTML', displayText: 'html2md(html string) string  | 将 HTML 转换为 Markdown'},
         {text: 'md2html MARKDOWN', displayText: 'md2html(markdown string) string  | 将 Markdown 转换为 HTML'},
+        {text: 'md2confluence MARKDOWN', displayText: 'md2confluence(markdown string) string  | 将 Markdown 转换为 Confluence (Wiki/Jira 等) 的富文本格式'},
         {text: 'html_beauty HTML', displayText: 'html_beauty(html string) string  | HTML 格式化'},
         {text: 'dom_filter_html selector STR', displayText: 'dom_filter_html(selector string, str string) []string  | 从 HTML DOM 提取匹配 selector 选择器的内容，以字符串数组形式返回'},
         {text: 'dom_filter_html_n selector N STR', displayText: 'dom_filter_html_n(selector string, n int, str string) string  | 从 HTML DOM 提取匹配 selector 选择器的内容，返回第 n 个（n 从 0 开始）'},
+
+        {text: 'md5 DATA', displayText: 'md5(data interface{}) string  | 生成 data 的 md5 值'},
+        {text: 'sha1 DATA', displayText: 'sha1(data interface{}) string  | 生成 data 的 sha1 值'},
+        {text: 'base64 DATA', displayText: 'base64(data interface{}) string  | 生成 data 的 base64 编码值'},
+        {text: 'base64_encode DATA', displayText: 'base64_encode(data interface{}) string  | 生成 data 的 base64 编码值'},
 
         {text: '.Action', displayText: '.Action | 字段类型：string | 所属对象：ROOT' },
         {text: '.RuleTemplateParsed', displayText: '.RuleTemplateParsed | 字段类型：string | 所属对象：ROOT' },

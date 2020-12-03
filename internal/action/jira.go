@@ -11,9 +11,9 @@ import (
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/messager/jira"
 	"github.com/mylxsw/asteria/log"
-	"github.com/russross/blackfriday"
 )
 
 // JiraAction Jira 发送动作
@@ -83,7 +83,7 @@ func (act JiraAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 		if meta.Issue.Description != "" {
 			description = parseTemplate(act.manager, meta.Issue.Description, payload)
 		}
-		description = string(blackfriday.MarkdownCommon([]byte(description)))
+		description = template.Markdown2Confluence(description)
 
 		summary := rule.Name
 		if meta.Issue.Summary != "" {

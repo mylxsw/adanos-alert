@@ -99,7 +99,7 @@ func (manager *queueManager) Enqueue(item repository.QueueJob) (string, error) {
 		return "", errors.New("not support such queueItem")
 	}
 
-	id, err := manager.repo.Enqueue(item)
+	id, err := manager.repo.Enqueue(context.TODO(), item)
 	if err != nil {
 		return "", fmt.Errorf("enqueu failed: %w", err)
 	}
@@ -156,7 +156,7 @@ func (manager *queueManager) run(ctx context.Context) {
 
 	var item repository.QueueJob
 	var err error
-	item, err = manager.repo.Dequeue()
+	item, err = manager.repo.Dequeue(ctx)
 
 	for err == nil {
 		manager.lock.Lock()
@@ -168,7 +168,7 @@ func (manager *queueManager) run(ctx context.Context) {
 			return
 		}
 
-		item, err = manager.repo.Dequeue()
+		item, err = manager.repo.Dequeue(ctx)
 	}
 }
 
@@ -178,7 +178,7 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 	manager.lock.RUnlock()
 	if !ok {
 		item.Status = repository.QueueItemStatusCanceled
-		if err := manager.repo.UpdateID(item.ID, item); err != nil {
+		if err := manager.repo.UpdateID(ctx, item.ID, item); err != nil {
 			log.WithFields(log.Fields{
 				"err":     err.Error(),
 				"item_id": item.ID,
@@ -206,7 +206,7 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 				"last_err": err,
 			}).Errorf("job execute failed after max retry times")
 
-			if err := manager.repo.UpdateID(item.ID, item); err != nil {
+			if err := manager.repo.UpdateID(ctx, item.ID, item); err != nil {
 				log.WithFields(log.Fields{
 					"err":  err.Error(),
 					"item": item,
@@ -216,9 +216,14 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 			return
 		}
 
+		log.WithFields(log.Fields{
+			"err":  err.Error(),
+			"item": item,
+		}).Warningf("job execute failed, we will retry later")
+
 		// try again latter
 		item.NextExecuteAt = time.Now().Add(time.Duration((item.RequeueTimes+1)*30+rand.Intn(10)) * time.Second)
-		if _, err := manager.repo.Enqueue(item); err != nil {
+		if _, err := manager.repo.Enqueue(ctx, item); err != nil {
 			log.WithFields(log.Fields{
 				"err":  err.Error(),
 				"item": item,
@@ -230,7 +235,7 @@ func (manager *queueManager) handle(ctx context.Context, item repository.QueueJo
 
 	// handler finished successful, update job status to succeed
 	item.Status = repository.QueueItemStatusSucceed
-	if err := manager.repo.UpdateID(item.ID, item); err != nil {
+	if err := manager.repo.UpdateID(ctx, item.ID, item); err != nil {
 		log.WithFields(log.Fields{
 			"err":  err.Error(),
 			"item": item,

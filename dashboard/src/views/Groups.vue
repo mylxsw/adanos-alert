@@ -135,6 +135,7 @@
                     'wechat': '微信通知',
                     'sms': '短信通知',
                     'http': 'HTTP',
+                    'jira': 'JIRA',
                 };
 
                 return actions[action];

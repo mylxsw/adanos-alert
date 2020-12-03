@@ -66,12 +66,6 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestCutOffFunc(t *testing.T) {
-	if len(cutOff(40, content))-3 > 40 {
-		t.Errorf("CutOff函数执行异常")
-	}
-}
-
 func TestLeftIdent(t *testing.T) {
 	for _, line := range strings.Split(leftIdent("....", content), "\n") {
 		if !strings.HasPrefix(line, "....") {
@@ -341,6 +335,7 @@ func TestMarkdown2html(t *testing.T) {
   </tbody>
 </table>`
 	assert.Equal(t, expected, FormatHTML(Markdown2html(mc)))
+	assert.Equal(t, "# Hello, world\n\n| a | b |\n| --- | --- |\n| 123 | 456 |", HTML2Markdown(expected))
 }
 
 func TestDOMQueryHTMLFirst(t *testing.T) {
@@ -411,4 +406,15 @@ func TestDOMQueryHTMLFirst(t *testing.T) {
 
 func TestStrConcat(t *testing.T) {
 	assert.Equal(t, "s1s2s3", StrConcat("s1", "s2", "s3"))
+}
+
+func TestMarkdown2Confluence(t *testing.T) {
+	mdStr := `# Hello, world
+
+[aaaa](http://aaa.bbb.ccc)
+`
+	expected := `h1. Hello, world
+[aaaa|http://aaa.bbb.ccc]`
+
+	assert.Equal(t, expected, strings.Trim(Markdown2Confluence(mdStr), "\n"))
 }

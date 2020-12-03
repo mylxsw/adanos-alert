@@ -75,7 +75,6 @@ func (client Client) GetIssue(ctx context.Context, issueID string) (IssueResp, e
 // CreateIssue create a jira issue
 func (client Client) CreateIssue(ctx context.Context, issue Issue) (string, error) {
 	fields := jira.IssueFields{
-		Type:        jira.IssueType{ID: issue.IssueType},
 		Project:     jira.Project{Key: issue.ProjectKey},
 		Summary:     issue.Summary,
 		Description: issue.Description,
@@ -87,6 +86,9 @@ func (client Client) CreateIssue(ctx context.Context, issue Issue) (string, erro
 	}
 	if issue.Priority != "" {
 		fields.Priority = &jira.Priority{ID: issue.Priority}
+	}
+	if issue.IssueType != "" {
+		fields.Type = jira.IssueType{ID: issue.IssueType}
 	}
 
 	createdIssue, resp, err := client.client.Issue.CreateWithContext(ctx, &jira.Issue{Fields: &fields})
@@ -128,6 +130,10 @@ func (client Client) GetIssueTypes(ctx context.Context, projectKey string) ([]Is
 	metas, resp, err := client.client.Issue.GetCreateMetaWithContext(ctx, projectKey)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", err, client.extractResponse(resp))
+	}
+
+	if metas == nil || metas.GetProjectWithKey(projectKey) == nil {
+		return []IssueType{}, nil
 	}
 
 	issueTypes := make([]IssueType, 0)
@@ -198,6 +204,10 @@ func (client Client) extractResponse(resp *jira.Response) string {
 	defer func() {
 		recover()
 	}()
+	if resp == nil {
+		return ""
+	}
+
 	body, _ := ioutil.ReadAll(resp.Body)
 	return string(body)
 }

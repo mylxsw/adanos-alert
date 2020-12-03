@@ -3,6 +3,9 @@ package template
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -14,7 +17,10 @@ import (
 	"text/template"
 	"time"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/JohannesKaufmann/html-to-markdown/plugin"
 	"github.com/PuerkitoBio/goquery"
+	bfconfluence "github.com/kentaro-m/blackfriday-confluence"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
@@ -51,7 +57,7 @@ func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, er
 // CreateParse create a template parser
 func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
-		"cutoff":                     cutOff,
+		"cutoff":                     str.Cutoff,
 		"cutoff_line":                CutOffLine,
 		"json_fields_cutoff":         JSONCutOffFields,
 		"map_fields_cutoff":          MapFieldsCutoff,
@@ -60,23 +66,26 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"join":                       join,
 		"split":                      split,
 		"ident":                      leftIdent,
-		"json":                       jsonFormatter,
 		"datetime":                   datetimeFormat,
 		"datetime_noloc":             datetimeFormatNoLoc,
 		"reformat_datetime_str":      reformatDatetimeStr,
 		"parse_datetime_str":         parseDatetime,
 		"parse_datetime_str_rfc3339": parseDatetimeRFC3339,
-		"json_get":                   pkgJSON.Get,
-		"json_gets":                  pkgJSON.Gets,
-		"json_array":                 pkgJSON.GetArray,
-		"json_flatten":               jsonFlatten,
-		"format":                     fmt.Sprintf,
-		"number_beauty":              NumberBeauty,
-		"integer":                    toInteger,
-		"float":                      toFloat,
-		"mysql_slowlog":              parseMySQLSlowlog,
-		"sql_finger":                 misc.SQLFinger,
-		"open_falcon_im":             ParseOpenFalconImMessage,
+
+		"format":         fmt.Sprintf,
+		"number_beauty":  NumberBeauty,
+		"integer":        toInteger,
+		"float":          toFloat,
+		"mysql_slowlog":  parseMySQLSlowlog,
+		"sql_finger":     misc.SQLFinger,
+		"open_falcon_im": ParseOpenFalconImMessage,
+
+		"json":         jsonFormatter,
+		"json_get":     pkgJSON.Get,
+		"json_gets":    pkgJSON.Gets,
+		"json_array":   pkgJSON.GetArray,
+		"json_flatten": jsonFlatten,
+		"json_encode":  Serialize,
 
 		"serialize":            Serialize,
 		"sort_map_human":       SortMapByKeyHuman,
@@ -118,10 +127,17 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"str_repeat":  strings.Repeat,
 		"str_concat":  StrConcat,
 
+		"html2md":           HTML2Markdown,
 		"md2html":           Markdown2html,
+		"md2confluence":     Markdown2Confluence,
 		"dom_filter_html":   DOMFilterHTML,
 		"dom_filter_html_n": DOMFilterHTMLIndex,
 		"html_beauty":       FormatHTML,
+
+		"md5":           encodeMD5,
+		"sha1":          encodeSha1,
+		"base64":        encodeBase64,
+		"base64_encode": encodeBase64,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -149,18 +165,6 @@ func parseMySQLSlowlog(slowlog string) map[string]string {
 	values, _ := g.Parse(`(?m)^(# Time: \d+ \d+:\d+:\d+\n)?#\s+User@Host:\s+%{USER:user}\[[^\]]+\]\s+@\s+(?:%{DATA:clienthost})?\[(?:%{IPV4:clientip})?\]\n#\s+Thread_id:\s+%{NUMBER:thread_id}\s+Schema:\s+%{WORD:schema}\s+QC_hit:\s+%{WORD:qc_hit}\n#\s*Query_time:\s+%{NUMBER:query_time}\s+Lock_time:\s+%{NUMBER:lock_time}\s+Rows_sent:\s+%{NUMBER:rows_sent}\s+Rows_examined:\s+%{NUMBER:rows_examined}\n(# Rows_affected: %{NUMBER:rows_affected}  Bytes_sent: %{NUMBER:bytes_sent}\n)?%{EXPLAIN:explain}\s*(?:use %{DATA:database};\s*\n)?SET\s+timestamp=%{NUMBER:occur_time};\n\s*%{SQL:sql};\s*(?:\n#\s+Time)?.*$`, slowlog)
 
 	return values
-}
-
-// cutOff 字符串截断
-func cutOff(maxLen int, val string) string {
-	valRune := []rune(strings.Trim(val, " \n"))
-
-	valLen := len(valRune)
-	if valLen <= maxLen {
-		return string(valRune)
-	}
-
-	return string(valRune[0:maxLen]) + "..."
 }
 
 // CutOffLine 字符串截取指定行数
@@ -637,8 +641,8 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 	var pairs []KVPair
 	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
 		return KVPair{
-			Key:   cutOff(30, p.Key),
-			Value: cutOff(length, p.Value),
+			Key:   str.Cutoff(30, p.Key),
+			Value: str.Cutoff(length, p.Value),
 		}
 	}).Filter(func(p KVPair) bool {
 		return p.Key != "" && p.Value != ""
@@ -656,7 +660,7 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 func MapFieldsCutoff(length int, source map[string]interface{}) map[string]interface{} {
 	data := make(map[string]interface{})
 	for k, v := range source {
-		data[cutOff(30, k)] = cutOff(length, fmt.Sprintf("%v", v))
+		data[str.Cutoff(30, k)] = str.Cutoff(length, fmt.Sprintf("%v", v))
 	}
 
 	return data
@@ -680,10 +684,30 @@ func conditionStr(s1, s2 string, cond bool) string {
 	return s2
 }
 
+// HTML2Markdown 将 HTML 转换为 Markdown 格式
+func HTML2Markdown(ht string) string {
+	converter := md.NewConverter("", true, nil)
+	converter.Use(plugin.GitHubFlavored())
+
+	mdStr, err := converter.ConvertString(ht)
+	if err != nil {
+		return ht
+	}
+
+	return mdStr
+}
+
 // Markdown2html 将 Markdown 转换为 HTML
 func Markdown2html(mc string) string {
 	unsafe := blackfriday.Run([]byte(mc))
 	return string(bluemonday.UGCPolicy().SanitizeBytes(unsafe))
+}
+
+// Markdown2Confluence 将 Markdown 转换为 confluence 富文本格式
+func Markdown2Confluence(md string) string {
+	renderer := &bfconfluence.Renderer{}
+	bf := blackfriday.New(blackfriday.WithRenderer(renderer), blackfriday.WithExtensions(blackfriday.CommonExtensions))
+	return string(renderer.Render(bf.Parse([]byte(md))))
 }
 
 // DOMFilterHTMLIndex 从 HTML DOM 对象中查询第 index 个匹配 selector 的元素内容
@@ -723,4 +747,19 @@ func FormatHTML(html string) string {
 // StrConcat 字符串拼接
 func StrConcat(str ...string) string {
 	return strings.Join(str, "")
+}
+
+// encodeMD5 对 data 进行 Hash，生成 MD5 值
+func encodeMD5(data interface{}) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%v", data))))
+}
+
+// encodeSha1 对 data 进行 Hash，生成 Sha1 值
+func encodeSha1(data interface{}) string {
+	return fmt.Sprintf("%x", sha1.Sum([]byte(fmt.Sprintf("%v", data))))
+}
+
+// encodeBase64 将 data 编码为 base64
+func encodeBase64(data interface{}) string {
+	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v", data)))
 }

@@ -46,7 +46,13 @@ func (j JiraController) IssueOptions(webCtx web.Context, conf *configs.Config) w
 	wg.Add(2)
 
 	go func() {
-		defer wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				log.Errorf("get priorities from jira server failed: %v", err)
+			}
+
+			wg.Done()
+		}()
 
 		ctx, cancel := context.WithTimeout(webCtx.Context(), 5*time.Second)
 		defer cancel()
@@ -62,7 +68,14 @@ func (j JiraController) IssueOptions(webCtx web.Context, conf *configs.Config) w
 	}()
 
 	go func() {
-		defer wg.Done()
+		defer func() {
+			if err := recover(); err != nil {
+				log.Errorf("get issue types from jira server failed: %v", err)
+			}
+
+			wg.Done()
+		}()
+
 		projectKey := strings.TrimSpace(webCtx.Input("project_key"))
 		if projectKey != "" {
 			ctx, cancel := context.WithTimeout(webCtx.Context(), 5*time.Second)
