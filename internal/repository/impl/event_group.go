@@ -274,10 +274,16 @@ func (m EventGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime 
 	return results, nil
 }
 
-func (m EventGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]repository.EventGroupByDatetimeCount, error) {
+func (m EventGroupRepo) StatByDatetimeCount(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]repository.EventGroupByDatetimeCount, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+
+	filter["updated_at"] = bson.M{"$gt": startTime, "$lte": endTime}
+
 	unixTime, _ := time.Parse(time.RFC3339, "1970-01-01T00:00:00Z00:00")
 	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
-		bson.D{{"$match", bson.M{"updated_at": bson.M{"$gt": startTime, "$lte": endTime}}}},
+		bson.D{{"$match", filter}},
 		bson.D{{"$group", bson.M{
 			"_id": bson.M{
 				"$subtract": bson.A{

@@ -48,16 +48,8 @@ type GroupsGroupResp struct {
 	CollectTimeRemain int64 `json:"collect_time_remain"`
 }
 
-// Groups list all event groups
-// Arguments:
-//   - offset/limit
-//   - status
-//   - rule_id
-//   - user_id
-func (g GroupController) Groups(ctx web.Context, groupRepo repository.EventGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
-	offset, limit := offsetAndLimit(ctx)
+func groupFilter(ctx web.Context) bson.M {
 	filter := bson.M{}
-
 	status := ctx.Input("status")
 	if status != "" {
 		filter["status"] = status
@@ -78,7 +70,18 @@ func (g GroupController) Groups(ctx web.Context, groupRepo repository.EventGroup
 		filter["actions.meta"] = bson.M{"$regex": fmt.Sprintf(`"robot_id":"%s"`, dingID)}
 	}
 
-	grps, next, err := groupRepo.Paginate(filter, offset, limit)
+	return filter
+}
+
+// Groups list all event groups
+// Arguments:
+//   - offset/limit
+//   - status
+//   - rule_id
+//   - user_id
+func (g GroupController) Groups(ctx web.Context, groupRepo repository.EventGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
+	offset, limit := offsetAndLimit(ctx)
+	grps, next, err := groupRepo.Paginate(groupFilter(ctx), offset, limit)
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}

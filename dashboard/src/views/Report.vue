@@ -1,17 +1,8 @@
 <template>
     <b-row class="mb-5">
         <b-col>
-            <b-card class="mb-2" header="每日报警次数汇总">
-                <b-card-body>
-                    <v-charts :options="alertByDatetime" style="width: 100%;"></v-charts>
-                </b-card-body>
-            </b-card>
-            <b-card class="mb-2" header="事件发生时间段分布" >
-                <b-card-body>
-                    <v-charts :options="eventsByDatetime" style="width: 100%;"></v-charts>
-                </b-card-body>
-            </b-card>
-
+            <v-charts :options="alertByDatetime" style="width: 100%;"></v-charts>
+            <v-charts :options="eventsByDatetime" style="width: 100%;" class="mt-3"></v-charts>
         </b-col>
     </b-row>
 </template>
@@ -25,9 +16,10 @@
     import 'echarts/lib/component/legend';
     import 'echarts/lib/component/toolbox';
     import 'echarts/lib/component/polar';
+    import 'echarts/lib/component/title';
 
-    import 'echarts/lib/chart/scatter';
-    import 'echarts/lib/component/singleAxis';
+    import 'echarts/lib/component/dataZoom';
+    import { graphic } from 'echarts/lib/export'
 
     import axios from "axios";
 
@@ -39,7 +31,7 @@
         data() {
             return {
                 alertByDatetime: {
-                    title: {left: 'center', text: '报警时间分布'},
+                    title: {left: 'left', text: '事件组数量时间分布'},
                     tooltip: {
                         trigger: 'axis',
                     },
@@ -50,34 +42,107 @@
                     yAxis: {
                         type: 'value'
                     },
-                    series: [
-                        {
-                            smooth: true,
-                            name: '今日报警次数',
-                            data: [],
-                            type: 'line'
+                    grid: {left: 50},
+                    dataZoom: [{
+                        type: 'inside',
+                        start: 0,
+                        end: 100
+                    },{
+                        start: 0,
+                        end: 100,
+                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                        handleSize: '80%',
+                        handleStyle: {
+                            color: '#fff',
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0, 0, 0, 0.6)',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
                         }
-                    ]
+                    }],
+                    toolbox: {
+                　　　　show:true,
+　　　　                feature:{
+　　　　　                  dataZoom: {
+　　　　　　                    yAxisIndex:"none"
+　　　　　                  },
+　　　　                }
+　　　               },
+                    series: {
+                        smooth: true,
+                        name: '事件组数量',
+                        data: [],
+                        type: 'line',
+                        sampling: 'average',
+                        itemStyle: {
+                            color: 'rgb(255, 70, 131)'
+                        },
+                        areaStyle: {
+                            color: new graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: 'rgb(255, 158, 68)'
+                            }, {
+                                offset: 1,
+                                color: 'rgb(255, 70, 131)'
+                            }])
+                        }
+                    }
                 },
                 eventsByDatetime: {
-                    tooltip: {position: 'top'},
-                    singleAxis: {
-                        type: 'category',
-                        boundaryGap: false,
-                        data: [],
-                        axisLabel: {interval: 4},
+                    title: {left: 'left', text: '事件数量时间分布'},
+                    tooltip: {
+                        trigger: 'axis',
                     },
+                    xAxis: {
+                        type: 'category',
+                        data: []
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    grid: {left: 50},
+                    dataZoom: [{
+                        type: 'inside',
+                        start: 0,
+                        end: 100
+                    },{
+                        start: 0,
+                        end: 100,
+                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                        handleSize: '80%',
+                        handleStyle: {
+                            color: '#fff',
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0, 0, 0, 0.6)',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
+                        }
+                    }],
+                    toolbox: {
+                　　　　show:true,
+　　　　                feature:{
+　　　　　                  dataZoom: {
+　　　　　　                    yAxisIndex:"none"
+　　　　　                  },
+　　　　                }
+　　　               },
                     series: {
-                        coordinateSystem: 'singleAxis',
-                        type: 'scatter',
+                        smooth: true,
+                        name: '事件数量',
                         data: [],
-                        symbolSize: function(dataItem) {
-                            let val = dataItem * 3;
-                            if (val >= 300) {
-                                return 300;
-                            }
-                            
-                            return val;
+                        type: 'line',
+                        sampling: 'average',
+                        itemStyle: {
+                            color: 'rgb(255, 70, 131)'
+                        },
+                        areaStyle: {
+                            color: new graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: 'rgb(255, 158, 68)'
+                            }, {
+                                offset: 1,
+                                color: 'rgb(255, 70, 131)'
+                            }])
                         }
                     }
                 }
@@ -90,14 +155,12 @@
         mounted() {
             axios.get('/api/statistics/daily-group-counts/').then(response => {
                 this.alertByDatetime.xAxis.data = response.data.map(s => s.datetime);
-                this.alertByDatetime.series[0].data = response.data.map(s => s.total)
+                this.alertByDatetime.series.data = response.data.map(s => s.total)
             }).catch(error => {this.ToastError(error)});
 
             axios.get('/api/statistics/events/period-counts/').then(resp => {
-                this.eventsByDatetime.singleAxis.data = resp.data.map(s => s.datetime);
+                this.eventsByDatetime.xAxis.data = resp.data.map(s => s.datetime);
                 this.eventsByDatetime.series.data = resp.data.map(s => s.total);
-                this.eventsByDatetime.singleAxis.axisLabel.interval = parseInt(resp.data.length / 10);
-                console.log(this.eventsByDatetime.singleAxis.axisLabel.interval);
             }).catch(error => {this.ToastError(error)});
         }
     }

@@ -42,10 +42,10 @@ type MessageGroupByDatetimeCount struct {
 
 // DailyGroupCounts 每日报警次数汇总
 func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repository.EventGroupRepo) ([]MessageGroupByDatetimeCount, error) {
-	timeoutCtx, cancel := context.WithTimeout(ctx.Context(), 5*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(ctx.Context(), 15*time.Second)
 	defer cancel()
 
-	dailyCounts, err := groupRepo.StatByDatetimeCount(timeoutCtx, time.Now().Add(-30*24*time.Hour), time.Now(), 24)
+	dailyCounts, err := groupRepo.StatByDatetimeCount(timeoutCtx, groupFilter(ctx), time.Now().Add(-30*24*time.Hour), time.Now(), 24)
 	if err != nil {
 		return nil, err
 	}
@@ -112,12 +112,12 @@ type EventByDatetimeCount struct {
 // EventCountInPeriod 统计周期内的事件数量
 // 支持的参数: days/step/format/meta/tags/origin/status/relation_id/group_id/event_id
 func (s *StatisticsController) EventCountInPeriod(webCtx web.Context, evtRepo repository.EventRepo) ([]EventByDatetimeCount, error) {
-	ctx, cancel := context.WithTimeout(webCtx.Context(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(webCtx.Context(), 15*time.Second)
 	defer cancel()
 
 	dayRange := webCtx.IntInput("days", 3)
 	dateTimeFormat := webCtx.InputWithDefault("format", "01-02 15:00")
-	step := webCtx.Int64Input("step", 1)
+	var step int64 = 1
 
 	startDate := time.Now().Add(-time.Duration(dayRange*24) * time.Hour)
 	endDate := time.Now()
@@ -142,22 +142,8 @@ func (s *StatisticsController) EventCountInPeriod(webCtx web.Context, evtRepo re
 		dailyCountsByDate[datetime] = d
 	}
 
-	// 找到查询数据集中与第一个元素事件最接近的时间
-	// 该时间与第一个元素事件的差值就是时间段间隔的偏移，步长减去
-	// 偏移来实现时间范围和从 DB 中查询出的时间范围一致
-	diffHour := 0.0
-	startDateTmp := startDate
-	for startDateTmp.Before(endDate) || startDateTmp.Equal(endDate) {
-		diffHour = dailyCounts[0].Datetime.Sub(startDateTmp).Hours()
-		if diffHour <= float64(step) {
-			break
-		}
-
-		startDateTmp = startDateTmp.Add(time.Duration(step) * time.Hour)
-	}
-
 	results := make([]EventByDatetimeCount, 0)
-	startDateTmp = startDate.Add(time.Duration(step-int64(diffHour)) * time.Hour)
+	startDateTmp := startDate.Add(time.Duration(step) * time.Hour)
 	for startDateTmp.Before(endDate) || startDateTmp.Equal(endDate) {
 		startDateF := startDateTmp.Format(dateTimeFormat)
 		if d, ok := dailyCountsByDate[startDateF]; ok {
