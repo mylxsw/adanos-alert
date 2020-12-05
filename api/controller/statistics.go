@@ -56,7 +56,7 @@ func (s *StatisticsController) DailyGroupCounts(ctx web.Context, groupRepo repos
 
 	dailyCountsByDate := make(map[string]MessageGroupByDatetimeCount)
 	for _, d := range dailyCounts {
-		datetime := d.Datetime.Format("2006-01-02")
+		datetime := d.Datetime.In(time.Local).Format("2006-01-02")
 		dailyCountsByDate[datetime] = MessageGroupByDatetimeCount{
 			Datetime:      datetime,
 			Total:         d.Total,
@@ -138,7 +138,7 @@ func (s *StatisticsController) EventCountInPeriod(webCtx web.Context, evtRepo re
 
 	dailyCountsByDate := make(map[string]repository.EventByDatetimeCount)
 	for _, d := range dailyCounts {
-		datetime := d.Datetime.Format(dateTimeFormat)
+		datetime := d.Datetime.In(time.Local).Format(dateTimeFormat)
 		dailyCountsByDate[datetime] = d
 	}
 

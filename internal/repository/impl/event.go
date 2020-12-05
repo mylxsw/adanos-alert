@@ -189,24 +189,25 @@ func (m EventRepo) CountByDatetime(ctx context.Context, filter bson.M, startTime
 	}
 
 	filter["created_at"] = bson.M{"$gt": startTime, "$lte": endTime}
-	unixTime, _ := time.Parse(time.RFC3339, "1970-01-01T00:00:00Z00:00")
 
 	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
 		bson.D{{"$match", filter}},
 		bson.D{{"$group", bson.M{
 			"_id": bson.M{
-				"$subtract": bson.A{
-					bson.M{"$subtract": bson.A{"$created_at", unixTime}},
-					bson.M{"$mod": bson.A{
-						bson.M{"$subtract": bson.A{"$created_at", unixTime}},
-						1000 * 60 * 60 * hour,
-					}},
+				"$toDate": bson.M{
+					"$subtract": bson.A{
+						bson.M{"$toLong": "$created_at"},
+						bson.M{"$mod": bson.A{
+							bson.M{"$toLong": "$created_at"},
+							1000 * 60 * 60 * hour,
+						}},
+					},
 				},
 			},
 			"count": bson.M{"$sum": 1},
 		}}},
 		bson.D{{"$project", bson.M{
-			"datetime": bson.M{"$add": bson.A{unixTime, "$_id"}},
+			"datetime": "$_id",
 			"total":    "$count",
 			"_id":      0,
 		}}},
