@@ -322,3 +322,90 @@ func (m EventGroupRepo) StatByDatetimeCount(ctx context.Context, filter bson.M, 
 
 	return results, nil
 }
+
+func (m EventGroupRepo) StatByAggCountInPeriod(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time, hour int64) ([]repository.EventGroupAggByDatetimeCount, error) {
+	filter := bson.M{}
+	filter["rule._id"] = ruleID
+	filter["updated_at"] = bson.M{"$gt": startTime, "$lte": endTime}
+
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", filter}},
+		bson.D{{"$group", bson.M{
+			"_id": bson.M{
+				"datetime": bson.M{
+					"$toDate": bson.M{
+						"$subtract": bson.A{
+							bson.M{"$toLong": "$created_at"},
+							bson.M{"$mod": bson.A{
+								bson.M{"$toLong": "$created_at"},
+								1000 * 60 * 60 * hour,
+							}},
+						},
+					},
+				},
+				"aggregate_key": "$aggregate_key",
+			},
+			"count":         bson.M{"$sum": 1},
+			"message_count": bson.M{"$sum": "$message_count"},
+		}}},
+		bson.D{{"$project", bson.M{
+			"datetime":       "$_id.datetime",
+			"aggregate_key":  "$_id.aggregate_key",
+			"total":          "$count",
+			"total_messages": "$message_count",
+			"_id":            0,
+		}}},
+		bson.D{{"$sort", bson.M{"datetime": 1}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer aggregate.Close(ctx)
+
+	results := make([]repository.EventGroupAggByDatetimeCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.EventGroupAggByDatetimeCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}
+
+func (m EventGroupRepo) StatByAggCount(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time) ([]repository.EventGroupAggCount, error) {
+	filter := bson.M{}
+	filter["rule._id"] = ruleID
+	filter["updated_at"] = bson.M{"$gt": startTime, "$lte": endTime}
+
+	aggregate, err := m.col.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{"$match", filter}},
+		bson.D{{"$group", bson.M{
+			"_id":   "$aggregate_key",
+			"count": bson.M{"$sum": 1},
+		}}},
+		bson.D{{"$project", bson.M{
+			"aggregate_key": "$_id",
+			"total":         "$count",
+			"_id":           0,
+		}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer aggregate.Close(ctx)
+
+	results := make([]repository.EventGroupAggCount, 0)
+	for aggregate.Next(ctx) {
+		var res repository.EventGroupAggCount
+		if err := aggregate.Decode(&res); err != nil {
+			return nil, err
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
+}

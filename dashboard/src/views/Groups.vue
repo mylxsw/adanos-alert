@@ -6,7 +6,10 @@
                     <b-badge :variant="$route.query.status === undefined ? 'primary':''" class="mr-1" :to="'/'">全部</b-badge>
                     <b-badge :variant="$route.query.status === status.value ? 'primary': ''" v-for="(status, index) in statuses" :key="index" class="mr-1" :to="'/?status=' + status.value">{{ status.name }}</b-badge>
                 </b-card-text>
-                <v-charts :options="alertByDatetime" style="width: 100%;" ref="alertByDatetimeChart"></v-charts>
+                <b-row>
+                    <b-col cols="4"><v-charts :options="alertByAgg" style="width: 95%;" ref="alertByAgg" v-if="vchartShow"></v-charts></b-col>
+                    <b-col cols="8"><v-charts :options="alertByDatetime" style="width: 95%;" ref="alertByDatetimeChart" v-if="vchartShow"></v-charts></b-col>
+                </b-row>
             </b-card>
             <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(id)="row">
@@ -78,7 +81,7 @@
     import axios from 'axios';
     import Echarts from 'vue-echarts';
     import 'echarts/lib/chart/line';
-    
+
     import 'echarts/lib/component/tooltip'
     import 'echarts/lib/component/axis';
     import 'echarts/lib/component/legend';
@@ -89,6 +92,7 @@
     import 'echarts/lib/component/dataZoom';
     import { graphic } from 'echarts/lib/export'
 
+    import 'echarts/lib/chart/pie';
 
     export default {
         name: 'Groups',
@@ -118,20 +122,20 @@
                     {value: 'canceled', name:'取消'},
                 ],
                 alertByDatetime: {
-                    title: {left: 'left', text: '事件组时间分布'},
-                    tooltip: {
-                        trigger: 'axis',
+                    title: {
+                        text: 'Event Group Count',
+                        left: 'center',
+                        textStyle: {
+                            color: '#ccc'
+                        }
                     },
+                    tooltip: {trigger: 'axis',},
                     xAxis: {
                         type: 'category',
                         data: []
                     },
-                    yAxis: {
-                        type: 'value',
-                    },
-                    grid: {
-                        left: 50,
-                    },
+                    yAxis: {type: 'value',},
+                    grid: {left: 50, right: 50},
                     dataZoom: [{
                         type: 'inside',
                         start: 0,
@@ -149,34 +153,25 @@
                             shadowOffsetY: 2
                         }
                     }],
-                    toolbox: {
-                　　　　show:true,
-　　　　                feature:{
-　　　　　                  dataZoom: {
-　　　　　　                    yAxisIndex:"none"
-　　　　　                  },
-　　　　                }
-　　　               },
-                    series: {
-                        smooth: true,
-                        name: '事件组数量',
-                        data: [],
-                        type: 'line',
-                        sampling: 'average',
-                        itemStyle: {
-                            color: 'rgb(255, 70, 131)'
-                        },
-                        areaStyle: {
-                            color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: 'rgb(255, 158, 68)'
-                            }, {
-                                offset: 1,
-                                color: 'rgb(255, 70, 131)'
-                            }])
+                    series: [],
+                },
+                alertByAgg: {
+                    title: {
+                        text: 'Aggregate Keys',
+                        left: 'center',
+                        textStyle: {
+                            color: '#ccc'
                         }
-                    }
-                }
+                    },
+
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{b} : {c} ({d}%)'
+                    },
+
+                    series: [],
+                },
+                vchartShow: false,
             };
         },
         watch: {
@@ -231,12 +226,50 @@
                     this.ToastError(error)
                 });
 
-                axios.get('/api/statistics/daily-group-counts/', {
-                    params: params,
-                }).then(response => {
-                    this.alertByDatetime.xAxis.data = response.data.map(s => s.datetime);
-                    this.alertByDatetime.series.data = response.data.map(s => s.total)
-                }).catch(error => {this.ToastError(error)});
+                if (this.$route.query.rule_id !== undefined) {
+                    this.vchartShow = true;
+                    axios.get('/api/statistics/daily-group-counts/', {
+                        params: params,
+                    }).then(response => {
+                        this.alertByDatetime.xAxis.data = response.data.map(s => s.datetime);
+                        this.alertByDatetime.series = {
+                            smooth: true,
+                            name: '事件组数量',
+                            data: response.data.map(s => s.total),
+                            type: 'line',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: 'rgb(255, 70, 131)'
+                            },
+                            areaStyle: {
+                                color: new graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: 'rgb(255, 158, 68)'
+                                }, {
+                                    offset: 1,
+                                    color: 'rgb(255, 70, 131)'
+                                }])
+                            }
+                        }
+                    }).catch(error => {this.ToastError(error)});
+
+                    axios.get('/api/statistics/group-agg-counts/', {
+                        params: params,
+                    }).then(response => {
+                        this.alertByAgg.series = [
+                            {
+                                type: 'pie',
+                                radius: '55%',
+                                center: ['50%', '50%'],
+                                labelLine: {smooth: 0.2, length: 10, length2: 20},
+                                animationType: 'scale',
+                                animationEasing: 'elasticOut',
+                                data: response.data.map(s => { return {name: s.aggregate_key, value: s.total}}),
+                            }
+                        ];
+                    }).catch(error => {this.ToastError(error)});
+
+                }
             }
         },
         mounted() {

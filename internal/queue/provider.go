@@ -22,6 +22,10 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 
 func (s ServiceProvider) Daemon(ctx context.Context, app infra.Glacier) {
 	app.MustResolve(func(manager Manager, conf *configs.Config) {
+		if conf.NoJobMode {
+			return
+		}
+
 		var wg sync.WaitGroup
 		wg.Add(conf.QueueWorkerNum)
 

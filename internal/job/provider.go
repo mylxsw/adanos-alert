@@ -28,6 +28,10 @@ func (s ServiceProvider) Boot(app infra.Glacier) {
 	app.Cron(func(cr cron.Manager, cc container.Container) error {
 
 		return cc.Resolve(func(conf *configs.Config, aggregationJob *AggregationJob, alertJob *TriggerJob, recoveryJob *RecoveryJob, lockRepo repository.LockRepo) {
+			if conf.NoJobMode {
+				return
+			}
+
 			hostname, _ := os.Hostname()
 			cr.DistributeLockManager(NewDistributeLockManager(lockRepo, fmt.Sprintf("%s(%s)", hostname, conf.Listen)))
 

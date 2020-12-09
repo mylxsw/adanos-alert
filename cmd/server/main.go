@@ -191,6 +191,10 @@ func main() {
 		EnvVar: "ADANOS_JIRA_PASSWORD",
 		Usage:  "Jira 连接密码",
 	}))
+	app.AddFlags(altsrc.NewBoolFlag(cli.BoolFlag{
+		Name:  "no_job_mode",
+		Usage: "启用该标识后，将会停止事件聚合和队列任务处理，用于开发调试",
+	}))
 
 	app.WithHttpServer(listener.FlagContext("listen"))
 
@@ -258,6 +262,7 @@ func main() {
 			ReportURL:             c.String("report_url"),
 			KeepPeriod:            c.Int("keep_period"),
 			AuditKeepPeriod:       c.Int("audit_keep_period"),
+			NoJobMode:             c.Bool("no_job_mode"),
 			AliyunVoiceCall: configs.AliyunVoiceCall{
 				BaseURI:            "http://dyvmsapi.aliyuncs.com/",
 				AccessKey:          c.String("aliyun_access_key"),

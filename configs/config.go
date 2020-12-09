@@ -19,6 +19,9 @@ type Config struct {
 	APIToken          string `json:"-"`
 	UseLocalDashboard bool   `json:"use_local_dashboard"`
 
+	// NoJobMode 启用该标识后，将停止事件聚合和队列消费
+	NoJobMode bool `json:"no_job_mode"`
+
 	AggregationPeriod     time.Duration `json:"aggregation_period"`
 	ActionTriggerPeriod   time.Duration `json:"action_trigger_period"`
 	QueueJobMaxRetryTimes int           `json:"queue_job_max_retry_times"`
@@ -28,8 +31,8 @@ type Config struct {
 	KeepPeriod      int `json:"keep_period"`
 	AuditKeepPeriod int `json:"audit_keep_period"`
 
-	Migrate         bool            `json:"migrate"`
-	ReMigrate       bool            `json:"re_migrate"`
+	Migrate   bool `json:"migrate"`
+	ReMigrate bool `json:"re_migrate"`
 
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
 	EmailSMTP       EmailSMTP       `json:"email_smtp"`

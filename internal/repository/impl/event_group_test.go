@@ -128,7 +128,7 @@ func (m *MessageGroupTestSuite) TestMessageGroup() {
 	_, err = m.repo.StatByUserCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now())
 	m.NoError(err)
 
-	res, err := m.repo.StatByDatetimeCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now(), 1)
+	res, err := m.repo.StatByDatetimeCount(context.TODO(), nil, time.Now().Add(- 365*24*time.Hour), time.Now(), 1)
 	m.NoError(err)
 	m.NotEmpty(res)
 }

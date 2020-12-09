@@ -80,6 +80,20 @@ type EventGroupByDatetimeCount struct {
 	TotalMessages int64     `bson:"total_messages" json:"total_messages"`
 }
 
+// EventGroupAggByDatetimeCount 时间范围内事件组聚合数量
+type EventGroupAggByDatetimeCount struct {
+	Datetime      time.Time `bson:"datetime" json:"datetime"`
+	AggregateKey  string    `bson:"aggregate_key" json:"aggregate_key"`
+	Total         int64     `bson:"total" json:"total"`
+	TotalMessages int64     `bson:"total_messages" json:"total_messages"`
+}
+
+// EventGroupAggCount 事件组聚合数量
+type EventGroupAggCount struct {
+	AggregateKey string `bson:"aggregate_key" json:"aggregate_key"`
+	Total        int64  `bson:"total" json:"total"`
+}
+
 type EventGroupRepo interface {
 	Add(grp EventGroup) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (grp EventGroup, err error)
@@ -100,4 +114,6 @@ type EventGroupRepo interface {
 	StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]EventGroupByRuleCount, error)
 	StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]EventGroupByUserCount, error)
 	StatByDatetimeCount(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]EventGroupByDatetimeCount, error)
+	StatByAggCountInPeriod(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time, hour int64) ([]EventGroupAggByDatetimeCount, error)
+	StatByAggCount(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time) ([]EventGroupAggCount, error)
 }
