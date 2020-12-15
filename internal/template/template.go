@@ -23,6 +23,7 @@ import (
 	bfconfluence "github.com/kentaro-m/blackfriday-confluence"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/helper"
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
@@ -138,6 +139,8 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"sha1":          encodeSha1,
 		"base64":        encodeBase64,
 		"base64_encode": encodeBase64,
+
+		"helpers": helper.NewHelpers,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -550,9 +553,10 @@ func extractRelationIDs(events []repository.Event) []primitive.ObjectID {
 
 // buildEventsRelationsFunc 创建事件关联查询函数
 func buildEventsRelationsFunc(cc SimpleContainer) func(relationIDs []primitive.ObjectID) []repository.EventRelation {
-	evtRelationRepoR, _ := cc.Get(new(repository.EventRelationRepo))
-	evtRelationRepo := evtRelationRepoR.(repository.EventRelationRepo)
 	return func(relationIDs []primitive.ObjectID) []repository.EventRelation {
+		evtRelationRepoR, _ := cc.Get(new(repository.EventRelationRepo))
+		evtRelationRepo := evtRelationRepoR.(repository.EventRelationRepo)
+
 		if len(relationIDs) == 0 {
 			return []repository.EventRelation{}
 		}
@@ -567,9 +571,10 @@ func buildEventsRelationsFunc(cc SimpleContainer) func(relationIDs []primitive.O
 
 // buildEventRelationNotesFunc 创建事件关联备注查询函数
 func buildEventRelationNotesFunc(cc SimpleContainer) func(relationID primitive.ObjectID) []repository.EventRelationNote {
-	evtRelNoteRepoR, _ := cc.Get(new(repository.EventRelationNoteRepo))
-	evtRelNoteRepo := evtRelNoteRepoR.(repository.EventRelationNoteRepo)
 	return func(relationID primitive.ObjectID) []repository.EventRelationNote {
+		evtRelNoteRepoR, _ := cc.Get(new(repository.EventRelationNoteRepo))
+		evtRelNoteRepo := evtRelNoteRepoR.(repository.EventRelationNoteRepo)
+
 		if relationID.IsZero() {
 			return []repository.EventRelationNote{}
 		}

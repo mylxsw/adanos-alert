@@ -8,6 +8,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
 	"github.com/mylxsw/adanos-alert/internal/repository"
+	"github.com/mylxsw/adanos-alert/pkg/helper"
 	"github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 )
@@ -19,7 +20,7 @@ var InvalidReturnVal = errors.New("invalid return value: must be a bool value")
 // We will add some helper function to message
 type EventWrap struct {
 	repository.Event
-	Helpers
+	helper.Helpers
 	fullJSONOnce sync.Once
 	fullJSON     string
 }

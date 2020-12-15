@@ -8,6 +8,7 @@ import (
 	"github.com/antonmedv/expr/vm"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
+	"github.com/mylxsw/adanos-alert/pkg/helper"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,7 +22,7 @@ type TriggerMatcher struct {
 }
 
 type TriggerContext struct {
-	Helpers
+	helper.Helpers
 	Group   repository.EventGroup
 	Trigger repository.Trigger
 

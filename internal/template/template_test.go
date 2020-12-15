@@ -36,8 +36,9 @@ create mode 100644 storage/user.go
 create mode 100644 web/message.go`
 
 type testParseData struct {
-	Name string
-	Age  int
+	Name    string
+	Age     int
+	Content string
 }
 
 func (data testParseData) Strings(ele string) []string {
@@ -63,6 +64,12 @@ func TestParse(t *testing.T) {
 		}
 
 		fmt.Println(parsed)
+	}
+
+	{
+		parsed, err := Parse(container.New(), `{{ helpers.JSON .Content "deps.#.first" }}`, testParseData{Name: "Prometheus", Age: 1088, Content: `{"id": 123, "name": "李逍遥", "deps": [{"first": 123, "second": 434}]}`})
+		assert.NoError(t, err)
+		assert.Equal(t, "[123]", parsed)
 	}
 }
 

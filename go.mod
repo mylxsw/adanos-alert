@@ -23,6 +23,7 @@ require (
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
+	github.com/itchyny/gojq v0.11.2
 	github.com/jeremywohl/flatten v0.0.0-20190921043622-d936035e55cf
 	github.com/kentaro-m/blackfriday-confluence v0.0.0-20200514101926-773172e7101d
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
@@ -30,6 +31,7 @@ require (
 	github.com/mylxsw/asteria v0.0.0-20201109073030-ef64164c7661
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
 	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
+	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
 	github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4
@@ -39,7 +41,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/russross/blackfriday v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.8+incompatible
@@ -47,7 +48,7 @@ require (
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190614090009-c2865af9083e
 	github.com/swaggo/swag v1.6.2
-	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/tidwall/gjson v1.6.4
 	github.com/trivago/tgo v1.0.7 // indirect
 	github.com/urfave/cli v1.22.2
 	github.com/vjeantet/grok v1.0.0
@@ -56,7 +57,6 @@ require (
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	go.mongodb.org/mongo-driver v1.0.4
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
-	golang.org/x/sys v0.0.0-20200922070232-aee5d888a860 // indirect
 	google.golang.org/grpc v1.28.1
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
