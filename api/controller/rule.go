@@ -356,7 +356,7 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 			ID:           primitive.NewObjectID(),
 			SeqNum:       1000,
 			Type:         repository.EventTypePlain,
-			MessageCount: 3,
+			MessageCount: 30,
 			AggregateKey: "AggregateKey",
 			Rule:         rule.ToGroupRule("", repository.EventTypePlain),
 			Actions:      triggers,
