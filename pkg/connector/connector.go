@@ -27,16 +27,16 @@ func NewConnector(token string, servers ...string) *Connector {
 
 // Send send a message to adanos server
 func (conn *Connector) Send(ctx context.Context, evt *Event) error {
-	return Send(ctx, conn.servers, conn.token, evt.meta, evt.tags, evt.origin, evt.ctl.toExtensionEventControl(), evt.content)
+	return Send(ctx, conn.servers, conn.token, evt.Meta, evt.Tags, evt.Origin, evt.Ctl.toExtensionEventControl(), evt.Content)
 }
 
 // Event is a adanos alert message
 type Event struct {
-	meta    map[string]interface{}
-	tags    []string
-	origin  string
-	ctl     EventControl
-	content string
+	Meta    map[string]interface{} `json:"meta" yaml:"meta"`
+	Tags    []string               `json:"tags" yaml:"tags"`
+	Origin  string                 `json:"origin" yaml:"origin"`
+	Ctl     EventControl           `json:"ctl" yaml:"ctl"`
+	Content string                 `json:"content" yaml:"content"`
 }
 
 type EventControl struct {
@@ -55,33 +55,33 @@ func (ec EventControl) toExtensionEventControl() extension.EventControl {
 
 // NewEvent create a new Event
 func NewEvent(content string) *Event {
-	return &Event{content: content, tags: make([]string, 0), meta: make(map[string]interface{})}
+	return &Event{Content: content, Tags: make([]string, 0), Meta: make(map[string]interface{})}
 }
 
 func (m *Event) WithTags(tags ...string) *Event {
-	m.tags = append(m.tags, tags...)
+	m.Tags = append(m.Tags, tags...)
 	return m
 }
 
 func (m *Event) WithOrigin(origin string) *Event {
-	m.origin = origin
+	m.Origin = origin
 	return m
 }
 
 func (m *Event) WithCtl(ctl EventControl) *Event {
-	m.ctl = ctl
+	m.Ctl = ctl
 	return m
 }
 
 func (m *Event) WithMetas(metas map[string]interface{}) *Event {
 	for k, v := range metas {
-		m.meta[k] = v
+		m.Meta[k] = v
 	}
 	return m
 }
 
 func (m *Event) WithMeta(key string, value interface{}) *Event {
-	m.meta[key] = value
+	m.Meta[key] = value
 	return m
 }
 
