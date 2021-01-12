@@ -75,10 +75,11 @@ type RuleForm struct {
 	AggregateRule string `json:"aggregate_rule"`
 	RelationRule  string `json:"relation_rule"`
 
-	ReadyType  string                 `json:"ready_type"`
-	Interval   int64                  `json:"interval"`
-	DailyTimes []string               `json:"daily_times"`
-	TimeRanges []repository.TimeRange `json:"time_ranges"`
+	ReadyType        string                 `json:"ready_type"`
+	Interval         int64                  `json:"interval"`
+	DailyTimes       []string               `json:"daily_times"`
+	TimeRanges       []repository.TimeRange `json:"time_ranges"`
+	RealtimeInterval int64                  `json:"realtime_interval"`
 
 	Rule             string            `json:"rule"`
 	IgnoreRule       string            `json:"ignore_rule"`
@@ -168,6 +169,10 @@ func (r RuleForm) Validate(req web.Request) error {
 		}
 	default:
 		return errors.New("invalid readyType")
+	}
+
+	if r.RealtimeInterval < 0 {
+		return errors.New("realtime_interval must be a positive number in minutes")
 	}
 
 	if r.Status != "" && !govalidator.IsIn(r.Status, string(repository.RuleStatusEnabled), string(repository.RuleStatusDisabled)) {
@@ -412,6 +417,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		DailyTimes:       str.Distinct(ruleForm.DailyTimes),
 		Interval:         ruleForm.Interval,
 		TimeRanges:       ruleForm.TimeRanges,
+		RealtimeInterval: ruleForm.RealtimeInterval,
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
 		AggregateRule:    ruleForm.AggregateRule,
@@ -498,6 +504,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		DailyTimes:       str.Distinct(ruleForm.DailyTimes),
 		Interval:         ruleForm.Interval,
 		TimeRanges:       ruleForm.TimeRanges,
+		RealtimeInterval: ruleForm.RealtimeInterval,
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
 		AggregateRule:    ruleForm.AggregateRule,

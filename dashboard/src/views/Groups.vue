@@ -15,6 +15,7 @@
                 <template v-slot:cell(id)="row">
                     <b-badge class="mr-2" variant="dark">{{ row.item.seq_num }}</b-badge>
                     <date-time :value="row.item.updated_at"></date-time>
+                    <b-badge class="ml-2" variant="danger" v-if="row.item.rule.realtime">即时</b-badge>
                     <p><b>{{ row.item.id }}</b></p>
                 </template>
                 <template v-slot:cell(actions)="row">

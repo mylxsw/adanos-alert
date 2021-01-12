@@ -28,6 +28,7 @@ type EventGroupRule struct {
 
 	// ExpectReadyAt 预期就绪时间，当超过该时间后，Group自动关闭，发起通知
 	ExpectReadyAt time.Time `bson:"expect_ready_at" json:"expect_ready_at"`
+	Realtime      bool      `bson:"realtime" json:"realtime"`
 
 	Rule            string `bson:"rule" json:"rule"`
 	IgnoreRule      string `bson:"ignore_rule" json:"ignore_rule"`

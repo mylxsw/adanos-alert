@@ -9,6 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pubsub"
+	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/container"
@@ -43,7 +44,7 @@ func (a *AggregationJob) Handle() {
 	}
 }
 
-func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRepo repository.EventRelationRepo, groupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo) error {
+func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRepo repository.EventRelationRepo, groupRepo repository.EventGroupRepo, ruleRepo repository.RuleRepo, groupSrv service.EventGroupService) error {
 	matchers, err := initializeMatchers(ruleRepo)
 	if err != nil {
 		log.Error(err.Error())
@@ -59,15 +60,17 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRe
 				continue
 			}
 
+			rule := m.Rule()
+
 			// if the message matched a rule, update message's group_id and skip to next message
 			if matched {
 				// 对于匹配规则的消息，首先判断是否能够为消息建立关联
-				if m.Rule().RelationRule != "" {
-					if relationSummary := BuildEventFinger(m.Rule().RelationRule, evt); relationSummary != "" {
-						if evtRel, err := evtRelRepo.AddOrUpdateEventRelation(context.TODO(), relationSummary, m.Rule().ID); err != nil {
+				if rule.RelationRule != "" {
+					if relationSummary := BuildEventFinger(rule.RelationRule, evt); relationSummary != "" {
+						if evtRel, err := evtRelRepo.AddOrUpdateEventRelation(context.TODO(), relationSummary, rule.ID); err != nil {
 							log.WithFields(log.Fields{
 								"evt":  evt,
-								"rule": m.Rule(),
+								"rule": rule,
 								"err":  err,
 							}).Errorf("create event relation failed: %v", err)
 						} else {
@@ -80,14 +83,24 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRe
 				if ignored {
 					messageCanIgnore = true
 				} else {
-					aggregateKey := BuildEventFinger(m.Rule().AggregateRule, evt)
-					key := fmt.Sprintf("%s:%s:%s", m.Rule().ID.Hex(), aggregateKey, evt.Type)
+					aggregateKey := BuildEventFinger(rule.AggregateRule, evt)
+					key := fmt.Sprintf("%s:%s:%s", rule.ID.Hex(), aggregateKey, evt.Type)
 					if _, ok := collectingGroups[key]; !ok {
-						grp, err := groupRepo.CollectingGroup(m.Rule().ToGroupRule(aggregateKey, evt.Type))
+
+						evtGrpRule := rule.ToGroupRule(aggregateKey, evt.Type)
+						// 检查规则是否支持即时发送，当支持即时发送时，事件组的就绪时间将会被设置为立即执行
+						if rule.RealtimeInterval > 0 {
+							groupSrv.EventShouldRealtime(context.Background(), key, time.Duration(rule.RealtimeInterval)*time.Minute, func() {
+								evtGrpRule.ExpectReadyAt = time.Now().Add(-time.Second)
+								evtGrpRule.Realtime = true
+							})
+						}
+
+						grp, err := groupRepo.CollectingGroup(evtGrpRule)
 						if err != nil {
 							log.WithFields(log.Fields{
 								"evt":  evt,
-								"rule": m.Rule(),
+								"rule": rule,
 								"err":  err.Error(),
 							}).Errorf("create collecting group failed: %v", err)
 							return err

@@ -15,6 +15,7 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/web"
+	"github.com/mylxsw/go-utils/str"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -211,7 +212,7 @@ func (m *EventController) ReproduceEvent(ctx web.Context, eventRepo repository.E
 	id, err := eventService.Add(context.TODO(), extension.CommonEvent{
 		Content: event.Content,
 		Meta:    event.Meta,
-		Tags:    append(event.Tags, "adanos-reproduced"),
+		Tags:    str.Distinct(append(event.Tags, "adanos-reproduced")),
 		Origin:  event.Origin,
 	})
 	if err != nil {
@@ -333,7 +334,12 @@ func (m *EventController) TestMatchedRules(ctx web.Context, msgRepo repository.E
 
 // QueryEventRelation 查询事件关联
 func (m *EventController) QueryEventRelation(ctx web.Context, evtRelationRepo repository.EventRelationRepo) (*repository.EventRelation, error) {
-	relID, err := primitive.ObjectIDFromHex(ctx.PathVar("id"))
+	relationID := ctx.PathVar("id")
+	if relationID == "" {
+		return nil, errors.New("relation id is required")
+	}
+
+	relID, err := primitive.ObjectIDFromHex(relationID)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid relation id")
 	}

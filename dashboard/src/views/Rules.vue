@@ -21,8 +21,9 @@
             </b-card>
             <b-table :items="rules" :fields="fields" :busy="isBusy" show-empty responsive="true" hover>
                 <template v-slot:cell(name)="row">
-                    <span v-b-tooltip.hover :title="row.item.id">{{ row.item.name }}</span>
+                    <span v-b-tooltip.hover :title="row.item.description">{{ row.item.name }}</span>
                     <p>
+                        <b-badge class="mr-1" variant="danger" v-if="row.item.realtime_interval > 0">即时：{{ row.item.realtime_interval }}m</b-badge>
                         <b-badge :variant="$route.query.tag === tag ? 'primary': 'info'"
                                  v-for="(tag, index) in row.item.tags" :key="index" class="mr-1"
                                  :to="'/rules?tag=' + tag">{{ tag }}
@@ -31,7 +32,7 @@
                 </template>
                 <template v-slot:cell(rule)="row">
                     <p><small>
-                        频率为
+                        聚合周期为
                         <span v-if="row.item.ready_type === 'interval' || row.item.ready_type === ''"><code><b>{{ row.item.interval / 60 }} 分钟每次</b></code></span>
                         <span v-if="row.item.ready_type === 'daily_time'">
                             <code><b>每天 {{ row.item.daily_times.map((t) => t.substring(0, 5)).join(", ") }}</b></code>

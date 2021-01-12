@@ -54,6 +54,9 @@ type Rule struct {
 	DailyTimes []string    `bson:"daily_times" json:"daily_times"`
 	TimeRanges []TimeRange `bson:"time_ranges" json:"time_ranges"`
 
+	// RealtimeInterval 即时触发，当该值 > 0 时，将会采用即时触发，超过周期后，第一个发生的事件将会立即触发告警
+	RealtimeInterval int64 `bson:"realtime_interval" json:"realtime_interval"`
+
 	// Rule 用于分组匹配的规则
 	Rule string `bson:"rule" json:"rule"`
 	// IgnoreRule 分组匹配后，检查 message 是否应该被忽略

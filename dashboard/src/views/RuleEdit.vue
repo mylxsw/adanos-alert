@@ -27,7 +27,7 @@
                                 <b-form-tags id="tags_input" placeholder="输入规则分类标签" tag-variant="primary" tag-pills separator=" " v-model="form.tags"></b-form-tags>
                             </b-form-group>
 
-                            <b-form-group label-cols="2" label="频率*">
+                            <b-form-group label-cols="2" label="聚合周期*">
                                 <div class="adanos-sub-form">
                                     <b-form-group label-cols="2" label="类型">
                                         <b-form-select v-model="form.ready_type">
@@ -37,7 +37,7 @@
                                         </b-form-select>
                                     </b-form-group>
                                     <b-form-group label-cols="2" id="rule_interval" label="周期" label-for="rule_interval_input" v-if="form.ready_type === 'interval'"
-                                                  :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次报警'">
+                                                  :description="'当前：' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟，每隔 ' + (parseInt(form.interval) === 0 ? 1 : form.interval) + ' 分钟后触发一次告警'">
                                         <b-form-input id="rule_interval_input" type="range" min="0" max="1440" step="5" v-model="form.interval" required/>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="时间" v-if="form.ready_type === 'daily_time'">
@@ -62,10 +62,20 @@
                                     </b-form-group>
                                 </div>
                             </b-form-group>
+                            <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
+                            <b-button v-b-toggle.advance-basic variant="secondary" class="mt-2">高级</b-button>
+                            <b-collapse id="advance-basic" class="mt-2">
+                              <b-card>
+                                  <b-form-group label-cols="2" id="rule_realtime" label="即时发送" label-for="realtime_input"
+                                                :description="form.realtime_interval > 0 ? ('当前：' +  form.realtime_interval + ' 分钟，每隔 ' + form.realtime_interval + ' 分钟没有新告警产生时，再次触发的第一条告警事件将会被立即发送'):'不启用即时发送功能'">
+                                    <b-form-input id="realtime_input" type="range" min="0" max="1440" step="10" v-model="form.realtime_interval"/>
+                                  </b-form-group>
 
-                            <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
-                                <b-form-checkbox id="is_enabled_checkbox" v-model="form.status">启用</b-form-checkbox>
-                            </b-form-group>
+                                  <b-form-group label-cols="2" id="is_enabled" label="是否启用*" label-for="is_enabled_checkbox">
+                                    <b-form-checkbox id="is_enabled_checkbox" v-model="form.status">启用</b-form-checkbox>
+                                  </b-form-group>
+                              </b-card>
+                            </b-collapse>
                         </b-card-text>
                     </b-card>
                 </b-card-group>
@@ -125,7 +135,7 @@
                                     </b-form-group>
                                     <b-form-group label-cols="2">
                                         <codemirror v-model="form.ignore_rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
-                                        <small class="form-text text-muted">当匹配规则后，会检查事件是否与忽略规则匹配，匹配则忽略该事件，常用于临时忽略某些不需要报警的事件。</small>
+                                        <small class="form-text text-muted">当匹配规则后，会检查事件是否与忽略规则匹配，匹配则忽略该事件，常用于临时忽略某些不需要告警的事件。</small>
                                         <small class="form-text text-muted">
                                             语法提示 <code>Alt+/</code>，语法参考 <a
                                             href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
@@ -203,7 +213,7 @@
                         </template>
                         <b-card-text v-if="action_card_fold">...</b-card-text>
                         <b-card-text v-if="!action_card_fold">
-                            <p class="text-muted">事件组达到报警周期后，会按照这里的规则来将事件组通知给对应的通道。</p>
+                            <p class="text-muted">事件组达到告警周期后，会按照这里的规则来将事件组通知给对应的通道。</p>
                             <b-card :header="trigger.id" :border-variant="trigger.is_else_trigger ? 'warning':'dark'" :header-bg-variant="trigger.is_else_trigger ? 'warning':'dark'"
                                     header-text-variant="white" class="mb-3" v-bind:key="i"
                                     v-for="(trigger, i) in form.triggers">
@@ -621,6 +631,7 @@ export default {
                 report_template_id: '',
                 triggers: [],
                 status: true,
+                realtime_interval: 0,
             },
             rule_help: false,
             ignore_rule_help: false,
@@ -1059,6 +1070,7 @@ export default {
             requestData.relation_rule = this.form.relation_rule;
             requestData.template = this.form.template;
             requestData.report_template_id = this.form.report_template_id;
+            requestData.realtime_interval = parseInt(this.form.realtime_interval);
             requestData.triggers = this.form.triggers.map((trigger) => {
                 switch (trigger.action) {
                     case 'jira': {
@@ -1145,6 +1157,7 @@ export default {
                 this.form.relation_rule = response.data.relation_rule;
                 this.form.template = response.data.template;
                 this.form.report_template_id = response.data.report_template_id;
+                this.form.realtime_interval = response.data.realtime_interval || 0;
 
                 if (response.data.time_ranges === null || response.data.time_ranges.length === 0) {
                     response.data.time_ranges = this.form.time_ranges;
@@ -1214,6 +1227,9 @@ export default {
                 if (this.form.ignore_rule.trim() === '' && this.form.relation_rule === '') {
                     // 解决高级规则默认不展示时，编辑器窗口初始化不完整问题
                     this.$root.$emit('bv::toggle::collapse', 'advance')
+                }
+                if (this.form.realtime_interval > 0) {
+                    this.$root.$emit('bv::toggle::collapse', 'advance-basic')
                 }
 
             }).catch((error) => {
