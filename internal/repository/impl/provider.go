@@ -7,16 +7,15 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier/cron"
 	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/glacier/scheduler"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (s ServiceProvider) Register(app container.Container) {
+func (s Provider) Register(app infra.Binder) {
 	app.MustSingleton(NewSequenceRepo)
 	app.MustSingleton(NewKVRepo)
 	app.MustSingleton(NewEventRepo)
@@ -34,41 +33,40 @@ func (s ServiceProvider) Register(app container.Container) {
 	app.MustSingleton(NewRecoveryRepo)
 }
 
-func (s ServiceProvider) Boot(app infra.Glacier) {
-	app.Cron(func(cr cron.Manager, cc container.Container) error {
-		return cc.Resolve(func(
-			kvRepo repository.KVRepo,
-			groupRepo repository.EventGroupRepo,
-			eventRepo repository.EventRepo,
-			auditRepo repository.AuditLogRepo,
-			conf *configs.Config,
-		) {
-			_ = cr.Add("kv_repository_gc", "@every 60s", func() {
-				if err := kvRepo.GC(); err != nil {
-					log.Errorf("kv kvRepo gc failed: %v", err)
-				}
-			})
-
-			if conf.AuditKeepPeriod > 0 {
-				_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
-					deadLineDate := time.Now().AddDate(0, 0, -conf.AuditKeepPeriod)
-					log.Infof("clear expired audit logs before %v", deadLineDate)
-
-					if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
-						log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
-					}
-				})
-			}
-
-			if conf.KeepPeriod > 0 {
-				_ = cr.Add("remove_expired_events", "@midnight", func() {
-					expiredEventsGC(conf, eventRepo, groupRepo)
-				})
-
-				// 每次重启服务时，自动触发一次GC
-				expiredEventsGC(conf, eventRepo, groupRepo)
+func (s Provider) Boot(app infra.Resolver) {
+	app.MustResolve(func(
+		cr scheduler.JobCreator,
+		kvRepo repository.KVRepo,
+		groupRepo repository.EventGroupRepo,
+		eventRepo repository.EventRepo,
+		auditRepo repository.AuditLogRepo,
+		conf *configs.Config,
+	) {
+		_ = cr.Add("kv_repository_gc", "@every 60s", func() {
+			if err := kvRepo.GC(); err != nil {
+				log.Errorf("kv kvRepo gc failed: %v", err)
 			}
 		})
+
+		if conf.AuditKeepPeriod > 0 {
+			_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
+				deadLineDate := time.Now().AddDate(0, 0, -conf.AuditKeepPeriod)
+				log.Infof("clear expired audit logs before %v", deadLineDate)
+
+				if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
+					log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
+				}
+			})
+		}
+
+		if conf.KeepPeriod > 0 {
+			_ = cr.Add("remove_expired_events", "@midnight", func() {
+				expiredEventsGC(conf, eventRepo, groupRepo)
+			})
+
+			// 每次重启服务时，自动触发一次GC
+			expiredEventsGC(conf, eventRepo, groupRepo)
+		}
 	})
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-utils/str"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,24 +17,24 @@ import (
 
 // StatisticsController 统计功能
 type StatisticsController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
 // NewStatisticsController create a new StatisticsController
-func NewStatisticsController(cc container.Container) web.Controller {
+func NewStatisticsController(cc infra.Resolver) web.Controller {
 	return StatisticsController{cc: cc}
 }
 
 // Register 注册路由
-func (s StatisticsController) Register(router *web.Router) {
-	router.Group("/statistics", func(router *web.Router) {
+func (s StatisticsController) Register(router web.Router) {
+	router.Group("/statistics", func(router web.Router) {
 		router.Get("/daily-group-counts/", s.DailyGroupCounts).Name("statistics:daily-group-counts")
 		router.Get("/user-group-counts/", s.UserGroupCounts).Name("statistics:user-group-counts")
 		router.Get("/rule-group-counts/", s.RuleGroupCounts).Name("statistics:rule-group-counts")
 		router.Get("/group-agg-period-counts/", s.EventGroupAggInPeriod).Name("statistics:group-agg-period-counts")
 		router.Get("/group-agg-counts/", s.EventGroupAggCounts).Name("statistics:group-agg-counts")
 
-		router.Group("/events/", func(router *web.Router) {
+		router.Group("/events/", func(router web.Router) {
 			router.Get("/period-counts/", s.EventCountInPeriod).Name("statistics:events:period-counts")
 		})
 	})

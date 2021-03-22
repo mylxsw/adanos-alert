@@ -7,17 +7,17 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/adanos-alert/service"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 )
 
 // EventService is a service server for message processing
 type EventService struct {
-	cc         container.Container
+	cc         infra.Resolver
 	msgService service.EventService `autowire:"@"`
 }
 
 // NewEventService create a new message service
-func NewEventService(cc container.Container) *EventService {
+func NewEventService(cc infra.Resolver) *EventService {
 	ms := &EventService{cc: cc}
 	cc.Must(cc.AutoWire(ms))
 	return ms

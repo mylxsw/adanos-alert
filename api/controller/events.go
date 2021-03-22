@@ -13,7 +13,7 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-utils/str"
 	"github.com/pkg/errors"
@@ -22,15 +22,15 @@ import (
 )
 
 type EventController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewEventController(cc container.Container) web.Controller {
+func NewEventController(cc infra.Resolver) web.Controller {
 	return &EventController{cc: cc}
 }
 
-func (m *EventController) Register(router *web.Router) {
-	router.Group("/messages", func(router *web.Router) {
+func (m *EventController) Register(router web.Router) {
+	router.Group("/messages", func(router web.Router) {
 		router.Post("/", m.AddCommonEvent).Name("events:add:common")
 		router.Post("/logstash/", m.AddLogstashEvent).Name("events:add:logstash")
 		router.Post("/grafana/", m.AddGrafanaEvent).Name("events:add:grafana")
@@ -39,7 +39,7 @@ func (m *EventController) Register(router *web.Router) {
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 	})
 
-	router.Group("/events", func(router *web.Router) {
+	router.Group("/events", func(router web.Router) {
 		router.Get("/", m.Events).Name("events:all")
 		router.Get("/{id}/", m.Event).Name("events:one")
 		router.Delete("/{id}/", m.DeleteEvent).Name("events:delete")
@@ -55,13 +55,13 @@ func (m *EventController) Register(router *web.Router) {
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 	})
 
-	router.Group("/event-relations", func(router *web.Router) {
+	router.Group("/event-relations", func(router web.Router) {
 		router.Get("/{id}/", m.QueryEventRelation).Name("event-relations:one")
 		router.Get("/{id}/notes/", m.QueryEventRelationNotes).Name("event-relations:notes")
 		router.Post("/{id}/notes/", m.AddEventRelationNote).Name("event-relations:notes:add")
 	})
 
-	router.Group("/events-count/", func(router *web.Router) {
+	router.Group("/events-count/", func(router web.Router) {
 		router.Get("/", m.Count).Name("events:count")
 	})
 }

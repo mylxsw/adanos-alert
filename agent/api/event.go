@@ -10,21 +10,20 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 )
 
 type EventController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewEventController(cc container.Container) web.Controller {
+func NewEventController(cc infra.Resolver) web.Controller {
 	return &EventController{cc: cc}
 }
 
-func (m *EventController) Register(router *web.Router) {
-	router.Group("/messages", func(router *web.Router) {
+func (m *EventController) Register(router web.Router) {
+	router.Group("/messages", func(router web.Router) {
 		router.Post("/", m.AddCommonEvent).Name("events:add:common")
 		router.Post("/logstash/", m.AddLogstashEvent).Name("events:add:logstash")
 		router.Post("/grafana/", m.AddGrafanaEvent).Name("events:add:grafana")
@@ -33,7 +32,7 @@ func (m *EventController) Register(router *web.Router) {
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 	})
 
-	router.Group("/events", func(router *web.Router) {
+	router.Group("/events", func(router web.Router) {
 		router.Post("/", m.AddCommonEvent).Name("events:add:common")
 		router.Post("/logstash/", m.AddLogstashEvent).Name("events:add:logstash")
 		router.Post("/grafana/", m.AddGrafanaEvent).Name("events:add:grafana")

@@ -1,19 +1,19 @@
 package controller
 
 import (
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 )
 
 type WelcomeController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewWelcomeController(cc container.Container) web.Controller {
+func NewWelcomeController(cc infra.Resolver) web.Controller {
 	return &WelcomeController{cc: cc}
 }
 
-func (w *WelcomeController) Register(router *web.Router) {
+func (w *WelcomeController) Register(router web.Router) {
 	router.Any("/", w.Home).Name("welcome:home")
 }
 

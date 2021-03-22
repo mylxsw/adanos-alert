@@ -10,21 +10,21 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/messager/jira"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-utils/str"
 )
 
 type JiraController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewJiraController(cc container.Container) web.Controller {
+func NewJiraController(cc infra.Resolver) web.Controller {
 	return &JiraController{cc: cc}
 }
 
-func (j JiraController) Register(router *web.Router) {
-	router.Group("/jira/issue", func(router *web.Router) {
+func (j JiraController) Register(router web.Router) {
+	router.Group("/jira/issue", func(router web.Router) {
 		router.Get("/options/", j.IssueOptions).Name("jira.issue:options")
 		router.Get("/types/", j.IssueTypes).Name("jira:issue:types")
 		router.Get("/priorities/", j.Priorities).Name("jira:issue:priorities")

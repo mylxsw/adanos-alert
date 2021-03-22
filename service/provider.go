@@ -1,16 +1,15 @@
 package service
 
 import (
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (p ServiceProvider) Register(app container.Container) {
+func (p Provider) Register(app infra.Binder) {
 	app.MustSingleton(NewEventService)
 	app.MustSingleton(NewEventGroupService)
 }
 
-func (p ServiceProvider) Boot(app infra.Glacier) {
+func (p Provider) Boot(app infra.Resolver) {
 }

@@ -3,21 +3,21 @@ package controller
 import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type AgentController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewAgentController(cc container.Container) web.Controller {
+func NewAgentController(cc infra.Resolver) web.Controller {
 	return &AgentController{cc: cc}
 }
 
-func (c AgentController) Register(router *web.Router) {
-	router.Group("/agents", func(router *web.Router) {
+func (c AgentController) Register(router web.Router) {
+	router.Group("/agents", func(router web.Router) {
 		router.Get("/", c.All).Name("agents:all")
 		router.Delete("/{id}/", c.Remove).Name("agents:delete")
 	})

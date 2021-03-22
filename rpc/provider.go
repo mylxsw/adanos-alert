@@ -11,15 +11,14 @@ import (
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/graceful"
 	"google.golang.org/grpc"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (p ServiceProvider) Register(app container.Container) {
+func (p Provider) Register(app infra.Binder) {
 	app.MustSingleton(func(conf *configs.Config) *grpc.Server {
 		auth := authFunc(app, conf)
 		return grpc.NewServer(
@@ -36,14 +35,14 @@ func (p ServiceProvider) Register(app container.Container) {
 
 }
 
-func (p ServiceProvider) Boot(app infra.Glacier) {
+func (p Provider) Boot(app infra.Resolver) {
 	app.MustResolve(func(serv *grpc.Server) {
-		protocol.RegisterMessageServer(serv, NewEventService(app.Container()))
-		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app.Container()))
+		protocol.RegisterMessageServer(serv, NewEventService(app))
+		protocol.RegisterHeartbeatServer(serv, NewHeartbeatService(app))
 	})
 }
 
-func (p ServiceProvider) Daemon(_ context.Context, app infra.Glacier) {
+func (p Provider) Daemon(_ context.Context, app infra.Resolver) {
 	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf graceful.Graceful) {
 		listener, err := net.Listen("tcp", conf.GRPCListen)
 		if err != nil {

@@ -12,8 +12,8 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -35,13 +35,13 @@ type Manager interface {
 }
 
 type actionManager struct {
-	cc      container.Container
+	cc      infra.Resolver
 	lock    sync.RWMutex
 	actions map[string]Action
 }
 
 // NewManager create a new Manager
-func NewManager(cc container.Container) Manager {
+func NewManager(cc infra.Resolver) Manager {
 	return &actionManager{cc: cc, actions: make(map[string]Action)}
 }
 

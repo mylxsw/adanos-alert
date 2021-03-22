@@ -2,23 +2,24 @@ package job
 
 import (
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
-	"github.com/mylxsw/container"
-	"github.com/mylxsw/glacier/cron"
 	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/glacier/scheduler"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (s ServiceProvider) Register(app container.Container) {
+func (s Provider) Aggregates() []infra.Provider {
+	return []infra.Provider{
+		scheduler.Provider(func(cc infra.Resolver, creator scheduler.JobCreator) {
+			cc.Must(creator.Add("sync-events", "@every 5s", eventSyncJob))
+			cc.Must(creator.Add("heartbeat", "@every 10s", heartbeatJob))
+		}),
+	}
+}
+
+func (s Provider) Register(app infra.Binder) {
 	app.MustSingleton(protocol.NewMessageClient)
 	app.MustSingleton(protocol.NewHeartbeatClient)
 }
 
-func (s ServiceProvider) Boot(app infra.Glacier) {
-	app.Cron(func(cr cron.Manager, cc container.Container) error {
-		cc.Must(cr.Add("sync-events", "@every 5s", eventSyncJob))
-		cc.Must(cr.Add("heartbeat", "@every 10s", heartbeatJob))
-
-		return nil
-	})
-}
+func (s Provider) Boot(app infra.Resolver) {}

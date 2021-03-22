@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/pubsub"
@@ -16,10 +15,8 @@ import (
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/glacier/event"
 	"github.com/mylxsw/glacier/infra"
-	"github.com/mylxsw/glacier/listener"
 	"github.com/mylxsw/go-utils/str"
 
-	"github.com/gorilla/mux"
 	"github.com/mylxsw/adanos-alert/api"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/action"
@@ -32,7 +29,6 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/starter/application"
-	"github.com/mylxsw/glacier/web"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -196,8 +192,6 @@ func main() {
 		Usage: "启用该标识后，将会停止事件聚合和队列任务处理，用于开发调试",
 	}))
 
-	app.WithHttpServer(listener.FlagContext("listen"))
-
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
 		cc.MustResolve(func(c infra.FlagContext) {
@@ -214,7 +208,7 @@ func main() {
 		})
 
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(app.Container()),
+			NewErrorCollectorWriter(cc),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -294,22 +288,13 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
-		log.Errorf("error: %v, call stack: %s", err, debug.Stack())
-		return nil
-	})
-
-	app.Main(func(conf *configs.Config, router *mux.Router, em event.Manager) {
+	app.Main(func(conf *configs.Config, em event.Manager) {
 		rand.Seed(time.Now().Unix())
 
 		if log.DebugEnabled() {
 			log.WithFields(log.Fields{
 				"config": conf,
 			}).Debug("configuration")
-
-			for _, r := range web.GetAllRoutes(router) {
-				log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
-			}
 		}
 
 		em.Publish(pubsub.SystemUpDownEvent{
@@ -318,7 +303,7 @@ func main() {
 		})
 	})
 
-	app.BeforeServerStop(func(cc container.Container) error {
+	app.BeforeServerStop(func(cc infra.Resolver) error {
 		return cc.Resolve(func(em event.Manager) {
 			em.Publish(pubsub.SystemUpDownEvent{
 				Up:        false,
@@ -327,15 +312,15 @@ func main() {
 		})
 	})
 
-	app.Provider(action.ServiceProvider{})
-	app.Provider(impl.ServiceProvider{})
-	app.Provider(api.ServiceProvider{})
-	app.Provider(job.ServiceProvider{})
-	app.Provider(queue.ServiceProvider{})
-	app.Provider(migrate.ServiceProvider{})
-	app.Provider(rpc.ServiceProvider{})
-	app.Provider(service.ServiceProvider{})
-	app.Provider(pubsub.ServiceProvider{})
+	app.Provider(action.Provider{})
+	app.Provider(impl.Provider{})
+	app.Provider(api.Provider{})
+	app.Provider(job.Provider{})
+	app.Provider(queue.Provider{})
+	app.Provider(migrate.Provider{})
+	app.Provider(rpc.Provider{})
+	app.Provider(service.Provider{})
+	app.Provider(pubsub.Provider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
@@ -343,10 +328,10 @@ func main() {
 }
 
 type ErrorCollectorWriter struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
+func NewErrorCollectorWriter(cc infra.Resolver) *ErrorCollectorWriter {
 	return &ErrorCollectorWriter{cc: cc}
 }
 

@@ -10,23 +10,23 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pubsub"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewUserController(cc container.Container) web.Controller {
+func NewUserController(cc infra.Resolver) web.Controller {
 	return &UserController{cc: cc}
 }
 
-func (u UserController) Register(router *web.Router) {
-	router.Group("/users/", func(router *web.Router) {
+func (u UserController) Register(router web.Router) {
+	router.Group("/users/", func(router web.Router) {
 		router.Get("/", u.Users).Name("users:all")
 		router.Post("/", u.Add).Name("users:add")
 		router.Post("/{id}/", u.Update).Name("users:update")
@@ -34,7 +34,7 @@ func (u UserController) Register(router *web.Router) {
 		router.Delete("/{id}/", u.Delete).Name("users:delete")
 	})
 
-	router.Group("/users-helper/", func(router *web.Router) {
+	router.Group("/users-helper/", func(router web.Router) {
 		router.Get("/names/", u.UserNames).Name("users-helper:names")
 	})
 }

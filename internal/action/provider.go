@@ -4,18 +4,17 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/pkg/errors"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (s ServiceProvider) Register(app container.Container) {
+func (s Provider) Register(app infra.Binder) {
 	app.MustSingleton(NewManager)
 }
 
-func (s ServiceProvider) Boot(app infra.Glacier) {
+func (s Provider) Boot(app infra.Resolver) {
 	app.MustResolve(func(manager Manager, queueManager queue.Manager) {
 		manager.Register("http", NewHTTPAction(manager))
 		manager.Register("dingding", NewDingdingAction(manager))

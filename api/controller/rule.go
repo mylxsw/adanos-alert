@@ -16,8 +16,8 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/pubsub"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-utils/str"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,15 +25,15 @@ import (
 )
 
 type RuleController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewRuleController(cc container.Container) web.Controller {
+func NewRuleController(cc infra.Resolver) web.Controller {
 	return &RuleController{cc: cc}
 }
 
-func (r RuleController) Register(router *web.Router) {
-	router.Group("/rules/", func(router *web.Router) {
+func (r RuleController) Register(router web.Router) {
+	router.Group("/rules/", func(router web.Router) {
 		router.Post("/", r.Add).Name("rules:add")
 		router.Get("/", r.Rules).Name("rules:all")
 		router.Get("/{id}/", r.Rule).Name("rules:one")
@@ -41,16 +41,16 @@ func (r RuleController) Register(router *web.Router) {
 		router.Delete("/{id}/", r.Delete).Name("rules:delete")
 	})
 
-	router.Group("/rules-meta/", func(router *web.Router) {
+	router.Group("/rules-meta/", func(router web.Router) {
 		router.Get("/tags/", r.Tags).Name("rules:meta:tags")
 		router.Get("/message-sample/", r.MessageSample).Name("rules:meta:message-sample")
 	})
 
-	router.Group("/rules-test/", func(router *web.Router) {
+	router.Group("/rules-test/", func(router web.Router) {
 		router.Post("/rule-check/{type}/", r.Check).Name("rules:test:check")
 	})
 
-	router.Group("/evaluate/", func(router *web.Router) {
+	router.Group("/evaluate/", func(router web.Router) {
 		router.Post("/expression-sample/", r.EvaluateExpressionSample).Name("evaluate:sample")
 	})
 }

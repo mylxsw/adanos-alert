@@ -6,24 +6,24 @@ import (
 
 	"github.com/mylxsw/adanos-alert/api/view"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PublicController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewPublicController(cc container.Container) web.Controller {
+func NewPublicController(cc infra.Resolver) web.Controller {
 	return &PublicController{cc: cc}
 }
 
-func (p PublicController) Register(router *web.Router) {
-	router.Group("/groups/", func(router *web.Router) {
+func (p PublicController) Register(router web.Router) {
+	router.Group("/groups/", func(router web.Router) {
 		router.Get("/{id}.html", p.Group).Name("public:group")
 	})
-	router.Group("/reports/", func(router *web.Router) {
+	router.Group("/reports/", func(router web.Router) {
 		router.Get("/{id}.html", p.Reports).Name("public:report")
 	})
 }

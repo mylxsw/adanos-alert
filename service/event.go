@@ -8,7 +8,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,12 +18,12 @@ type EventService interface {
 }
 
 type eventService struct {
-	cc      container.Container
+	cc      infra.Resolver
 	kvRepo  repository.KVRepo    `autowire:"@"`
 	msgRepo repository.EventRepo `autowire:"@"`
 }
 
-func NewEventService(cc container.Container) EventService {
+func NewEventService(cc infra.Resolver) EventService {
 	ms := &eventService{cc: cc}
 	cc.Must(cc.AutoWire(ms))
 	return ms

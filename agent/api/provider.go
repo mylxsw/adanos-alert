@@ -1,33 +1,41 @@
 package api
 
 import (
+	"runtime/debug"
+
 	"github.com/gorilla/mux"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/glacier/listener"
 	"github.com/mylxsw/glacier/web"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (s ServiceProvider) Register(app container.Container) {}
-
-func (s ServiceProvider) Boot(app infra.Glacier) {
-	app.WebAppRouter(routers(app.Container()))
-	app.WebAppMuxRouter(func(router *mux.Router) {
-		// prometheus metrics
-		router.PathPrefix("/metrics").Handler(promhttp.Handler())
-	})
-}
-
-func routers(cc container.Container) func(router *web.Router, mw web.RequestMiddleware) {
-	return func(router *web.Router, mw web.RequestMiddleware) {
-		mws := make([]web.HandlerDecorator, 0)
-		mws = append(mws, mw.AccessLog(log.Module("api")), mw.CORS("*"))
-		router.WithMiddleware(mws...).Controllers(
-			"/api",
-			NewEventController(cc),
-		)
+func (s Provider) Aggregates() []infra.Provider {
+	return []infra.Provider{
+		web.Provider(
+			listener.FlagContext("listen"),
+			web.SetRouteHandlerOption(func(cc infra.Resolver, router web.Router, mw web.RequestMiddleware) {
+				mws := make([]web.HandlerDecorator, 0)
+				mws = append(mws, mw.AccessLog(log.Module("api")), mw.CORS("*"))
+				router.WithMiddleware(mws...).Controllers(
+					"/api",
+					NewEventController(cc),
+				)
+			}),
+			web.SetMuxRouteHandlerOption(func(router *mux.Router) {
+				// prometheus metrics
+				router.PathPrefix("/metrics").Handler(promhttp.Handler())
+			}),
+			web.SetExceptionHandlerOption(func(ctx web.Context, err interface{}) web.Response {
+				log.Errorf("error: %v, call stack: %s", err, debug.Stack())
+				return nil
+			}),
+		),
 	}
 }
+
+func (s Provider) Register(app infra.Binder) {}
+func (s Provider) Boot(app infra.Resolver)   {}

@@ -9,14 +9,13 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 )
 
-func heartbeatJob(cc container.Container, db *ledis.DB, conf *config.Config, hs protocol.HeartbeatClient) error {
+func heartbeatJob(cc infra.Resolver, db *ledis.DB, conf *config.Config, hs protocol.HeartbeatClient) error {
 	agentID, _ := db.Get([]byte("agent-id"))
 	pingReq := protocol.PingRequest{
 		AgentTs:       time.Now().Unix(),

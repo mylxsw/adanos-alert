@@ -7,7 +7,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -22,14 +22,14 @@ type EventGroupService interface {
 }
 
 type eventGroupService struct {
-	cc           container.Container
+	cc           infra.Resolver
 	evtRepo      repository.EventRepo      `autowire:"@"`
 	evtGroupRepo repository.EventGroupRepo `autowire:"@"`
 	kvRepo       repository.KVRepo         `autowire:"@"`
 }
 
 // NewEventGroupService create a new event group service
-func NewEventGroupService(cc container.Container) EventGroupService {
+func NewEventGroupService(cc infra.Resolver) EventGroupService {
 	eg := &eventGroupService{cc: cc}
 	cc.Must(cc.AutoWire(eg))
 	return eg

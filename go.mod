@@ -28,14 +28,14 @@ require (
 	github.com/kentaro-m/blackfriday-confluence v0.0.0-20200514101926-773172e7101d
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/mylxsw/asteria v0.0.0-20201109073030-ef64164c7661
+	github.com/mylxsw/asteria v0.0.0-20210107083329-f465aaced0b0
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
-	github.com/mylxsw/container v0.0.0-20200525090619-01208c02b074
+	github.com/mylxsw/container v0.0.0-20210320032614-4c230b312e04
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
-	github.com/mylxsw/glacier v0.0.0-20201109074739-c3205f7faac3
+	github.com/mylxsw/glacier v0.0.0-20210322040714-19830c2ee444
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4
-	github.com/mylxsw/graceful v0.0.0-20200605063420-3c53968cf134
+	github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
 	github.com/pkg/errors v0.9.1

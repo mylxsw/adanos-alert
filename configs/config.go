@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 )
 
 type Config struct {
@@ -67,6 +67,6 @@ func (conf *Config) Serialize() string {
 }
 
 // Get return config object from container
-func Get(cc container.Container) *Config {
+func Get(cc infra.Resolver) *Config {
 	return cc.MustGet(&Config{}).(*Config)
 }

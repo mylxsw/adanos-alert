@@ -14,6 +14,14 @@ type MessageRepo struct {
 	Messages []repository.Event
 }
 
+func (m *MessageRepo) FindIDs(ctx context.Context, filter interface{}, limit int64) ([]primitive.ObjectID, error) {
+	panic("implement me")
+}
+
+func (m *MessageRepo) CountByDatetime(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]repository.EventByDatetimeCount, error) {
+	panic("implement me")
+}
+
 func (m *MessageRepo) AddWithContext(ctx context.Context, msg repository.Event) (id primitive.ObjectID, err error) {
 	panic("implement me")
 }

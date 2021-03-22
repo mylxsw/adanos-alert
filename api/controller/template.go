@@ -7,22 +7,22 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TemplateController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewTemplateController(cc container.Container) web.Controller {
+func NewTemplateController(cc infra.Resolver) web.Controller {
 	return &TemplateController{cc: cc}
 }
 
-func (t *TemplateController) Register(router *web.Router) {
-	router.Group("/templates/", func(router *web.Router) {
+func (t *TemplateController) Register(router web.Router) {
+	router.Group("/templates/", func(router web.Router) {
 		router.Get("/", t.Templates).Name("template:all")
 		router.Post("/", t.Add).Name("template:add")
 		router.Get("/{id}/", t.Get).Name("template:one")

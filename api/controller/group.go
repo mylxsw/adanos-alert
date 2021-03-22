@@ -10,29 +10,29 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/adanos-alert/service"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type GroupController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewGroupController(cc container.Container) web.Controller {
+func NewGroupController(cc infra.Resolver) web.Controller {
 	return &GroupController{cc: cc}
 }
 
-func (g GroupController) Register(router *web.Router) {
-	router.Group("/groups/", func(router *web.Router) {
+func (g GroupController) Register(router web.Router) {
+	router.Group("/groups/", func(router web.Router) {
 		router.Get("/", g.Groups).Name("groups:all")
 		router.Get("/{id}/", g.Group).Name("groups:one")
 		router.Delete("/{id}/reduce/", g.CutGroupEvents).Name("groups:reduce")
 	})
 
-	router.Group("/recoverable-groups/", func(router *web.Router) {
+	router.Group("/recoverable-groups/", func(router web.Router) {
 		router.Get("/", g.RecoverableGroups).Name("recoverable-groups:all")
 	})
 }

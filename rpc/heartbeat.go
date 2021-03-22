@@ -8,16 +8,15 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 )
 
 // HeartbeatService is a service server for heartbeat
 type HeartbeatService struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewHeartbeatService(cc container.Container) *HeartbeatService {
+func NewHeartbeatService(cc infra.Resolver) *HeartbeatService {
 	return &HeartbeatService{cc: cc}
 }
 

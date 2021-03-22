@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/ledisdb/ledisdb/ledis"
 	"github.com/mylxsw/adanos-alert/agent/api"
 	"github.com/mylxsw/adanos-alert/agent/config"
@@ -25,9 +23,7 @@ import (
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
-	"github.com/mylxsw/glacier/listener"
 	"github.com/mylxsw/glacier/starter/application"
-	"github.com/mylxsw/glacier/web"
 	"github.com/mylxsw/go-toolkit/network"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
@@ -70,8 +66,6 @@ func main() {
 		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
 	}))
 
-	app.WithHttpServer(listener.FlagContext("listen"))
-
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
 		cc.MustResolve(func(c infra.FlagContext) {
@@ -88,7 +82,7 @@ func main() {
 		})
 
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(app.Container()),
+			NewErrorCollectorWriter(cc),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -126,12 +120,7 @@ func main() {
 		return grpc.Dial(conf.ServerAddr, grpc.WithInsecure(), grpc.WithPerRPCCredentials(NewAuthAPI(conf.ServerToken)))
 	})
 
-	app.WebAppExceptionHandler(func(ctx web.Context, err interface{}) web.Response {
-		log.Errorf("error: %v, call stack: %s", err, debug.Stack())
-		return nil
-	})
-
-	app.Main(func(conf *config.Config, router *mux.Router, db *ledis.DB) {
+	app.Main(func(conf *config.Config, db *ledis.DB) {
 		agentID, err := db.Get([]byte("agent-id"))
 		if err != nil || agentID == nil {
 			_ = db.Set([]byte("agent-id"), []byte(misc.UUID()))
@@ -144,16 +133,12 @@ func main() {
 				"config":   conf,
 				"agent_id": string(agentID),
 			}).Debug("configuration")
-
-			for _, r := range web.GetAllRoutes(router) {
-				log.Debugf("route: %s -> %s | %s | %s", r.Name, r.Methods, r.PathTemplate, r.PathRegexp)
-			}
 		}
 	})
 
-	app.Provider(api.ServiceProvider{})
-	app.Provider(store.ServiceProvider{})
-	app.Provider(job.ServiceProvider{})
+	app.Provider(api.Provider{})
+	app.Provider(store.Provider{})
+	app.Provider(job.Provider{})
 
 	if err := app.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
@@ -162,11 +147,11 @@ func main() {
 
 // ErrorCollectorWriter Agent 错误日志采集器
 type ErrorCollectorWriter struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
 // NewErrorCollectorWriter 创建一个错误日志采集器
-func NewErrorCollectorWriter(cc container.Container) *ErrorCollectorWriter {
+func NewErrorCollectorWriter(cc infra.Resolver) *ErrorCollectorWriter {
 	return &ErrorCollectorWriter{cc: cc}
 }
 

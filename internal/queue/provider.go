@@ -6,21 +6,18 @@ import (
 	"sync"
 
 	"github.com/mylxsw/adanos-alert/configs"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 )
 
-type ServiceProvider struct{}
+type Provider struct{}
 
-func (s ServiceProvider) Register(app container.Container) {
+func (s Provider) Register(app infra.Binder) {
 	app.MustSingleton(NewManager)
 }
 
-func (s ServiceProvider) Boot(app infra.Glacier) {
+func (s Provider) Boot(app infra.Resolver) {}
 
-}
-
-func (s ServiceProvider) Daemon(ctx context.Context, app infra.Glacier) {
+func (s Provider) Daemon(ctx context.Context, app infra.Resolver) {
 	app.MustResolve(func(manager Manager, conf *configs.Config) {
 		if conf.NoJobMode {
 			return

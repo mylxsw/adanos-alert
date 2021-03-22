@@ -5,21 +5,21 @@ import (
 	"net/http"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type AuditController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewAuditController(cc container.Container) web.Controller {
+func NewAuditController(cc infra.Resolver) web.Controller {
 	return &AuditController{cc: cc}
 }
 
-func (u AuditController) Register(router *web.Router) {
-	router.Group("/audit/", func(router *web.Router) {
+func (u AuditController) Register(router web.Router) {
+	router.Group("/audit/", func(router web.Router) {
 		router.Get("/logs/", u.Logs).Name("audit:logs")
 	})
 }

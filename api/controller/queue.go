@@ -9,22 +9,22 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type QueueController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewQueueController(cc container.Container) web.Controller {
+func NewQueueController(cc infra.Resolver) web.Controller {
 	return &QueueController{cc: cc}
 }
 
-func (q *QueueController) Register(router *web.Router) {
-	router.Group("/queue/", func(router *web.Router) {
+func (q *QueueController) Register(router web.Router) {
+	router.Group("/queue/", func(router web.Router) {
 		router.Post("/control/", q.Control).Name("queue:control")
 		router.Get("/jobs/", q.Jobs).Name("queue:jobs:all")
 		router.Delete("/jobs/{id}/", q.Delete).Name("queue:jobs:delete")

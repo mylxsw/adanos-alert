@@ -14,6 +14,18 @@ type EventGroupRepo struct {
 	Groups []repository.EventGroup
 }
 
+func (m *EventGroupRepo) StatByDatetimeCount(ctx context.Context, filter bson.M, startTime, endTime time.Time, hour int64) ([]repository.EventGroupByDatetimeCount, error) {
+	panic("implement me")
+}
+
+func (m *EventGroupRepo) StatByAggCountInPeriod(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time, hour int64) ([]repository.EventGroupAggByDatetimeCount, error) {
+	panic("implement me")
+}
+
+func (m *EventGroupRepo) StatByAggCount(ctx context.Context, ruleID primitive.ObjectID, startTime, endTime time.Time) ([]repository.EventGroupAggCount, error) {
+	panic("implement me")
+}
+
 func (m *EventGroupRepo) StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]repository.EventGroupByRuleCount, error) {
 	panic("implement me")
 }
@@ -22,9 +34,6 @@ func (m *EventGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime
 	panic("implement me")
 }
 
-func (m *EventGroupRepo) StatByDatetimeCount(ctx context.Context, startTime, endTime time.Time, hour int64) ([]repository.EventGroupByDatetimeCount, error) {
-	panic("implement me")
-}
 
 func (m *EventGroupRepo) LastGroup(filter bson.M) (grp repository.EventGroup, err error) {
 	panic("implement me")

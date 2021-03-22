@@ -9,7 +9,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 )
 
 type GroupData struct {
@@ -32,7 +32,7 @@ func init() {
 }
 
 // GroupView 分组视图展示
-func GroupView(cc container.Container, data GroupData) (string, error) {
+func GroupView(cc infra.Resolver, data GroupData) (string, error) {
 	templateContent, err := fileGetContent(filepath.Join(currentPath(), "groups.html"))
 	if err != nil {
 		templateContent = defaultTemplateContent
@@ -42,7 +42,7 @@ func GroupView(cc container.Container, data GroupData) (string, error) {
 }
 
 // ReportView 报表视图展示
-func ReportView(cc container.Container, templateContent string, data GroupData) (string, error) {
+func ReportView(cc infra.Resolver, templateContent string, data GroupData) (string, error) {
 	if templateContent == "" {
 		return GroupView(cc, data)
 	}

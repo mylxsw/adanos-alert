@@ -9,23 +9,23 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pubsub"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type DingdingRobotController struct {
-	cc container.Container
+	cc infra.Resolver
 }
 
-func NewDingdingRobotController(cc container.Container) web.Controller {
+func NewDingdingRobotController(cc infra.Resolver) web.Controller {
 	return &DingdingRobotController{cc: cc}
 }
 
-func (u DingdingRobotController) Register(router *web.Router) {
-	router.Group("/dingding-robots/", func(router *web.Router) {
+func (u DingdingRobotController) Register(router web.Router) {
+	router.Group("/dingding-robots/", func(router web.Router) {
 		router.Get("/", u.DingdingRobots).Name("robots:all")
 		router.Post("/", u.Add).Name("robots:add")
 		router.Post("/{id}/", u.Update).Name("robots:update")
@@ -33,7 +33,7 @@ func (u DingdingRobotController) Register(router *web.Router) {
 		router.Delete("/{id}/", u.Delete).Name("robots:delete")
 	})
 
-	router.Group("/dingding-robots-helper/", func(router *web.Router) {
+	router.Group("/dingding-robots-helper/", func(router web.Router) {
 		router.Get("/names/", u.DingdingRobotNames).Name("robots-helper:names")
 	})
 }
