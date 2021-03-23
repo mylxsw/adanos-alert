@@ -32,7 +32,7 @@ require (
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
 	github.com/mylxsw/container v0.0.0-20210320032614-4c230b312e04
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
-	github.com/mylxsw/glacier v0.0.0-20210322040714-19830c2ee444
+	github.com/mylxsw/glacier v0.0.0-20210322044907-dc4c08087409
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
 	github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4
 	github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564
