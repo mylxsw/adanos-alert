@@ -25,7 +25,7 @@ func (s Provider) Aggregates() []infra.Provider {
 					NewEventController(cc),
 				)
 			}),
-			web.SetMuxRouteHandlerOption(func(router *mux.Router) {
+			web.SetMuxRouteHandlerOption(func(cc infra.Resolver, router *mux.Router) {
 				// prometheus metrics
 				router.PathPrefix("/metrics").Handler(promhttp.Handler())
 			}),

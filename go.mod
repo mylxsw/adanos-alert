@@ -28,7 +28,7 @@ require (
 	github.com/kentaro-m/blackfriday-confluence v0.0.0-20200514101926-773172e7101d
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/mylxsw/asteria v0.0.0-20210107083329-f465aaced0b0
+	github.com/mylxsw/asteria v0.0.0-20210423061904-9b17f4c87f96
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
 	github.com/mylxsw/container v0.0.0-20210320032614-4c230b312e04
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb

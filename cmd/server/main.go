@@ -194,7 +194,7 @@ func main() {
 
 	app.BeforeServerStart(func(cc container.Container) error {
 		stackWriter := writer.NewStackWriter()
-		cc.MustResolve(func(c infra.FlagContext) {
+		cc.MustResolve(func(ctx context.Context, c infra.FlagContext) {
 			logPath := c.String("log_path")
 			if logPath == "" {
 				stackWriter.PushWithLevels(writer.NewStdoutWriter())
@@ -202,7 +202,7 @@ func main() {
 			}
 
 			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
-			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(func(le level.Level, module string) string {
+			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(ctx, func(le level.Level, module string) string {
 				return filepath.Join(logPath, fmt.Sprintf("server-%s.%s.log", le.GetLevelName(), time.Now().Format("20060102")))
 			}))
 		})

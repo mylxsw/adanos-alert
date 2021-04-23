@@ -228,6 +228,8 @@ github.com/mylxsw/asteria v0.0.0-20201109073030-ef64164c7661 h1:JZS8euU+/cMmZ7m6
 github.com/mylxsw/asteria v0.0.0-20201109073030-ef64164c7661/go.mod h1:v0FN8lOptbljEJBRtBrvompc+NyUpIR7Dcpg2f9823s=
 github.com/mylxsw/asteria v0.0.0-20210107083329-f465aaced0b0 h1:tVgZSYGDWFfQD6DWg+NsM/1/qM0jf8VsWSOH18tEspo=
 github.com/mylxsw/asteria v0.0.0-20210107083329-f465aaced0b0/go.mod h1:LLAdhjXLJdhyCmb3Mh+/DiNgjeCIZ+Z/VWMF3tmJoXU=
+github.com/mylxsw/asteria v0.0.0-20210423061904-9b17f4c87f96 h1:OxvE/N9rgWD58AwJW1rAtGGS7KXYJf2y6DejfaqKXJM=
+github.com/mylxsw/asteria v0.0.0-20210423061904-9b17f4c87f96/go.mod h1:LLAdhjXLJdhyCmb3Mh+/DiNgjeCIZ+Z/VWMF3tmJoXU=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8 h1:TtxSw54bx34zGgs7Y/VisH/sD5HOlopHbSavxTOzgko=
 github.com/mylxsw/coll v0.0.0-20190810120926-a7a6f0f4bae8/go.mod h1:Ugpjgv7bOSn1NXiPNHl92DdCGP2siWk50irFSyI+Hf8=
 github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9 h1:lIkaR71UX7xCQLNppsj52QpXufseVp3kiEgxqSNJco0=
