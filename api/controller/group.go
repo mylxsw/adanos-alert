@@ -70,6 +70,31 @@ func groupFilter(ctx web.Context) bson.M {
 		filter["actions.meta"] = bson.M{"$regex": fmt.Sprintf(`"robot_id":"%s"`, dingID)}
 	}
 
+	beginAt := ctx.Input("start_at")
+	endAt := ctx.Input("end_at")
+
+	if beginAt != "" || endAt != "" {
+		createdAtRange := bson.M{}
+		if beginAt != "" {
+			beginAtTs, err := time.ParseInLocation("2006-01-02 15:04:05", beginAt, time.Local)
+			if err != nil {
+				beginAtTs = time.Now()
+			}
+
+			createdAtRange["$gt"] = beginAtTs
+		}
+
+		if endAt != "" {
+			endAtTs, err := time.ParseInLocation("2006-01-02 15:04:05", endAt, time.Local)
+			if err != nil {
+				endAtTs = time.Now()
+			}
+
+			createdAtRange["$lt"] = endAtTs
+		}
+
+		filter["created_at"] = createdAtRange
+	}
 	return filter
 }
 
@@ -81,7 +106,9 @@ func groupFilter(ctx web.Context) bson.M {
 //   - user_id
 func (g GroupController) Groups(ctx web.Context, groupRepo repository.EventGroupRepo, userRepo repository.UserRepo) (*GroupsResp, error) {
 	offset, limit := offsetAndLimit(ctx)
-	grps, next, err := groupRepo.Paginate(groupFilter(ctx), offset, limit)
+
+	sortDir := ctx.InputWithDefault("sort", "desc")
+	grps, next, err := groupRepo.Paginate(groupFilter(ctx), offset, limit, sortDir == "desc")
 	if err != nil {
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}

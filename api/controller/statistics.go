@@ -56,14 +56,22 @@ func extractDateRange(webCtx web.Context, defaultDays int) (time.Time, time.Time
 	endTime := time.Now()
 
 	if startAt != "" {
-		parsed, err := time.Parse("2006-01-02", startAt)
+		if len(startAt) == 10 {
+			startAt = startAt + " 00:00:00"
+		}
+
+		parsed, err := time.Parse("2006-01-02 15:04:05", startAt)
 		if err == nil {
 			startTime = parsed
 		}
 	}
 
 	if endAt != "" {
-		parsed, err := time.Parse("2006-01-02", endAt)
+		if len(endAt) == 10 {
+			endAt = endAt + " 23:59:59"
+		}
+
+		parsed, err := time.Parse("2006-01-02 15:04:05", endAt)
 		if err == nil {
 			endTime = parsed
 		}

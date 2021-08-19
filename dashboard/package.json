@@ -11,6 +11,8 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/vue-fontawesome": "^0.1.8",
+    "@hyjiacan/vue-datepicker": "^2.2.0",
+    "@popperjs/core": "^2.9.3",
     "bootstrap-vue": "^2.15.0",
     "core-js": "^2.6.11",
     "echarts": "^4.9.0",

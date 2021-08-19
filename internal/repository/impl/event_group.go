@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -74,7 +75,7 @@ func (m EventGroupRepo) Find(filter bson.M) (grps []repository.EventGroup, err e
 	return
 }
 
-func (m EventGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.EventGroup, next int64, err error) {
+func (m EventGroupRepo) Paginate(filter bson.M, offset, limit int64, sortByCreatedAtDesc bool) (grps []repository.EventGroup, next int64, err error) {
 	grps = make([]repository.EventGroup, 0)
 	cur, err := m.col.Find(
 		context.TODO(),
@@ -82,7 +83,7 @@ func (m EventGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []rep
 		options.Find().
 			SetSkip(offset).
 			SetLimit(limit).
-			SetSort(bson.M{"created_at": -1}),
+			SetSort(bson.M{"created_at": misc.IfElse(sortByCreatedAtDesc, -1, 1)}),
 	)
 	if err != nil {
 		return

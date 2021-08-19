@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/extension"
 	"github.com/mylxsw/adanos-alert/internal/job"
@@ -116,6 +117,32 @@ func eventsFilter(ctx web.Context) bson.M {
 		if err == nil {
 			filter["_id"] = evtID
 		}
+	}
+
+	beginAt := ctx.Input("start_at")
+	endAt := ctx.Input("end_at")
+
+	if beginAt != "" || endAt != "" {
+		createdAtRange := bson.M{}
+		if beginAt != "" {
+			beginAtTs, err := time.ParseInLocation("2006-01-02 15:04:05", beginAt, time.Local)
+			if err != nil {
+				beginAtTs = time.Now()
+			}
+
+			createdAtRange["$gt"] = beginAtTs
+		}
+
+		if endAt != "" {
+			endAtTs, err := time.ParseInLocation("2006-01-02 15:04:05", endAt, time.Local)
+			if err != nil {
+				endAtTs = time.Now()
+			}
+
+			createdAtRange["$lt"] = endAtTs
+		}
+
+		filter["created_at"] = createdAtRange
 	}
 
 	return filter

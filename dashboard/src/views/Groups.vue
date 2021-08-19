@@ -6,6 +6,15 @@
                     <b-badge :variant="$route.query.status === undefined ? 'primary':''" class="mr-1" :to="'/'">全部</b-badge>
                     <b-badge :variant="$route.query.status === status.value ? 'primary': ''" v-for="(status, index) in statuses" :key="index" class="mr-1" :to="'/?status=' + status.value">{{ status.name }}</b-badge>
                 </b-card-text>
+
+                <b-card-text>
+                    <b-form inline @submit="searchSubmit">
+                        <date-picker type="datetime" v-model="search.time_range" range clearable class="mr-2" style="width: 400px;"/>
+                        <b-form-select v-model="search.sort" class="mb-2 mr-sm-2 mb-sm-0" placeholder="排序方式" :options="sort_options"></b-form-select>
+                        <b-button variant="primary" type="submit">刷新</b-button>
+                    </b-form>
+                </b-card-text>
+
                 <b-row>
                     <b-col cols="4"><v-charts :options="alertByAgg" style="width: 95%;" ref="alertByAgg" v-if="vchartShow"></v-charts></b-col>
                     <b-col cols="8"><v-charts :options="alertByDatetime" style="width: 95%;" ref="alertByDatetimeChart" v-if="vchartShow"></v-charts></b-col>
@@ -66,7 +75,7 @@
                             <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">事件组</b-dropdown-item>
                             <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">报告</b-dropdown-item>
                         </b-dropdown>
-                        <b-button size="sm" variant="danger" 
+                        <b-button size="sm" variant="danger"
                             @click="clearGroup(row.item.id)"
                             v-if="row.item.status != 'collecting' && row.item.status != 'pending'">清理</b-button>
                     </b-button-group>
@@ -94,14 +103,28 @@
     import { graphic } from 'echarts/lib/export'
 
     import 'echarts/lib/chart/pie';
+    import DatePicker from '@hyjiacan/vue-datepicker'
+    import '@hyjiacan/vue-datepicker/dist/datepicker.css'
 
     export default {
         name: 'Groups',
         components: {
             'v-charts': Echarts,
+            'date-picker': DatePicker,
         },
         data() {
             return {
+                search: {
+                    time_range: [
+                      this.$route.query.start_at !== undefined ? this.$route.query.start_at : moment().subtract(7, 'days').format('YYYY-MM-DD HH:mm:ss'),
+                      this.$route.query.end_at !== undefined ? this.$route.query.end_at : moment().format('YYYY-MM-DD HH:mm:ss'),
+                    ],
+                    sort: this.$route.query.sort !== undefined ? this.$route.query.sort : 'desc',
+                },
+                sort_options: [
+                    {value: 'asc', text: '创建时间正序'},
+                    {value: 'desc', text: '创建时间倒序'},
+                ],
                 groups: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
@@ -179,6 +202,21 @@
             '$route': 'reload',
         },
         methods: {
+            searchSubmit(evt) {
+                evt.preventDefault();
+                let query = {};
+                for (let i in this.$route.query) {
+                    query[i] = this.$route.query[i];
+                }
+
+                query['start_at'] = this.search['time_range'][0];
+                query['end_at'] = this.search['time_range'][1];
+                query['sort'] = this.search['sort'];
+
+                this.$router.push({path: '/', query: query}).catch(err => {
+                  this.ToastError(err)
+                });
+            },
             formatted(t) {
                 return moment(t).format('YYYY-MM-DD HH:mm:ss');
             },

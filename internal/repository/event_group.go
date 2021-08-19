@@ -99,7 +99,7 @@ type EventGroupRepo interface {
 	Add(grp EventGroup) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (grp EventGroup, err error)
 	Find(filter bson.M) (grps []EventGroup, err error)
-	Paginate(filter bson.M, offset, limit int64) (grps []EventGroup, next int64, err error)
+	Paginate(filter bson.M, offset, limit int64, sortByCreatedAtDesc bool) (grps []EventGroup, next int64, err error)
 	Delete(filter bson.M) error
 	DeleteID(id primitive.ObjectID) error
 	Traverse(filter bson.M, cb func(grp EventGroup) error) error
