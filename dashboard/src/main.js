@@ -71,7 +71,16 @@ Vue.prototype.SuccessBox = function (message, cb) {
 
 Vue.prototype.ErrorBox = function (message, cb) {
     cb = cb || function () {};
-    this.$bvModal.msgBoxOk(this.ParseError(message), {
+    
+    let err = this.ParseError(message);
+    console.log(err);
+
+    const h = this.$createElement;
+    const messageVNode = h('div', {domProps: {
+        innerHTML: '<pre style="white-space: pre-wrap; word-wrap: break-word;">' + err + '</pre>'
+    }});
+
+    this.$bvModal.msgBoxOk([messageVNode], {
         centered: true,
         title:'出错了',
         okVariant: 'danger',
