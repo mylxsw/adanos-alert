@@ -2,43 +2,43 @@ import {CodeMirror} from "vue-codemirror-lite";
 
 let helpers = {
     helpers: [
-        {text: "Upper(KEY)", displayText: "Upper(val string) string  | 字符串转大写"},
-        {text: "Lower(KEY)", displayText: "Lower(val string) string  | 字符串转小写"},
-        {text: "Now()", displayText: "Now() time.Time  | 当前时间"},
-        {text: "ParseTime(LAYOUT, VALUE)", displayText: "ParseTime(layout string, value string) time.Time | 时间字符串转时间对象"},
-        {text: "DailyTimeBetween(START_TIME_STR, END_TIME_STR)", displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"},
-        {text: 'SQLFinger(SQL_STR)', displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"},
-        {text: 'TrimSuffix(STR, SUFFIX)', displayText: 'TrimSuffix(str, suffix string) string | 去除字符串后缀'},
-        {text: 'TrimPrefix(STR, PREFIX)', displayText: 'TrimPrefix(str, prefix string) string | 去除字符串前缀'},
-        {text: 'CutoffLine(STR, MAX)', displayText: 'CutoffLine(val string, maxLine int) string | 字符串截取 maxLine 行'},
-        {text: 'MD5 DATA', displayText: 'MD5(data interface{}) string  | 生成 data 的 md5 值'},
-        {text: 'Sha1 DATA', displayText: 'Sha1(data interface{}) string  | 生成 data 的 sha1 值'},
-        {text: 'Base64 DATA', displayText: 'Base64(data interface{}) string  | 生成 data 的 base64 编码值'},
-        {text: 'CutOff MAXLEN STR', displayText: 'CutOff(maxLen int, val string) string  | 字符串截取最大长度'},
-        {text: 'Mask LEFT STR', displayText: 'Mask(left int, content string) string  | 字符串掩码，只保留两侧 left 个字符，其余使用*替换'},
-        {text: 'Split SEP STR', displayText: 'Split(sep string, content string) []string  | 字符串使用 sep 切割为字符串数组'},
-        {text: 'FilterEmptyLines STR', displayText: 'FilterEmptyLines(content string) string  | 去除字符串中的空行'},
-        {text: 'Join ELEMENTS SEP', displayText: 'Join(elements interface{}, sep string) string  | 数组使用 sep 连接为字符串'},
-        {text: 'Repeat COUNT STR', displayText: 'Repeat(count int, s string) string  | 重复字符串 COUNT 次'},
-        {text: 'NumberBeauty NUMBER', displayText: 'NumberBeauty(number interface{}) string  | 数值格式化'},
-        {text: 'Float NUMSTR', displayText: 'Float(numStr string) float64  | 字符串转 float64'},
-        {text: 'Int NUMSTR', displayText: 'Int(numStr string) int  | 字符串转 int'},
-        {text: 'Empty NUMSTR', displayText: 'Empty(str string) bool  | 检查字符串是否为空，`空白`, `0`，`任意大小写的 false` 会被认为是 false，其它情况为 true'},
-        {text: 'JQuery DATA EXPR SUPPRESS_ERR', displayText: 'JQuery(data string, expression string, suppressError bool) string  | 使用 JQ 表达式提取 json 字符串中的值'},
-        {text: 'DOMQueryOne SELECTOR INDEX HTML', displayText: 'DOMQueryOne(selector string, index int, htmlContent string) string  | 从 HTML DOM 对象中查询第 index 个匹配 selector 的元素内容'},
-        {text: 'DOMQuery SELECTOR HTML', displayText: 'DOMQuery(selector string, htmlContent string) []string  | 从 HTML DOM 对象中查询所有匹配 selector 的元素'},
-        {text: 'JSONArray STR PATH', displayText: 'JSONArray(content string, path string) []gjson.Result  | return array elements from path'},
-        {text: 'JSONStrArray STR PATH', displayText: 'JSONStrArray(content string, path string) []string  | return string array from json'},
-        {text: 'JSONIntArray STR PATH', displayText: 'JSONIntArray(content string, path string) []int64  | return int64 array from json'},
-        {text: 'JSONFloatArray STR PATH', displayText: 'JSONFloatArray(content string, path string) []float64  | return float64 array from json'},
-        {text: 'JSONBoolArray STR PATH', displayText: 'JSONBoolArray(content string, path string) []bool  | return bool array from json'},
-        {text: 'JSON STR PATH', displayText: 'JSON(content string, path string) string  | return string content from json'},
-        {text: 'JSONInt STR PATH', displayText: 'JSONInt(content string, path string) int64  | return int content from json'},
-        {text: 'JSONFloat STR PATH', displayText: 'JSONFloat(content string, path string) float64  | return float64 content from json'},
-        {text: 'JSONBool STR PATH', displayText: 'JSONBool(content string, path string) bool  | return bool content from json'},
-        {text: 'String DATA', displayText: 'String(data interface}) string  | convert any data to string'},
-        {text: 'JSONEncode DATA', displayText: 'JSONEncode(data interface}) string  | convert any data to json string'},
-        {text: 'HumanDuration STR', displayText: 'HumanDuration(duration string) string | 时间段格式化，以人类可读的形式展示'}
+        {text: "Upper", args: ['KEY'], displayText: "Upper(val string) string  | 字符串转大写"},
+        {text: "Lower", args: ['KEY'], displayText: "Lower(val string) string  | 字符串转小写"},
+        {text: "Now", args: [], displayText: "Now() time.Time  | 当前时间"},
+        {text: "ParseTime", args: ['LAYOUT', 'VALUE'], displayText: "ParseTime(layout string, value string) time.Time | 时间字符串转时间对象"},
+        {text: "DailyTimeBetween", args: ['START_TIME_STR', 'END_TIME_STR'], displayText: "DailyTimeBetween(startTime, endTime string) bool  | 判断当前时间是否在 startTime 和 endTime 之间（每天），时间格式为 15:04"},
+        {text: 'SQLFinger', args: ['SQL_STR'], displayText: "SQLFinger(sqlStr string) string | 创建 SQL 指纹"},
+        {text: 'TrimSuffix', args: ['STR', 'SUFFIX'], displayText: 'TrimSuffix(str, suffix string) string | 去除字符串后缀'},
+        {text: 'TrimPrefix', args: ['STR', 'PREFIX'], displayText: 'TrimPrefix(str, prefix string) string | 去除字符串前缀'},
+        {text: 'CutoffLine', args: ['STR', 'MAX'], displayText: 'CutoffLine(val string, maxLine int) string | 字符串截取 maxLine 行'},
+        {text: 'MD5', args: ['DATA'], displayText: 'MD5(data interface{}) string  | 生成 data 的 md5 值'},
+        {text: 'Sha1', args: ['DATA'], displayText: 'Sha1(data interface{}) string  | 生成 data 的 sha1 值'},
+        {text: 'Base64', args: ['DATA'], displayText: 'Base64(data interface{}) string  | 生成 data 的 base64 编码值'},
+        {text: 'CutOff', args: ['MAXLEN', 'STR'], displayText: 'CutOff(maxLen int, val string) string  | 字符串截取最大长度'},
+        {text: 'Mask', args: ['LEFT', 'STR'], displayText: 'Mask(left int, content string) string  | 字符串掩码，只保留两侧 left 个字符，其余使用*替换'},
+        {text: 'Split', args: ['SEP', 'STR'], displayText: 'Split(sep string, content string) []string  | 字符串使用 sep 切割为字符串数组'},
+        {text: 'FilterEmptyLines', args: ['STR'], displayText: 'FilterEmptyLines(content string) string  | 去除字符串中的空行'},
+        {text: 'Join', args: ['ELEMENTS', 'SEP'], displayText: 'Join(elements interface{}, sep string) string  | 数组使用 sep 连接为字符串'},
+        {text: 'Repeat', args: ['COUNT', 'STR'], displayText: 'Repeat(count int, s string) string  | 重复字符串 COUNT 次'},
+        {text: 'NumberBeauty', args: ['NUMBER'], displayText: 'NumberBeauty(number interface{}) string  | 数值格式化'},
+        {text: 'Float', args: ['NUMSTR'], displayText: 'Float(numStr string) float64  | 字符串转 float64'},
+        {text: 'Int', args: ['NUMSTR'], displayText: 'Int(numStr string) int  | 字符串转 int'},
+        {text: 'Empty', args: ['NUMSTR'], displayText: 'Empty(str string) bool  | 检查字符串是否为空，`空白`, `0`，`任意大小写的 false` 会被认为是 false，其它情况为 true'},
+        {text: 'JQuery', args: ['DATA', 'EXPR', 'SUPPRESS_ERR'], displayText: 'JQuery(data string, expression string, suppressError bool) string  | 使用 JQ 表达式提取 json 字符串中的值'},
+        {text: 'DOMQueryOne', args: ['SELECTOR', 'INDEX HTML'], displayText: 'DOMQueryOne(selector string, index int, htmlContent string) string  | 从 HTML DOM 对象中查询第 index 个匹配 selector 的元素内容'},
+        {text: 'DOMQuery', args: ['SELECTOR', 'HTML'], displayText: 'DOMQuery(selector string, htmlContent string) []string  | 从 HTML DOM 对象中查询所有匹配 selector 的元素'},
+        {text: 'JSONArray', args: ['STR', 'PATH'], displayText: 'JSONArray(content string, path string) []gjson.Result  | return array elements from path'},
+        {text: 'JSONStrArray', args: ['STR', 'PATH'], displayText: 'JSONStrArray(content string, path string) []string  | return string array from json'},
+        {text: 'JSONIntArray', args: ['STR', 'PATH'], displayText: 'JSONIntArray(content string, path string) []int64  | return int64 array from json'},
+        {text: 'JSONFloatArray', args: ['STR', 'PATH'], displayText: 'JSONFloatArray(content string, path string) []float64  | return float64 array from json'},
+        {text: 'JSONBoolArray', args: ['STR', 'PATH'], displayText: 'JSONBoolArray(content string, path string) []bool  | return bool array from json'},
+        {text: 'JSON', args: ['STR', 'PATH'], displayText: 'JSON(content string, path string) string  | return string content from json'},
+        {text: 'JSONInt', args: ['STR', 'PATH'], displayText: 'JSONInt(content string, path string) int64  | return int content from json'},
+        {text: 'JSONFloat', args: ['STR', 'PATH'], displayText: 'JSONFloat(content string, path string) float64  | return float64 content from json'},
+        {text: 'JSONBool', args: ['STR', 'PATH'], displayText: 'JSONBool(content string, path string) bool  | return bool content from json'},
+        {text: 'String', args: ['DATA'], displayText: 'String(data interface}) string  | convert any data to string'},
+        {text: 'JSONEncode', args: ['DATA'], displayText: 'JSONEncode(data interface}) string  | convert any data to json string'},
+        {text: 'HumanDuration', args: ['STR'], displayText: 'HumanDuration(duration string) string | 时间段格式化，以人类可读的形式展示'}
     ],
     groupMatchRules: [
         {text: 'Content', displayText: 'Content | 字段类型：string |  事件内容，字符串格式'},
@@ -297,10 +297,15 @@ let helpers = {
     ],
 }
 
-helpers.matchRules.push(...helpers.helpers);
+helpers.matchRules.push(...helpers.helpers.map(item => {
+    return {
+        text: item.text + "(" + item.args.join(", ") + ")",
+        displayText: item.displayText,
+    }
+}));
 helpers.templates.push(...helpers.helpers.map(item => {
     return {
-        text: 'helpers.' + item.text,
+        text: 'helpers.' + item.text + " " + item.args.join(" "),
         displayText: 'helpers.' + item.displayText,
     };
 }))
