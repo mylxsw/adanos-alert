@@ -197,6 +197,7 @@ func main() {
 		cc.MustResolve(func(ctx context.Context, c infra.FlagContext) {
 			logPath := c.String("log_path")
 			if logPath == "" {
+				log.All().LogFormatter(formatter.NewJSONFormatter())
 				stackWriter.PushWithLevels(writer.NewStdoutWriter())
 				return
 			}
