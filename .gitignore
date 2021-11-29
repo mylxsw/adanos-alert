@@ -15,3 +15,5 @@
 .idea/
 .vscode/
 Makefile.local
+
+docker-build.sh

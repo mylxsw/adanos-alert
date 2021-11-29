@@ -9,9 +9,9 @@ COPY . .
 RUN go build -o /data/bin/adanos-alert-server cmd/server/main.go 
 
 #final stage
-FROM alpine:latest
+FROM ubuntu:21.04
 WORKDIR /data
-COPY --from=builder /data/bin/adanos-alert-server /usr/local/bin/adanos-alert-server
+COPY --from=builder /data/bin/adanos-alert-server /usr/local/bin/
 EXPOSE 80
 EXPOSE 3000
 
