@@ -1,16 +1,18 @@
 
 #build stage
-FROM golang:alpine AS builder
-WORKDIR /go/src/app
+FROM golang:1.17 AS builder
+ENV GOPROXY=https://goproxy.io,direct
+WORKDIR /data
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN apk add --no-cache git
-RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go build -o /data/bin/adanos-alert-server cmd/server/main.go 
 
 #final stage
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-COPY --from=builder /go/bin/app /app
-ENTRYPOINT ./app
-LABEL Name=adanos-alert Version=0.0.1
+WORKDIR /data
+COPY --from=builder /data/bin/adanos-alert-server /usr/local/bin/adanos-alert-server
+EXPOSE 80
 EXPOSE 3000
+
+ENTRYPOINT ["/usr/local/bin/adanos-alert-server", "--conf", "/etc/adanos-alert-server.yaml"]
