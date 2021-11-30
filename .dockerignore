@@ -13,3 +13,4 @@ README.md
 LICENSE
 .vscode
 build/*
+docker-build.sh

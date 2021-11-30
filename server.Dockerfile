@@ -10,6 +10,11 @@ RUN go build -o /data/bin/adanos-alert-server cmd/server/main.go
 
 #final stage
 FROM ubuntu:21.04
+
+ENV TZ=Asia/Shanghai
+RUN apt-get -y update && DEBIAN_FRONTEND="nointeractive" apt install -y tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /data
 COPY --from=builder /data/bin/adanos-alert-server /usr/local/bin/
 EXPOSE 80
