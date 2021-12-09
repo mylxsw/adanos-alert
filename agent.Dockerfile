@@ -12,7 +12,7 @@ RUN go build -o /data/bin/adanos-alert-agent cmd/agent/main.go
 FROM ubuntu:21.04
 
 ENV TZ=Asia/Shanghai
-RUN apt-get -y update && DEBIAN_FRONTEND="nointeractive" apt install -y tzdata
+RUN apt-get -y update && DEBIAN_FRONTEND="nointeractive" apt install -y tzdata ca-certificates
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /data
