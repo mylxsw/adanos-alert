@@ -12,6 +12,10 @@ Adanos-alert is a alert manager with multi alert channel support
 
 ## Build 
 
+编译时依赖以下工具
+
+- [esc](https://github.com/mjibson/esc) 是用于将静态文件打包到 Go 程序中的一个工具库
+
 使用下面的命令直接完成编译并运行
 
 ```bash
