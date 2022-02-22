@@ -22,6 +22,7 @@ func (p Provider) Register(app infra.Binder) {
 	app.MustSingleton(func(conf *configs.Config) *grpc.Server {
 		auth := authFunc(app, conf)
 		return grpc.NewServer(
+			grpc.MaxRecvMsgSize(1024*1024*4*100),
 			grpc_middleware.WithStreamServerChain(
 				grpc_auth.StreamServerInterceptor(auth),
 				grpc_recovery.StreamServerInterceptor(),
