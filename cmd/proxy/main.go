@@ -62,6 +62,10 @@ func main() {
 				Name:  "max-lines",
 				Value: 1000,
 			},
+			&cli.BoolFlag{
+				Name:  "multi-line",
+				Usage: "是否为多行日志，添加该选项后，所有输入将作为一个告警事件发送",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			stdinLines := readStdin(c.Int("max-lines"))
@@ -80,14 +84,38 @@ func main() {
 				RecoveryAfter:   c.String("recovery-after"),
 			}
 
-			evt := connector.NewEvent(stdinLines).
-				WithTags(c.StringSlice("tag")...).
-				WithOrigin(c.String("origin")).
-				WithMetas(createMessageMeta(c.StringSlice("meta"))).
-				WithCtl(ctl)
+			multiLine := c.Bool("multi-line")
+			if multiLine {
+				evt := connector.NewEvent(stdinLines).
+					WithTags(c.StringSlice("tag")...).
+					WithOrigin(c.String("origin")).
+					WithMetas(createMessageMeta(c.StringSlice("meta"))).
+					WithCtl(ctl)
 
-			ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
-			return connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, evt)
+				ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
+				return connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, evt)
+			}
+
+			for _, line := range strings.Split(stdinLines, "\n") {
+				if strings.TrimSpace(line) == "" {
+					continue
+				}
+
+				evt := connector.NewEvent(line).
+					WithTags(c.StringSlice("tag")...).
+					WithOrigin(c.String("origin")).
+					WithMetas(createMessageMeta(c.StringSlice("meta"))).
+					WithCtl(ctl)
+
+				ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
+				if err := connector.NewConnector(c.String("adanos-token"), adanosServers...).Send(ctx, evt); err != nil {
+					log.WithFields(log.Fields{
+						"event": line,
+					}).Errorf("send event to adanos-alert server failed: %v", err)
+				}
+			}
+
+			return nil
 		},
 	}
 
