@@ -16,7 +16,7 @@
     "bootstrap-vue": "^2.15.0",
     "core-js": "^2.6.11",
     "echarts": "^4.9.0",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "moment": "^2.24.0",
     "vue": "^2.6.10",
     "vue-codemirror-lite": "^1.0.4",
