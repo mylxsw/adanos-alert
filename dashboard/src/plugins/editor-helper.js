@@ -147,6 +147,8 @@ let helpers = {
         {text: 'json JSONSTR', displayText: 'json(content string) string  |  JSON 字符串格式化'},
         {text: 'datetime LAYOUT DATETIME', displayText: 'datetime(layout string, datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，时区选择北京/重庆'},
         {text: 'datetime_noloc LAYOUT DATETIME',displayText: 'datetime_noloc(layout string, datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，默认时区'},
+        {text: 'datetime_loc LAYOUT LOC DATETIME',displayText: 'datetime_loc(layout string, locName string, datetime time.Time) string  |  时间格式化展示为 2006-01-02 15:04:05 格式，指定时区，如 UTC'},
+        {text: 'datetime_add_sec DATETIME OFFSET',displayText: 'datetime_add_sec(datetime time.Time, offset int) time.Time  | 对时间进行运算，offset 单位为秒'},
         {text: 'reformat_datetime_str ORIGINAL_LAYOUT TARGET_LAYOUT DATETIME_STR',displayText: 'reformat_datetime_str(originalLayout, targetLayout string, dt string) string  |  重新格式化时间字符串'},
         {text: 'parse_datetime_str LAYOUT DATETIME_STR',displayText: 'parse_datetime_str(layout string, dt string) time.Time  | 将时间字符串解析为时间对象'},
         {text: 'parse_datetime_str_rfc3339 DATETIME_STR',displayText: 'parse_datetime_str_rfc3339(dt string) time.Time  |  将时间字符串解析为时间对象，格式为 RFC3339'},

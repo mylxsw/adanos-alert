@@ -213,7 +213,7 @@ var _escData = map[string]*_escFile{
 		name:    "groups.html",
 		local:   "api/view/groups.html",
 		size:    3116,
-		modtime: 1626225706,
+		modtime: 1626536985,
 		compressed: `
 H4sIAAAAAAAC/+xWzW7bRhC+6ykGW/VmyrJdF6hAsSiMAgWK2gZa9CosxaG01nJX3l2xFmgBvQVILnmB
 AMkhxxwDGDnkaQwHeYtgV6Ql0SRNJ9f4QHj/5vvmm29W2/EjlsKYU62HZE4nTFAjFQk6AABZBiyG3h9U

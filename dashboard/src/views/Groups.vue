@@ -240,11 +240,11 @@
             },
             formatAction(action) {
                 let actions = {
-                    'dingding': '钉钉通知',
-                    'email': '邮件通知',
-                    'phone_call': '电话通知',
-                    'wechat': '微信通知',
-                    'sms': '短信通知',
+                    'dingding': '钉钉',
+                    'email': '邮件',
+                    'phone_call_aliyun': '电话',
+                    'wechat': '微信',
+                    'sms': '短信',
                     'http': 'HTTP',
                     'jira': 'JIRA',
                 };

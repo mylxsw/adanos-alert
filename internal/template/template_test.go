@@ -2,12 +2,11 @@ package template
 
 import (
 	"fmt"
-	"strings"
-	"testing"
-
 	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
 	"github.com/mylxsw/container"
 	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
 )
 
 var content = `

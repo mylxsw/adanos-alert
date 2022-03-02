@@ -41,7 +41,7 @@ type SimpleContainer interface {
 	Get(key interface{}) (interface{}, error)
 }
 
-// Parse parse template with data to html
+// Parse template with data to html
 func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, error) {
 	var buffer bytes.Buffer
 	par, err := CreateParser(cc, templateStr)
@@ -55,7 +55,7 @@ func Parse(cc SimpleContainer, templateStr string, data interface{}) (string, er
 	return buffer.String(), nil
 }
 
-// CreateParse create a template parser
+// CreateParser create a template parser
 func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, error) {
 	funcMap := template.FuncMap{
 		"cutoff":                     str.Cutoff,
@@ -69,9 +69,11 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"ident":                      leftIdent,
 		"datetime":                   datetimeFormat,
 		"datetime_noloc":             datetimeFormatNoLoc,
+		"datetime_loc":               datetimeFormatLoc,
 		"reformat_datetime_str":      reformatDatetimeStr,
 		"parse_datetime_str":         parseDatetime,
 		"parse_datetime_str_rfc3339": parseDatetimeRFC3339,
+		"datetime_add_sec":           datetimeAddSec,
 
 		"format":         fmt.Sprintf,
 		"number_beauty":  NumberBeauty,
@@ -261,6 +263,17 @@ func datetimeFormat(layout string, datetime time.Time) string {
 	return datetime.In(loc).Format(layout)
 }
 
+// datetimeFormatLoc 根据提供的location对时间进行格式化
+func datetimeFormatLoc(layout string, locName string, datetime time.Time) string {
+	loc, _ := time.LoadLocation(locName)
+	return datetime.In(loc).Format(layout)
+}
+
+// datetimeAddSec 时间的运算
+func datetimeAddSec(datetime time.Time, addSec int) time.Time {
+	return datetime.Add(time.Duration(addSec) * time.Second)
+}
+
 type KvPairs []jsonutils.KvPair
 
 func (k KvPairs) Len() int {
@@ -392,7 +405,7 @@ func MetaFilterExclude(meta map[string]interface{}, excludeKeys ...string) map[s
 	return res
 }
 
-// MetaFilter 过滤 Meta，只保留以 allowKeyPrefix 开头的项
+// MetaFilterPrefix 过滤 Meta，只保留以 allowKeyPrefix 开头的项
 func MetaFilterPrefix(meta map[string]interface{}, allowKeyPrefix ...string) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range meta {
@@ -492,19 +505,19 @@ func Implode(elems interface{}, sep string) string {
 
 // NumberBeauty 字符串数字格式化
 func NumberBeauty(number interface{}) string {
-	str, ok := number.(string)
+	strs, ok := number.(string)
 	if !ok {
-		str = fmt.Sprintf("%.2f", number)
+		strs = fmt.Sprintf("%.2f", number)
 	}
 
-	length := len(str)
+	length := len(strs)
 	if length < 4 {
-		return str
+		return strs
 	}
-	arr := strings.Split(str, ".") //用小数点符号分割字符串,为数组接收
+	arr := strings.Split(strs, ".") //用小数点符号分割字符串,为数组接收
 	length1 := len(arr[0])
 	if length1 < 4 {
-		return str
+		return strs
 	}
 	count := (length1 - 1) / 3
 	for i := 0; i < count; i++ {
