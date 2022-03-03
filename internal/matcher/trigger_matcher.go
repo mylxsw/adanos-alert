@@ -156,8 +156,11 @@ func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerSta
 
 	if log.DebugEnabled() {
 		log.WithFields(log.Fields{
-			"times": triggeredTimes,
-		}).Debugf("TriggeredTimesInPeriod")
+			"periodInMinutes": periodInMinutes,
+			"triggerStatus":   triggerStatus,
+			"times":           triggeredTimes,
+			"trigger":         tc.Trigger,
+		}).Debugf("helper function: triggeredTimesInPeriod")
 	}
 
 	return triggeredTimes
@@ -183,8 +186,10 @@ func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.Ev
 
 	if log.DebugEnabled() {
 		log.WithFields(log.Fields{
-			"group": lastTriggeredGroup,
-		}).Debugf("LastTriggeredGroup")
+			"group":         lastTriggeredGroup,
+			"trigger":       tc.Trigger,
+			"triggerStatus": triggerStatus,
+		}).Debugf("helper function: lastTriggeredGroup")
 	}
 
 	return lastTriggeredGroup

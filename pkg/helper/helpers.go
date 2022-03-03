@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/mylxsw/asteria/log"
 	"html"
 	"strconv"
 	"strings"
@@ -57,7 +58,18 @@ func (Helpers) DailyTimeBetween(startTime, endTime string) bool {
 	}
 
 	now, _ := time.Parse("15:04", time.Now().Format("15:04"))
-	return now.After(start) && now.Before(end)
+	matched := now.After(start) && now.Before(end)
+
+	if log.DebugEnabled() {
+		log.WithFields(log.Fields{
+			"start":   start,
+			"end":     end,
+			"now":     now,
+			"matched": matched,
+		}).Debug("helper function: dailyTimeBetween")
+	}
+
+	return matched
 }
 
 // Now return current time
