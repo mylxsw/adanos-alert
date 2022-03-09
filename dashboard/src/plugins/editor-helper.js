@@ -57,6 +57,7 @@ let helpers = {
         {text: "EventsWithMetaCount(KEY, VALUE)", displayText: "EventsWithMetaCount(key, value string) int64  | 获取 meta 匹配指定 key=value 的 Event 数量"},
         {text: "EventsWithTagsCount(TAG)", displayText: "EventsWithTagsCount(tags string) int64  | 获取拥有指定 tag 的 Event 数量，多个 tag 使用英文逗号分隔"},
         {text: "EventsCount()", displayText: "EventsCount() int64 | 获取事件组中 Events 数量"},
+        {text: "UserHasProperty(KEY, VALUE, RETURN)", displayText: "UserHasProperty(key, value string, returnField string) []string | 根据字段、值查询用户，返回值指定字段列表"},
         {text: "TriggeredTimesInPeriod(PERIOD_IN_MINUTES, TRIGGER_STATUS)", displayText: "TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 当前规则在指定时间范围内，状态为 triggerStatus 的触发次数"},
         {text: "LastTriggeredGroup(TRIGGER_STATUS)", displayText: "LastTriggeredGroup(triggerStatus string) repository.MessageGroup 最后一次触发该规则的状态为 triggerStatus 的事件组"},
         {text: "collecting", displayText: "collecting  | TriggerStatus：collecting"},

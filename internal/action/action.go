@@ -3,6 +3,8 @@ package action
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mylxsw/adanos-alert/internal/matcher"
+	"github.com/mylxsw/container"
 	"sync"
 	"time"
 
@@ -259,4 +261,47 @@ func parseTemplate(cc template.SimpleContainer, temp string, payload *Payload) s
 	}
 
 	return summary
+}
+
+func getUserRefs(cc container.Container, tr repository.Trigger, grp repository.EventGroup, eventRepo repository.EventRepo) []primitive.ObjectID {
+	users := make([]primitive.ObjectID, 0)
+	for _, u := range tr.UserRefs {
+		users = append(users, u)
+	}
+
+	if tr.UserEvalFunc != "" {
+		tm, err := matcher.NewTriggerMatcher(tr.UserEvalFunc, tr, false)
+		if err != nil {
+			log.With(tr).Errorf("eval trigger GetUserRefs failed: %v", err)
+			return users
+		}
+
+		res, err := tm.Eval(matcher.NewTriggerContext(cc, tr, grp, func() []repository.Event {
+			messages, err := eventRepo.Find(bson.M{"group_ids": grp.ID})
+			if err != nil {
+				log.WithFields(log.Fields{
+					"err": err.Error(),
+					"grp": grp,
+				}).Errorf("trigger callback: fetch messages from group failed: %v", err)
+			}
+
+			return messages
+		}))
+		if err != nil {
+			log.With(tr).Errorf("eval trigger GetUserRefs failed: %v", err)
+			return users
+		}
+
+		for _, r := range res {
+			objID, err := primitive.ObjectIDFromHex(r)
+			if err != nil {
+				log.With(tr).Errorf("eval trigger GetUserRefs failed: %v, userEvalFunc return a invalid object id: %v", err, r)
+				continue
+			}
+
+			users = append(users, objID)
+		}
+	}
+
+	return users
 }

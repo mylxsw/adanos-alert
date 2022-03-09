@@ -22,6 +22,7 @@ type Trigger struct {
 	Action        string               `bson:"action" json:"action"`
 	Meta          string               `bson:"meta" json:"meta"`
 	UserRefs      []primitive.ObjectID `bson:"user_refs" json:"user_refs"`
+	UserEvalFunc  string               `bson:"user_eval_func" json:"user_eval_func"`
 	// for group actions
 	Status       TriggerStatus `bson:"trigger_status,omitempty" json:"trigger_status,omitempty"`
 	FailedCount  int           `bson:"failed_count" json:"failed_count"`

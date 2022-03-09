@@ -3,6 +3,7 @@ package action
 import (
 	"encoding/json"
 	"errors"
+	"github.com/mylxsw/container"
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -32,7 +33,7 @@ type VoiceCallMeta struct {
 }
 
 func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.Trigger, grp repository.EventGroup) error {
-	return w.manager.Resolve(func(conf *configs.Config, userRepo repository.UserRepo) error {
+	return w.manager.Resolve(func(cc container.Container, conf *configs.Config, userRepo repository.UserRepo, evtRepo repository.EventRepo) error {
 		voiceCall := aliyun_voice.NewVoiceCall(conf)
 
 		var meta VoiceCallMeta
@@ -49,7 +50,7 @@ func (w AliyunVoiceCallAction) Handle(rule repository.Rule, trigger repository.T
 			title = rule.Name
 		}
 
-		mobiles := extractPhonesFromUserRefs(userRepo, trigger.UserRefs)
+		mobiles := extractPhonesFromUserRefs(userRepo, getUserRefs(cc, trigger, grp, evtRepo))
 		if err := voiceCall.Send(title, mobiles); err != nil {
 			log.WithFields(log.Fields{
 				"title":   title,

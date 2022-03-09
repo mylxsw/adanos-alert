@@ -143,6 +143,8 @@ func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {
 	var res []string
 	_ = coll.MustNew(users).Map(func(u repository.User) string {
 		switch field {
+		case "id":
+			return u.ID.Hex()
 		case "name":
 			return u.Name
 		case "phone":

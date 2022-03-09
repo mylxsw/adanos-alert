@@ -281,6 +281,9 @@
                                         </small>
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_expr_' + i" label="接收人表达式" :label-for="'trigger_meta_template_expr_' + i">
+                                      <b-form-input :id="'trigger_meta_template_expr_' + i" v-model="trigger.user_eval_func" placeholder="接收人计算表达式"/>
+                                    </b-form-group>
                                     <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
                                         <div class="adanos-form-group-box">
                                             <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
@@ -420,6 +423,9 @@
                                     </b-form-group>
                                     <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID" :label-for="'trigger_meta_template_id_' + i">
                                         <b-form-input :id="'trigger_meta_template_id_' + i" v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
+                                    </b-form-group>
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_expr_' + i" label="接收人表达式" :label-for="'trigger_meta_template_expr_' + i">
+                                      <b-form-input :id="'trigger_meta_template_expr_' + i" v-model="trigger.user_eval_func" placeholder="接收人计算表达式"/>
                                     </b-form-group>
                                     <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i">
                                         <div class="adanos-form-group-box">
@@ -944,6 +950,7 @@ export default {
                 meta_arr: this.createTriggerMeta(),
                 id: '',
                 user_refs: [],
+                user_eval_func: '',
                 help: false,
                 template_help: false,
                 template_fold: true,

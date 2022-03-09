@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -136,6 +137,14 @@ func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 	return count
 }
 
+func (tc *TriggerContext) UserHasProperty(key, value, returnField string) []string {
+	users := make([]string, 0)
+	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+		users, _ = userRepo.GetUserMetas(key, value, returnField)
+	})
+	return users
+}
+
 // TriggeredTimesInPeriod return triggered times in specified periods
 func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 {
 	var triggeredTimes int64 = 0
@@ -197,13 +206,18 @@ func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.Ev
 
 // NewTriggerMatcher create a new TriggerMatcher
 // https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md
-func NewTriggerMatcher(trigger repository.Trigger) (*TriggerMatcher, error) {
-	condition := trigger.PreCondition
-	if condition == "" {
+func NewTriggerMatcher(condition string, trigger repository.Trigger, boolRet bool) (*TriggerMatcher, error) {
+	if condition == "" && boolRet {
 		condition = "true"
 	}
 
-	program, err := expr.Compile(condition, expr.Env(&TriggerContext{}), expr.AsBool())
+	options := make([]expr.Option, 0)
+	options = append(options, expr.Env(&TriggerContext{}))
+	if boolRet {
+		options = append(options, expr.AsBool())
+	}
+
+	program, err := expr.Compile(condition, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -223,6 +237,37 @@ func (m *TriggerMatcher) Match(triggerCtx *TriggerContext) (bool, error) {
 	}
 
 	return false, InvalidReturnVal
+}
+
+// Eval 根据指定的表达式创建 Event 解析内容为字符串数组
+func (m *TriggerMatcher) Eval(triggerCtx *TriggerContext) ([]string, error) {
+	result, err := expr.Run(m.program, triggerCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	if result == nil {
+		return nil, nil
+	}
+
+	if s, ok := result.(string); ok {
+		return []string{s}, nil
+	}
+
+	if ss, ok := result.([]string); ok {
+		return ss, nil
+	}
+
+	if ss, ok := result.([]interface{}); ok {
+		res := make([]string, 0)
+		for _, s := range ss {
+			res = append(res, fmt.Sprintf("%v", s))
+		}
+
+		return res, nil
+	}
+
+	return []string{fmt.Sprintf("%v", result)}, nil
 }
 
 // Trigger return original trigger object

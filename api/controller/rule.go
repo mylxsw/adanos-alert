@@ -64,6 +64,7 @@ type RuleTriggerForm struct {
 	Action        string   `json:"action"`
 	Meta          string   `json:"meta"`
 	UserRefs      []string `json:"user_refs"`
+	UserEvalFunc  string   `json:"user_eval_func"`
 }
 
 // RuleForm is a form object using create or update rule
@@ -186,9 +187,9 @@ func (r RuleForm) Validate(req web.Request) error {
 
 	for i, tr := range r.Triggers {
 		if tr.PreCondition != "" {
-			_, err := matcher.NewTriggerMatcher(repository.Trigger{
+			_, err := matcher.NewTriggerMatcher(tr.PreCondition, repository.Trigger{
 				PreCondition: tr.PreCondition,
-			})
+			}, true)
 			if err != nil {
 				return fmt.Errorf("trigger #%d is invalid: %w", i, err)
 			}
@@ -198,6 +199,13 @@ func (r RuleForm) Validate(req web.Request) error {
 			_, err := primitive.ObjectIDFromHex(u)
 			if err != nil {
 				return fmt.Errorf("trigger #%d, user #%d with value %s: %w", i, j, u, err)
+			}
+		}
+
+		if tr.UserEvalFunc != "" {
+			_, err := matcher.NewTriggerMatcher(tr.UserEvalFunc, repository.Trigger{}, false)
+			if err != nil {
+				return fmt.Errorf("trigger #%d's user eval func is invalid: %w", i, err)
 			}
 		}
 
@@ -268,7 +276,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 			_, err = matcher.NewEventMatcher(repository.Rule{Rule: content})
 		}
 	case repository.TemplateTypeTriggerRule:
-		_, err = matcher.NewTriggerMatcher(repository.Trigger{PreCondition: content})
+		_, err = matcher.NewTriggerMatcher(content, repository.Trigger{PreCondition: content}, true)
 	case repository.TemplateTypeTemplate:
 		data, err1 := template.Parse(r.cc, content, createPayloadForTemplateCheck(r, conf, msgID, msgRepo, content))
 		if err1 != nil {
@@ -487,6 +495,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 			Meta:          t.Meta,
 			IsElseTrigger: t.IsElseTrigger,
 			UserRefs:      users,
+			UserEvalFunc:  t.UserEvalFunc,
 		})
 	}
 

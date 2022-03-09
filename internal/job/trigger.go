@@ -59,7 +59,7 @@ func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, even
 				continue
 			}
 
-			tm, err := matcher.NewTriggerMatcher(trigger)
+			tm, err := matcher.NewTriggerMatcher(trigger.PreCondition, trigger, true)
 			if err != nil {
 				log.WithFields(log.Fields{
 					"trigger_id": trigger.ID,
