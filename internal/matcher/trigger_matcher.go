@@ -137,7 +137,7 @@ func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 	return count
 }
 
-func (tc *TriggerContext) UserHasProperty(key, value, returnField string) []string {
+func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []string {
 	users := make([]string, 0)
 	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
 		users, _ = userRepo.GetUserMetas(key, value, returnField)

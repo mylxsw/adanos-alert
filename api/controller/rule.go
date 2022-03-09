@@ -309,6 +309,8 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 		} else {
 			err = err1
 		}
+	case "user_eval_rule":
+		_, err = matcher.NewTriggerMatcher(content, repository.Trigger{PreCondition: content}, false)
 	}
 
 	if err != nil {

@@ -281,23 +281,42 @@
                                         </small>
                                         <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_template_expr_' + i" label="接收人表达式" :label-for="'trigger_meta_template_expr_' + i">
-                                      <b-form-input :id="'trigger_meta_template_expr_' + i" v-model="trigger.user_eval_func" placeholder="接收人计算表达式"/>
-                                    </b-form-group>
+
                                     <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
                                         <div class="adanos-form-group-box">
                                             <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                            <b-btn v-b-toggle="'trigger_meta_template_expr_p' + i" variant="secondary" class="ml-2 mb-3">高级</b-btn>
+                                            <b-collapse :id="'trigger_meta_template_expr_p' + i" class="mt-2 mb-3">
+                                              <b-card>
+                                                <b-form-group label-cols="2" label="接收人表达式">
+                                                  <b-btn-group class="mb-2 float-right">
+                                                    <b-btn variant="primary" @click="checkUserEvalRule(trigger)">检查</b-btn>
+                                                  </b-btn-group>
+                                                </b-form-group>
+                                                <b-form-group>
+                                                  <codemirror v-model="trigger.user_eval_func" class="mt-1 adanos-code-textarea" :options="options.user_eval_rule"></codemirror>
+                                                  <small class="form-text text-muted">
+                                                    语法提示 <code>Alt+/</code>，语法参考 <a
+                                                      href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                                      target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                                  </small>
+                                                </b-form-group>
+                                              </b-card>
+                                            </b-collapse>
+
                                             <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
                                                 <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
                                                 <b-input-group-append>
                                                     <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
                                                 </b-input-group-append>
                                             </b-input-group>
+
                                             <small class="form-text text-muted">
                                                 发送钉钉消息时，将会自动 @ 这里选择的接收人，请确保接收人在接收消息的钉钉群内。
                                             </small>
                                         </div>
                                     </b-form-group>
+
                                 </div>
                                 <!-- DINGDING ACTION END -->
 
@@ -424,12 +443,27 @@
                                     <b-form-group label-cols="2" :id="'trigger_meta_template_id_' + i" label="语音模板ID" :label-for="'trigger_meta_template_id_' + i">
                                         <b-form-input :id="'trigger_meta_template_id_' + i" v-model="trigger.meta_arr.template_id" placeholder="阿里云语音通知模板ID，留空使用默认模板"/>
                                     </b-form-group>
-                                    <b-form-group label-cols="2" :id="'trigger_meta_template_expr_' + i" label="接收人表达式" :label-for="'trigger_meta_template_expr_' + i">
-                                      <b-form-input :id="'trigger_meta_template_expr_' + i" v-model="trigger.user_eval_func" placeholder="接收人计算表达式"/>
-                                    </b-form-group>
                                     <b-form-group label-cols="2" label="接收人*" :label-for="'trigger_users_' + i">
                                         <div class="adanos-form-group-box">
                                             <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                            <b-btn v-b-toggle="'trigger_meta_template_expr_p' + i" variant="secondary" class="ml-2 mb-3">高级</b-btn>
+                                            <b-collapse :id="'trigger_meta_template_expr_p' + i" class="mt-2 mb-3">
+                                              <b-card>
+                                                <b-form-group label-cols="2" label="接收人表达式">
+                                                  <b-btn-group class="mb-2 float-right">
+                                                    <b-btn variant="primary" @click="checkUserEvalRule(trigger)">检查</b-btn>
+                                                  </b-btn-group>
+                                                </b-form-group>
+                                                <b-form-group>
+                                                  <codemirror v-model="trigger.user_eval_func" class="mt-1 adanos-code-textarea" :options="options.user_eval_rule"></codemirror>
+                                                  <small class="form-text text-muted">
+                                                    语法提示 <code>Alt+/</code>，语法参考 <a
+                                                      href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
+                                                      target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                                  </small>
+                                                </b-form-group>
+                                              </b-card>
+                                            </b-collapse>
                                             <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
                                                 <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
                                                 <b-input-group-append>
@@ -706,6 +740,15 @@ export default {
                     placeholder: '默认为 true （全部匹配）',
                     lineWrapping: true
                 },
+                user_eval_rule: {
+                  extraKeys: {'Alt-/': 'autocomplete'},
+                  smartIndent: true,
+                  hintOptions: {adanosType: 'TriggerMatchRule'},
+                  completeSingle: false,
+                  lineNumbers: true,
+                  placeholder: '示例 UsersHasProperty("service-owner", Group.AggregateKey, "id")',
+                  lineWrapping: true
+                },
                 ding_template: {
                     extraKeys: {'Alt-/': 'autocomplete'},
                     mode: 'markdown',
@@ -788,6 +831,16 @@ export default {
             }
 
             this.sendCheckRequest('trigger_rule', rule)
+        },
+
+        checkUserEvalRule(trigger) {
+            let rule = trigger.user_eval_func.trim();
+            if (rule === '') {
+              this.SuccessBox('接收人表达式为空，无需检查');
+              return;
+            }
+
+            this.sendCheckRequest('user_eval_rule', rule);
         },
 
         /**
@@ -1224,6 +1277,13 @@ export default {
                     trigger.template_fold = trigger.meta_arr.template === "";
 
                     this.form.triggers.push(trigger);
+
+                    if (trigger.user_eval_func !== '') {
+                      let that = this;
+                      window.setTimeout(function () {
+                          that.$root.$emit('bv::toggle::collapse', 'trigger_meta_template_expr_p' + i);
+                      }, 0);
+                    }
                 }
 
                 for (let i in triggerJiraLoaders) {
