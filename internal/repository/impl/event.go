@@ -80,6 +80,20 @@ func (m EventRepo) Get(id primitive.ObjectID) (msg repository.Event, err error) 
 	return msg, err
 }
 
+func (m EventRepo) Has(filter interface{}) (bool, error) {
+	var msg repository.Event
+	err := m.col.FindOne(context.TODO(), filter).Decode(&msg)
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (m EventRepo) Find(filter interface{}) (messages []repository.Event, err error) {
 	messages = make([]repository.Event, 0)
 	cur, err := m.col.Find(context.TODO(), filter)

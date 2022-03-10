@@ -58,6 +58,7 @@ type EventRepo interface {
 	AddWithContext(ctx context.Context, msg Event) (id primitive.ObjectID, err error)
 	Add(msg Event) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (msg Event, err error)
+	Has(filter interface{}) (bool, error)
 	Find(filter interface{}) (messages []Event, err error)
 	FindIDs(ctx context.Context, filter interface{}, limit int64) ([]primitive.ObjectID, error)
 	Paginate(filter interface{}, offset, limit int64) (messages []Event, next int64, err error)

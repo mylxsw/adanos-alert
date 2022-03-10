@@ -95,6 +95,53 @@ func (tc *TriggerContext) EventsMatchRegexCount(regex string) int64 {
 	return count
 }
 
+// HasEventsMatchRegexs check if events matched regexs
+func (tc *TriggerContext) HasEventsMatchRegexs(regexs []string) bool {
+	var matched bool
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+		regexps := make(bson.A, 0)
+		for _, reg := range regexs {
+			regexps = append(regexps, primitive.Regex{Pattern: reg, Options: "im"})
+		}
+
+		filter := bson.M{
+			"group_ids": tc.Group.ID,
+			"content":   bson.M{"$in": regexps},
+		}
+
+		var err error
+		matched, err = msgRepo.Has(filter)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"filter": filter,
+			}).Warningf("triggerContext#HasEventsMatchRegexs failed: %v", err)
+		}
+	})
+
+	return matched
+}
+
+// HasEventsMatchRegex check if events matched regex
+func (tc *TriggerContext) HasEventsMatchRegex(regex string) bool {
+	var matched bool
+	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+		filter := bson.M{
+			"group_ids": tc.Group.ID,
+			"content":   primitive.Regex{Pattern: regex, Options: "im"},
+		}
+
+		var err error
+		matched, err = msgRepo.Has(filter)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"filter": filter,
+			}).Warningf("triggerContext#HasEventsMatchRegex failed: %v", err)
+		}
+	})
+
+	return matched
+}
+
 // MessagesWithTagsCount get the count for events which has tags
 // This method is depressed
 func (tc *TriggerContext) MessagesWithTagsCount(tags string) int64 {
@@ -140,7 +187,31 @@ func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []string {
 	users := make([]string, 0)
 	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
-		users, _ = userRepo.GetUserMetas(key, value, returnField)
+		var err error
+		users, err = userRepo.GetUserMetas(key, value, returnField)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"key":         key,
+				"value":       value,
+				"returnField": returnField,
+			}).Warningf("triggerContext#UsersHasProperty failed: %v", err)
+		}
+	})
+	return users
+}
+
+func (tc *TriggerContext) UsersIDWithProperty(key, value, returnField string) []repository.UserIDWithMeta {
+	users := make([]repository.UserIDWithMeta, 0)
+	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+		var err error
+		users, err = userRepo.GetUserIDWithMetas(key, value, returnField)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"key":         key,
+				"value":       value,
+				"returnField": returnField,
+			}).Warningf("triggerContext#UsersHasProperty failed: %v", err)
+		}
 	})
 	return users
 }

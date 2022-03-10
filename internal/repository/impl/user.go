@@ -126,9 +126,16 @@ func (u UserRepo) Count(filter bson.M) (int64, error) {
 	return u.col.CountDocuments(context.TODO(), filter)
 }
 
-func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {
+func (u UserRepo) GetUserIDWithMetas(queryK, queryV, field string) ([]repository.UserIDWithMeta, error) {
 	filter := bson.M{}
-	if str.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
+	if queryK == "id" || queryK == "_id" {
+		id, err := primitive.ObjectIDFromHex(queryV)
+		if err != nil {
+			return nil, err
+		}
+
+		filter["_id"] = id
+	} else if str.In(queryK, []string{"name", "phone", "email", "role", "status"}) {
 		filter[queryK] = queryV
 	} else {
 		filter["metas.key"] = queryK
@@ -140,30 +147,53 @@ func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {
 		return nil, err
 	}
 
-	var res []string
-	_ = coll.MustNew(users).Map(func(u repository.User) string {
+	var res []repository.UserIDWithMeta
+	_ = coll.MustNew(users).Map(func(u repository.User) repository.UserIDWithMeta {
+		res := repository.UserIDWithMeta{UserID: u.ID.Hex(), Meta: make([]string, 0)}
 		switch field {
-		case "id":
-			return u.ID.Hex()
+		case "id", "_id":
+			res.Meta = append(res.Meta, u.ID.Hex())
 		case "name":
-			return u.Name
+			res.Meta = append(res.Meta, u.Name)
 		case "phone":
-			return u.Phone
+			res.Meta = append(res.Meta, u.Phone)
 		case "email":
-			return u.Email
+			res.Meta = append(res.Meta, u.Email)
 		case "role":
-			return u.Role
+			res.Meta = append(res.Meta, u.Role)
 		case "status":
-			return string(u.Status)
+			res.Meta = append(res.Meta, string(u.Status))
 		default:
 			for _, m := range u.Metas {
 				if m.Key == field {
-					return m.Value
+					res.Meta = append(res.Meta, m.Value)
 				}
 			}
-
-			return ""
 		}
-	}).Filter(func(v string) bool { return v != "" }).All(&res)
+
+		return res
+	}).Filter(func(v repository.UserIDWithMeta) bool {
+		for _, m := range v.Meta {
+			if m != "" {
+				return true
+			}
+		}
+
+		return false
+	}).All(&res)
 	return res, nil
+}
+
+func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {
+	userWithMetas, err := u.GetUserIDWithMetas(queryK, queryV, field)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]string, 0)
+	for _, u := range userWithMetas {
+		res = append(res, u.Meta...)
+	}
+
+	return str.Distinct(res), nil
 }

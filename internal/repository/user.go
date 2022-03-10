@@ -49,6 +49,11 @@ type User struct {
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
 }
 
+type UserIDWithMeta struct {
+	UserID string   `bson:"user_id" json:"user_id"`
+	Meta   []string `bson:"meta" json:"meta"`
+}
+
 type UserRepo interface {
 	Add(user User) (id primitive.ObjectID, err error)
 	Get(id primitive.ObjectID) (user User, err error)
@@ -61,4 +66,5 @@ type UserRepo interface {
 	Count(filter bson.M) (int64, error)
 
 	GetUserMetas(queryK, queryV, field string) ([]string, error)
+	GetUserIDWithMetas(queryK, queryV, field string) ([]UserIDWithMeta, error)
 }
