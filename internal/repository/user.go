@@ -67,4 +67,7 @@ type UserRepo interface {
 
 	GetUserMetas(queryK, queryV, field string) ([]string, error)
 	GetUserIDWithMetas(queryK, queryV, field string) ([]UserIDWithMeta, error)
+
+	GetUserMetasRegex(queryK, queryVRegex, field string) ([]string, error)
+	GetUserIDWithMetasRegex(queryK, queryVRegex, field string) ([]UserIDWithMeta, error)
 }

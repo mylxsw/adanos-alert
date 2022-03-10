@@ -184,6 +184,22 @@ func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 	return count
 }
 
+func (tc *TriggerContext) UsersHasPropertyRegex(key, valueRegex, returnField string) []string {
+	users := make([]string, 0)
+	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+		var err error
+		users, err = userRepo.GetUserMetasRegex(key, valueRegex, returnField)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"key":         key,
+				"value":       valueRegex,
+				"returnField": returnField,
+			}).Warningf("triggerContext#UsersHasPropertyRegex failed: %v", err)
+		}
+	})
+	return users
+}
+
 func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []string {
 	users := make([]string, 0)
 	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
@@ -195,6 +211,22 @@ func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []str
 				"value":       value,
 				"returnField": returnField,
 			}).Warningf("triggerContext#UsersHasProperty failed: %v", err)
+		}
+	})
+	return users
+}
+
+func (tc *TriggerContext) UsersIDWithPropertyRegex(key, valueRegex, returnField string) []repository.UserIDWithMeta {
+	users := make([]repository.UserIDWithMeta, 0)
+	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+		var err error
+		users, err = userRepo.GetUserIDWithMetasRegex(key, valueRegex, returnField)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"key":         key,
+				"value":       valueRegex,
+				"returnField": returnField,
+			}).Warningf("triggerContext#UsersHasPropertyRegex failed: %v", err)
 		}
 	})
 	return users

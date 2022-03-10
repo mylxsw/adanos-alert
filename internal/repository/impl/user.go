@@ -126,10 +126,10 @@ func (u UserRepo) Count(filter bson.M) (int64, error) {
 	return u.col.CountDocuments(context.TODO(), filter)
 }
 
-func (u UserRepo) GetUserIDWithMetas(queryK, queryV, field string) ([]repository.UserIDWithMeta, error) {
+func (u UserRepo) getUserIDWithMetas(queryK string, queryV interface{}, field string) ([]repository.UserIDWithMeta, error) {
 	filter := bson.M{}
 	if queryK == "id" || queryK == "_id" {
-		id, err := primitive.ObjectIDFromHex(queryV)
+		id, err := primitive.ObjectIDFromHex(queryV.(string))
 		if err != nil {
 			return nil, err
 		}
@@ -182,6 +182,32 @@ func (u UserRepo) GetUserIDWithMetas(queryK, queryV, field string) ([]repository
 		return false
 	}).All(&res)
 	return res, nil
+}
+
+func (u UserRepo) GetUserIDWithMetasRegex(queryK, queryVRegex, field string) ([]repository.UserIDWithMeta, error) {
+	if queryK == "id" || queryK == "_id" {
+		return u.getUserIDWithMetas(queryK, queryVRegex, field)
+	}
+
+	return u.getUserIDWithMetas(queryK, primitive.Regex{Pattern: queryVRegex, Options: "im"}, field)
+}
+
+func (u UserRepo) GetUserMetasRegex(queryK, queryVRegex, field string) ([]string, error) {
+	userWithMetas, err := u.GetUserIDWithMetasRegex(queryK, queryVRegex, field)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]string, 0)
+	for _, u := range userWithMetas {
+		res = append(res, u.Meta...)
+	}
+
+	return str.Distinct(res), nil
+}
+
+func (u UserRepo) GetUserIDWithMetas(queryK, queryV, field string) ([]repository.UserIDWithMeta, error) {
+	return u.getUserIDWithMetas(queryK, queryV, field)
 }
 
 func (u UserRepo) GetUserMetas(queryK, queryV, field string) ([]string, error) {

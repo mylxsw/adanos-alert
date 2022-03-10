@@ -36,6 +36,11 @@ Trigger {
 	FailedCount  int
 	FailedReason string
 }
+
+UserIDWithMeta {
+	UserID string
+	Meta   []string
+}
                     </code></pre>
                 </li>
                 <li>支持的对象、函数：
