@@ -61,6 +61,7 @@ type Rule struct {
 	Rule string `bson:"rule" json:"rule"`
 	// IgnoreRule 分组匹配后，检查 message 是否应该被忽略
 	IgnoreRule      string    `bson:"ignore_rule" json:"ignore_rule"`
+	IgnoreMaxCount  int       `bson:"ignore_max_count" json:"ignore_max_count"`
 	Template        string    `bson:"template" json:"template"`
 	SummaryTemplate string    `bson:"summary_template" json:"summary_template"`
 	Triggers        []Trigger `bson:"triggers" json:"triggers"`
@@ -81,6 +82,7 @@ func (rule Rule) ToGroupRule(aggregateKey string, msgType EventType) EventGroupR
 		Name:             rule.Name,
 		Rule:             rule.Rule,
 		IgnoreRule:       rule.IgnoreRule,
+		IgnoreMaxCount:   rule.IgnoreMaxCount,
 		Template:         rule.Template,
 		SummaryTemplate:  rule.SummaryTemplate,
 		ReportTemplateID: rule.ReportTemplateID,

@@ -32,6 +32,7 @@ type EventGroupRule struct {
 
 	Rule            string `bson:"rule" json:"rule"`
 	IgnoreRule      string `bson:"ignore_rule" json:"ignore_rule"`
+	IgnoreMaxCount  int    `bson:"ignore_max_count" json:"ignore_max_count"`
 	Template        string `bson:"template" json:"template"`
 	SummaryTemplate string `bson:"summary_template" json:"summary_template"`
 

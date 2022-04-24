@@ -84,6 +84,7 @@ type RuleForm struct {
 
 	Rule             string            `json:"rule"`
 	IgnoreRule       string            `json:"ignore_rule"`
+	IgnoreMaxCount   int               `json:"ignore_max_count"`
 	Template         string            `json:"template"`
 	SummaryTemplate  string            `json:"summary_template"`
 	ReportTemplateID string            `json:"report_template_id"`
@@ -183,6 +184,10 @@ func (r RuleForm) Validate(req web.Request) error {
 	_, err := matcher.NewEventMatcher(repository.Rule{Rule: r.Rule, IgnoreRule: r.IgnoreRule})
 	if err != nil {
 		return fmt.Errorf("rule is invalid: %w", err)
+	}
+
+	if r.IgnoreMaxCount < 0 {
+		return fmt.Errorf("ignore_max_count must greater than or equal 0")
 	}
 
 	for i, tr := range r.Triggers {
@@ -430,6 +435,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		RealtimeInterval: ruleForm.RealtimeInterval,
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
+		IgnoreMaxCount:   ruleForm.IgnoreMaxCount,
 		AggregateRule:    ruleForm.AggregateRule,
 		RelationRule:     ruleForm.RelationRule,
 		Template:         ruleForm.Template,
@@ -518,6 +524,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		RealtimeInterval: ruleForm.RealtimeInterval,
 		Rule:             ruleForm.Rule,
 		IgnoreRule:       ruleForm.IgnoreRule,
+		IgnoreMaxCount:   ruleForm.IgnoreMaxCount,
 		AggregateRule:    ruleForm.AggregateRule,
 		RelationRule:     ruleForm.RelationRule,
 		Template:         ruleForm.Template,

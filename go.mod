@@ -18,7 +18,7 @@ require (
 	github.com/kentaro-m/blackfriday-confluence v0.0.0-20200514101926-773172e7101d
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/mylxsw/asteria v0.0.0-20210423061904-9b17f4c87f96
+	github.com/mylxsw/asteria v0.0.0-20220327145745-90b9a4ef2cea
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
 	github.com/mylxsw/container v0.0.0-20210320032614-4c230b312e04
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
@@ -79,11 +79,11 @@ require (
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/itchyny/timefmt-go v0.1.3 // indirect
-	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.0.1 // indirect
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
 	github.com/pingcap/errors v0.11.4 // indirect

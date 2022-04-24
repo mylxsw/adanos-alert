@@ -24,12 +24,14 @@ const (
 	// EventStatusIgnored 死信（匹配规则，但是被主动忽略）
 	EventStatusIgnored EventStatus = "ignored"
 
-	// EventTypePlain 普通消息
+	// EventTypePlain 普通事件
 	EventTypePlain EventType = "plain"
-	// EventTypeRecoverable 可恢复消息
+	// EventTypeRecoverable 可恢复事件
 	EventTypeRecoverable EventType = "recoverable"
-	// EventTypeRecovery 恢复消息
+	// EventTypeRecovery 恢复事件
 	EventTypeRecovery EventType = "recovery"
+	// EventTypeIgnored 被忽略的事件
+	EventTypeIgnored EventType = "ignored"
 )
 
 // Event 事件

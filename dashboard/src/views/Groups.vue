@@ -44,7 +44,8 @@
                     </b-link>
                     <p>
                         <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="事件组类型">恢复</b-badge>
-                        <b-badge v-if="row.item.type === 'recoverable'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
+                        <b-badge v-if="row.item.type === 'recoverable'" variant="info" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
+                        <b-badge v-if="row.item.type === 'ignored'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">忽略事件</b-badge>
                         <b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge>
                     </p>
                 </template>

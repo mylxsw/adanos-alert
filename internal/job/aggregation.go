@@ -82,36 +82,37 @@ func (a *AggregationJob) groupingEvents(eventRepo repository.EventRepo, evtRelRe
 				// 为消息分组
 				if ignored {
 					messageCanIgnore = true
-				} else {
-					aggregateKey := BuildEventFinger(rule.AggregateRule, evt)
-					key := fmt.Sprintf("%s:%s:%s", rule.ID.Hex(), aggregateKey, evt.Type)
-					if _, ok := collectingGroups[key]; !ok {
+					evt.Type = repository.EventTypeIgnored
+				}
 
-						evtGrpRule := rule.ToGroupRule(aggregateKey, evt.Type)
-						// 检查规则是否支持即时发送，当支持即时发送时，事件组的就绪时间将会被设置为立即执行
-						if rule.RealtimeInterval > 0 {
-							groupSrv.EventShouldRealtime(context.Background(), key, time.Duration(rule.RealtimeInterval)*time.Minute, func() {
-								evtGrpRule.ExpectReadyAt = time.Now().Add(-time.Second)
-								evtGrpRule.Realtime = true
-							})
-						}
+				aggregateKey := BuildEventFinger(rule.AggregateRule, evt)
+				key := fmt.Sprintf("%s:%s:%s", rule.ID.Hex(), aggregateKey, evt.Type)
+				if _, ok := collectingGroups[key]; !ok {
 
-						grp, err := groupRepo.CollectingGroup(evtGrpRule)
-						if err != nil {
-							log.WithFields(log.Fields{
-								"evt":  evt,
-								"rule": rule,
-								"err":  err.Error(),
-							}).Errorf("create collecting group failed: %v", err)
-							return err
-						}
-
-						collectingGroups[key] = grp
+					evtGrpRule := rule.ToGroupRule(aggregateKey, evt.Type)
+					// 检查规则是否支持即时发送，当支持即时发送时，事件组的就绪时间将会被设置为立即执行
+					if rule.RealtimeInterval > 0 {
+						groupSrv.EventShouldRealtime(context.Background(), key, time.Duration(rule.RealtimeInterval)*time.Minute, func() {
+							evtGrpRule.ExpectReadyAt = time.Now().Add(-time.Second)
+							evtGrpRule.Realtime = true
+						})
 					}
 
-					evt.GroupID = append(evt.GroupID, collectingGroups[key].ID)
-					evt.Status = repository.EventStatusGrouped
+					grp, err := groupRepo.CollectingGroup(evtGrpRule)
+					if err != nil {
+						log.WithFields(log.Fields{
+							"evt":  evt,
+							"rule": rule,
+							"err":  err.Error(),
+						}).Errorf("create collecting group failed: %v", err)
+						return err
+					}
+
+					collectingGroups[key] = grp
 				}
+
+				evt.GroupID = append(evt.GroupID, collectingGroups[key].ID)
+				evt.Status = repository.EventStatusGrouped
 			}
 		}
 
@@ -198,10 +199,20 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 			}).Errorf("query message count failed: %v", err)
 		}
 
+		// 1. 当前分组事件数为空，则忽略当前告警，设置状态为已取消
+		// 2. 当前分组事件数不为空，需要分情况:
+		//     1）事件组为 ignored 类型，当前事件数 <= 忽略最大值，设置为取消，不进行告警
+		//     2）事件组为 ignored 类型，当前事件数 > 忽略最大值，直接进行告警
+		//     3）事件组为非 ignored 类型，直接进行告警
 		if evtCount == 0 {
 			grp.Status = repository.EventGroupStatusCanceled
 		} else {
 			grp.Status = repository.EventGroupStatusPending
+			if grp.Type == repository.EventTypeIgnored {
+				if grp.Rule.IgnoreMaxCount == 0 || int(evtCount) <= grp.Rule.IgnoreMaxCount {
+					grp.Status = repository.EventGroupStatusCanceled
+				}
+			}
 		}
 
 		grp.MessageCount = evtCount

@@ -143,6 +143,10 @@
                                         </small>
                                         <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
                                     </b-form-group>
+                                    <b-form-group label-cols="2" label="最大忽略事件数">
+                                        <b-form-input type="number" min="0" max="1000000" step="1"  v-model="form.ignore_max_count" class="w-25"/>
+                                        <small class="form-text text-muted">默认为 0，所有匹配忽略规则的事件均被丢弃，当事件组中包含的被忽略事件数量大于该值时，事件组将进入正常的动作触发流程，事件不再被忽略。</small>
+                                    </b-form-group>
                                     <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
                                     <b-form-group label-cols="2" label="关联条件（可选）" label-for="relation_cond_input">
                                         <b-btn-group class="mb-2 float-right">
@@ -667,6 +671,7 @@ export default {
                 interval: 1,
                 rule: '',
                 ignore_rule: '',
+                ignore_max_count: 0,
                 template: '',
                 report_template_id: '',
                 triggers: [],
@@ -1125,6 +1130,7 @@ export default {
             requestData.description = this.form.description;
             requestData.rule = this.form.rule;
             requestData.ignore_rule = this.form.ignore_rule;
+            requestData.ignore_max_count = parseInt(this.form.ignore_max_count);
             requestData.tags = this.form.tags;
             requestData.aggregate_rule = this.form.aggregate_rule;
             requestData.relation_rule = this.form.relation_rule;
@@ -1212,6 +1218,7 @@ export default {
                 this.form.daily_times = (response.data.daily_times === null || response.data.daily_times.length === 0) ? ['09:00:00'] : response.data.daily_times;
                 this.form.rule = response.data.rule;
                 this.form.ignore_rule = response.data.ignore_rule;
+                this.form.ignore_max_count = response.data.ignore_max_count;
                 this.form.tags = response.data.tags;
                 this.form.aggregate_rule = response.data.aggregate_rule;
                 this.form.relation_rule = response.data.relation_rule;
