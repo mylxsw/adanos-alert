@@ -55,6 +55,11 @@ func groupFilter(ctx web.Context) bson.M {
 		filter["status"] = status
 	}
 
+	typ := ctx.Input("type")
+	if typ != "" {
+		filter["type"] = typ
+	}
+
 	ruleID, err := primitive.ObjectIDFromHex(ctx.Input("rule_id"))
 	if err == nil {
 		filter["rule._id"] = ruleID

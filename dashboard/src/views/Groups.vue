@@ -10,6 +10,7 @@
                 <b-card-text>
                     <b-form inline @submit="searchSubmit">
                         <date-picker type="datetime" v-model="search.time_range" range clearable class="mr-2" style="width: 400px;"/>
+                        <b-form-select v-model="search.type" class="mb-2 mr-sm-2 mb-sm-0" placeholder="类型" :options="type_options"></b-form-select>
                         <b-form-select v-model="search.sort" class="mb-2 mr-sm-2 mb-sm-0" placeholder="排序方式" :options="sort_options"></b-form-select>
                         <b-button variant="primary" type="submit">刷新</b-button>
                     </b-form>
@@ -22,32 +23,29 @@
             </b-card>
             <b-table :items="groups" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(id)="row">
-                    <b-badge class="mr-2" variant="dark">{{ row.item.seq_num }}</b-badge>
-                    <date-time :value="row.item.updated_at"></date-time>
-                    <b-badge class="ml-2" variant="danger" v-if="row.item.rule.realtime">即时</b-badge>
-                    <p><b>{{ row.item.id }}</b></p>
-                </template>
-                <template v-slot:cell(actions)="row">
-                    <b-list-group style="font-size: 80%">
-                        <b-list-group-item v-for="(act, index) in row.item.actions" :key="index" :variant="act.trigger_status === 'ok' ? 'success': 'danger'">
-                            <code class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || '全部' }}</code>
-                            <code class="action-pre-condition" v-if="act.is_else_trigger">兜底</code>
-                            <b :class="act.is_else_trigger ? 'text-warning':'text-dark'"> | </b>
-                            {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
-                        </b-list-group-item>
-                    </b-list-group>
-                </template>
-                <template v-slot:cell(rule_name)="row">
+                    <b-badge class="mr-2" variant="dark" v-b-tooltip.hover :title="row.item.id">{{ row.item.seq_num }}</b-badge>
                     <span v-b-tooltip.hover :title="row.item.rule.rule">{{ row.item.rule.name }}</span>
                     <b-link :to="'/rules/?id=' + row.item.rule.id" target="_blank" class="ml-2">
                         <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
                     </b-link>
-                    <p>
+                    <p><date-time :value="row.item.updated_at"></date-time></p>
+                </template>
+                <template v-slot:cell(actions)="row">
+                    <p style="margin-bottom:4px">
                         <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="事件组类型">恢复</b-badge>
                         <b-badge v-if="row.item.type === 'recoverable'" variant="info" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
                         <b-badge v-if="row.item.type === 'ignored'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">忽略事件</b-badge>
+                        <b-badge class="mr-2" variant="danger" v-if="row.item.rule.realtime" v-b-tooltip title="即时消息">即时</b-badge>
                         <b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge>
                     </p>
+                    <b-list-group style="font-size: 80%">
+                        <b-list-group-item style="padding: 5px" v-for="(act, index) in row.item.actions" :key="index" :variant="act.trigger_status === 'ok' ? 'success': 'danger'">
+                            <code style="line-height: 0.85" class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || '全部' }}</code>
+                            <code style="line-height: 0.85" class="action-pre-condition" v-if="act.is_else_trigger">兜底</code>
+                            <b :class="act.is_else_trigger ? 'text-warning':'text-dark'"> | </b>
+                            {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
+                        </b-list-group-item>
+                    </b-list-group>
                 </template>
                 <template v-slot:cell(status)="row">
                     <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中
@@ -121,10 +119,18 @@
                       this.$route.query.end_at !== undefined ? this.$route.query.end_at : moment().format('YYYY-MM-DD HH:mm:ss'),
                     ],
                     sort: this.$route.query.sort !== undefined ? this.$route.query.sort : 'desc',
+                    type: this.$route.query.type !== undefined ? this.$route.query.type : '',
                 },
                 sort_options: [
                     {value: 'asc', text: '创建时间正序'},
                     {value: 'desc', text: '创建时间倒序'},
+                ],
+                type_options: [
+                    {value: '', text: '所有类型'},
+                    {value: 'plain', text: '普通事件组'},
+                    {value: 'recoverable', text: '可恢复事件组'},
+                    {value: 'recovery', text: '已恢复事件组'},
+                    {value: 'ignored', text: '忽略事件组'},
                 ],
                 groups: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
@@ -132,8 +138,7 @@
                 isBusy: true,
                 userRefs: {},
                 fields: [
-                    {key: 'id', label: '时间/事件组 ID'},
-                    {key: 'rule_name', label: '匹配规则'},
+                    {key: 'id', label: '时间'},
                     {key: 'actions', label: '触发动作'},
                     {key: 'message_count', label: '事件数'},
                     {key: 'status', label: '状态'},
@@ -213,6 +218,7 @@
                 query['start_at'] = this.search['time_range'][0];
                 query['end_at'] = this.search['time_range'][1];
                 query['sort'] = this.search['sort'];
+                query['type'] = this.search['type'];
 
                 this.$router.push({path: '/', query: query}).catch(err => {
                   this.ToastError(err)
@@ -327,5 +333,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+p {
+    margin-bottom: 5px;
 }
 </style>

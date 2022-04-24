@@ -49,11 +49,11 @@
                 </template>
                 <template v-slot:cell(triggers)="row">
                     <b-list-group>
-                        <b-list-group-item v-for="(trigger, index) in row.item.triggers" :key="index">
-                            <code v-b-tooltip :title="trigger.pre_condition" class="action-pre-condition" v-if="!trigger.is_else_trigger">
-                                {{ trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition || 'true') : trigger.name }}
+                        <b-list-group-item style="padding: 5px;" v-for="(trigger, index) in row.item.triggers" :key="index">
+                            <code style="line-height: 0.9" v-b-tooltip :title="trigger.pre_condition" class="action-pre-condition" v-if="!trigger.is_else_trigger">
+                                {{ trigger.name === "" || trigger.name === undefined ? (trigger.pre_condition || '全部') : trigger.name }}
                             </code>
-                            <code v-if="trigger.is_else_trigger">兜底</code>
+                            <code style="line-height: 0.9" v-if="trigger.is_else_trigger">兜底</code>
                             <b :class="trigger.is_else_trigger ? 'text-warning' : 'text-success'"> | </b> {{ formatAction(trigger.action) }}
                             <span v-if="trigger.user_refs.length > 0">({{ users(trigger.user_refs) }})</span>
                         </b-list-group-item>
@@ -110,7 +110,7 @@ export default {
             userRefs: {},
             isBusy: true,
             fields: [
-                {key: 'name', label: '规则名称/ID'},
+                {key: 'name', label: '规则名称'},
                 {key: 'rule', label: '规则', class: 'th-autohide-md'},
                 {key: 'triggers', label: '动作', class: 'th-autohide-sm'},
                 {key: 'updated_at', label: '状态/最后更新', class: 'th-autohide-sm'},
@@ -237,5 +237,9 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+p {
+    margin-bottom: 5px;
 }
 </style>
