@@ -215,6 +215,11 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 			}
 		}
 
+		// 被忽略的事件组，如果超过最大忽略阈值，加入到告警行列中，将分组的类型设置为 IngoredExceed
+		if grp.Type == repository.EventTypeIgnored && grp.Status != repository.EventGroupStatusCanceled {
+			grp.Type = repository.EventTypeIgnoredExceed
+		}
+
 		grp.MessageCount = evtCount
 
 		if log.DebugEnabled() {

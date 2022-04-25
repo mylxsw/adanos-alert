@@ -35,6 +35,7 @@
                         <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="事件组类型">恢复</b-badge>
                         <b-badge v-if="row.item.type === 'recoverable'" variant="info" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
                         <b-badge v-if="row.item.type === 'ignored'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">忽略事件</b-badge>
+                        <b-badge v-if="row.item.type === 'ignoredExceed'" variant="primary" class="mr-2" v-b-tooltip title="事件组类型">超限忽略事件</b-badge>
                         <b-badge class="mr-2" variant="danger" v-if="row.item.rule.realtime" v-b-tooltip title="即时消息">即时</b-badge>
                         <b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge>
                     </p>
@@ -126,11 +127,12 @@
                     {value: 'desc', text: '创建时间倒序'},
                 ],
                 type_options: [
-                    {value: '', text: '所有类型'},
+                    {value: '', text: '所有类型（忽略事件组除外）'},
                     {value: 'plain', text: '普通事件组'},
                     {value: 'recoverable', text: '可恢复事件组'},
                     {value: 'recovery', text: '已恢复事件组'},
                     {value: 'ignored', text: '忽略事件组'},
+                    {value: 'ignoredExceed', text: '超限忽略事件组'},
                 ],
                 groups: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),

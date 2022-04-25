@@ -32,6 +32,9 @@ const (
 	EventTypeRecovery EventType = "recovery"
 	// EventTypeIgnored 被忽略的事件
 	EventTypeIgnored EventType = "ignored"
+	// EventTypeIgnoredExceed 被忽略的事件，由于数量超过最大忽略阈值，
+	// 加入到报警行列中，只在 Group.Type 中使用
+	EventTypeIgnoredExceed EventType = "ignoredExceed"
 )
 
 // Event 事件

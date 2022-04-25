@@ -55,9 +55,12 @@ func groupFilter(ctx web.Context) bson.M {
 		filter["status"] = status
 	}
 
+	// type 为空时，查询所有非 ignored 类型的事件组
 	typ := ctx.Input("type")
 	if typ != "" {
 		filter["type"] = typ
+	} else {
+		filter["type"] = bson.M{"$ne": repository.EventTypeIgnored}
 	}
 
 	ruleID, err := primitive.ObjectIDFromHex(ctx.Input("rule_id"))
