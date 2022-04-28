@@ -1,6 +1,6 @@
 module github.com/mylxsw/adanos-alert
 
-go 1.17
+go 1.18
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
@@ -24,7 +24,7 @@ require (
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
 	github.com/mylxsw/glacier v0.0.0-20210322044907-dc4c08087409
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
-	github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4
+	github.com/mylxsw/go-utils v0.0.0-20220320145042-fc2075bd254a
 	github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
 	github.com/pkg/errors v0.9.1

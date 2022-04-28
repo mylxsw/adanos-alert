@@ -44,7 +44,7 @@
                             <code style="line-height: 0.85" class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || '全部' }}</code>
                             <code style="line-height: 0.85" class="action-pre-condition" v-if="act.is_else_trigger">兜底</code>
                             <b :class="act.is_else_trigger ? 'text-warning':'text-dark'"> | </b>
-                            {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act.user_refs) }})</span>
+                            {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act) }})</span>
                         </b-list-group-item>
                     </b-list-group>
                 </template>
@@ -116,8 +116,8 @@
             return {
                 search: {
                     time_range: [
-                      this.$route.query.start_at !== undefined ? this.$route.query.start_at : moment().subtract(7, 'days').format('YYYY-MM-DD HH:mm:ss'),
-                      this.$route.query.end_at !== undefined ? this.$route.query.end_at : moment().format('YYYY-MM-DD HH:mm:ss'),
+                      this.$route.query.start_at !== undefined ? this.$route.query.start_at : null,
+                      this.$route.query.end_at !== undefined ? this.$route.query.end_at : null,
                     ],
                     sort: this.$route.query.sort !== undefined ? this.$route.query.sort : 'desc',
                     type: this.$route.query.type !== undefined ? this.$route.query.type : '',
@@ -217,8 +217,13 @@
                     query[i] = this.$route.query[i];
                 }
 
-                query['start_at'] = this.search['time_range'][0];
-                query['end_at'] = this.search['time_range'][1];
+                if (this.search['time_range'][0] != null) {
+                    query['start_at'] = this.search['time_range'][0];
+                }
+                if (this.search['time_range'][1] != null) {
+                    query['end_at'] = this.search['time_range'][1];
+                }
+
                 query['sort'] = this.search['sort'];
                 query['type'] = this.search['type'];
 
@@ -229,8 +234,12 @@
             formatted(t) {
                 return moment(t).format('YYYY-MM-DD HH:mm:ss');
             },
-            users(user_refs) {
-                return user_refs.map((u) => {
+            users(act) {
+                if (act.user_names !== undefined && act.user_names != null && act.user_names.length > 0) {
+                  return act.user_names.join(', ');
+                }
+
+                return act.user_refs.map((u) => {
                     return this.userRefs[u] !== undefined ? this.userRefs[u] : '-';
                 }).join(', ')
             },

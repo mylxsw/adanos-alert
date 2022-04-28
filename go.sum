@@ -217,8 +217,8 @@ github.com/mylxsw/glacier v0.0.0-20210322044907-dc4c08087409 h1:uHfmC8a0NCDw8hQI
 github.com/mylxsw/glacier v0.0.0-20210322044907-dc4c08087409/go.mod h1:UaO/3qs9SQFI/gvgJcqnDGQmMdh3rwHCrkNlQjNa7Ck=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988 h1:eUlVMPyxeWUogeqwAkat6eE+3eY5fjP/UAXyhAf/7Jw=
 github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988/go.mod h1:aJAUawotu1IMtEPXInIm6qwiAEIMSGRAMH6otakYCWw=
-github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4 h1:XzH0R9/Ox3GmAe9d18+GIqsAz/qMcuOxY3Zc1AEY2l8=
-github.com/mylxsw/go-utils v0.0.0-20201203034232-e340741582b4/go.mod h1:qXS/ktGB0Hi3aIPCLKbFX0fsCS6ELg7JqbpQvLSX6ic=
+github.com/mylxsw/go-utils v0.0.0-20220320145042-fc2075bd254a h1:aFZJpEFPFAiSvYjf4BqrlRAYRIXQ4higL2AWyg/3ZnY=
+github.com/mylxsw/go-utils v0.0.0-20220320145042-fc2075bd254a/go.mod h1:GIywna5jA7dodjmre1qXJYLpKg1x6N/foN6BSqc9jgs=
 github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564 h1:bm9z1TNpmuOY4TutqejxlbNBy5hJaGX+uU5eOC5LUtk=
 github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564/go.mod h1:8lD0X9U+/IfoW5t8f50k4BcomSznR0PR29ZRUsQ/n0I=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=

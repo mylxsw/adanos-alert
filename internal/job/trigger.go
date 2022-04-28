@@ -133,7 +133,8 @@ func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, even
 
 func (a TriggerJob) matchedTriggerAction(grp repository.EventGroup, manager action.Manager, trigger repository.Trigger, rule repository.Rule, matchedTriggers []repository.Trigger, maxFailedCount int) (bool, []repository.Trigger, int) {
 	hasError := false
-	if err := manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
+	var err error
+	if trigger, err = manager.Dispatch(trigger.Action).Handle(rule, trigger, grp); err != nil {
 		trigger.Status = repository.TriggerStatusFailed
 		trigger.FailedCount = trigger.FailedCount + 1
 		trigger.FailedReason = err.Error()
