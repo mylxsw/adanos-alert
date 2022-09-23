@@ -1,0 +1,45 @@
+# 告警通知事件组查看页面
+preview_url: "http://localhost:19999/ui/groups/%s.html"
+# 告警通知事件组报告页面，高级使用技巧，用于自定义事件组展示页面
+report_url: "http://localhost:19999/ui/reports/%s.html"
+# HTTP 服务监听地址，用于访问 Dashboard，查看告警通知事件，也用于接收告警事件
+listen: ":19999"
+# HTTP 访问 Token
+api_token: ""
+# GRPC 接口监听地址，用于 adanos-alert-agent 与 adanos-alert-server 通信
+grpc_listen: ":19998"
+# GRPC 访问秘钥
+grpc_token: ""
+# MongoDB 数据库连接字符串
+mongo_uri: "mongodb://localhost:27017"
+# MongoDB 数据库库名
+mongo_db: "adanos-alert"
+# 是否允许在启动时执行数据库迁移，默认开启，当有更新时自动升级数据库结构
+enable_migrate: True
+
+# 保留多长时间的报警，如果全部保留，设置为0，单位为天
+# Adanos-Alert 会自动清理超过 keep_period 天的报警
+keep_period: 60
+# 保留多长时间的审计日志，如果全部保留，设置为0，单位为天
+# Adanos-Alert 会自动清理超过 audit_keep_period 天的审计日志
+audit_keep_period: 60
+
+# 阿里云语音通知设置
+# 被叫显示号码
+aliyun_voice_called_show_number: ""
+# 语音文件模板ID
+aliyun_voice_tts_code: "TTS_165115246"
+# 语音文件模板参数
+aliyun_voice_tts_param: "title"
+# 阿里云 AccessKey ID
+aliyun_access_key: ""
+# 阿里云 AccessKey Secret
+aliyun_access_secret: ""
+
+# 日志存储目录
+log_path: /data/logs/adanos-alert
+
+# Jira 服务器信息
+jira_url: "http://192.168.1.23:8080"
+jira_username: ""
+jira_password: ""

@@ -1,0 +1,12 @@
+[Unit]
+Description=adanos alert agent
+
+[Service]
+Type=simple
+ExecStart=/usr/local/adanos-alert-agent/bin/adanos-alert-agent --conf /usr/local/adanos-alert-agent/etc/agent.yaml
+ExecStop=/bin/kill -INT $MAINPID
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
