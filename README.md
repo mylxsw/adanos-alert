@@ -46,6 +46,60 @@ Adanos-alert 是一款使用 Golang 开发的告警通知系统，Adanos-alert �
 
 Adanos-alert 使用 MongoDB 作为数据存储后端，所有的数据（告警规则、告警事件、事件组等）均存储在 MongoDB 中，因此需要先 [安装 MongoDB 数据库](https://www.mongodb.com/docs/v4.4/administration/install-community/)，版本建议在 4.0 以上（低版本未测试过，可能存在兼容问题）。
 
+## 安装运行
+
+以下配置文件可供参考
+
+- **./systemd/** 目录包含 server 和 agent 在 systemd 管理下的启动命令
+- **server.config.yaml** 是 adanos-alert-server 的配置文件示例
+- **agent.config.yaml** 是 adanos-alert-agent 的配置文件示例
+- **logstash.example.conf** 是 Logstash 将错误日志输出到 adanos 的配置示例
+- **prometheus.example.yaml** 是 Prometheus 将告警信息接入到 adanos 的配置示例
+- **prometheus.rules.example.conf** 是 Prometheus 告警规则示例
+
+adanos-alert-server 命令行选项（配置文件）
+
+- **conf**： configuration file path
+- **shutdown_timeout**： set a shutdown timeout for each service (default: 5s) [$GLACIER_SHUTDOWN_TIMOUT]
+- **listen**： http listen addr (default: ":19999")
+- **grpc_listen**： GRPC Server listen address (default: ":19998")
+- **grpc_token**： GRPC Server token (default: "000000")
+- **preview_url**： Alert preview page url (default: "http://localhost:19999/ui/groups/%s.html") [$ADANOS_PREVIEW_URL]
+- **report_url**： Alert report page url (default: "http://localhost:19999/ui/reports/%s.html") [$ADANOS_REPORT_URL]
+- **mongo_uri**： Mongodb connection uri，参考 https://docs.mongodb.com/manual/reference/connection-string/ (default: "mongodb://localhost:27017") [$MONGODB_HOST]
+- **mongo_db**： Mongodb database name (default: "adanos-alert") [$MONGODB_DB]
+- **api_token**： API Token for api access control [$ADANOS_API_TOKEN]
+- **use_local_dashboard**： whether using local dashboard, this is used when development
+- **enable_migrate**： whether enable database migrate when app run
+- **re_migrate**： 是否重新执行迁移，重新迁移会移除已有的预定义模板
+- **aggregation_period**： aggregation job execute period (default: "5s") [$ADANOS_AGGREGATION_PERIOD]
+- **action_trigger_period**： action trigger job execute period (default: "5s") [$ADANOS_ACTION_TRIGGER_PERIOD]
+- **queue_job_max_retry_times**： set queue job max retry times (default: 3) [$ADANOS_QUEUE_JOB_MAX_RETRY_TIMES]
+- **keep_period**： 保留多长时间的报警，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 keep_period 天的报警 (default: 0) [$ADANOS_KEEP_PERIOD]
+- **audit_keep_period**： 保留多长时间的审计日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 audit_keep_period 天的审计日志 (default: 0) [$ADANOS_AUDIT_KEEP_PERIOD]
+- **queue_worker_num**： set queue worker numbers (default: 3) [$ADANOS_QUEUE_WORKER_NUM]
+- **query_timeout**： query timeout for backend service (default: "30s") [$ADANOS_QUERY_TIMEOUT]
+- **aliyun_access_key**： 阿里云语音通知接口 Access Key ID [$ADANOS_ALIYUN_ACCESS_KEY]
+- **aliyun_access_secret**： 阿里云语音通知接口 Access Secret [$ADANOS_ALIYUN_ACCESS_SECRET]
+- **aliyun_voice_called_show_number**： 阿里云语音通知被叫显号
+- **aliyun_voice_tts_code**： 阿里云语音通知模板，这里是模板ID，模板内容在阿里云申请，建议内容："您有一条名为 ${title} 的报警通知，请及时处理！"
+- **aliyun_voice_tts_param**： 阿里云语音通知模板变量名 (default: "title")
+- **log_path**： 日志文件输出目录（非文件名），默认为空，输出到标准输出
+- **jira_url**： Jira 服务器地址，如 http://127.0.0.1:8080 [$ADANOS_JIRA_URL]
+- **jira_username**： Jira 连接账号 [$ADANOS_JIRA_USERNAME]
+- **jira_password**： Jira 连接密码 [$ADANOS_JIRA_PASSWORD]
+- **no_job_mode**： 启用该标识后，将会停止事件聚合和队列任务处理，用于开发调试
+
+adanos-alert-agent 命令行选项（配置文件）
+
+- **conf**： configuration file path
+- **shutdown_timeout**： set a shutdown timeout for each service (default: 5s) [$GLACIER_SHUTDOWN_TIMOUT]
+- **server_addr**： server grpc listen address (default: "127.0.0.1:19998") [$ADANOS_SERVER_ADDR]
+- **server_token**： API Token for grpc api access control (default: "000000") [$ADANOS_SERVER_TOKEN]
+- **data_dir**： 本地数据库存储目录 (default: "/tmp/adanos-agent")
+- **listen**： listen address (default: "127.0.0.1:29999") [$ADANOS_AGENT_LISTEN_ADDR]
+- **log_path**： 日志文件输出目录（非文件名），默认为空，输出到标准输出
+
 ## 手动编译
 
 编译时依赖以下工具

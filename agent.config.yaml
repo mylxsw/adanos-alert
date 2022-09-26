@@ -1,0 +1,11 @@
+# agent 监听地址，用于对外暴露 http API
+listen: ":29999"
+# adanos-alert-server 服务 GRPC 接口地址
+server_addr: "127.0.0.1:19998"
+# adanos-alert-server 服务 GRPC token
+server_token: "000000"
+# 临时数据存储目录，包含本地的事件队列等，在 adanos-alert-server 不可用时，事件
+# 将会被写入到本地任务队列，在服务恢复时重新投递
+data_dir: /usr/local/adanos-alert-agent/data
+# 日志存储目录
+log_path: /data/logs/adanos-alert

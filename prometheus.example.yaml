@@ -1,0 +1,12 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+  - path_prefix: "/api/events/prometheus"
+    api_version: v1
+    static_configs:
+      # adanos-alert-agent 服务的 HTTP 监听地址，也可以直接使用
+      # adanos-alert-server 的地址（默认端口 19999）
+      - targets: ["127.0.0.1:29999"]

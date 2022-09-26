@@ -155,7 +155,7 @@ func main() {
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "aliyun_voice_called_show_number",
-		Value: "073182705707",
+		Value: "",
 		Usage: "阿里云语音通知被叫显号",
 	}))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
