@@ -51,6 +51,16 @@ var predefinedTemplates = []repository.Template{
 		Type:        repository.TemplateTypeMatchRule,
 	},
 	{
+		Name:        "判断字段匹配任一正则表达式",
+		Description: "判断 Meta[message.stack_trace] 匹配任一正则表达式",
+		Content: `any([
+	"^org\\.apache\\.catalina\\.connector\\.ClientAbortException:",
+	"^java\\.lang\\.IllegalArgumentException: Invalid salt version"
+], {Meta["message.stack_trace"] matches #})`,
+		Type: repository.TemplateTypeMatchRule,
+	},
+
+	{
 		Name:        "单位时间内触发次数判断",
 		Description: "30分钟内触发失败次数小于5次",
 		Content:     `TriggeredTimesInPeriod(30, "failed") < 5`,
@@ -89,7 +99,7 @@ var predefinedTemplates = []repository.Template{
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
-		Name:        "报警信息摘要（Meta 信息）",
+		Name:        "报警信息摘要(Meta 信息)",
 		Description: "显示报警摘要，输出匹配前缀的 Meta 信息",
 		Content: `{{ range $i, $evt := .Events 4 }}- 文件：{{ index $evt.Meta "log.file.path" }}
 {{ meta_prefix_filter $evt.Meta "message" | serialize | cutoff 400 | ident "    > "}}
@@ -107,6 +117,20 @@ var predefinedTemplates = []repository.Template{
 		Description: "报警详细信息链接地址，报告模式",
 		Content:     `[共 {{ .Group.MessageCount }} 条，查看详细]({{ .ReportURL }})`,
 		Type:        repository.TemplateTypeTemplate,
+	},
+	{
+		Name:        "服务健康检查失败告警示例",
+		Description: "服务健康检查失败告警示例",
+		Content: `## {{ .Rule.Name }}
+
+{{ range $i, $evt := .Events 4 }}- 服务 {{ json_get "service" "-" $evt.Content }} 的实例 {{ json_get "instance" "-" $evt.Content }} 已经持续 <font color="red">{{ json_get "lost_duration" "-" $evt.Content | printf "%ss" | helpers.HumanDuration }}</font> 处于离线状态，原因为健康检查失败
+{{ end }}
+
+{{- if gt .Group.MessageCount 4 }}
+---
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .ReportURL }})
+{{- end }}`,
+		Type: repository.TemplateTypeTemplate,
 	},
 	{
 		Name:        "嵌入全局的规则模板",

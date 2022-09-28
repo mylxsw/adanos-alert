@@ -107,8 +107,8 @@
                             <codemirror v-model="form.rule" class="mt-3 adanos-code-textarea" :options="options.group_match_rule"></codemirror>
                             <small class="form-text text-muted">
                                 语法提示 <code>Alt+/</code>，语法参考 <a
-                                href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
                             </small>
                             <MatchRuleHelp v-if="rule_help" :helpers="helper.groupMatchRules"/>
                             <hr style="border-top: 1px dashed #ccc;" class="mt-4" />
@@ -138,8 +138,8 @@
                                         <small class="form-text text-muted">当匹配规则后，会检查事件是否与忽略规则匹配，匹配则忽略该事件，常用于临时忽略某些不需要告警的事件。</small>
                                         <small class="form-text text-muted">
                                             语法提示 <code>Alt+/</code>，语法参考 <a
-                                            href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                            target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                            href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                            target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
                                         </small>
                                         <MatchRuleHelp v-if="ignore_rule_help" :helpers="helper.groupMatchRules"/>
                                     </b-form-group>
@@ -246,8 +246,8 @@
                                                 :options="options.trigger_rule"></codemirror>
                                     <small class="form-text text-muted">
                                         语法提示 <code>Alt+/</code>，语法参考 <a
-                                        href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                        target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                        href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                        target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
                                     </small>
                                     <TriggerHelp class="mt-2" v-if="trigger.help" :helpers="helper.triggerMatchRules"/>
                                 </b-form-group>
@@ -301,8 +301,8 @@
                                                   <codemirror v-model="trigger.user_eval_func" class="mt-1 adanos-code-textarea" :options="options.user_eval_rule"></codemirror>
                                                   <small class="form-text text-muted">
                                                     语法提示 <code>Alt+/</code>，语法参考 <a
-                                                      href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                                      target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                                      href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                                      target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
                                                   </small>
                                                 </b-form-group>
                                               </b-card>
@@ -462,8 +462,8 @@
                                                   <codemirror v-model="trigger.user_eval_func" class="mt-1 adanos-code-textarea" :options="options.user_eval_rule"></codemirror>
                                                   <small class="form-text text-muted">
                                                     语法提示 <code>Alt+/</code>，语法参考 <a
-                                                      href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md"
-                                                      target="_blank">https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md</a>
+                                                      href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                                      target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
                                                   </small>
                                                 </b-form-group>
                                               </b-card>
