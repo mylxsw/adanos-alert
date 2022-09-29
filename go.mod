@@ -82,6 +82,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.0.1 // indirect
@@ -106,13 +107,14 @@ require (
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/tools v0.0.0-20190618225709-2cfd321de3ee // indirect
 	go.uber.org/zap v1.12.0 // indirect
-	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
-	golang.org/x/net v0.0.0-20200320220750-118fecf932d8 // indirect
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
-	golang.org/x/text v0.3.5 // indirect
-	golang.org/x/tools v0.0.0-20191107010934-f79515f33823 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
+	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
