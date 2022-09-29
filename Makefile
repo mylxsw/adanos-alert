@@ -51,6 +51,10 @@ build-release:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-linux cmd/server/main.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-arm cmd/server/main.go
 
+release:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-server-linux cmd/server/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o build/release/adanos-alert-agent-linux cmd/agent/main.go
+
 esc-build:
 	esc -pkg api -o api/static.go -prefix=dashboard/dist dashboard/dist
 	esc -pkg view -o api/view/views.go -include '.*\.html' -prefix=api/view api/view
@@ -66,4 +70,4 @@ doc-gen:
 clean:
 	rm -fr build/debug/adanos-alert build/release/adanos-alert*
 
-.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build build-release-linux build-all build-deploy-bin
+.PHONY: run build build-release clean build-dashboard run-dashboard static-gen doc-gen proto-build build-release-linux build-all build-deploy-bin release

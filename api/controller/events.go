@@ -38,6 +38,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus/api/v1/alerts", m.AddPrometheusEvent).Name("events:add:prometheus") // url 地址末尾不包含 "/"
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
+		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
 	})
 
 	router.Group("/events", func(router web.Router) {
@@ -54,6 +55,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus/api/v1/alerts", m.AddPrometheusEvent).Name("events:add:prometheus") // url 地址末尾不包含 "/"
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
+		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
 	})
 
 	router.Group("/event-relations", func(router web.Router) {
@@ -259,6 +261,43 @@ func (m *EventController) errorWrap(ctx web.Context, id primitive.ObjectID, err 
 	return ctx.JSON(web.M{
 		"id": misc.IfElse(id != primitive.NilObjectID, id.Hex(), ""),
 	})
+}
+
+// Add general message
+
+func (m *EventController) AddGeneralEvent(ctx web.Context, eventService service.EventService) web.Response {
+	body := ctx.Request().Body()
+	tags := str.FilterEmpty(append(strings.Split(ctx.Input("tags"), ","), ctx.Input("tag")))
+	origin := ctx.Input("origin")
+	metas := str.Map(str.FilterEmpty(strings.Split(ctx.Input("meta"), ",")), func(item string) string {
+		return strings.Join(str.Map(strings.SplitN(item, ":", 2), func(item string) string { return strings.TrimSpace(item) }), ":")
+	})
+
+	meta := make(repository.EventMeta)
+	for _, m := range metas {
+		kv := strings.SplitN(m, ":", 2)
+		if len(kv) == 2 {
+			meta[kv[0]] = kv[1]
+		}
+	}
+
+	evt := extension.CommonEvent{
+		Content: string(body),
+		Meta:    meta,
+		Tags:    tags,
+		Origin:  origin,
+	}
+
+	if ctx.Input("control.id") != "" {
+		evt.Control = extension.EventControl{
+			ID:              ctx.Input("control.id"),
+			InhibitInterval: ctx.Input("control.inhibit_interval"),
+			RecoveryAfter:   ctx.Input("control.recovery_after"),
+		}
+	}
+
+	id, err := eventService.Add(ctx.Context(), evt)
+	return m.errorWrap(ctx, id, err)
 }
 
 // Add common message

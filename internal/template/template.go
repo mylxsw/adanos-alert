@@ -29,6 +29,7 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
+	"github.com/mylxsw/go-utils/must"
 	"github.com/mylxsw/go-utils/str"
 	"github.com/russross/blackfriday/v2"
 	"github.com/vjeantet/grok"
@@ -61,6 +62,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"cutoff":                     str.Cutoff,
 		"cutoff_line":                CutOffLine,
 		"json_fields_cutoff":         JSONCutOffFields,
+		"json_fields_cutoff_str":     JSONCutOffFieldsStr,
 		"map_fields_cutoff":          MapFieldsCutoff,
 		"implode":                    Implode,
 		"explode":                    strings.Split,
@@ -83,12 +85,15 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"sql_finger":     misc.SQLFinger,
 		"open_falcon_im": ParseOpenFalconImMessage,
 
-		"json":         jsonFormatter,
-		"json_get":     pkgJSON.Get,
-		"json_gets":    pkgJSON.Gets,
-		"json_array":   pkgJSON.GetArray,
-		"json_flatten": jsonFlatten,
-		"json_encode":  Serialize,
+		"json":                     jsonFormatter,
+		"json_pretty":              jsonFormatter,
+		"json_get":                 pkgJSON.Get,
+		"json_gets":                pkgJSON.Gets,
+		"json_array":               pkgJSON.GetArray,
+		"json_flatten":             jsonFlatten,
+		"json_flatten_str":         jsonFlattenStr,
+		"json_flatten_str_noempty": jsonFlattenNoEmpty,
+		"json_encode":              Serialize,
 
 		"serialize":            Serialize,
 		"sort_map_human":       SortMapByKeyHuman,
@@ -305,6 +310,26 @@ func jsonFlatten(body string, maxLevel int) []jsonutils.KvPair {
 	sort.Sort(KvPairs(kvPairs))
 
 	return kvPairs
+}
+
+// jsonFlattenStr json转换格式化后的字符串，所有键值扁平化
+func jsonFlattenStr(body string, maxLevel int) string {
+	data := make(map[string]interface{})
+	for _, kv := range jsonFlatten(body, maxLevel) {
+		data[kv.Key] = kv.Value
+	}
+	return jsonFormatter(string(must.Must(json.Marshal(data))))
+}
+
+// jsonFlattenNoEmpty json转换格式化后的字符串，所有键值扁平化，移除空值
+func jsonFlattenNoEmpty(body string, maxLevel int) string {
+	data := make(map[string]interface{})
+	for _, kv := range jsonFlatten(body, maxLevel) {
+		if kv.Value != "" {
+			data[kv.Key] = kv.Value
+		}
+	}
+	return jsonFormatter(string(must.Must(json.Marshal(data))))
 }
 
 // startsWith 判断是字符串开始
@@ -672,6 +697,26 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 	}
 
 	return data
+}
+
+// JSONCutOffFieldsStr 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，输出字符串
+func JSONCutOffFieldsStr(length int, body string) string {
+	var pairs []KVPair
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+		return KVPair{
+			Key:   str.Cutoff(30, p.Key),
+			Value: str.Cutoff(length, p.Value),
+		}
+	}).Filter(func(p KVPair) bool {
+		return p.Key != "" && p.Value != ""
+	}).All(&pairs)
+
+	data := make(map[string]interface{})
+	for _, p := range pairs {
+		data[p.Key] = p.Value
+	}
+
+	return jsonFormatter(string(must.Must(json.Marshal(data))))
 }
 
 // MapFieldsCutoff 对 Map 的每个 KV 截取指定长度

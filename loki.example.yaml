@@ -1,0 +1,39 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  path_prefix: /usr/local/var/loki
+  storage:
+    filesystem:
+      chunks_directory: /usr/local/var/loki/chunks
+      rules_directory: /usr/local/var/loki/rules
+  replication_factor: 1
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+ruler:
+  # 这里配置 adanos-alert-server 或者 adanos-alert-agent 的地址，地址需要包含前缀 /api/events/prometheus/ （必须包含最后的 / ）
+  alertmanager_url: http://localhost:19999/api/events/prometheus/
+  storage:
+    type: local
+    local:
+      directory: /usr/local/etc/rules
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true

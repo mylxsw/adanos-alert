@@ -116,6 +116,10 @@ Dashboard 访问地址 http://localhost:19999
 
 ![预览图](https://ssl.aicode.cc/prometheus/20201025172345.png)
 
+## 系统接入
+
+TODO
+
 ## Architecture
 
 Adanos Alert 平台与其他系统之间的关系

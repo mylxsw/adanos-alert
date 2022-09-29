@@ -65,11 +65,12 @@
                 <b-col sm="9"><b-badge variant="light">{{ event.origin }}</b-badge></b-col>
             </b-row>
             <b-row v-for="(val, key) in event.meta" :key="key" style="max-width: 100rem;" class="adanos-meta-line" title="Meta" v-b-tooltip>
-                <b-col sm="3"><b class="text-dark" style="border-bottom: 1px dashed black">{{ key }}</b></b-col>
+                <b-col sm="3"><span class="text-black-50 mr-1" style="font-size: 50%">Meta</span><b class="text-dark" style="border-bottom: 1px dashed black">{{ key }}</b></b-col>
                 <b-col sm="9"><pre class="adanos-code"><code>{{ val }}</code></pre></b-col>
             </b-row>
         </b-card-text>
         <b-card-text v-if="!isFold">
+            <span class="text-black-50 mr-1" style="font-size: 50%">Content</span>
             <code><pre class="adanos-code" v-b-tooltip title="Content">{{ event.content }}</pre></code>
         </b-card-text>
     </b-card>

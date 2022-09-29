@@ -3,15 +3,18 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/ledisdb/ledisdb/ledis"
 	"github.com/mylxsw/adanos-alert/agent/store"
 	"github.com/mylxsw/adanos-alert/internal/extension"
+	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/web"
+	"github.com/mylxsw/go-utils/str"
 )
 
 type EventController struct {
@@ -30,6 +33,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus/api/v1/alerts", m.AddPrometheusEvent).Name("events:add:prometheus") // url 地址末尾不包含 "/"
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
+		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
 	})
 
 	router.Group("/events", func(router web.Router) {
@@ -39,6 +43,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus/api/v1/alerts", m.AddPrometheusEvent).Name("events:add:prometheus") // url 地址末尾不包含 "/"
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
+		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
 	})
 }
 
@@ -67,6 +72,40 @@ func (m *EventController) errorWrap(ctx web.Context, err error) web.Response {
 	}
 
 	return ctx.JSON(struct{}{})
+}
+
+func (m *EventController) AddGeneralEvent(ctx web.Context, messageStore store.EventStore) web.Response {
+	body := ctx.Request().Body()
+	tags := str.FilterEmpty(append(strings.Split(ctx.Input("tags"), ","), ctx.Input("tag")))
+	origin := ctx.Input("origin")
+	metas := str.Map(str.FilterEmpty(strings.Split(ctx.Input("meta"), ",")), func(item string) string {
+		return strings.Join(str.Map(strings.SplitN(item, ":", 2), func(item string) string { return strings.TrimSpace(item) }), ":")
+	})
+
+	meta := make(repository.EventMeta)
+	for _, m := range metas {
+		kv := strings.SplitN(m, ":", 2)
+		if len(kv) == 2 {
+			meta[kv[0]] = kv[1]
+		}
+	}
+
+	evt := extension.CommonEvent{
+		Content: string(body),
+		Meta:    meta,
+		Tags:    tags,
+		Origin:  origin,
+	}
+
+	if ctx.Input("control.id") != "" {
+		evt.Control = extension.EventControl{
+			ID:              ctx.Input("control.id"),
+			InhibitInterval: ctx.Input("control.inhibit_interval"),
+			RecoveryAfter:   ctx.Input("control.recovery_after"),
+		}
+	}
+
+	return m.errorWrap(ctx, m.saveEvent(messageStore, evt, ctx))
 }
 
 func (m *EventController) AddCommonEvent(ctx web.Context, messageStore store.EventStore) web.Response {

@@ -1,6 +1,6 @@
 module github.com/mylxsw/adanos-alert
 
-go 1.18
+go 1.19
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
@@ -24,7 +24,7 @@ require (
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
 	github.com/mylxsw/glacier v0.0.0-20210322044907-dc4c08087409
 	github.com/mylxsw/go-toolkit v0.0.0-20191208081907-50a06279f988
-	github.com/mylxsw/go-utils v0.0.0-20220320145042-fc2075bd254a
+	github.com/mylxsw/go-utils v0.0.0-20220916050157-2dbc01cca1ca
 	github.com/mylxsw/graceful v0.0.0-20210318070625-a4a80fb77564
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
 	github.com/pkg/errors v0.9.1
@@ -82,7 +82,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.0.1 // indirect

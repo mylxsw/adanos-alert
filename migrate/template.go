@@ -133,6 +133,35 @@ var predefinedTemplates = []repository.Template{
 		Type: repository.TemplateTypeTemplate,
 	},
 	{
+		Name:        "Prometheus/Loki 告警事件示例",
+		Description: "Prometheus/Loki 告警事件示例",
+		Content: `## {{ recoverable_notice .IsRecovery .Rule.Name }}
+
+{{ range $i, $msg := .Events 4 }}
+- {{ json_get "startsAt" "" $msg.Content | reformat_datetime_str "2006-01-02T15:04:05.999999999Z07:00" "2006-01-02 15:04:05" }} - {{ json_get "endsAt" "" $msg.Content | reformat_datetime_str "2006-01-02T15:04:05.999999999Z07:00" "2006-01-02 15:04:05" }} 
+	<p>{{ json_get "annotations.summary" "" $msg.Content }}</p>
+{{- end }}
+
+---
+
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Type: repository.TemplateTypeTemplate,
+	},
+	{
+		Name:        "完整输出告警信息",
+		Description: "完整输出告警信息",
+		Content: `## {{ .Rule.Name }}
+
+{{ range $i, $evt := .Events 4 }}- {{ $evt.CreatedAt | datetime "2006-01-02 15:04:05" }}， **来源**：{{ $evt.Origin }}，**标签**：{{ $evt.Tags  }}{{ range $k, $v := $evt.Meta }}，**{{ $k }}**: {{ $v }}{{ end }}
+{{ json_fields_cutoff_str 100 $evt.Content | cutoff_line 5 | cutoff 500 | ident "    > " }}
+{{ end }}
+
+---
+
+[共 {{ .Group.MessageCount }} 条，查看详细]({{ .PreviewURL }})`,
+		Type: repository.TemplateTypeTemplate,
+	},
+	{
 		Name:        "嵌入全局的规则模板",
 		Description: "在动作模板中引用规则的展示模板内容",
 		Content:     `{{ .RuleTemplateParsed }}`,
