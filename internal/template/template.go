@@ -29,6 +29,7 @@ import (
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
 	"github.com/mylxsw/go-toolkit/jsonutils"
+	"github.com/mylxsw/go-utils/array"
 	"github.com/mylxsw/go-utils/must"
 	"github.com/mylxsw/go-utils/str"
 	"github.com/russross/blackfriday/v2"
@@ -69,6 +70,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"join":                       join,
 		"split":                      split,
 		"ident":                      leftIdent,
+		"append_by_lines":            appendByLines,
 		"datetime":                   datetimeFormat,
 		"datetime_noloc":             datetimeFormatNoLoc,
 		"datetime_loc":               datetimeFormatLoc,
@@ -94,6 +96,7 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"json_flatten_str":         jsonFlattenStr,
 		"json_flatten_str_noempty": jsonFlattenNoEmpty,
 		"json_encode":              Serialize,
+		"json_fields_filter":       jsonFieldsFilter,
 
 		"serialize":            Serialize,
 		"sort_map_human":       SortMapByKeyHuman,
@@ -113,11 +116,13 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"meta_prefix_filter":         MetaFilterPrefix,
 		"meta_prefix_filter_exclude": MetaFilterPrefixExclude,
 
-		"prefix_all_str":      prefixStrArray,
-		"suffix_all_str":      suffixStrArray,
-		"trim_prefix_map_k":   TrimPrefixMapK,
-		"line_filter_include": LineFilterInclude,
-		"line_filter_exclude": LineFilterExclude,
+		"prefix_all_str":       prefixStrArray,
+		"suffix_all_str":       suffixStrArray,
+		"trim_prefix_map_k":    TrimPrefixMapK,
+		"line_filter_include":  LineFilterInclude,
+		"line_filter_exclude":  LineFilterExclude,
+		"line_filter_includes": LineFilterIncludes,
+		"line_filter_excludes": LineFilterExcludes,
 
 		"starts_with":       startsWith,
 		"ends_with":         endsWith,
@@ -198,12 +203,48 @@ func LineFilterInclude(includeStr string, val string) string {
 	return strings.Join(results, "\n")
 }
 
+func LineFilterIncludes(val string, includeStrs ...string) string {
+	lines := strings.Split(val, "\n")
+	var results []string
+
+	_ = coll.Filter(lines, &results, func(line string) bool {
+		for _, includeStr := range includeStrs {
+			matched, _ := regexp.MatchString(includeStr, line)
+			if matched || strings.Contains(line, includeStr) {
+				return true
+			}
+		}
+
+		return false
+	})
+
+	return strings.Join(results, "\n")
+}
+
 func LineFilterExclude(excludeStr string, val string) string {
 	lines := strings.Split(val, "\n")
 	var results []string
 	_ = coll.Filter(lines, &results, func(line string) bool {
 		matched, _ := regexp.MatchString(excludeStr, line)
 		return !matched && !strings.Contains(line, excludeStr)
+	})
+
+	return strings.Join(results, "\n")
+}
+
+func LineFilterExcludes(val string, excludeStrs ...string) string {
+	lines := strings.Split(val, "\n")
+	var results []string
+
+	_ = coll.Filter(lines, &results, func(line string) bool {
+		for _, excludeStr := range excludeStrs {
+			matched, _ := regexp.MatchString(excludeStr, line)
+			if matched || strings.Contains(line, excludeStr) {
+				return false
+			}
+		}
+
+		return true
 	})
 
 	return strings.Join(results, "\n")
@@ -218,6 +259,16 @@ func leftIdent(ident string, message string) string {
 	}, "").(string)
 
 	return strings.Trim(result, "\n")
+}
+
+// appendByLines 在字符串的每一行末尾追加字符串
+func appendByLines(appendStr string, val string) string {
+	return strings.Join(
+		array.Map(strings.Split(val, "\n"), func(line string) string {
+			return line + appendStr
+		}),
+		"\n",
+	)
 }
 
 // JSONBeauty format content as json beauty
@@ -677,6 +728,15 @@ func suffixStrArray(suffix string, arr []string) []string {
 	var dest []string
 	_ = coll.Map(arr, &dest, func(s string) string { return s + suffix })
 	return dest
+}
+
+func jsonFieldsFilter(body string, keys ...string) string {
+	kvs := array.Filter(jsonFlatten(body, 5), func(kv jsonutils.KvPair) bool {
+		return array.In(kv.Key, keys) && kv.Value != "" && kv.Value != "{}" && kv.Value != "[]"
+	})
+
+	rs, _ := json.Marshal(array.BuildMap(kvs, func(kv jsonutils.KvPair) (string, string) { return kv.Key, kv.Value }))
+	return string(rs)
 }
 
 // JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度
