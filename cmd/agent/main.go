@@ -24,7 +24,6 @@ import (
 	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/starter/application"
-	"github.com/mylxsw/go-toolkit/network"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 	"google.golang.org/grpc"
@@ -35,9 +34,15 @@ import (
 // Version GitCommit 编译参数，编译时通过编译选项 ldflags 指定
 var Version = "1.0"
 var GitCommit = "5dbef13fb456f51a5d29464d"
+var AsyncRunner = 3
+var DEBUG = ""
 
 func main() {
-	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit[:8]))
+	if DEBUG == "true" {
+		infra.DEBUG = true
+	}
+
+	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
 	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "server_addr",
 		Usage:  "server grpc listen address",
@@ -121,7 +126,7 @@ func main() {
 		return grpc.Dial(conf.ServerAddr, grpc.WithInsecure(), grpc.WithPerRPCCredentials(NewAuthAPI(conf.ServerToken)))
 	})
 
-	app.Main(func(conf *config.Config, db *ledis.DB) {
+	app.Async(func(conf *config.Config, db *ledis.DB) {
 		agentID, err := db.Get([]byte("agent-id"))
 		if err != nil || agentID == nil {
 			_ = db.Set([]byte("agent-id"), []byte(misc.UUID()))
@@ -158,7 +163,7 @@ func NewErrorCollectorWriter(cc infra.Resolver) *ErrorCollectorWriter {
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
 	return e.cc.ResolveWithError(func(msgStore store.EventStore) error {
-		ips, _ := network.GetLanIPs()
+		ips, _ := misc.GetLanIPs()
 		data, _ := json.Marshal(extension.CommonEvent{
 			Content: message,
 			Meta: repository.EventMeta{

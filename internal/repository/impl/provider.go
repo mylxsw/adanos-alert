@@ -29,7 +29,7 @@ func (s Provider) Register(app infra.Binder) {
 	app.MustSingleton(NewDingdingRobotRepo)
 	app.MustSingleton(NewLockRepo)
 	app.MustSingleton(NewAgentRepo)
-	app.MustSingleton(NewAuditLogRepo)
+	app.MustSingleton(NewSyslogRepo)
 	app.MustSingleton(NewRecoveryRepo)
 }
 
@@ -39,7 +39,7 @@ func (s Provider) Boot(app infra.Resolver) {
 		kvRepo repository.KVRepo,
 		groupRepo repository.EventGroupRepo,
 		eventRepo repository.EventRepo,
-		auditRepo repository.AuditLogRepo,
+		syslogRepo repository.SyslogRepo,
 		conf *configs.Config,
 	) {
 		_ = cr.Add("kv_repository_gc", "@every 60s", func() {
@@ -48,13 +48,13 @@ func (s Provider) Boot(app infra.Resolver) {
 			}
 		})
 
-		if conf.AuditKeepPeriod > 0 {
-			_ = cr.Add("remove_expired_audit_log", "@midnight", func() {
-				deadLineDate := time.Now().AddDate(0, 0, -conf.AuditKeepPeriod)
-				log.Infof("clear expired audit logs before %v", deadLineDate)
+		if conf.SyslogKeepPeriod > 0 {
+			_ = cr.Add("remove_expired_syslog", "@midnight", func() {
+				deadLineDate := time.Now().AddDate(0, 0, -conf.SyslogKeepPeriod)
+				log.Infof("clear expired syslog before %v", deadLineDate)
 
-				if err := auditRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
-					log.Errorf("clear expired audit logs before %v failed: %v", deadLineDate, err)
+				if err := syslogRepo.Delete(bson.M{"created_at": bson.M{"$lt": deadLineDate}}); err != nil {
+					log.Errorf("clear expired syslog before %v failed: %v", deadLineDate, err)
 				}
 			})
 		}

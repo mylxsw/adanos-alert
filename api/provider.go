@@ -91,7 +91,7 @@ func (s Provider) routes(cc infra.Resolver, router web.Router, mw web.RequestMid
 		controller.NewDingdingRobotController(cc),
 		controller.NewAgentController(cc),
 		controller.NewStatisticsController(cc),
-		controller.NewAuditController(cc),
+		controller.NewSyslogController(cc),
 		controller.NewJiraController(cc),
 	)
 

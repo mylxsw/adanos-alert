@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/queue"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
@@ -15,10 +16,10 @@ func (s Provider) Register(app infra.Binder) {
 }
 
 func (s Provider) Boot(app infra.Resolver) {
-	app.MustResolve(func(manager Manager, queueManager queue.Manager) {
+	app.MustResolve(func(manager Manager, queueManager queue.Manager, conf *configs.Config) {
 		manager.Register("http", NewHTTPAction(manager))
 		manager.Register("dingding", NewDingdingAction(manager))
-		manager.Register("email", NewEmailAction(manager))
+		manager.Register("email", NewEmailAction(manager, conf))
 		manager.Register("wechat", NewWechatAction(manager))
 		manager.Register("phone_call_aliyun", NewPhoneCallAliyunAction(manager))
 		manager.Register("sms_aliyun", NewSmsAliyunAction(manager))

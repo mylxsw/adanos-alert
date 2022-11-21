@@ -12,7 +12,7 @@
     import { FitAddon } from 'xterm-addon-fit';
 
     export default {
-        name: 'Audit',
+        name: 'Syslog',
         data() {
             return {
                 logs: [],
@@ -41,7 +41,7 @@
             term.open(document.getElementById("terminal"));
 
             let that = this;
-            axios.get('/api/audit/logs/?limit=100&offset=' + this.cur).then(response => {
+            axios.get('/api/syslog/logs/?limit=100&offset=' + this.cur).then(response => {
                 this.next = response.data.next;
                 this.logs = response.data.logs.reverse().map((line) => {
                     term.writeln(that.typeWrap(line.type) + line.body);

@@ -11,20 +11,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// AuditLogRepo 审计日志仓库
-type AuditLogRepo struct {
+// SyslogRepo 系统日志仓库
+type SyslogRepo struct {
 	col *mongo.Collection
 }
 
-// NewAuditLogRepo 创建一个 审计日志仓库
-func NewAuditLogRepo(db *mongo.Database) repository.AuditLogRepo {
-	return &AuditLogRepo{
-		col: db.Collection("audit_log"),
+// NewSyslogRepo 创建一个 系统日志仓库
+func NewSyslogRepo(db *mongo.Database) repository.SyslogRepo {
+	return &SyslogRepo{
+		col: db.Collection("syslog"),
 	}
 }
 
 // Add 添加日志
-func (alr *AuditLogRepo) Add(al repository.AuditLog) (id primitive.ObjectID, err error) {
+func (alr *SyslogRepo) Add(al repository.Syslog) (id primitive.ObjectID, err error) {
 	al.CreatedAt = time.Now()
 
 	rs, err := alr.col.InsertOne(context.TODO(), al)
@@ -36,7 +36,7 @@ func (alr *AuditLogRepo) Add(al repository.AuditLog) (id primitive.ObjectID, err
 }
 
 // Get 查询单个日志
-func (alr *AuditLogRepo) Get(id primitive.ObjectID) (al repository.AuditLog, err error) {
+func (alr *SyslogRepo) Get(id primitive.ObjectID) (al repository.Syslog, err error) {
 	err = alr.col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&al)
 	if err == mongo.ErrNoDocuments {
 		err = repository.ErrNotFound
@@ -46,8 +46,8 @@ func (alr *AuditLogRepo) Get(id primitive.ObjectID) (al repository.AuditLog, err
 }
 
 // Paginate 分页查询
-func (alr *AuditLogRepo) Paginate(filter bson.M, offset, limit int64) (als []repository.AuditLog, next int64, err error) {
-	als = make([]repository.AuditLog, 0)
+func (alr *SyslogRepo) Paginate(filter bson.M, offset, limit int64) (als []repository.Syslog, next int64, err error) {
+	als = make([]repository.Syslog, 0)
 	cur, err := alr.col.Find(context.TODO(), filter, options.Find().SetSkip(offset).SetLimit(limit).SetSort(bson.M{"created_at": -1}))
 	if err != nil {
 		return
@@ -55,7 +55,7 @@ func (alr *AuditLogRepo) Paginate(filter bson.M, offset, limit int64) (als []rep
 	defer cur.Close(context.TODO())
 
 	for cur.Next(context.TODO()) {
-		var al repository.AuditLog
+		var al repository.Syslog
 		if err = cur.Decode(&al); err != nil {
 			return
 		}
@@ -71,12 +71,12 @@ func (alr *AuditLogRepo) Paginate(filter bson.M, offset, limit int64) (als []rep
 }
 
 // Delete 删除
-func (alr *AuditLogRepo) Delete(filter bson.M) error {
+func (alr *SyslogRepo) Delete(filter bson.M) error {
 	_, err := alr.col.DeleteMany(context.TODO(), filter)
 	return err
 }
 
 // DeleteID 删除单条
-func (alr *AuditLogRepo) DeleteID(id primitive.ObjectID) error {
+func (alr *SyslogRepo) DeleteID(id primitive.ObjectID) error {
 	return alr.Delete(bson.M{"_id": id})
 }

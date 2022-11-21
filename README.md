@@ -76,7 +76,7 @@ adanos-alert-server 命令行选项（配置文件）
 - **action_trigger_period**： action trigger job execute period (default: "5s") [$ADANOS_ACTION_TRIGGER_PERIOD]
 - **queue_job_max_retry_times**： set queue job max retry times (default: 3) [$ADANOS_QUEUE_JOB_MAX_RETRY_TIMES]
 - **keep_period**： 保留多长时间的报警，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 keep_period 天的报警 (default: 0) [$ADANOS_KEEP_PERIOD]
-- **audit_keep_period**： 保留多长时间的审计日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 audit_keep_period 天的审计日志 (default: 0) [$ADANOS_AUDIT_KEEP_PERIOD]
+- **syslog_keep_period**： 保留多长时间的系统日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 syslog_keep_period 天的系统日志 (default: 0) [$ADANOS_SYSLOG_KEEP_PERIOD]
 - **queue_worker_num**： set queue worker numbers (default: 3) [$ADANOS_QUEUE_WORKER_NUM]
 - **query_timeout**： query timeout for backend service (default: "30s") [$ADANOS_QUERY_TIMEOUT]
 - **aliyun_access_key**： 阿里云语音通知接口 Access Key ID [$ADANOS_ALIYUN_ACCESS_KEY]

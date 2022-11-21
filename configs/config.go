@@ -28,8 +28,8 @@ type Config struct {
 	QueueWorkerNum        int           `json:"queue_worker_num"`
 	QueryTimeout          time.Duration `json:"query_timeout"`
 
-	KeepPeriod      int `json:"keep_period"`
-	AuditKeepPeriod int `json:"audit_keep_period"`
+	KeepPeriod       int `json:"keep_period"`
+	SyslogKeepPeriod int `json:"syslog_keep_period"`
 
 	Migrate   bool `json:"migrate"`
 	ReMigrate bool `json:"re_migrate"`

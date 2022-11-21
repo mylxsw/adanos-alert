@@ -28,7 +28,6 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/go-toolkit/jsonutils"
 	"github.com/mylxsw/go-utils/must"
 	"github.com/mylxsw/go-utils/str"
 	"github.com/russross/blackfriday/v2"
@@ -279,7 +278,7 @@ func datetimeAddSec(datetime time.Time, addSec int) time.Time {
 	return datetime.Add(time.Duration(addSec) * time.Second)
 }
 
-type KvPairs []jsonutils.KvPair
+type KvPairs []pkgJSON.KvPair
 
 func (k KvPairs) Len() int {
 	return len(k)
@@ -294,16 +293,16 @@ func (k KvPairs) Swap(i, j int) {
 }
 
 // jsonFlatten json转换为kv pairs
-func jsonFlatten(body string, maxLevel int) []jsonutils.KvPair {
+func jsonFlatten(body string, maxLevel int) []pkgJSON.KvPair {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorf("json解析失败: %s", err)
 		}
 	}()
 
-	ju, err := jsonutils.New([]byte(body), maxLevel, true)
+	ju, err := pkgJSON.New([]byte(body), maxLevel, true)
 	if err != nil {
-		return make([]jsonutils.KvPair, 0)
+		return make([]pkgJSON.KvPair, 0)
 	}
 
 	kvPairs := ju.ToKvPairsArray()
@@ -682,7 +681,7 @@ func suffixStrArray(suffix string, arr []string) []string {
 // JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度
 func JSONCutOffFields(length int, body string) map[string]interface{} {
 	var pairs []KVPair
-	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p pkgJSON.KvPair) KVPair {
 		return KVPair{
 			Key:   str.Cutoff(30, p.Key),
 			Value: str.Cutoff(length, p.Value),
@@ -702,7 +701,7 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 // JSONCutOffFieldsStr 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，输出字符串
 func JSONCutOffFieldsStr(length int, body string) string {
 	var pairs []KVPair
-	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p pkgJSON.KvPair) KVPair {
 		return KVPair{
 			Key:   str.Cutoff(30, p.Key),
 			Value: str.Cutoff(length, p.Value),

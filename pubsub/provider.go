@@ -17,43 +17,43 @@ type Provider struct{}
 func (s Provider) Aggregates() []infra.Provider {
 	return []infra.Provider{
 		event.Provider(func(cc infra.Resolver, em event.Listener) {
-			cc.MustResolve(func(auditRepo repository.AuditLogRepo) {
+			cc.MustResolve(func(syslogRepo repository.SyslogRepo) {
 				// 用户变更事件监听
 				em.Listen(func(ev UserChangedEvent) {
-					_, _ = auditRepo.Add(repository.AuditLog{
-						Type: repository.AuditLogTypeAction,
+					_, _ = syslogRepo.Add(repository.Syslog{
+						Type: repository.SyslogTypeAction,
 						Body: fmt.Sprintf("[%s] User %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.User)),
 					})
 				})
 
 				// 规则变更事件监听
 				em.Listen(func(ev RuleChangedEvent) {
-					_, _ = auditRepo.Add(repository.AuditLog{
-						Type: repository.AuditLogTypeAction,
+					_, _ = syslogRepo.Add(repository.Syslog{
+						Type: repository.SyslogTypeAction,
 						Body: fmt.Sprintf("[%s] Rule %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.Rule)),
 					})
 				})
 
 				// 钉钉机器人变更事件监听
 				em.Listen(func(ev DingdingRobotEvent) {
-					_, _ = auditRepo.Add(repository.AuditLog{
-						Type: repository.AuditLogTypeAction,
+					_, _ = syslogRepo.Add(repository.Syslog{
+						Type: repository.SyslogTypeAction,
 						Body: fmt.Sprintf("[%s] DingdingRobot %s %s", ev.CreatedAt.Format(time.RFC3339), ev.Type, serialize(ev.DingDingRobot)),
 					})
 				})
 
 				// 系统启停事件监听
 				em.Listen(func(ev SystemUpDownEvent) {
-					_, _ = auditRepo.Add(repository.AuditLog{
-						Type: repository.AuditLogTypeSystem,
+					_, _ = syslogRepo.Add(repository.Syslog{
+						Type: repository.SyslogTypeSystem,
 						Body: fmt.Sprintf("[%s] System is changed to %s", ev.CreatedAt.Format(time.RFC3339), misc.IfElse(ev.Up, "up", "down")),
 					})
 				})
 
 				// 事件组事件清理
 				em.Listen(func(ev EventGroupReduceEvent) {
-					_, _ = auditRepo.Add(repository.AuditLog{
-						Type: repository.AuditLogTypeAction,
+					_, _ = syslogRepo.Add(repository.Syslog{
+						Type: repository.SyslogTypeAction,
 						Body: fmt.Sprintf("[%s] EventGroup's (%s) event count reduced to %d, deleted count=%d", ev.CreatedAt.Format(time.RFC3339), ev.GroupID.Hex(), ev.KeepCount, ev.DeleteCount),
 					})
 				})
