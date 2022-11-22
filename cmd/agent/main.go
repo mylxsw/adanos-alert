@@ -21,9 +21,8 @@ import (
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/asteria/writer"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/infra"
-	"github.com/mylxsw/glacier/starter/application"
+	"github.com/mylxsw/glacier/starter/app"
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 	"google.golang.org/grpc"
@@ -42,53 +41,52 @@ func main() {
 		infra.DEBUG = true
 	}
 
-	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
-	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+	ins := app.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
+	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "server_addr",
 		Usage:  "server grpc listen address",
 		EnvVar: "ADANOS_SERVER_ADDR",
 		Value:  "127.0.0.1:19998",
 	}))
-	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "server_token",
 		Usage:  "API Token for grpc api access control",
 		EnvVar: "ADANOS_SERVER_TOKEN",
 		Value:  "000000",
 	}))
-	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "data_dir",
 		Usage: "本地数据库存储目录",
 		Value: "/tmp/adanos-agent",
 	}))
-	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:   "listen",
 		Usage:  "listen address",
 		EnvVar: "ADANOS_AGENT_LISTEN_ADDR",
 		Value:  "127.0.0.1:29999",
 	}))
-	app.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
+	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
 		Name:  "log_path",
 		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
 	}))
 
-	app.BeforeServerStart(func(cc container.Container) error {
+	ins.Init(func(c infra.FlagContext) error {
 		stackWriter := writer.NewStackWriter()
-		cc.MustResolve(func(ctx context.Context, c infra.FlagContext) {
-			logPath := c.String("log_path")
-			if logPath == "" {
-				log.All().LogFormatter(formatter.NewJSONFormatter())
-				stackWriter.PushWithLevels(writer.NewStdoutWriter())
-				return
-			}
+		logPath := c.String("log_path")
+		if logPath == "" {
+			log.All().LogFormatter(formatter.NewJSONFormatter())
+			stackWriter.PushWithLevels(writer.NewStdoutWriter())
 
-			log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
-			stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(ctx, func(le level.Level, module string) string {
-				return filepath.Join(logPath, fmt.Sprintf("agent-%s.%s.log", le.GetLevelName(), time.Now().Format("20060102")))
-			}))
-		})
+			return nil
+		}
+
+		log.All().LogFormatter(formatter.NewJSONWithTimeFormatter())
+		stackWriter.PushWithLevels(writer.NewDefaultRotatingFileWriter(context.TODO(), func(le level.Level, module string) string {
+			return filepath.Join(logPath, fmt.Sprintf("agent-%s.%s.log", le.GetLevelName(), time.Now().Format("20060102")))
+		}))
 
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(cc),
+			NewErrorCollectorWriter(ins.Container()),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -99,7 +97,7 @@ func main() {
 	})
 
 	// Config
-	app.Singleton(func(c infra.FlagContext) *config.Config {
+	ins.Singleton(func(c infra.FlagContext) *config.Config {
 		return &config.Config{
 			DataDir:     c.String("data_dir"),
 			ServerAddr:  c.String("server_addr"),
@@ -110,23 +108,23 @@ func main() {
 	})
 
 	// Ledis DB
-	app.Singleton(func(conf *config.Config) (*ledis.Ledis, error) {
+	ins.Singleton(func(conf *config.Config) (*ledis.Ledis, error) {
 		cfg := lediscfg.NewConfigDefault()
 		cfg.DataDir = conf.DataDir
 		cfg.Databases = 1
 
 		return ledis.Open(cfg)
 	})
-	app.Singleton(func(ld *ledis.Ledis) (*ledis.DB, error) {
+	ins.Singleton(func(ld *ledis.Ledis) (*ledis.DB, error) {
 		return ld.Select(0)
 	})
 
 	// GRPC
-	app.Singleton(func(conf *config.Config) (grpc.ClientConnInterface, error) {
+	ins.Singleton(func(conf *config.Config) (grpc.ClientConnInterface, error) {
 		return grpc.Dial(conf.ServerAddr, grpc.WithInsecure(), grpc.WithPerRPCCredentials(NewAuthAPI(conf.ServerToken)))
 	})
 
-	app.Async(func(conf *config.Config, db *ledis.DB) {
+	ins.Async(func(conf *config.Config, db *ledis.DB) {
 		agentID, err := db.Get([]byte("agent-id"))
 		if err != nil || agentID == nil {
 			_ = db.Set([]byte("agent-id"), []byte(misc.UUID()))
@@ -142,11 +140,11 @@ func main() {
 		}
 	})
 
-	app.Provider(api.Provider{})
-	app.Provider(store.Provider{})
-	app.Provider(job.Provider{})
+	ins.Provider(api.Provider{})
+	ins.Provider(store.Provider{})
+	ins.Provider(job.Provider{})
 
-	if err := app.Run(os.Args); err != nil {
+	if err := ins.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
 	}
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/mylxsw/adanos-alert/migrate"
 	"github.com/mylxsw/asteria/level"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/glacier/starter/application"
+	"github.com/mylxsw/glacier/starter/app"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -42,53 +42,52 @@ func main() {
 		infra.DEBUG = true
 	}
 
-	app := application.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
+	ins := app.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
 
-	app.AddStringFlag("listen", ":19999", "http server listen address")
-	app.AddStringFlag("api_token", "", "api token for http server")
-	app.AddStringFlag("grpc_listen", ":19998", "grpc server listen address")
+	ins.AddStringFlag("listen", ":19999", "http server listen address")
+	ins.AddStringFlag("api_token", "", "api token for http server")
+	ins.AddStringFlag("grpc_listen", ":19998", "grpc server listen address")
 
-	app.AddStringFlag("mongo_uri", "mongodb://localhost:27017", "mongodb uri, 参考 https://docs.mongodb.com/manual/reference/connection-string/")
-	app.AddStringFlag("mongo_db", "adanos-alert", "mongodb database name")
+	ins.AddStringFlag("mongo_uri", "mongodb://localhost:27017", "mongodb uri, 参考 https://docs.mongodb.com/manual/reference/connection-string/")
+	ins.AddStringFlag("mongo_db", "adanos-alert", "mongodb database name")
 
-	app.AddStringFlag("preview_url", "http://localhost:19999/ui/groups/%s.html", "preview url")
-	app.AddStringFlag("report_url", "http://localhost:19999/ui/reports/%s.html", "report url")
+	ins.AddStringFlag("preview_url", "http://localhost:19999/ui/groups/%s.html", "preview url")
+	ins.AddStringFlag("report_url", "http://localhost:19999/ui/reports/%s.html", "report url")
 
-	app.AddBoolFlag("use_local_dashboard", "使用本地的 Dashboard，用于开发调试")
-	app.AddBoolFlag("no_job_mode", "启用该标识后，将会停止事件聚合和队列任务处理，用于开发调试")
+	ins.AddBoolFlag("use_local_dashboard", "使用本地的 Dashboard，用于开发调试")
+	ins.AddBoolFlag("no_job_mode", "启用该标识后，将会停止事件聚合和队列任务处理，用于开发调试")
 
-	app.AddBoolFlag("enable_migrate", "在应用启动时自动执行数据库迁移")
-	app.AddBoolFlag("re_migrate", "重新执行数据库迁移，重新迁移会移除已有的预定义模板")
+	ins.AddBoolFlag("enable_migrate", "在应用启动时自动执行数据库迁移")
+	ins.AddBoolFlag("re_migrate", "重新执行数据库迁移，重新迁移会移除已有的预定义模板")
 
-	app.AddStringFlag("aggregation_period", "5s", "事件聚合周期，每隔 aggregation_period 时间对新增事件执行聚合任务")
-	app.AddStringFlag("action_trigger_period", "5s", "动作触发周期，每隔 action_trigger_period 时间执行一次动作触发")
-	app.AddIntFlag("queue_job_max_retry_times", 3, "任务最大重试次数")
-	app.AddIntFlag("keep_period", 0, "保留多长时间的报警，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 keep_period 天的报警")
-	app.AddIntFlag("syslog_keep_period", 0, "保留多长时间的系统日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 syslog_keep_period 天的系统日志")
-	app.AddIntFlag("queue_worker_num", 3, "队列工作线程数")
-	app.AddStringFlag("query_timeout", "30s", "后端服务查询超时时间")
-	app.AddStringFlag("log_path", "", "日志文件输出目录（非文件名），默认为空，输出到标准输出")
+	ins.AddStringFlag("aggregation_period", "5s", "事件聚合周期，每隔 aggregation_period 时间对新增事件执行聚合任务")
+	ins.AddStringFlag("action_trigger_period", "5s", "动作触发周期，每隔 action_trigger_period 时间执行一次动作触发")
+	ins.AddIntFlag("queue_job_max_retry_times", 3, "任务最大重试次数")
+	ins.AddIntFlag("keep_period", 0, "保留多长时间的报警，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 keep_period 天的报警")
+	ins.AddIntFlag("syslog_keep_period", 0, "保留多长时间的系统日志，如果全部保留，设置为0，单位为天，Adanos-Alert 会自动清理超过 syslog_keep_period 天的系统日志")
+	ins.AddIntFlag("queue_worker_num", 3, "队列工作线程数")
+	ins.AddStringFlag("query_timeout", "30s", "后端服务查询超时时间")
+	ins.AddStringFlag("log_path", "", "日志文件输出目录（非文件名），默认为空，输出到标准输出")
 
-	app.AddStringFlag("aliyun_access_key", "", "阿里云语音通知接口 Access Key ID")
-	app.AddStringFlag("aliyun_access_secret", "", "阿里云语音通知接口 Access Secret")
-	app.AddStringFlag("aliyun_voice_called_show_number", "", "阿里云语音通知被叫显号")
-	app.AddStringFlag("aliyun_voice_tts_code", "", "阿里云语音通知模板，这里是模板ID，模板内容在阿里云申请，建议内容：\"您有一条名为 ${title} 的报警通知，请及时处理！\"")
-	app.AddStringFlag("aliyun_voice_tts_param", "title", "阿里云语音通知模板变量名")
+	ins.AddStringFlag("aliyun_access_key", "", "阿里云语音通知接口 Access Key ID")
+	ins.AddStringFlag("aliyun_access_secret", "", "阿里云语音通知接口 Access Secret")
+	ins.AddStringFlag("aliyun_voice_called_show_number", "", "阿里云语音通知被叫显号")
+	ins.AddStringFlag("aliyun_voice_tts_code", "", "阿里云语音通知模板，这里是模板ID，模板内容在阿里云申请，建议内容：\"您有一条名为 ${title} 的报警通知，请及时处理！\"")
+	ins.AddStringFlag("aliyun_voice_tts_param", "title", "阿里云语音通知模板变量名")
 
-	app.AddStringFlag("jira_url", "", "Jira 服务器地址，如 http://127.0.0.1:8080")
-	app.AddStringFlag("jira_username", "", "Jira 用户名")
-	app.AddStringFlag("jira_password", "", "Jira 密码")
+	ins.AddStringFlag("jira_url", "", "Jira 服务器地址，如 http://127.0.0.1:8080")
+	ins.AddStringFlag("jira_username", "", "Jira 用户名")
+	ins.AddStringFlag("jira_password", "", "Jira 密码")
 
-	app.AddStringFlag("email_smtp_host", "", "邮件服务器地址")
-	app.AddIntFlag("email_smtp_port", 25, "邮件服务器端口")
-	app.AddStringFlag("email_smtp_username", "", "邮件服务器用户名")
-	app.AddStringFlag("email_smtp_password", "", "邮件服务器密码")
+	ins.AddStringFlag("email_smtp_host", "", "邮件服务器地址")
+	ins.AddIntFlag("email_smtp_port", 25, "邮件服务器端口")
+	ins.AddStringFlag("email_smtp_username", "", "邮件服务器用户名")
+	ins.AddStringFlag("email_smtp_password", "", "邮件服务器密码")
 
-	app.BeforeInitialize(func(f infra.FlagContext) error {
+	ins.Init(func(f infra.FlagContext) error {
 		stackWriter := writer.NewStackWriter()
 		logPath := f.String("log_path")
 		if logPath == "" {
-			log.All().LogFormatter(formatter.NewJSONFormatter())
 			stackWriter.PushWithLevels(writer.NewStdoutWriter())
 			return nil
 		}
@@ -99,7 +98,7 @@ func main() {
 		}))
 
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(app.Container()),
+			NewErrorCollectorWriter(ins.Container()),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -109,7 +108,7 @@ func main() {
 		return nil
 	})
 
-	app.Singleton(func(c infra.FlagContext) *configs.Config {
+	ins.Singleton(func(c infra.FlagContext) *configs.Config {
 		aggregationPeriod, err := time.ParseDuration(c.String("aggregation_period"))
 		if err != nil {
 			log.Warningf("invalid argument [aggregation_period: %s], using default value", c.String("aggregation_period"))
@@ -170,7 +169,7 @@ func main() {
 		}
 	})
 
-	app.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
+	ins.Singleton(func(ctx context.Context, conf *configs.Config) *mongo.Database {
 		ctx, _ = context.WithTimeout(ctx, conf.QueryTimeout)
 		conn, err := mongo.Connect(ctx, options.Client().
 			ApplyURI(conf.MongoURI).
@@ -185,7 +184,7 @@ func main() {
 		return conn.Database(conf.MongoDB)
 	})
 
-	app.Async(func(conf *configs.Config, em event.Manager) {
+	ins.Async(func(conf *configs.Config, em event.Manager) {
 		rand.Seed(time.Now().Unix())
 
 		if log.DebugEnabled() {
@@ -200,7 +199,7 @@ func main() {
 		})
 	})
 
-	app.BeforeServerStop(func(cc infra.Resolver) error {
+	ins.BeforeServerStop(func(cc infra.Resolver) error {
 		return cc.Resolve(func(em event.Manager) {
 			em.Publish(pubsub.SystemUpDownEvent{
 				Up:        false,
@@ -209,17 +208,17 @@ func main() {
 		})
 	})
 
-	app.Provider(action.Provider{})
-	app.Provider(impl.Provider{})
-	app.Provider(api.Provider{})
-	app.Provider(job.Provider{})
-	app.Provider(queue.Provider{})
-	app.Provider(migrate.Provider{})
-	app.Provider(rpc.Provider{})
-	app.Provider(service.Provider{})
-	app.Provider(pubsub.Provider{})
+	ins.Provider(action.Provider{})
+	ins.Provider(impl.Provider{})
+	ins.Provider(api.Provider{})
+	ins.Provider(job.Provider{})
+	ins.Provider(queue.Provider{})
+	ins.Provider(migrate.Provider{})
+	ins.Provider(rpc.Provider{})
+	ins.Provider(service.Provider{})
+	ins.Provider(pubsub.Provider{})
 
-	if err := app.Run(os.Args); err != nil {
+	if err := ins.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)
 	}
 }

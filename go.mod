@@ -19,11 +19,11 @@ require (
 	github.com/kentaro-m/blackfriday-confluence v0.0.0-20200514101926-773172e7101d
 	github.com/ledisdb/ledisdb v0.0.0-20200510135210-d35789ec47e6
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/mylxsw/asteria v1.0.0
+	github.com/mylxsw/asteria v1.0.1
 	github.com/mylxsw/coll v0.0.0-20200612040853-4275264442f9
 	github.com/mylxsw/container v1.0.0
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
-	github.com/mylxsw/glacier v1.0.1
+	github.com/mylxsw/glacier v1.1.1
 	github.com/mylxsw/go-utils v1.0.0
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
 	github.com/pkg/errors v0.9.1
