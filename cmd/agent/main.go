@@ -86,7 +86,7 @@ func main() {
 		}))
 
 		stackWriter.PushWithLevels(
-			NewErrorCollectorWriter(ins.Container()),
+			NewErrorCollectorWriter(ins.Resolver()),
 			level.Error,
 			level.Emergency,
 			level.Critical,
@@ -151,16 +151,16 @@ func main() {
 
 // ErrorCollectorWriter Agent 错误日志采集器
 type ErrorCollectorWriter struct {
-	cc infra.Resolver
+	resolver infra.Resolver
 }
 
 // NewErrorCollectorWriter 创建一个错误日志采集器
-func NewErrorCollectorWriter(cc infra.Resolver) *ErrorCollectorWriter {
-	return &ErrorCollectorWriter{cc: cc}
+func NewErrorCollectorWriter(resolver infra.Resolver) *ErrorCollectorWriter {
+	return &ErrorCollectorWriter{resolver: resolver}
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.cc.ResolveWithError(func(msgStore store.EventStore) error {
+	return e.resolver.Resolve(func(msgStore store.EventStore) error {
 		ips, _ := misc.GetLanIPs()
 		data, _ := json.Marshal(extension.CommonEvent{
 			Content: message,

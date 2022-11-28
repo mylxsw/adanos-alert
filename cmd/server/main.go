@@ -232,7 +232,7 @@ func NewErrorCollectorWriter(resolver infra.Resolver) *ErrorCollectorWriter {
 }
 
 func (e *ErrorCollectorWriter) Write(le level.Level, module string, message string) error {
-	return e.resolver.ResolveWithError(func(evtRepo repository.EventRepo, syslogRepo repository.SyslogRepo) error {
+	return e.resolver.Resolve(func(evtRepo repository.EventRepo, syslogRepo repository.SyslogRepo) error {
 
 		syslogID, err := syslogRepo.Add(repository.Syslog{
 			Type: repository.SyslogTypeError,

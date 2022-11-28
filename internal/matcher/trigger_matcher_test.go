@@ -6,7 +6,7 @@ import (
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/go-ioc"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -24,7 +24,7 @@ func TestTriggerMatcher(t *testing.T) {
 		MessageCount: 10,
 		CreatedAt:    currentTs,
 	}
-	triggerCtx := matcher.NewTriggerContext(container.New(), repository.Trigger{}, grp, func() []repository.Event {
+	triggerCtx := matcher.NewTriggerContext(ioc.New(), repository.Trigger{}, grp, func() []repository.Event {
 		return []repository.Event{
 			{
 				Content: "Hello, world",
@@ -89,7 +89,7 @@ func TestTriggerEval(t *testing.T) {
 			{Name: "trigger#2"},
 		},
 	}
-	triggerCtx := matcher.NewTriggerContext(container.New(), repository.Trigger{}, grp, func() []repository.Event {
+	triggerCtx := matcher.NewTriggerContext(ioc.New(), repository.Trigger{}, grp, func() []repository.Event {
 		return []repository.Event{
 			{
 				Content: "Hello, world",

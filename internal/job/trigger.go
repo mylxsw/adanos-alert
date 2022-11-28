@@ -5,18 +5,18 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/matcher"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 const TriggerJobName = "trigger"
 
 type TriggerJob struct {
-	app       container.Container
+	app       infra.Resolver
 	executing chan interface{} // 标识当前Job是否在执行中
 }
 
-func NewTrigger(app container.Container) *TriggerJob {
+func NewTrigger(app infra.Resolver) *TriggerJob {
 	return &TriggerJob{app: app, executing: make(chan interface{}, 1)}
 }
 

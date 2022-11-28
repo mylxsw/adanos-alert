@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 )
 
 // Manager 队列管理接口
@@ -37,7 +37,7 @@ type Info struct {
 
 type queueManager struct {
 	lock     sync.RWMutex
-	cc       container.Container
+	cc       infra.Resolver
 	repo     repository.QueueRepo
 	handlers map[string]Handler
 
@@ -48,7 +48,7 @@ type queueManager struct {
 }
 
 // NewManager create a QueueManager
-func NewManager(cc container.Container) Manager {
+func NewManager(cc infra.Resolver) Manager {
 	manager := queueManager{
 		cc:       cc,
 		paused:   true,

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/mylxsw/adanos-alert/internal/matcher"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/go-utils/array"
 
 	"github.com/mylxsw/adanos-alert/configs"
@@ -54,7 +53,7 @@ func (manager *actionManager) Get(key interface{}) (interface{}, error) {
 }
 
 func (manager *actionManager) Resolve(f interface{}) error {
-	return manager.cc.ResolveWithError(f)
+	return manager.cc.Resolve(f)
 }
 
 func (manager *actionManager) MustResolve(f interface{}) {
@@ -213,8 +212,8 @@ func (q QueueAction) Handle(rule repository.Rule, tr repository.Trigger, grp rep
 		}
 
 		// 更新最终通知人
-		q.manager.Resolve(func(cc container.Container, grpRepo repository.EventGroupRepo, userRepo repository.UserRepo, evtRepo repository.EventRepo) {
-			trigger.UserRefs = getUserRefs(cc, trigger, grp, evtRepo)
+		q.manager.Resolve(func(resolver infra.Resolver, grpRepo repository.EventGroupRepo, userRepo repository.UserRepo, evtRepo repository.EventRepo) {
+			trigger.UserRefs = getUserRefs(resolver, trigger, grp, evtRepo)
 			trigger.UserNames = extractNameFromUserRefs(userRepo, trigger.UserRefs)
 		})
 
@@ -274,7 +273,7 @@ func parseTemplate(cc template.SimpleContainer, temp string, payload *Payload) s
 	return summary
 }
 
-func getUserRefs(cc container.Container, tr repository.Trigger, grp repository.EventGroup, eventRepo repository.EventRepo) []primitive.ObjectID {
+func getUserRefs(resolver infra.Resolver, tr repository.Trigger, grp repository.EventGroup, eventRepo repository.EventRepo) []primitive.ObjectID {
 	users := make([]primitive.ObjectID, 0)
 	for _, u := range tr.UserRefs {
 		users = append(users, u)
@@ -287,7 +286,7 @@ func getUserRefs(cc container.Container, tr repository.Trigger, grp repository.E
 			return users
 		}
 
-		res, err := tm.Eval(matcher.NewTriggerContext(cc, tr, grp, func() []repository.Event {
+		res, err := tm.Eval(matcher.NewTriggerContext(resolver, tr, grp, func() []repository.Event {
 			messages, err := eventRepo.Find(bson.M{"group_ids": grp.ID})
 			if err != nil {
 				log.WithFields(log.Fields{

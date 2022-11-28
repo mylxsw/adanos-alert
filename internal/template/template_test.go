@@ -2,11 +2,12 @@ package template
 
 import (
 	"fmt"
-	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
-	"github.com/mylxsw/container"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	pkgJSON "github.com/mylxsw/adanos-alert/pkg/json"
+	"github.com/mylxsw/go-ioc"
+	"github.com/stretchr/testify/assert"
 )
 
 var content = `
@@ -46,7 +47,7 @@ func (data testParseData) Strings(ele string) []string {
 
 func TestParse(t *testing.T) {
 	{
-		parsed, err := Parse(container.New(), `{{ range $i, $msg := (explode .Name " ") }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		parsed, err := Parse(ioc.New(), `{{ range $i, $msg := (explode .Name " ") }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
 		if err != nil {
 			t.Errorf("test parse template failed: %v", err)
 		}
@@ -57,7 +58,7 @@ func TestParse(t *testing.T) {
 	}
 
 	{
-		parsed, err := Parse(container.New(), `{{ range $i, $msg := .Strings "last element" }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
+		parsed, err := Parse(ioc.New(), `{{ range $i, $msg := .Strings "last element" }} - {{ $msg }} {{ end }}`, testParseData{Name: "普罗米 修斯", Age: 1088})
 		if err != nil {
 			t.Errorf("test parse template failed: %v", err)
 		}
@@ -66,7 +67,7 @@ func TestParse(t *testing.T) {
 	}
 
 	{
-		parsed, err := Parse(container.New(), `{{ helpers.JSON .Content "deps.#.first" }}`, testParseData{Name: "Prometheus", Age: 1088, Content: `{"id": 123, "name": "李逍遥", "deps": [{"first": 123, "second": 434}]}`})
+		parsed, err := Parse(ioc.New(), `{{ helpers.JSON .Content "deps.#.first" }}`, testParseData{Name: "Prometheus", Age: 1088, Content: `{"id": 123, "name": "李逍遥", "deps": [{"first": 123, "second": 434}]}`})
 		assert.NoError(t, err)
 		assert.Equal(t, "[123]", parsed)
 	}
@@ -231,7 +232,7 @@ func TestMetaFilter(t *testing.T) {
 
 	var temp = `{{ range $i, $msg := meta_prefix_filter .Meta "message." "version" }}[{{ $i }}: {{ $msg }}]{{ end }}`
 
-	res, err := Parse(container.New(), temp, map[string]interface{}{
+	res, err := Parse(ioc.New(), temp, map[string]interface{}{
 		"Meta": meta,
 	})
 	assert.NoError(t, err)
@@ -278,7 +279,7 @@ func TestImplode(t *testing.T) {
 }
 
 func TestNumberBeauty(t *testing.T) {
-	parsed, _ := Parse(container.New(), `{{ index .Data "number" | format "%.0f" | number_beauty }} | {{ index .Data "number" | number_beauty }}`, struct {
+	parsed, _ := Parse(ioc.New(), `{{ index .Data "number" | format "%.0f" | number_beauty }} | {{ index .Data "number" | number_beauty }}`, struct {
 		Data map[string]interface{}
 	}{
 		Data: map[string]interface{}{

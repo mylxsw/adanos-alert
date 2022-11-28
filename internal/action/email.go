@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/messager/email"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/go-utils/array"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -48,14 +48,14 @@ func (e EmailAction) Handle(rule repository.Rule, trigger repository.Trigger, gr
 		return fmt.Errorf("parse email meta failed: %v", err)
 	}
 
-	return e.manager.Resolve(func(cc container.Container, conf *configs.Config, msgRepo repository.EventRepo, userRepo repository.UserRepo) error {
+	return e.manager.Resolve(func(resolver infra.Resolver, conf *configs.Config, msgRepo repository.EventRepo, userRepo repository.UserRepo) error {
 		payload, summary := createPayloadAndSummary(e.manager, "email", conf, msgRepo, rule, trigger, grp)
 		if strings.TrimSpace(meta.Template) != "" {
 			summary = parseTemplate(e.manager, meta.Template, payload)
 		}
 
 		summary = string(bluemonday.UGCPolicy().SanitizeBytes(blackfriday.Run([]byte(summary))))
-		emails := extractEmailsFromUserRefs(userRepo, getUserRefs(cc, trigger, grp, msgRepo))
+		emails := extractEmailsFromUserRefs(userRepo, getUserRefs(resolver, trigger, grp, msgRepo))
 		if err := e.client.Send(rule.Name, summary, emails...); err != nil {
 			log.WithFields(log.Fields{
 				"subject": rule.Name,

@@ -9,18 +9,19 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/job"
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	mockRepo "github.com/mylxsw/adanos-alert/test/mock/repository"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
+	"github.com/mylxsw/go-ioc"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type AggregationTestSuite struct {
 	suite.Suite
-	app container.Container
+	app infra.Resolver
 }
 
 func (a *AggregationTestSuite) SetupTest() {
-	cc := container.New()
+	cc := ioc.New()
 	cc.MustSingleton(mockRepo.NewMessageRepo)
 	cc.MustSingleton(mockRepo.NewMessageGroupRepo)
 	cc.MustSingleton(mockRepo.NewRuleRepo)
@@ -51,7 +52,7 @@ func (a *AggregationTestSuite) TestAggregationJob() {
 		})
 		a.NoError(err)
 
-		// add some messages 
+		// add some messages
 		for i := 0; i < 10; i++ {
 			_, err = mockMsgRepo.Add(repository.Event{
 				Content: fmt.Sprintf("Hello, world #%d", i),

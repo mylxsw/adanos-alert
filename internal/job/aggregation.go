@@ -12,19 +12,19 @@ import (
 	"github.com/mylxsw/adanos-alert/service"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/container"
 	"github.com/mylxsw/glacier/event"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 const AggregationJobName = "aggregation"
 
 type AggregationJob struct {
-	app       container.Container
+	app       infra.Resolver
 	executing chan interface{} // 标识当前Job是否在执行中
 }
 
-func NewAggregationJob(app container.Container) *AggregationJob {
+func NewAggregationJob(app infra.Resolver) *AggregationJob {
 	return &AggregationJob{app: app, executing: make(chan interface{}, 1)}
 }
 
