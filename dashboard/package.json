@@ -28,9 +28,9 @@
   },
   "devDependencies": {
     "@babel/polyfill": "^7.4.4",
-    "@vue/cli-plugin-babel": "^3.9.0",
-    "@vue/cli-plugin-eslint": "^3.9.0",
-    "@vue/cli-service": "^3.9.0",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.1",
     "bootstrap": "^4.3.1",
@@ -40,7 +40,7 @@
     "node-sass": "^7.0.1",
     "popper.js": "^1.15.0",
     "portal-vue": "^2.1.4",
-    "sass-loader": "^7.1.0",
+    "sass-loader": "^13.2.0",
     "vue-cli-plugin-axios": "^0.0.4",
     "vue-cli-plugin-bootstrap-vue": "^0.4.0",
     "vue-template-compiler": "^2.6.10"
