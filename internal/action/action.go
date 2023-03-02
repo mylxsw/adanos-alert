@@ -331,7 +331,7 @@ func extractNameFromUserRefs(userRepo repository.UserRepo, userRefs []primitive.
 		return names
 	}
 
-	return array.Map(users, func(user repository.User) string {
+	return array.Map(users, func(user repository.User, _ int) string {
 		return user.Name
 	})
 }

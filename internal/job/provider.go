@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -21,11 +22,13 @@ func (s Provider) Aggregates() []infra.Provider {
 	hostname, _ := os.Hostname()
 
 	return []infra.Provider{
-		scheduler.Provider(s.jobs, scheduler.SetDistributeLockManagerOption(func(cc infra.Resolver) scheduler.DistributeLockManager {
-			return NewDistributeLockManager(
-				cc.MustGet((*repository.LockRepo)(nil)).(repository.LockRepo),
-				fmt.Sprintf("%s(%s)", hostname, configs.Get(cc).Listen),
-			)
+		scheduler.Provider(s.jobs, scheduler.SetLockManagerOption(func(resolver infra.Resolver) scheduler.LockManagerBuilder {
+			return func(name string) scheduler.LockManager {
+				return NewDistributeLockManager(
+					resolver.MustGet((*repository.LockRepo)(nil)).(repository.LockRepo),
+					fmt.Sprintf("%s(%s)", hostname, configs.Get(resolver).Listen),
+				)
+			}
 		})),
 	}
 }
@@ -58,13 +61,13 @@ type DistributeLockManager struct {
 	owner    string
 }
 
-func NewDistributeLockManager(lockRepo repository.LockRepo, owner string) scheduler.DistributeLockManager {
+func NewDistributeLockManager(lockRepo repository.LockRepo, owner string) scheduler.LockManager {
 	return &DistributeLockManager{lockRepo: lockRepo, locked: false, owner: owner}
 }
 
 var lockResource = "crontab-lock"
 
-func (d *DistributeLockManager) TryLock() error {
+func (d *DistributeLockManager) TryLock(ctx context.Context) error {
 	d.syncLock.Lock()
 	defer d.syncLock.Unlock()
 
@@ -109,7 +112,7 @@ func (d *DistributeLockManager) lock() error {
 	return nil
 }
 
-func (d *DistributeLockManager) TryUnLock() error {
+func (d *DistributeLockManager) Release(ctx context.Context) error {
 	d.syncLock.Lock()
 	defer d.syncLock.Unlock()
 

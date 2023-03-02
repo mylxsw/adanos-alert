@@ -91,7 +91,7 @@ func extractEmailsFromUserRefs(userRepo repository.UserRepo, userRefs []primitiv
 		return []string{}
 	}
 
-	userFilterFunc := func(user repository.User) bool {
+	userFilterFunc := func(user repository.User, _ int) bool {
 		if user.Email != "" {
 			return true
 		}
@@ -105,7 +105,7 @@ func extractEmailsFromUserRefs(userRepo repository.UserRepo, userRefs []primitiv
 		return false
 	}
 
-	userMapFunc := func(user repository.User) string {
+	userMapFunc := func(user repository.User, _ int) string {
 		if user.Email != "" {
 			return user.Email
 		}

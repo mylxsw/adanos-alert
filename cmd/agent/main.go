@@ -23,8 +23,6 @@ import (
 	"github.com/mylxsw/asteria/writer"
 	"github.com/mylxsw/glacier/infra"
 	"github.com/mylxsw/glacier/starter/app"
-	"github.com/urfave/cli"
-	"github.com/urfave/cli/altsrc"
 	"google.golang.org/grpc"
 
 	lediscfg "github.com/ledisdb/ledisdb/config"
@@ -42,33 +40,12 @@ func main() {
 	}
 
 	ins := app.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
-	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:   "server_addr",
-		Usage:  "server grpc listen address",
-		EnvVar: "ADANOS_SERVER_ADDR",
-		Value:  "127.0.0.1:19998",
-	}))
-	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:   "server_token",
-		Usage:  "API Token for grpc api access control",
-		EnvVar: "ADANOS_SERVER_TOKEN",
-		Value:  "000000",
-	}))
-	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:  "data_dir",
-		Usage: "本地数据库存储目录",
-		Value: "/tmp/adanos-agent",
-	}))
-	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:   "listen",
-		Usage:  "listen address",
-		EnvVar: "ADANOS_AGENT_LISTEN_ADDR",
-		Value:  "127.0.0.1:29999",
-	}))
-	ins.AddFlags(altsrc.NewStringFlag(cli.StringFlag{
-		Name:  "log_path",
-		Usage: "日志文件输出目录（非文件名），默认为空，输出到标准输出",
-	}))
+
+	ins.AddFlags(app.StringEnvFlag("server_addr", "127.0.0.1:19998", "server grpc listen address", "ADANOS_SERVER_ADDR"))
+	ins.AddFlags(app.StringEnvFlag("server_token", "000000", "API Token for grpc api access control", "ADANOS_SERVER_TOKEN"))
+	ins.AddStringFlag("data_dir", "/tmp/adanos-agent", "本地数据库存储目录")
+	ins.AddStringFlag("log_path", "", "日志文件输出目录（非文件名），默认为空，输出到标准输出")
+	ins.AddFlags(app.StringEnvFlag("listen", "127.0.0.1:29999", "agent listen address", "ADANOS_AGENT_LISTEN_ADDR"))
 
 	ins.Init(func(c infra.FlagContext) error {
 		stackWriter := writer.NewStackWriter()
