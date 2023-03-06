@@ -20,9 +20,9 @@ enable_migrate: True
 # 保留多长时间的报警，如果全部保留，设置为0，单位为天
 # Adanos-Alert 会自动清理超过 keep_period 天的报警
 keep_period: 60
-# 保留多长时间的审计日志，如果全部保留，设置为0，单位为天
-# Adanos-Alert 会自动清理超过 audit_keep_period 天的审计日志
-audit_keep_period: 60
+# 保留多长时间的系统日志，如果全部保留，设置为0，单位为天
+# Adanos-Alert 会自动清理超过 syslog_keep_period 天的系统日志
+syslog_keep_period: 60
 
 # 阿里云语音通知设置
 # 被叫显示号码

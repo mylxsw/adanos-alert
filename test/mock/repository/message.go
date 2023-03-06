@@ -30,6 +30,10 @@ func NewMessageRepo() repository.EventRepo {
 	return &MessageRepo{Messages: make([]repository.Event, 0)}
 }
 
+func (m *MessageRepo) Has(filter interface{}) (bool, error) {
+	panic("implement me")
+}
+
 func (m *MessageRepo) Add(msg repository.Event) (id primitive.ObjectID, err error) {
 	msg.ID = primitive.NewObjectID()
 	msg.CreatedAt = time.Now()

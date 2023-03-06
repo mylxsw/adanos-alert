@@ -7,18 +7,18 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/repository"
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const RecoveryJobName = "recovery"
 
 type RecoveryJob struct {
-	app       container.Container
+	app       infra.Resolver
 	executing chan interface{} // 标识当前Job是否在执行中
 }
 
-func NewRecoveryJob(app container.Container) *RecoveryJob {
+func NewRecoveryJob(app infra.Resolver) *RecoveryJob {
 	return &RecoveryJob{app: app, executing: make(chan interface{}, 1)}
 }
 

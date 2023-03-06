@@ -74,12 +74,12 @@ func (m *MessageGroupTestSuite) TestMessageGroup() {
 	m.NoError(err)
 	m.EqualValues(10, len(grps))
 
-	grps, next, err := m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, 0, 10)
+	grps, next, err := m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, 0, 10, false)
 	m.NoError(err)
 	m.EqualValues(10, len(grps))
 	m.EqualValues(10, next)
 
-	grps, next, err = m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, next, 10)
+	grps, next, err = m.repo.Paginate(bson.M{"status": repository.EventGroupStatusOK}, next, 10, false)
 	m.NoError(err)
 	m.Empty(grps)
 	m.EqualValues(0, next)
@@ -121,14 +121,14 @@ func (m *MessageGroupTestSuite) TestMessageGroup() {
 	m.Equal(collectingGroup.ID, collectingGroup2.ID)
 	m.EqualValues(collectingGroup.CreatedAt.Unix(), collectingGroup2.CreatedAt.Unix())
 
-	ruleCount, err := m.repo.StatByRuleCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now())
+	ruleCount, err := m.repo.StatByRuleCount(context.TODO(), time.Now().Add(-365*24*time.Hour), time.Now())
 	m.NoError(err)
 	m.NotEmpty(ruleCount)
 
-	_, err = m.repo.StatByUserCount(context.TODO(), time.Now().Add(- 365*24*time.Hour), time.Now())
+	_, err = m.repo.StatByUserCount(context.TODO(), time.Now().Add(-365*24*time.Hour), time.Now())
 	m.NoError(err)
 
-	res, err := m.repo.StatByDatetimeCount(context.TODO(), nil, time.Now().Add(- 365*24*time.Hour), time.Now(), 1)
+	res, err := m.repo.StatByDatetimeCount(context.TODO(), nil, time.Now().Add(-365*24*time.Hour), time.Now(), 1)
 	m.NoError(err)
 	m.NotEmpty(res)
 }

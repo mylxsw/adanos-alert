@@ -266,7 +266,7 @@
                                     <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
                                                   :label-for="'trigger_meta_template_' + i">
                                         <b-btn-group class="mb-2" v-if="!trigger.template_fold">
-                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="warning" @click="openActionTemplateSelector(i)">插入模板</b-btn>
                                             <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">
                                                 帮助
                                             </b-btn>
@@ -363,7 +363,7 @@
                                         </b-form-group>
                                         <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="描述" :label-for="'trigger_meta_template_' + i">
                                             <b-btn-group class="mb-2" v-if="!trigger.template_fold">
-                                                <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                                <b-btn variant="warning" @click="openActionTemplateSelector(i)">插入模板</b-btn>
                                                 <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
                                             </b-btn-group>
                                             <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
@@ -419,7 +419,7 @@
                                     </b-form-group>
                                     <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="请求体" :label-for="'trigger_meta_template_' + i">
                                         <b-btn-group class="mb-2" v-if="!trigger.template_fold">
-                                            <b-btn variant="warning" @click="openDingdingTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="warning" @click="openActionTemplateSelector(i)">插入模板</b-btn>
                                             <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">帮助</b-btn>
                                         </b-btn-group>
                                         <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
@@ -481,6 +481,68 @@
                                     </b-form-group>
                                 </div>
                                 <!-- PHONE_CALL_ALIYUN ACTION END -->
+
+                                <!-- EMAIL ACTION START -->
+                                <div v-else-if="trigger.action === 'email'" class="adanos-sub-form">
+                                    <b-form-group label-cols="2" :id="'trigger_meta_template_' + i" label="模板"
+                                                  :label-for="'trigger_meta_template_' + i">
+                                        <b-btn-group class="mb-2" v-if="!trigger.template_fold">
+                                            <b-btn variant="warning" @click="openActionTemplateSelector(i)">插入模板</b-btn>
+                                            <b-btn variant="dark" @click="trigger.template_help = !trigger.template_help">
+                                                帮助
+                                            </b-btn>
+                                        </b-btn-group>
+                                        <span class="text-muted" style="line-height: 2.5" v-if="trigger.template_fold">编辑区域已折叠，编辑请点 <b>展开</b> 按钮</span>
+
+                                        <b-btn-group class="mb-2 float-right">
+                                            <b-btn variant="primary" class="float-right" @click="checkTemplate(trigger.meta_arr.template)">检查</b-btn>
+                                            <b-btn variant="info" class="float-right" @click="trigger.template_fold = !trigger.template_fold">{{ trigger.template_fold ? '展开' : '收起' }}</b-btn>
+                                        </b-btn-group>
+                                    </b-form-group>
+                                    <b-form-group v-if="!trigger.template_fold">
+                                        <codemirror v-model="trigger.meta_arr.template" class="mt-3 adanos-code-textarea" :options="options.ding_template"></codemirror>
+                                        <small class="form-text text-muted">
+                                            语法提示 <code>Alt+/</code>，语法参考 <a href="https://golang.org/pkg/text/template/" target="_blank">https://golang.org/pkg/text/template/</a>
+                                        </small>
+                                        <TemplateHelp v-if="trigger.template_help" :helpers="helper.dingdingTemplateRules"/>
+                                    </b-form-group>
+
+                                    <b-form-group label-cols="2" label="接收人" :label-for="'trigger_users_' + i">
+                                        <div class="adanos-form-group-box">
+                                            <b-btn variant="info" class="mb-3" @click="userAdd(i)">添加接收人</b-btn>
+                                            <b-btn v-b-toggle="'trigger_meta_template_expr_p' + i" variant="secondary" class="ml-2 mb-3">高级</b-btn>
+                                            <b-collapse :id="'trigger_meta_template_expr_p' + i" class="mt-2 mb-3">
+                                              <b-card>
+                                                <b-form-group label-cols="2" label="接收人表达式">
+                                                  <b-btn-group class="mb-2 float-right">
+                                                    <b-btn variant="primary" @click="checkUserEvalRule(trigger)">检查</b-btn>
+                                                  </b-btn-group>
+                                                </b-form-group>
+                                                <b-form-group>
+                                                  <codemirror v-model="trigger.user_eval_func" class="mt-1 adanos-code-textarea" :options="options.user_eval_rule"></codemirror>
+                                                  <small class="form-text text-muted">
+                                                    语法提示 <code>Alt+/</code>，语法参考 <a
+                                                      href="https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md"
+                                                      target="_blank">https://github.com/mylxsw/expr/blob/master/docs/Language-Definition.md</a>
+                                                  </small>
+                                                </b-form-group>
+                                              </b-card>
+                                            </b-collapse>
+
+                                            <b-input-group v-bind:key="index" v-for="(user, index) in trigger.user_refs" class="mb-3">
+                                                <b-form-select v-model="trigger.user_refs[index]" :options="user_options"/>
+                                                <b-input-group-append>
+                                                    <b-btn variant="danger" @click="userDelete(i, index)">删除</b-btn>
+                                                </b-input-group-append>
+                                            </b-input-group>
+
+                                            <small class="form-text text-muted">
+                                                发送钉钉消息时，将会自动 @ 这里选择的接收人，请确保接收人在接收消息的钉钉群内。
+                                            </small>
+                                        </div>
+                                    </b-form-group>
+                                </div>
+                                <!-- EMAIL ACTION END -->
 
                                 <div class="adanos-sub-form" v-else>
                                     <b-form-group label-cols="2" :id="'trigger_meta_' + i" label="动作参数" :label-for="'trigger_meta_' + i">
@@ -602,7 +664,7 @@
                     </template>
                 </b-table>
             </b-modal>
-            <b-modal id="template_dingding_selector" title="选择钉钉通知模板" hide-footer size="xl">
+            <b-modal id="template_action_selector" title="选择动作通知模板" hide-footer size="xl">
                 <b-table sticky-header="500px" responsive
                          :items="templates.template_dingding.concat(templates.template)" :fields="template_fields">
                     <template v-slot:cell(content)="row">
@@ -619,7 +681,7 @@
                     </template>
                     <template v-slot:cell(operations)="row">
                         <b-button-group>
-                            <b-button size="sm" variant="info" @click="applyTemplateForDingding(row.item.content)">
+                            <b-button size="sm" variant="info" @click="applyTemplateForAction(row.item.content)">
                                 选中
                             </b-button>
                             <b-button size="sm" @click="row.toggleDetails" class="mr-2">
@@ -687,7 +749,7 @@ export default {
                 {value: 'phone_call_aliyun', text: '阿里云语音通知'},
                 {value: 'jira', text: 'JIRA'},
                 {value: 'http', text: 'HTTP'},
-                // {value: 'email', text: '邮件'},
+                {value: 'email', text: '邮件'},
                 // {value: 'wechat', text: '微信'},
                 // {value: 'sms_aliyun', text: '阿里云短信'},
                 // {value: 'sms_yunxin', text: '网易云信'},
@@ -903,11 +965,11 @@ export default {
             this.$root.$emit('bv::show::modal', "trigger_rule_selector");
         },
         /**
-         * 打开钉钉模板选择页面
+         * 打开动作模板选择页面
          */
-        openDingdingTemplateSelector(index) {
+        openActionTemplateSelector(index) {
             this.currentTriggerRuleId = index;
-            this.$root.$emit('bv::show::modal', "template_dingding_selector");
+            this.$root.$emit('bv::show::modal', "template_action_selector");
         },
         /**
          * 动作触发规则模板选择
@@ -922,15 +984,15 @@ export default {
             this.$bvModal.hide('trigger_rule_selector');
         },
         /**
-         * 钉钉模板选择
+         * 动作模板选择
          */
-        applyTemplateForDingding(template) {
+         applyTemplateForAction(template) {
             if (this.form.triggers[this.currentTriggerRuleId].meta_arr.template.trim() === '') {
                 this.form.triggers[this.currentTriggerRuleId].meta_arr.template = template;
             } else {
                 this.form.triggers[this.currentTriggerRuleId].meta_arr.template += '\n' + template;
             }
-            this.$bvModal.hide('template_dingding_selector');
+            this.$bvModal.hide('template_action_selector');
         },
         /**
          * 展示模板选择

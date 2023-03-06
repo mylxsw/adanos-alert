@@ -34,7 +34,6 @@ func (m *EventGroupRepo) StatByUserCount(ctx context.Context, startTime, endTime
 	panic("implement me")
 }
 
-
 func (m *EventGroupRepo) LastGroup(filter bson.M) (grp repository.EventGroup, err error) {
 	panic("implement me")
 }
@@ -55,7 +54,7 @@ func (m *EventGroupRepo) Find(filter bson.M) (grps []repository.EventGroup, err 
 	panic("implement me")
 }
 
-func (m *EventGroupRepo) Paginate(filter bson.M, offset, limit int64) (grps []repository.EventGroup, next int64, err error) {
+func (m *EventGroupRepo) Paginate(filter bson.M, offset, limit int64, sortByCreatedAtDesc bool) (grps []repository.EventGroup, next int64, err error) {
 	panic("implement me")
 }
 

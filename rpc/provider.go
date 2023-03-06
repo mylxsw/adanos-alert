@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/rpc/protocol"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/glacier/infra"
-	"github.com/mylxsw/graceful"
 	"google.golang.org/grpc"
 )
 
@@ -44,7 +43,7 @@ func (p Provider) Boot(app infra.Resolver) {
 }
 
 func (p Provider) Daemon(_ context.Context, app infra.Resolver) {
-	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf graceful.Graceful) {
+	app.MustResolve(func(serv *grpc.Server, conf *configs.Config, gf infra.Graceful) {
 		listener, err := net.Listen("tcp", conf.GRPCListen)
 		if err != nil {
 			panic(fmt.Sprintf("can not create listener for grpc: %v", err))

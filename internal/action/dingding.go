@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mylxsw/container"
 	"strings"
+
+	"github.com/mylxsw/glacier/infra"
 
 	"github.com/mylxsw/adanos-alert/configs"
 	"github.com/mylxsw/adanos-alert/internal/repository"
@@ -59,7 +60,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 		return fmt.Errorf("parse dingding meta failed: %v", err)
 	}
 
-	return d.manager.Resolve(func(cc container.Container, conf *configs.Config, msgRepo repository.EventRepo, robotRepo repository.DingdingRobotRepo) error {
+	return d.manager.Resolve(func(resolver infra.Resolver, conf *configs.Config, msgRepo repository.EventRepo, robotRepo repository.DingdingRobotRepo) error {
 		// get robot for dingding
 		robotID, err := primitive.ObjectIDFromHex(meta.RobotID)
 		if err != nil {
@@ -76,7 +77,7 @@ func (d DingdingAction) Handle(rule repository.Rule, trigger repository.Trigger,
 			summary = parseTemplate(d.manager, meta.Template, payload)
 		}
 
-		mobiles := extractPhonesFromUserRefs(d.userRepo, getUserRefs(cc, trigger, grp, msgRepo))
+		mobiles := extractPhonesFromUserRefs(d.userRepo, getUserRefs(resolver, trigger, grp, msgRepo))
 		msg := dingding.NewMarkdownMessage(rule.Name, summary, mobiles)
 		if err := dingding.NewDingding(robot.Token, robot.Secret).Send(msg); err != nil {
 			log.WithFields(log.Fields{

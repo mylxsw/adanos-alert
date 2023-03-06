@@ -14,7 +14,6 @@ import (
 	"github.com/mylxsw/glacier/listener"
 	"github.com/mylxsw/glacier/web"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @title Adanos-alert API
@@ -48,8 +47,6 @@ func (s Provider) Aggregates() []infra.Provider {
 
 func (s Provider) muxRoutes(cc infra.Resolver, router *mux.Router) {
 	cc.MustResolve(func(conf *configs.Config) {
-		// Swagger doc
-		router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler).Name("swagger")
 		// prometheus metrics
 		router.PathPrefix("/metrics").Handler(promhttp.Handler())
 		// health check
@@ -91,7 +88,7 @@ func (s Provider) routes(cc infra.Resolver, router web.Router, mw web.RequestMid
 		controller.NewDingdingRobotController(cc),
 		controller.NewAgentController(cc),
 		controller.NewStatisticsController(cc),
-		controller.NewAuditController(cc),
+		controller.NewSyslogController(cc),
 		controller.NewJiraController(cc),
 	)
 

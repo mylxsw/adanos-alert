@@ -11,7 +11,7 @@ import (
 	"github.com/mylxsw/adanos-alert/internal/template"
 	"github.com/mylxsw/adanos-alert/pkg/helper"
 	"github.com/mylxsw/asteria/log"
-	"github.com/mylxsw/container"
+	"github.com/mylxsw/glacier/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -31,12 +31,12 @@ type TriggerContext struct {
 	eventCallbackOnce sync.Once
 	events            []repository.Event
 
-	cc container.Container
+	resolver infra.Resolver
 }
 
 // NewTriggerContext create a new TriggerContext
-func NewTriggerContext(cc container.Container, trigger repository.Trigger, group repository.EventGroup, eventCallback func() []repository.Event) *TriggerContext {
-	return &TriggerContext{cc: cc, Trigger: trigger, Group: group, EventCallback: eventCallback}
+func NewTriggerContext(resolver infra.Resolver, trigger repository.Trigger, group repository.EventGroup, eventCallback func() []repository.Event) *TriggerContext {
+	return &TriggerContext{resolver: resolver, Trigger: trigger, Group: group, EventCallback: eventCallback}
 }
 
 // Messages return all events in group
@@ -65,7 +65,7 @@ func (tc *TriggerContext) MessagesCount() int64 {
 // EventsCount return the count in group
 func (tc *TriggerContext) EventsCount() int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		count, _ = msgRepo.Count(bson.M{
 			"group_ids": tc.Group.ID,
 		})
@@ -83,7 +83,7 @@ func (tc *TriggerContext) MessagesMatchRegexCount(regex string) int64 {
 // EventsMatchRegexCount get the count for events matched regex
 func (tc *TriggerContext) EventsMatchRegexCount(regex string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids": tc.Group.ID,
 			"content":   primitive.Regex{Pattern: regex, Options: "im"},
@@ -98,7 +98,7 @@ func (tc *TriggerContext) EventsMatchRegexCount(regex string) int64 {
 // HasEventsMatchRegexs check if events matched regexs
 func (tc *TriggerContext) HasEventsMatchRegexs(regexs []string) bool {
 	var matched bool
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		regexps := make(bson.A, 0)
 		for _, reg := range regexs {
 			regexps = append(regexps, primitive.Regex{Pattern: reg, Options: "im"})
@@ -124,7 +124,7 @@ func (tc *TriggerContext) HasEventsMatchRegexs(regexs []string) bool {
 // HasEventsMatchRegex check if events matched regex
 func (tc *TriggerContext) HasEventsMatchRegex(regex string) bool {
 	var matched bool
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids": tc.Group.ID,
 			"content":   primitive.Regex{Pattern: regex, Options: "im"},
@@ -151,7 +151,7 @@ func (tc *TriggerContext) MessagesWithTagsCount(tags string) int64 {
 // EventsWithTagsCount get the count for events which has tags
 func (tc *TriggerContext) EventsWithTagsCount(tags string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids": tc.Group.ID,
 			"tags":      bson.M{"$in": template.StringTags(tags, ",")},
@@ -172,7 +172,7 @@ func (tc *TriggerContext) MessagesWithMetaCount(key, value string) int64 {
 // EventsWithMetaCount get the count for events has a meta[key] equals to value
 func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 	var count int64 = 0
-	tc.cc.MustResolve(func(msgRepo repository.EventRepo) {
+	tc.resolver.MustResolve(func(msgRepo repository.EventRepo) {
 		filter := bson.M{
 			"group_ids":   tc.Group.ID,
 			"meta." + key: value,
@@ -186,7 +186,7 @@ func (tc *TriggerContext) EventsWithMetaCount(key, value string) int64 {
 
 func (tc *TriggerContext) UsersHasPropertyRegex(key, valueRegex, returnField string) []string {
 	users := make([]string, 0)
-	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+	tc.resolver.MustResolve(func(userRepo repository.UserRepo) {
 		var err error
 		users, err = userRepo.GetUserMetasRegex(key, valueRegex, returnField)
 		if err != nil {
@@ -202,7 +202,7 @@ func (tc *TriggerContext) UsersHasPropertyRegex(key, valueRegex, returnField str
 
 func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []string {
 	users := make([]string, 0)
-	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+	tc.resolver.MustResolve(func(userRepo repository.UserRepo) {
 		var err error
 		users, err = userRepo.GetUserMetas(key, value, returnField)
 		if err != nil {
@@ -218,7 +218,7 @@ func (tc *TriggerContext) UsersHasProperty(key, value, returnField string) []str
 
 func (tc *TriggerContext) UsersIDWithPropertyRegex(key, valueRegex, returnField string) []repository.UserIDWithMeta {
 	users := make([]repository.UserIDWithMeta, 0)
-	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+	tc.resolver.MustResolve(func(userRepo repository.UserRepo) {
 		var err error
 		users, err = userRepo.GetUserIDWithMetasRegex(key, valueRegex, returnField)
 		if err != nil {
@@ -234,7 +234,7 @@ func (tc *TriggerContext) UsersIDWithPropertyRegex(key, valueRegex, returnField 
 
 func (tc *TriggerContext) UsersIDWithProperty(key, value, returnField string) []repository.UserIDWithMeta {
 	users := make([]repository.UserIDWithMeta, 0)
-	tc.cc.MustResolve(func(userRepo repository.UserRepo) {
+	tc.resolver.MustResolve(func(userRepo repository.UserRepo) {
 		var err error
 		users, err = userRepo.GetUserIDWithMetas(key, value, returnField)
 		if err != nil {
@@ -251,7 +251,7 @@ func (tc *TriggerContext) UsersIDWithProperty(key, value, returnField string) []
 // TriggeredTimesInPeriod return triggered times in specified periods
 func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerStatus string) int64 {
 	var triggeredTimes int64 = 0
-	tc.cc.MustResolve(func(groupRepo repository.EventGroupRepo) {
+	tc.resolver.MustResolve(func(groupRepo repository.EventGroupRepo) {
 		filter := bson.M{
 			"actions._id": tc.Trigger.ID,
 			"updated_at":  bson.M{"$gt": time.Now().Add(-time.Duration(periodInMinutes) * time.Minute)},
@@ -281,7 +281,7 @@ func (tc *TriggerContext) TriggeredTimesInPeriod(periodInMinutes int, triggerSta
 // LastTriggeredGroup get last triggeredGroup
 func (tc *TriggerContext) LastTriggeredGroup(triggerStatus string) repository.EventGroup {
 	var lastTriggeredGroup repository.EventGroup
-	tc.cc.MustResolve(func(groupRepo repository.EventGroupRepo) {
+	tc.resolver.MustResolve(func(groupRepo repository.EventGroupRepo) {
 		filter := bson.M{
 			"actions._id": tc.Trigger.ID,
 		}

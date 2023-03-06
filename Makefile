@@ -1,7 +1,7 @@
 Version := $(shell date "+%Y%m%d%H%M")
 GitCommit := $(shell git rev-parse HEAD)
 DIR := $(shell pwd)
-LDFLAGS := -s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)
+LDFLAGS := -s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit) -X main.DEBUG=true
 
 run: build 
 	./build/debug/adanos-alert --enable_migrate

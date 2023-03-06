@@ -28,7 +28,6 @@ import (
 	"github.com/mylxsw/adanos-alert/pkg/misc"
 	"github.com/mylxsw/asteria/log"
 	"github.com/mylxsw/coll"
-	"github.com/mylxsw/go-toolkit/jsonutils"
 	"github.com/mylxsw/go-utils/array"
 	"github.com/mylxsw/go-utils/must"
 	"github.com/mylxsw/go-utils/str"
@@ -264,7 +263,7 @@ func leftIdent(ident string, message string) string {
 // appendByLines 在字符串的每一行末尾追加字符串
 func appendByLines(appendStr string, val string) string {
 	return strings.Join(
-		array.Map(strings.Split(val, "\n"), func(line string) string {
+		array.Map(strings.Split(val, "\n"), func(line string, _ int) string {
 			return line + appendStr
 		}),
 		"\n",
@@ -330,7 +329,7 @@ func datetimeAddSec(datetime time.Time, addSec int) time.Time {
 	return datetime.Add(time.Duration(addSec) * time.Second)
 }
 
-type KvPairs []jsonutils.KvPair
+type KvPairs []pkgJSON.KvPair
 
 func (k KvPairs) Len() int {
 	return len(k)
@@ -345,16 +344,16 @@ func (k KvPairs) Swap(i, j int) {
 }
 
 // jsonFlatten json转换为kv pairs
-func jsonFlatten(body string, maxLevel int) []jsonutils.KvPair {
+func jsonFlatten(body string, maxLevel int) []pkgJSON.KvPair {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorf("json解析失败: %s", err)
 		}
 	}()
 
-	ju, err := jsonutils.New([]byte(body), maxLevel, true)
+	ju, err := pkgJSON.New([]byte(body), maxLevel, true)
 	if err != nil {
-		return make([]jsonutils.KvPair, 0)
+		return make([]pkgJSON.KvPair, 0)
 	}
 
 	kvPairs := ju.ToKvPairsArray()
@@ -731,18 +730,18 @@ func suffixStrArray(suffix string, arr []string) []string {
 }
 
 func jsonFieldsFilter(body string, keys ...string) string {
-	kvs := array.Filter(jsonFlatten(body, 5), func(kv jsonutils.KvPair) bool {
+	kvs := array.Filter(jsonFlatten(body, 5), func(kv pkgJSON.KvPair, _ int) bool {
 		return array.In(kv.Key, keys) && kv.Value != "" && kv.Value != "{}" && kv.Value != "[]"
 	})
 
-	rs, _ := json.Marshal(array.BuildMap(kvs, func(kv jsonutils.KvPair) (string, string) { return kv.Key, kv.Value }))
+	rs, _ := json.Marshal(array.BuildMap(kvs, func(kv pkgJSON.KvPair, _ int) (string, string) { return kv.Key, kv.Value }))
 	return string(rs)
 }
 
 // JSONCutOffFields 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度
 func JSONCutOffFields(length int, body string) map[string]interface{} {
 	var pairs []KVPair
-	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p pkgJSON.KvPair) KVPair {
 		return KVPair{
 			Key:   str.Cutoff(30, p.Key),
 			Value: str.Cutoff(length, p.Value),
@@ -762,7 +761,7 @@ func JSONCutOffFields(length int, body string) map[string]interface{} {
 // JSONCutOffFieldsStr 对 JSON 字符串扁平化，然后对每个 KV 截取指定长度，输出字符串
 func JSONCutOffFieldsStr(length int, body string) string {
 	var pairs []KVPair
-	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p jsonutils.KvPair) KVPair {
+	_ = coll.MustNew(jsonFlatten(body, 3)).Map(func(p pkgJSON.KvPair) KVPair {
 		return KVPair{
 			Key:   str.Cutoff(30, p.Key),
 			Value: str.Cutoff(length, p.Value),

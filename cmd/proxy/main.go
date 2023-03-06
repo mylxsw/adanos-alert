@@ -23,7 +23,7 @@ func main() {
 	app := &cli.App{
 		Name:    "adanos-proxy",
 		Usage:   "adanos-proxy 是一个简单的命令行工具，你可以通过管道的方式，把消息直接发送给 adanos-alert 用于告警通知",
-		Version: fmt.Sprintf("%s (%s)", Version, GitCommit[:8]),
+		Version: fmt.Sprintf("%s (%s)", Version, GitCommit),
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
 				Name:  "adanos-server",
@@ -127,7 +127,7 @@ func main() {
 
 func createMessageMeta(meta []string) repository.EventMeta {
 	metas := make(repository.EventMeta)
-	if meta != nil && len(meta) > 0 {
+	if len(meta) > 0 {
 		for _, m := range meta {
 			segs := strings.SplitN(m, "=", 2)
 			metas[segs[0]] = misc.IfElse(len(segs) == 2, segs[1], "")
