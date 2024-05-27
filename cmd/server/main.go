@@ -42,7 +42,9 @@ func main() {
 		infra.DEBUG = true
 	}
 
-	ins := app.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).WithLogger(log.Module("glacier"))
+	ins := app.Create(fmt.Sprintf("%s (%s)", Version, GitCommit), AsyncRunner).
+		WithLogger(log.Module("glacier")).
+		WithYAMLFlag("conf")
 
 	ins.AddStringFlag("listen", ":19999", "http server listen address")
 	ins.AddStringFlag("api_token", "", "api token for http server")
