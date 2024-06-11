@@ -112,7 +112,7 @@ func (act HTTPAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 				"trigger": trigger,
 				"rule_id": rule.ID.Hex(),
 				"resp":    string(respBody),
-			}).Debug("send message to jira succeed")
+			}).Debug("send message to http succeed")
 		}
 
 		return nil
