@@ -425,3 +425,7 @@ func TestMarkdown2Confluence(t *testing.T) {
 
 	assert.Equal(t, expected, strings.Trim(Markdown2Confluence(mdStr), "\n"))
 }
+
+func TestSlackRequestBody(t *testing.T) {
+	fmt.Println(SlackRequestBody("event", "jack", "ghost", "hello, world"))
+}

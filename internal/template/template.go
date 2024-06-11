@@ -8,7 +8,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/mylxsw/go-utils/ternary"
 	"html"
+	"net/url"
 	"reflect"
 	"regexp"
 	"sort"
@@ -152,6 +154,8 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"base64_encode": encodeBase64,
 
 		"helpers": helper.NewHelpers,
+
+		"build_slack_body": SlackRequestBody,
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
@@ -884,4 +888,20 @@ func encodeSha1(data interface{}) string {
 // encodeBase64 将 data 编码为 base64
 func encodeBase64(data interface{}) string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v", data)))
+}
+
+// SlackRequestBody 构建 Slack 请求体
+func SlackRequestBody(channelName string, username string, emoji string, text string) string {
+	payload := map[string]interface{}{
+		"channel":    ternary.If(strings.HasPrefix(channelName, "#"), channelName, "#"+channelName),
+		"username":   ternary.If(username == "", "Adanos", username),
+		"icon_emoji": ternary.If(emoji == "", ":ghost:", ":"+emoji+":"),
+		"text":       text,
+	}
+
+	payloadStr := string(must.Must(json.Marshal(payload)))
+
+	params := url.Values{}
+	params.Add("payload", payloadStr)
+	return params.Encode()
 }
