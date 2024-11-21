@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mylxsw/go-utils/array"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jeremywohl/flatten"
@@ -311,4 +313,85 @@ func OpenFalconToCommonEvent(tos, content string) *CommonEvent {
 		Tags:    []string{tos},
 		Origin:  "open-falcon",
 	}
+}
+
+// DatadogLogEvent represents a log event from Datadog
+type DatadogLogEvent struct {
+	ID         string         `json:"_id"`
+	Date       string         `json:"date"`
+	Host       string         `json:"host"`
+	Message    string         `json:"message"`
+	Service    string         `json:"service"`
+	Source     string         `json:"source"`
+	Status     string         `json:"status"`
+	Tags       []string       `json:"tags"`
+	Attributes map[string]any `json:"attributes"`
+}
+
+// ToRepo convert Datadog log event to repository.Event
+func (evt DatadogLogEvent) ToRepo() repository.Event {
+	meta := make(repository.EventMeta)
+
+	for k, v := range evt.Attributes {
+		meta[fmt.Sprintf("attr-%s", k)] = fmt.Sprintf("%v", v)
+	}
+
+	if evt.Host != "" {
+		meta["host"] = evt.Host
+	}
+
+	if evt.Service != "" {
+		meta["service"] = evt.Service
+	}
+
+	if evt.Source != "" {
+		meta["source"] = evt.Source
+	}
+
+	if evt.Status != "" {
+		meta["level"] = evt.Status
+		meta["status"] = evt.Status
+	}
+
+	if evt.Date != "" {
+		meta["date"] = evt.Date
+	}
+
+	if evt.ID != "" {
+		meta["id"] = evt.ID
+	}
+
+	for _, tag := range evt.Tags {
+		ss := strings.SplitN(tag, ":", 2)
+		if len(ss) == 2 {
+			meta[fmt.Sprintf("tag-%s", ss[0])] = ss[1]
+		} else {
+			meta[fmt.Sprintf("tag-%s", tag)] = "true"
+		}
+	}
+
+	return repository.Event{
+		Content: evt.Message,
+		Origin:  "datadog-log-forwarding",
+		Tags:    evt.Tags,
+		Meta:    meta,
+	}
+}
+
+// DatadogLogForwardingToCommonEvents Convert Datadog logs to generic events
+func DatadogLogForwardingToCommonEvents(content []byte) ([]CommonEvent, error) {
+	var datadogEvents []DatadogLogEvent
+	if err := json.Unmarshal(content, &datadogEvents); err != nil {
+		return nil, errors.New("invalid request")
+	}
+
+	return array.Map(datadogEvents, func(item DatadogLogEvent, _ int) CommonEvent {
+		evt := item.ToRepo()
+		return CommonEvent{
+			Content: evt.Content,
+			Meta:    evt.Meta,
+			Tags:    evt.Tags,
+			Origin:  evt.Origin,
+		}
+	}), nil
 }

@@ -39,6 +39,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
+		router.Post("/datadog/log-forwarding/", m.AddDatadogLogForwardingEvent).Name("events:add:datadog-log-forwarding")
 	})
 
 	router.Group("/events", func(router web.Router) {
@@ -56,6 +57,7 @@ func (m *EventController) Register(router web.Router) {
 		router.Post("/prometheus_alertmanager/", m.AddPrometheusAlertEvent).Name("events:add:prometheus-alert")
 		router.Post("/openfalcon/im/", m.AddOpenFalconEvent).Name("events:add:openfalcon")
 		router.Post("/general/", m.AddGeneralEvent).Name("events:add:general")
+		router.Post("/datadog/log-forwarding/", m.AddDatadogLogForwardingEvent).Name("events:add:datadog-log-forwarding")
 	})
 
 	router.Group("/event-relations", func(router web.Router) {
@@ -298,6 +300,29 @@ func (m *EventController) AddGeneralEvent(ctx web.Context, eventService service.
 
 	id, err := eventService.Add(ctx.Context(), evt)
 	return m.errorWrap(ctx, id, err)
+}
+
+// AddDatadogLogForwardingEvent Add datadog log forwarding message
+func (m *EventController) AddDatadogLogForwardingEvent(ctx web.Context, eventService service.EventService) web.Response {
+	events, err := extension.DatadogLogForwardingToCommonEvents(ctx.Request().Body())
+	if err != nil {
+		return ctx.JSONError(err.Error(), http.StatusInternalServerError)
+	}
+
+	var lastID primitive.ObjectID
+	for _, evt := range events {
+		id, err := eventService.Add(ctx.Context(), evt)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"event": evt,
+			}).Errorf("save datadog log forwarding message failed: %v", err)
+			continue
+		}
+
+		lastID = id
+	}
+
+	return m.errorWrap(ctx, lastID, err)
 }
 
 // Add common message
