@@ -4,10 +4,10 @@ var defaultLayout = `<html>
 <head>
     <title>{{ .Group.Rule.Name }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
-    <script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <style type="text/css">
         .panel-body img {
@@ -93,11 +93,11 @@ var defaultLayout = `<html>
 
 <body>
 <div class="container-fluid">
-    <h2>{{ .Group.Rule.Name }} {{ if eq .Group.Type "recovery" }}<span class="label label-success">恢复</span>{{ end }}</h2>
+    <h2>{{ .Group.Rule.Name }} {{ if eq .Group.Type "recovery" }}<span class="label label-success">Recovered</span>{{ end }}</h2>
     <div class="bs-callout bs-callout-warning">
-        <p>创建时间：{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }}</p>
-        <p>规则：<code>{{ .Group.Rule.Rule }}</code></p>
-        <p>事件数量：{{ .EventsCount }}</p>
+        <p>Create time：{{ .Group.UpdatedAt | datetime "2006-01-02 15:04:05" }}</p>
+        <p>Rule：<code>{{ .Group.Rule.Rule }}</code></p>
+        <p>Number of events：{{ .EventsCount }}</p>
     </div>
     {{--BODY--}}
 </div>
