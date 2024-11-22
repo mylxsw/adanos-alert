@@ -343,6 +343,8 @@ github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb h1:NLuBddjfW/E4WQfK
 github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb/go.mod h1:TtnRhM6+t7ST6k8ROHHvKGmD5tCdVQWtUnVVhyIPn8Y=
 github.com/mylxsw/glacier v1.1.4-0.20230302093345-50e0493d9115 h1:umuKRqZz0ng/mQc5vZLipJq4WXtetv5lwXHyaHr6ZY8=
 github.com/mylxsw/glacier v1.1.4-0.20230302093345-50e0493d9115/go.mod h1:memrPz3F1+z+uczIOsv4pux//xezU+GQk4R8dtNmB7Q=
+github.com/mylxsw/glacier v1.1.6-0.20241122032452-f248437a567a h1:lmnpP5f+oMDJwhpgitD81/gBQimqbvAfjMu02+nGhAQ=
+github.com/mylxsw/glacier v1.1.6-0.20241122032452-f248437a567a/go.mod h1:memrPz3F1+z+uczIOsv4pux//xezU+GQk4R8dtNmB7Q=
 github.com/mylxsw/go-ioc v1.1.0 h1:oBHGkeIl511UTw22wM4wNJlsvQjheyLsfo8K5p4hp+U=
 github.com/mylxsw/go-ioc v1.1.0/go.mod h1:HUGesamRKCt0Rd7DEPYKfj+ZJuY7rtjiYuZLNGasekk=
 github.com/mylxsw/go-utils v1.0.4-0.20230301075642-bc388fac385e h1:WzuGD1SdNo7fNHo3N6eEzNKlLzxpdzbxjkNJe4TxWQM=

@@ -22,7 +22,7 @@ require (
 	github.com/mylxsw/asteria v1.0.2-0.20221222065801-3f0515da865f
 	github.com/mylxsw/coll v0.0.0-20230301083706-803f9c7e8a0e
 	github.com/mylxsw/durafmt v0.0.0-20201215070806-70f4dc16bcdb
-	github.com/mylxsw/glacier v1.1.4-0.20230302093345-50e0493d9115
+	github.com/mylxsw/glacier v1.1.6-0.20241122032452-f248437a567a
 	github.com/mylxsw/go-ioc v1.1.0
 	github.com/mylxsw/go-utils v1.0.4-0.20230301075642-bc388fac385e
 	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
