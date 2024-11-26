@@ -1,6 +1,6 @@
 
 #build stage
-FROM golang:1.18 AS builder
+FROM golang:1.23 AS builder
 ENV GOPROXY=https://goproxy.io,direct
 WORKDIR /data
 COPY go.mod go.sum ./
@@ -9,7 +9,7 @@ COPY . .
 RUN go build -o /data/bin/adanos-alert-server cmd/server/main.go 
 
 #final stage
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV TZ=Asia/Shanghai
 
