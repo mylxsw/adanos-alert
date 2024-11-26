@@ -52,7 +52,9 @@ func (alr *SyslogRepo) Paginate(filter bson.M, offset, limit int64) (als []repos
 	if err != nil {
 		return
 	}
-	defer cur.Close(context.TODO())
+	defer func() {
+		_ = cur.Close(context.TODO())
+	}()
 
 	for cur.Next(context.TODO()) {
 		var al repository.Syslog

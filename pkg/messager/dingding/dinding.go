@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -148,7 +147,7 @@ func (ding *Dingding) Send(msg Message) error {
 		return fmt.Errorf("dingding send msg failed: %w", err)
 	}
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("dingding read response failed: %w", err)
 	}

@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"sort"
@@ -114,7 +114,7 @@ func (ap *AliyunPOP) Request(baseUri string) (*AliyunResponse, error) {
 	body := response.Body
 	defer func() { _ = body.Close() }()
 
-	resp, err := ioutil.ReadAll(body)
+	resp, err := io.ReadAll(body)
 	if err != nil {
 		return nil, fmt.Errorf("read response body failed: %s", err)
 	}
@@ -126,4 +126,3 @@ func (ap *AliyunPOP) Request(baseUri string) (*AliyunResponse, error) {
 
 	return &aliyunResp, nil
 }
-

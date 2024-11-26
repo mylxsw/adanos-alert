@@ -14,8 +14,8 @@
                     <b v-else>{{ row.item.requeue_times }}</b>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.alive" variant="success">活跃</b-badge>
-                    <b-badge v-if="!row.item.alive" variant="danger">丢失</b-badge>
+                    <b-badge v-if="row.item.alive" variant="success">Alive</b-badge>
+                    <b-badge v-if="!row.item.alive" variant="danger">Lose</b-badge>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -23,7 +23,7 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
-                        <b-button size="sm" variant="danger" @click="delete_agent(row.index, row.item.id)">删除</b-button>
+                        <b-button size="sm" variant="danger" @click="delete_agent(row.index, row.item.id)">Delete</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -42,25 +42,25 @@
                 isBusy: true,
                 fields: [
                     {key: 'agent_id', label: 'ID'},
-                    {key: 'version', label: '版本'},
-                    {key: 'ip', label: '所在服务器'},
-                    {key: 'last_alive_at', label: '最后心跳时间'},
-                    {key: 'status', label: '状态'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'version', label: 'Version'},
+                    {key: 'ip', label: 'Server'},
+                    {key: 'last_alive_at', label: 'Last Heartbeat'},
+                    {key: 'status', label: 'Status'},
+                    {key: 'operations', label: 'Operations'}
                 ],
             };
         },
         methods: {
             delete_agent(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/agents/' + id + '/').then(() => {
                         self.agents.splice(index, 1);
-                        this.SuccessBox('操作成功');
+                        this.SuccessBox('Operation successful');
                     }).catch(error => {
                         this.ErrorBox(error);
                     });

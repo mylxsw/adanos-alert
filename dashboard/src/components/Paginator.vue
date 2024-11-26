@@ -1,8 +1,8 @@
 <template>
     <div class="mt-3">
         <b-button-group class="mx-1">
-            <b-button v-if="hasPrevPage()" @click.native="$router.go(0)" :to="{path: this.path, query: prevPageQuery()}">上一页</b-button>
-            <b-button v-if="hasNextPage()" @click.native="$router.go(0)" :to="{path: this.path, query: nextPageQuery()}">下一页</b-button>
+            <b-button v-if="hasPrevPage()" @click.native="$router.go(0)" :to="{path: this.path, query: prevPageQuery()}">Previous</b-button>
+            <b-button v-if="hasNextPage()" @click.native="$router.go(0)" :to="{path: this.path, query: nextPageQuery()}">Next</b-button>
         </b-button-group>
     </div>
 </template>

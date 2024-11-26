@@ -102,7 +102,7 @@ func (u DingdingRobotController) Add(ctx web.Context, em event.Manager, robotRep
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.DingdingRobotEvent{
+	_ = em.Publish(pubsub.DingdingRobotEvent{
 		DingDingRobot: robot,
 		Type:          pubsub.EventTypeAdd,
 		CreatedAt:     time.Now(),
@@ -147,7 +147,7 @@ func (u DingdingRobotController) Update(ctx web.Context, em event.Manager, robot
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.DingdingRobotEvent{
+	_ = em.Publish(pubsub.DingdingRobotEvent{
 		DingDingRobot: robot,
 		Type:          pubsub.EventTypeUpdate,
 		CreatedAt:     time.Now(),
@@ -167,7 +167,7 @@ func (u DingdingRobotController) Delete(ctx web.Context, em event.Manager, robot
 		return err
 	}
 
-	em.Publish(pubsub.DingdingRobotEvent{
+	_ = em.Publish(pubsub.DingdingRobotEvent{
 		DingDingRobot: robot,
 		Type:          pubsub.EventTypeDelete,
 		CreatedAt:     time.Now(),

@@ -207,12 +207,12 @@ func (g GroupController) CutGroupEvents(webCtx web.Context, evtGrpRepo repositor
 	}
 
 	if grp.Status == repository.EventGroupStatusCollecting || grp.Status == repository.EventGroupStatusPending {
-		return webCtx.JSONError("当前事件组暂时不支持该操作", http.StatusUnprocessableEntity)
+		return webCtx.JSONError("The current event group does not currently support this operation", http.StatusUnprocessableEntity)
 	}
 
 	keepCount := webCtx.Int64Input("keep", 20)
 	if keepCount < 0 || keepCount > 1000 {
-		return webCtx.JSONError("keep: 保留事件数必须在 0 - 1000 之间", http.StatusUnprocessableEntity)
+		return webCtx.JSONError("keep: The number of events to retain must be between 0 - 1000", http.StatusUnprocessableEntity)
 	}
 
 	ctx, cancel := context.WithTimeout(webCtx.Context(), 10*time.Second)
@@ -224,7 +224,7 @@ func (g GroupController) CutGroupEvents(webCtx web.Context, evtGrpRepo repositor
 	}
 
 	if deletedCount > 0 {
-		em.Publish(pubsub.EventGroupReduceEvent{
+		_ = em.Publish(pubsub.EventGroupReduceEvent{
 			GroupID:     grp.ID,
 			KeepCount:   keepCount,
 			DeleteCount: deletedCount,

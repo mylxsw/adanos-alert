@@ -4,9 +4,9 @@
             <b-card class="mb-2 search-box">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <b-form inline @submit="searchSubmit">
-                        <b-form-datepicker class="mb-2 mr-sm-2 mb-sm-0" type="date" placeholder="开始日期" v-model="search.start_at" today-button></b-form-datepicker>
-                        <b-form-datepicker class="mb-2 mr-sm-2 mb-sm-0" type="date" placeholder="截止日期" v-model="search.end_at" today-button></b-form-datepicker>
-                        <b-button variant="light" type="submit">刷新</b-button>
+                        <b-form-datepicker class="mb-2 mr-sm-2 mb-sm-0" type="date" placeholder="Start date" v-model="search.start_at" today-button></b-form-datepicker>
+                        <b-form-datepicker class="mb-2 mr-sm-2 mb-sm-0" type="date" placeholder="End date" v-model="search.end_at" today-button></b-form-datepicker>
+                        <b-button variant="light" type="submit">Refresh</b-button>
                     </b-form>
                 </b-card-text>
             </b-card>
@@ -88,7 +88,7 @@ export default {
                 },
                 alertByDatetime: {
                     title: {
-                        text: '事件组数量时间分布',
+                        text: 'Number of event groups Time distribution',
                         left: 'center',
                         textStyle: {
                             color: '#ccc'
@@ -132,7 +132,7 @@ export default {
                     },
                     series: {
                         smooth: true,
-                        name: '事件组数量',
+                        name: 'Number of event groups',
                         data: [],
                         type: 'line',
                         sampling: 'average',
@@ -152,7 +152,7 @@ export default {
                 },
                 eventsByDatetime: {
                     title: {
-                        text: '事件数量时间分布',
+                        text: 'Distribution of the number of events over time',
                         left: 'center',
                         textStyle: {
                             color: '#ccc'
@@ -196,7 +196,7 @@ export default {
                     },
                     series: {
                         smooth: true,
-                        name: '事件数量',
+                        name: 'Event count',
                         data: [],
                         type: 'line',
                         sampling: 'average',

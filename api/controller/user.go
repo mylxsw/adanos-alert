@@ -162,7 +162,7 @@ func (u UserController) Add(ctx web.Context, userRepo repository.UserRepo, em ev
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.UserChangedEvent{
+	_ = em.Publish(pubsub.UserChangedEvent{
 		User:      newUser,
 		Type:      pubsub.EventTypeAdd,
 		CreatedAt: time.Now(),
@@ -214,7 +214,7 @@ func (u UserController) Update(ctx web.Context, userRepo repository.UserRepo, em
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.UserChangedEvent{
+	_ = em.Publish(pubsub.UserChangedEvent{
 		User:      user,
 		Type:      pubsub.EventTypeUpdate,
 		CreatedAt: time.Now(),
@@ -234,7 +234,7 @@ func (u UserController) Delete(ctx web.Context, userRepo repository.UserRepo, em
 		return err
 	}
 
-	em.Publish(pubsub.UserChangedEvent{
+	_ = em.Publish(pubsub.UserChangedEvent{
 		User:      user,
 		Type:      pubsub.EventTypeDelete,
 		CreatedAt: time.Now(),

@@ -4,10 +4,10 @@
             <b-card class="mb-2">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <b-form inline @submit="searchSubmit">
-                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="名称" v-model="search.name"></b-input>
-                        <b-button variant="light" type="submit">搜索</b-button>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Name" v-model="search.name"></b-input>
+                        <b-button variant="light" type="submit">Search</b-button>
                     </b-form>
-                    <b-button to="/dingding-robots/add" variant="primary">新增机器人</b-button>
+                    <b-button to="/dingding-robots/add" variant="primary">New Robot</b-button>
                 </b-card-text>
             </b-card>
             <b-table :items="robots" :fields="fields" :busy="isBusy" show-empty hover>
@@ -20,13 +20,13 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group class="mr-2">
-                        <b-button size="sm" variant="success" :to="{path:'/', query:{dingding_id: row.item.id}}">报警</b-button>
-                        <b-button size="sm" variant="dark" :to="{path:'/rules', query:{dingding_id: row.item.id}}">规则</b-button>
+                        <b-button size="sm" variant="success" :to="{path:'/', query:{dingding_id: row.item.id}}">Events</b-button>
+                        <b-button size="sm" variant="dark" :to="{path:'/rules', query:{dingding_id: row.item.id}}">Rules</b-button>
                     </b-button-group>
                     <b-button-group>
 
-                        <b-button size="sm" variant="info" :to="{path:'/dingding-robots/' + row.item.id + '/edit'}">编辑</b-button>
-                        <b-button size="sm" variant="danger" @click="delete_robot(row.index, row.item.id)">删除</b-button>
+                        <b-button size="sm" variant="info" :to="{path:'/dingding-robots/' + row.item.id + '/edit'}">Edit</b-button>
+                        <b-button size="sm" variant="danger" @click="delete_robot(row.index, row.item.id)">Delete</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -48,10 +48,10 @@
                 isBusy: true,
                 fields: [
                     {key: 'id', label: 'ID'},
-                    {key: 'name', label: '名称'},
+                    {key: 'name', label: 'Name'},
                     {key: 'token', label: 'Token'},
-                    {key: 'updated_at', label: '最后更新'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'updated_at', label: 'Last Updated'},
+                    {key: 'operations', label: 'Operations'}
                 ],
                 search: {
                     name: '',
@@ -79,14 +79,14 @@
             },
             delete_robot(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/dingding-robots/' + id + '/').then(() => {
                         self.robots.splice(index, 1);
-                        this.SuccessBox('操作成功')
+                        this.SuccessBox('Operation successful')
                     }).catch(error => {
                         this.ErrorBox(error);
                     });

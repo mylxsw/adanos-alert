@@ -3,22 +3,22 @@
         <b-col>
             <b-form @submit="onSubmit">
                 <b-card-group class="mb-3">
-                    <b-card header="基本">
-                        <b-form-group label-cols="2" id="template_type" label="类型" label-for="template_type_input">
+                    <b-card header="Basic">
+                        <b-form-group label-cols="2" id="template_type" label="Type" label-for="template_type_input">
                             <b-form-select id="template_type_input" v-model="form.type"
                                            :options="type_options"></b-form-select>
                         </b-form-group>
-                        <b-form-group label-cols="2" id="templatename" label="模板名称*" label-for="templatename_input">
+                        <b-form-group label-cols="2" id="templatename" label="Name*" label-for="templatename_input">
                             <b-form-input id="templatename_input" type="text" v-model="form.name" required
-                                          placeholder="输入模板名称"></b-form-input>
+                                          placeholder="Input template name"></b-form-input>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="description" label="描述" label-for="description_input">
-                            <b-form-textarea id="description_input" placeholder="输入模板描述"
+                        <b-form-group label-cols="2" id="description" label="Description" label-for="description_input">
+                            <b-form-textarea id="description_input" placeholder="Input template description"
                                              v-model="form.description"></b-form-textarea>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="template_content" label="模板内容"
+                        <b-form-group label-cols="2" id="template_content" label="Content"
                                       label-for="template_content_input">
                             <b-card bg-variant="light">
                                 <b-card-body style="max-height: 500px; overflow-y: auto;">
@@ -36,8 +36,8 @@
                     </b-card>
                 </b-card-group>
 
-                <b-button type="submit" variant="primary" class="mr-2">保存</b-button>
-                <b-button to="/templates">返回</b-button>
+                <b-button type="submit" variant="primary" class="mr-2">Save</b-button>
+                <b-button to="/templates">Go back</b-button>
             </b-form>
         </b-col>
     </b-row>
@@ -71,11 +71,11 @@
                     type: 'template',
                 },
                 type_options: [
-                    {value: 'match_rule', text: '事件组匹配规则'},
-                    {value: 'template', text: '事件组展示模板'},
-                    {value: 'trigger_rule', text: '动作触发规则'},
-                    {value: 'template_dingding', text: '钉钉通知模板'},
-                    {value: 'template_report', text: '报告模板'},
+                    {value: 'match_rule', text: 'Event Group Matching Rule'},
+                    {value: 'template', text: 'Event Group Display Template'},
+                    {value: 'trigger_rule', text: 'Action Triggering Rule'},
+                    {value: 'template_dingding', text: 'DingTalk Notification Template'},
+                    {value: 'template_report', text: 'Report Template'},
                 ],
                 helper: {
                     match_rule: helpers.groupMatchRules.concat(...helpers.matchRules),
@@ -91,7 +91,7 @@
                         smartIndent: true,
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '输入规则，必须返回布尔值',
+                        placeholder: 'Enter a rule that must return a Boolean value',
                         lineWrapping: true
                     },
                     template: {
@@ -101,7 +101,7 @@
                         smartIndent: true,
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '输入模板',
+                        placeholder: 'Input template',
                         lineWrapping: true
                     },
                     template_report: {
@@ -111,7 +111,7 @@
                         smartIndent: true,
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '输入模板',
+                        placeholder: 'Input template',
                         lineWrapping: true
                     },
                     trigger_rule: {
@@ -120,7 +120,7 @@
                         hintOptions: {adanosType: 'TriggerMatchRule'},
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '默认为 true （全部匹配）',
+                        placeholder: 'Defaults to true (match all)',
                         lineWrapping: true
                     },
                     template_dingding: {
@@ -130,7 +130,7 @@
                         hintOptions: {adanosType: 'DingTemplate'},
                         completeSingle: false,
                         lineNumbers: true,
-                        placeholder: '默认使用事件组展示模板',
+                        placeholder: 'Default to use the event group display template.',
                         lineWrapping: true
                     }
                 }
@@ -152,7 +152,7 @@
                 }
 
                 axios.post(url, this.createRequest()).then(() => {
-                    this.SuccessBox('操作成功', () => {
+                    this.SuccessBox('Operation successful', () => {
                         window.location.reload(true);
                     })
                 }).catch(error => {

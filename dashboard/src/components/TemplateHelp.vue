@@ -2,11 +2,11 @@
     <b-card-body>
         <b-card-text class="adanos-help">
             <ul>
-                <li>支持的基本字段：
+                <li>Base Fields:
                     <pre><code>
 Action: string
-RuleTemplateParsed: string // 根据规则全局模板生成的报警摘要，只在动作触发模板部分可用
-PreviewURL: string // 报警详情预览地址
+RuleTemplateParsed: string // The alarm summary generated based on the rules of the global template is only available in the action-triggering template section.
+PreviewURL: string // Preview address for alarm details
 Rule: {
 	ID          primitive.ObjectID
 	Name        string
@@ -49,7 +49,7 @@ Group: {
 		Template        string
 		SummaryTemplate string
 	}
-	Actions      []Trigger // 事件组关联的所有动作
+	Actions      []Trigger // All actions associated with the event group
 
 	Status    string
 	CreatedAt time.Time
@@ -68,8 +68,8 @@ Group: {
             </ul>
             <hr />
             <ol>
-                <li>时间格式 layout 如 <code>2006-01-02T15:04:05Z07:00</code> 代表了 <code>RFC3339</code></li>
-                <li>OpenFalconIM 格式为 
+                <li>The time format layout such as <code>2006-01-02T15:04:05Z07:00</code> represents <code>RFC3339</code></li>
+                <li>OpenFalconIM format is
                     <pre>
 <code>type OpenFalconIM struct {
 	Priority    int
@@ -82,7 +82,7 @@ Group: {
 </code>
                     </pre>
                 </li>
-                <li>jsonutils.KvPair 格式为
+                <li>jsonutils.KvPair format is
                     <pre>
 <code>
 type KvPair struct {

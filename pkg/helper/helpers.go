@@ -136,7 +136,7 @@ func (Helpers) CutOff(maxLen int, val string) string {
 	return string(valRune[0:maxLen]) + "..."
 }
 
-// stringMask create a mask for string
+// Mask create a mask for string
 func (Helpers) Mask(left int, content string) string {
 	size := len(content)
 	if size < 16 {

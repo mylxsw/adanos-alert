@@ -100,7 +100,9 @@ func (m EventRepo) Find(filter interface{}) (messages []repository.Event, err er
 	if err != nil {
 		return
 	}
-	defer cur.Close(context.TODO())
+	defer func() {
+		_ = cur.Close(context.TODO())
+	}()
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event
@@ -120,7 +122,7 @@ func (m EventRepo) FindIDs(ctx context.Context, filter interface{}, limit int64)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
+	defer func() { _ = cur.Close(ctx) }()
 
 	for cur.Next(ctx) {
 		var evt repository.Event
@@ -140,7 +142,7 @@ func (m EventRepo) Paginate(filter interface{}, offset, limit int64) (messages [
 	if err != nil {
 		return
 	}
-	defer cur.Close(context.TODO())
+	defer func() { _ = cur.Close(context.TODO()) }()
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event
@@ -172,7 +174,9 @@ func (m EventRepo) Traverse(filter interface{}, cb func(msg repository.Event) er
 	if err != nil {
 		return err
 	}
-	defer cur.Close(context.TODO())
+	defer func() {
+		_ = cur.Close(context.TODO())
+	}()
 
 	for cur.Next(context.TODO()) {
 		var msg repository.Event
@@ -230,7 +234,9 @@ func (m EventRepo) CountByDatetime(ctx context.Context, filter bson.M, startTime
 	if err != nil {
 		return nil, err
 	}
-	defer aggregate.Close(ctx)
+	defer func() {
+		_ = aggregate.Close(ctx)
+	}()
 
 	results := make([]repository.EventByDatetimeCount, 0)
 	for aggregate.Next(ctx) {

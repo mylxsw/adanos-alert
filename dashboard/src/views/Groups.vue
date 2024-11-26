@@ -3,16 +3,16 @@
         <b-col>
             <b-card class="mb-2">
                 <b-card-text>
-                    <b-badge :variant="$route.query.status === undefined ? 'primary':''" class="mr-1" :to="'/'">全部</b-badge>
+                    <b-badge :variant="$route.query.status === undefined ? 'primary':''" class="mr-1" :to="'/'">All</b-badge>
                     <b-badge :variant="$route.query.status === status.value ? 'primary': ''" v-for="(status, index) in statuses" :key="index" class="mr-1" :to="'/?status=' + status.value">{{ status.name }}</b-badge>
                 </b-card-text>
 
                 <b-card-text>
                     <b-form inline @submit="searchSubmit">
                         <date-picker type="datetime" v-model="search.time_range" range clearable class="mr-2" style="width: 400px;"/>
-                        <b-form-select v-model="search.type" class="mb-2 mr-sm-2 mb-sm-0" placeholder="类型" :options="type_options"></b-form-select>
-                        <b-form-select v-model="search.sort" class="mb-2 mr-sm-2 mb-sm-0" placeholder="排序方式" :options="sort_options"></b-form-select>
-                        <b-button variant="primary" type="submit">刷新</b-button>
+                        <b-form-select v-model="search.type" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type" :options="type_options"></b-form-select>
+                        <b-form-select v-model="search.sort" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Sort by" :options="sort_options"></b-form-select>
+                        <b-button variant="primary" type="submit">Refresh</b-button>
                     </b-form>
                 </b-card-text>
 
@@ -32,33 +32,33 @@
                 </template>
                 <template v-slot:cell(actions)="row">
                     <p style="margin-bottom:4px">
-                        <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="事件组类型">恢复</b-badge>
-                        <b-badge v-if="row.item.type === 'recoverable'" variant="info" class="mr-2" v-b-tooltip title="事件组类型">可恢复</b-badge>
-                        <b-badge v-if="row.item.type === 'ignored'" variant="warning" class="mr-2" v-b-tooltip title="事件组类型">忽略事件</b-badge>
-                        <b-badge v-if="row.item.type === 'ignoredExceed'" variant="primary" class="mr-2" v-b-tooltip title="事件组类型">超限忽略事件</b-badge>
-                        <b-badge class="mr-2" variant="danger" v-if="row.item.rule.realtime" v-b-tooltip title="即时消息">即时</b-badge>
-                        <b-badge v-b-tooltip.hover title="聚合条件（Key）">{{ row.item.aggregate_key }}</b-badge>
+                        <b-badge v-if="row.item.type === 'recovery'" variant="success" class="mr-2" v-b-tooltip title="Event Group Type">Recovered</b-badge>
+                        <b-badge v-if="row.item.type === 'recoverable'" variant="info" class="mr-2" v-b-tooltip title="Event Group Type">Recoverable</b-badge>
+                        <b-badge v-if="row.item.type === 'ignored'" variant="warning" class="mr-2" v-b-tooltip title="Event Group Type">Ignored</b-badge>
+                        <b-badge v-if="row.item.type === 'ignoredExceed'" variant="primary" class="mr-2" v-b-tooltip title="Event Group Type">Ignore events that exceed the limit</b-badge>
+                        <b-badge class="mr-2" variant="danger" v-if="row.item.rule.realtime" v-b-tooltip title="Instant message">ASAP</b-badge>
+                        <b-badge v-b-tooltip.hover title="Aggregation Condition (Key)">{{ row.item.aggregate_key }}</b-badge>
                     </p>
                     <b-list-group style="font-size: 80%">
                         <b-list-group-item style="padding: 5px" v-for="(act, index) in row.item.actions" :key="index" :variant="act.trigger_status === 'ok' ? 'success': 'danger'">
-                            <code style="line-height: 0.85" class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || '全部' }}</code>
-                            <code style="line-height: 0.85" class="action-pre-condition" v-if="act.is_else_trigger">兜底</code>
+                            <code style="line-height: 0.85" class="action-pre-condition" v-b-tooltip :title="act.pre_condition" v-if="!act.is_else_trigger">{{ act.pre_condition || 'All' }}</code>
+                            <code style="line-height: 0.85" class="action-pre-condition" v-if="act.is_else_trigger">Catch All</code>
                             <b :class="act.is_else_trigger ? 'text-warning':'text-dark'"> | </b>
                             {{ act.name !== '' ? act.name : formatAction(act.action) }} <span v-if="act.user_refs.length > 0">({{ users(act) }})</span>
                         </b-list-group-item>
                     </b-list-group>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'预计' + formatted(row.item.rule.expect_ready_at) + '完成'" v-b-tooltip.hover>收集中
+                    <b-badge v-if="row.item.status === 'collecting'" variant="dark" :title="'Predict ' + formatted(row.item.rule.expect_ready_at) + ' Done'" v-b-tooltip.hover>Collecting
                         <span v-if="row.item.collect_time_remain > 0">
-                            剩余 <human-time :value="row.item.collect_time_remain"></human-time>
+                            Remaining <human-time :value="row.item.collect_time_remain"></human-time>
                         </span>
-                        <span v-else>收集完成</span>
+                        <span v-else>Collected</span>
                     </b-badge>
-                    <b-badge v-if="row.item.status === 'pending'" variant="info">准备</b-badge>
-                    <b-badge v-if="row.item.status === 'ok'" variant="success">完成</b-badge>
-                    <b-badge v-if="row.item.status === 'failed'" variant="danger">失败</b-badge>
-                    <b-badge v-if="row.item.status === 'canceled'" variant="warning">已取消</b-badge>
+                    <b-badge v-if="row.item.status === 'pending'" variant="info">Ready</b-badge>
+                    <b-badge v-if="row.item.status === 'ok'" variant="success">Done</b-badge>
+                    <b-badge v-if="row.item.status === 'failed'" variant="danger">Failed</b-badge>
+                    <b-badge v-if="row.item.status === 'canceled'" variant="warning">Cancelled</b-badge>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -70,14 +70,14 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
-                        <b-button size="sm" variant="info" :to="{path:'/events', query: {group_id: row.item.id}}">详情</b-button>
-                        <b-dropdown size="sm" right text="预览" variant="primary">
-                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">事件组</b-dropdown-item>
-                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">报告</b-dropdown-item>
+                        <b-button size="sm" variant="info" :to="{path:'/events', query: {group_id: row.item.id}}">Details</b-button>
+                        <b-dropdown size="sm" right text="Preview" variant="primary">
+                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/groups/' + row.item.id + '.html'" target="_blank">Event Groups</b-dropdown-item>
+                            <b-dropdown-item :href="$store.getters.serverUrl + '/ui/reports/' + row.item.id + '.html'" target="_blank">Reports</b-dropdown-item>
                         </b-dropdown>
                         <b-button size="sm" variant="danger"
                             @click="clearGroup(row.item.id)"
-                            v-if="row.item.status != 'collecting' && row.item.status != 'pending'">清理</b-button>
+                            v-if="row.item.status != 'collecting' && row.item.status != 'pending'">Clean</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -123,16 +123,16 @@
                     type: this.$route.query.type !== undefined ? this.$route.query.type : '',
                 },
                 sort_options: [
-                    {value: 'asc', text: '创建时间正序'},
-                    {value: 'desc', text: '创建时间倒序'},
+                    {value: 'asc', text: 'Created time ascending'},
+                    {value: 'desc', text: 'Created time descending'},
                 ],
                 type_options: [
-                    {value: '', text: '所有类型（忽略事件组除外）'},
-                    {value: 'plain', text: '普通事件组'},
-                    {value: 'recoverable', text: '可恢复事件组'},
-                    {value: 'recovery', text: '已恢复事件组'},
-                    {value: 'ignored', text: '忽略事件组'},
-                    {value: 'ignoredExceed', text: '超限忽略事件组'},
+                    {value: '', text: 'All types (except ignored)'},
+                    {value: 'plain', text: 'Standard'},
+                    {value: 'recoverable', text: 'Recoverable'},
+                    {value: 'recovery', text: 'Recovered'},
+                    {value: 'ignored', text: 'Ignored'},
+                    {value: 'ignoredExceed', text: 'Ignored events that exceed the limit'},
                 ],
                 groups: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
@@ -140,18 +140,18 @@
                 isBusy: true,
                 userRefs: {},
                 fields: [
-                    {key: 'id', label: '时间'},
-                    {key: 'actions', label: '触发动作'},
-                    {key: 'message_count', label: '事件数'},
-                    {key: 'status', label: '状态'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'id', label: 'Time'},
+                    {key: 'actions', label: 'Actions'},
+                    {key: 'message_count', label: 'Event Count'},
+                    {key: 'status', label: 'Status'},
+                    {key: 'operations', label: 'Operations'},
                 ],
                 statuses: [
-                    {value: 'collecting', name:'收集中'},
-                    {value: 'pending', name:'准备'},
-                    {value: 'ok', name:'完成'},
-                    {value: 'failed', name:'失败'},
-                    {value: 'canceled', name:'取消'},
+                    {value: 'collecting', name:'Collecting'},
+                    {value: 'pending', name:'Ready'},
+                    {value: 'ok', name:'Done'},
+                    {value: 'failed', name:'Failed'},
+                    {value: 'canceled', name:'Cancelled'},
                 ],
                 alertByDatetime: {
                     title: {
@@ -244,13 +244,13 @@
                 }).join(', ')
             },
             clearGroup(id) {
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure you wanna do that?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/groups/' + id + '/reduce/').then((resp) => {
-                        this.SuccessBox('操作成功，删除事件数为 ' + resp.data.deleted_count);
+                        this.SuccessBox('Operation successful, number of events deleted: ' + resp.data.deleted_count);
                     }).catch(error => {
                         this.ErrorBox(error);
                     });
@@ -258,11 +258,11 @@
             },
             formatAction(action) {
                 let actions = {
-                    'dingding': '钉钉',
-                    'email': '邮件',
-                    'phone_call_aliyun': '电话',
-                    'wechat': '微信',
-                    'sms': '短信',
+                    'dingding': 'DingTalk',
+                    'email': 'Email',
+                    'phone_call_aliyun': 'Phone Call (Aliyun)',
+                    'wechat': 'WeChat',
+                    'sms': 'SMS',
                     'http': 'HTTP',
                     'jira': 'JIRA',
                 };
@@ -291,7 +291,7 @@
                         this.alertByDatetime.xAxis.data = response.data.map(s => s.datetime);
                         this.alertByDatetime.series = {
                             smooth: true,
-                            name: '事件组数量',
+                            name: 'Event Group Count',
                             data: response.data.map(s => s.total),
                             type: 'line',
                             sampling: 'average',

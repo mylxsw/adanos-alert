@@ -4,12 +4,12 @@
             <b-card class="mb-2">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <b-form inline @submit="searchSubmit">
-                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="用户名" v-model="search.name"></b-input>
-                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="邮箱" v-model="search.email"></b-input>
-                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="手机号码" v-model="search.phone"></b-input>
-                        <b-button variant="light" type="submit">搜索</b-button>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Name" v-model="search.name"></b-input>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Email" v-model="search.email"></b-input>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Phone" v-model="search.phone"></b-input>
+                        <b-button variant="light" type="submit">Search</b-button>
                     </b-form>
-                    <b-button to="/users/add" variant="primary">新增用户</b-button>
+                    <b-button to="/users/add" variant="primary">New User</b-button>
                 </b-card-text>
             </b-card>
             <b-table :items="users" :fields="fields" :busy="isBusy" show-empty hover>
@@ -25,8 +25,8 @@
                     </b-list-group>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'enabled'" variant="success">启用</b-badge>
-                    <b-badge v-if="row.item.status === 'disabled'" variant="warning">禁用</b-badge>
+                    <b-badge v-if="row.item.status === 'enabled'" variant="success">Enabled</b-badge>
+                    <b-badge v-if="row.item.status === 'disabled'" variant="warning">Disabled</b-badge>
                 </template>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
@@ -37,12 +37,12 @@
                 </template>
                 <template v-slot:cell(operations)="row">
                     <b-button-group class="mr-2">
-                        <b-button size="sm" variant="success" :to="{path:'/', query:{user_id: row.item.id}}">报警</b-button>
-                        <b-button size="sm" variant="dark" :to="{path:'/rules', query:{user_id: row.item.id}}">规则</b-button>
+                        <b-button size="sm" variant="success" :to="{path:'/', query:{user_id: row.item.id}}">Events</b-button>
+                        <b-button size="sm" variant="dark" :to="{path:'/rules', query:{user_id: row.item.id}}">Rules</b-button>
                     </b-button-group>
                     <b-button-group>
-                        <b-button size="sm" variant="info" :to="{path:'/users/' + row.item.id + '/edit'}">编辑</b-button>
-                        <b-button size="sm" variant="danger" @click="delete_user(row.index, row.item.id)">删除</b-button>
+                        <b-button size="sm" variant="info" :to="{path:'/users/' + row.item.id + '/edit'}">Edit</b-button>
+                        <b-button size="sm" variant="danger" @click="delete_user(row.index, row.item.id)">Delete</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -63,12 +63,12 @@
                 next: -1,
                 isBusy: true,
                 fields: [
-                    {key: 'name', label: '用户名/ID'},
-                    {key: 'email', label: '邮箱账号'},
-                    {key: 'phone', label: '手机号码'},
-                    {key: 'metas', label: '属性'},
-                    {key: 'updated_at', label: '最后更新'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'name', label: 'Name/ID'},
+                    {key: 'email', label: 'Email'},
+                    {key: 'phone', label: 'Phone'},
+                    {key: 'metas', label: 'Attributes'},
+                    {key: 'updated_at', label: 'Last Updated'},
+                    {key: 'operations', label: 'Operations'}
                 ],
                 search: {
                     name: '',
@@ -98,14 +98,14 @@
             },
             delete_user(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/users/' + id + '/').then(() => {
                         self.users.splice(index, 1);
-                        this.SuccessBox('操作成功')
+                        this.SuccessBox('Operation successful')
                     }).catch(error => {
                         this.ErrorBox(error);
                     });

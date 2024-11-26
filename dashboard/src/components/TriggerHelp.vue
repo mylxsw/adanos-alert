@@ -2,7 +2,7 @@
     <b-card>
         <b-card-text class="adanos-help">
             <ul>
-                <li>支持的基本字段如下：
+                <li>Base Fields:
                     <pre><code>
 Group   {
 	ID     primitive.ObjectID
@@ -17,7 +17,7 @@ Group   {
 		Template        string
 		SummaryTemplate string
 	}
-	Actions      []Trigger // 事件组关联的所有动作
+	Actions      []Trigger // All actions associated with the event group
 
 	Status    string
 	CreatedAt time.Time
@@ -43,7 +43,7 @@ UserIDWithMeta {
 }
                     </code></pre>
                 </li>
-                <li>支持的对象、函数：
+                <li>Objects and functions:
                     <ul>
                         <li v-for="(helper, i) in helpers" v-bind:key="i">
                             <code>{{ helper.text }}</code>
@@ -54,8 +54,8 @@ UserIDWithMeta {
             </ul>
             <hr />
             <ol>
-                <li><b>triggerStatus</b> 状态可选值为 <code>collecting</code>, <code>pending</code>, <code>ok</code>, <code>failed</code>, <code>canceled</code></li>
-                <li>时间格式 layout 如 <code>2006-01-02T15:04:05Z07:00</code> 代表了 <code>RFC3339</code></li>
+                <li><b>triggerStatus</b> status optional values are <code>collecting</code>, <code>pending</code>, <code>ok</code>, <code>failed</code>, <code>canceled</code></li>
+                <li>The time format layout such as <code>2006-01-02T15:04:05Z07:00</code> represents <code>RFC3339</code></li>
             </ol>
         </b-card-text>
     </b-card>

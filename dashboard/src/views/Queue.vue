@@ -3,10 +3,9 @@
         <b-col>
             <div class="mb-3">
                 <b-button size="sm" :variant="queue_btn" class="float-right" @click="pause_queue()">{{ queue_action }}</b-button>
-                当前状态：<span v-html="queue_status"></span>，
-                Workers: <b>{{ queue_info.worker_num }}</b>，
-                自 <date-time :value="queue_info.start_at"></date-time> 开始，已处理：<b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>，
-                失败：<b-badge :to="'/queues?status=failed'" variant="danger">{{ queue_info.failed_count }}</b-badge>
+              Current status: <span v-html="queue_status"></span>，
+              Workers: <b>{{ queue_info.worker_num }}</b>，
+              Processed since <date-time :value="queue_info.start_at"></date-time>: <b-badge :to="'/queues?status=succeed'" variant="success">{{ queue_info.processed_count }}</b-badge>, Failed: <b-badge :to="'/queues?status=failed'" variant="danger">{{ queue_info.failed_count }}</b-badge>
             </div>
             <b-table :items="jobs" :fields="fields" :busy="isBusy" show-empty hover>
                 <template v-slot:cell(id)="row">
@@ -24,14 +23,14 @@
                     <b v-else>{{ row.item.requeue_times }}</b>
                 </template>
                 <template v-slot:cell(status)="row">
-                    <b-badge v-if="row.item.status === 'wait'" variant="info">等待
-                        <span v-if="row.item.execute_time_remain > 0">（剩余 <human-time :value="row.item.execute_time_remain"></human-time>）</span>
-                        <span v-else>（就绪）</span>
+                    <b-badge v-if="row.item.status === 'wait'" variant="info">Waiting
+                        <span v-if="row.item.execute_time_remain > 0">(Remaining <human-time :value="row.item.execute_time_remain"></human-time>)</span>
+                        <span v-else>(Ready)</span>
                     </b-badge>
-                    <b-badge v-if="row.item.status === 'running'" variant="dark">执行中</b-badge>
-                    <b-badge v-if="row.item.status === 'failed'" variant="danger" v-b-tooltip.hover :title="row.item.last_error">失败</b-badge>
-                    <b-badge v-if="row.item.status === 'succeed'" variant="success">成功</b-badge>
-                    <b-badge v-if="row.item.status === 'canceled'" variant="warning">已取消</b-badge>
+                    <b-badge v-if="row.item.status === 'running'" variant="dark">In progress</b-badge>
+                    <b-badge v-if="row.item.status === 'failed'" variant="danger" v-b-tooltip.hover :title="row.item.last_error">Failed</b-badge>
+                    <b-badge v-if="row.item.status === 'succeed'" variant="success">Done</b-badge>
+                    <b-badge v-if="row.item.status === 'canceled'" variant="warning">Canceled</b-badge>
                 </template>
                 <template v-slot:table-busy class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -45,7 +44,7 @@
                 <template v-slot:cell(operations)="row">
                     <b-button-group>
                         <b-button size="sm" variant="info" @click.stop="row.toggleDetails" v-model="row.detailsShowing">Payload</b-button>
-                        <b-button size="sm" variant="danger" @click="delete_job(row.index, row.item.id)">删除</b-button>
+                        <b-button size="sm" variant="danger" @click="delete_job(row.index, row.item.id)">Delete</b-button>
                     </b-button-group>
                 </template>
             </b-table>
@@ -74,16 +73,16 @@
                 },
                 queue_paused: false,
                 queue_status: "-",
-                queue_action: "启动",
+                queue_action: "Start",
                 queue_btn: "success",
                 fields: [
-                    {key: 'id', label: '时间/ID'},
-                    {key: 'name', label: '类型'},
-                    {key: 'requeue_times', label: '重试次数'},
-                    {key: 'next_execute_at', label: '期望执行时间'},
-                    {key: 'updated_at', label: '最后更新'},
-                    {key: 'status', label: '状态'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'id', label: 'Time/ID'},
+                    {key: 'name', label: 'Type'},
+                    {key: 'requeue_times', label: 'Retry times'},
+                    {key: 'next_execute_at', label: 'Expected execution time'},
+                    {key: 'updated_at', label: 'Last update'},
+                    {key: 'status', label: 'Status'},
+                    {key: 'operations', label: 'Operations'}
                 ],
             };
         },
@@ -93,24 +92,24 @@
         methods: {
             delete_job(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/queue/jobs/' + id + '/').then(() => {
                         self.jobs.splice(index, 1);
-                        this.SuccessBox('操作成功');
+                        this.SuccessBox('Operation successful');
                     }).catch(error => {
                         this.ErrorBox(error);
                     });
                 });
             },
             pause_queue() {
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {return;}
                     axios.post('/api/queue/control/', {op: this.queue_paused ? 'continue' : 'pause'}).then(resp => {
-                        this.SuccessBox('操作成功');
+                        this.SuccessBox('Operation successful');
                         this.updateControlStatus(resp.data.paused);
                         this.queue_info = resp.data.info;
                     }).catch(error => {this.ErrorBox(error)});
@@ -118,8 +117,8 @@
 
             },
             updateControlStatus(paused) {
-                this.queue_status = paused ? '<b class="text-warning">暂停</b>':'<b class="text-success">运行中</b>';
-                this.queue_action = paused ? '启动' : '暂停';
+                this.queue_status = paused ? '<b class="text-warning">Stopped</b>':'<b class="text-success">Running</b>';
+                this.queue_action = paused ? 'Start' : 'Stop';
                 this.queue_btn = paused ? 'success' : 'warning';
                 this.queue_paused = paused;
             },

@@ -4,14 +4,14 @@
             <b-card class="mb-2 search-box">
                 <b-card-text style="display: flex; justify-content:space-between">
                     <div>
-                        <b-badge :variant="$route.query.type === undefined ? 'primary':''" class="mr-1" :to="'/templates'">全部</b-badge>
-                        <b-badge :variant="$route.query.type === 'match_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=match_rule'">事件组匹配规则</b-badge>
-                        <b-badge :variant="$route.query.type === 'template' ? 'primary':''" class="mr-1" :to="'/templates?type=template'">事件组展示模板</b-badge>
-                        <b-badge :variant="$route.query.type === 'trigger_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=trigger_rule'">动作触发规则</b-badge>
-                        <b-badge :variant="$route.query.type === 'template_dingding' ? 'primary':''" class="mr-1" :to="'/templates?type=template_dingding'">钉钉通知模板</b-badge>
-                        <b-badge :variant="$route.query.type === 'template_report' ? 'primary':''" class="mr-1" :to="'/templates?type=template_report'">报告模板</b-badge>
+                        <b-badge :variant="$route.query.type === undefined ? 'primary':''" class="mr-1" :to="'/templates'">All</b-badge>
+                        <b-badge :variant="$route.query.type === 'match_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=match_rule'">Event Group Matching Rule</b-badge>
+                        <b-badge :variant="$route.query.type === 'template' ? 'primary':''" class="mr-1" :to="'/templates?type=template'">Event Group Display Template</b-badge>
+                        <b-badge :variant="$route.query.type === 'trigger_rule' ? 'primary':''" class="mr-1" :to="'/templates?type=trigger_rule'">Action Triggering Rule</b-badge>
+                        <b-badge :variant="$route.query.type === 'template_dingding' ? 'primary':''" class="mr-1" :to="'/templates?type=template_dingding'">DingTalk Notification Template</b-badge>
+                        <b-badge :variant="$route.query.type === 'template_report' ? 'primary':''" class="mr-1" :to="'/templates?type=template_report'">Report Template</b-badge>
                     </div>
-                    <b-button to="/templates/add" variant="primary">新增模板</b-button>
+                    <b-button to="/templates/add" variant="primary">New</b-button>
                 </b-card-text>
             </b-card>
             <b-table :items="templates" :fields="fields" :busy="isBusy" show-empty hover>
@@ -27,11 +27,11 @@
                     </b-list-group>
                 </template>
                 <template v-slot:cell(type)="row">
-                    <b-badge v-if="row.item.type === 'match_rule'" variant="success">事件组匹配规则</b-badge>
-                    <b-badge v-if="row.item.type === 'template'" variant="info">事件组展示模板</b-badge>
-                    <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">动作触发规则</b-badge>
-                    <b-badge v-if="row.item.type === 'template_dingding'" variant="info">钉钉通知模板</b-badge>
-                    <b-badge v-if="row.item.type === 'template_report'" variant="warning">报告模板</b-badge>
+                    <b-badge v-if="row.item.type === 'match_rule'" variant="success">Event Group Matching Rules</b-badge>
+                    <b-badge v-if="row.item.type === 'template'" variant="info">Event Group Display Template</b-badge>
+                    <b-badge v-if="row.item.type === 'trigger_rule'" variant="dark">Action Triggering Rule</b-badge>
+                    <b-badge v-if="row.item.type === 'template_dingding'" variant="info">DingTalk Notification Template</b-badge>
+                    <b-badge v-if="row.item.type === 'template_report'" variant="warning">Report Template</b-badge>
                 </template>
                 <template v-slot:cell(updated_at)="row">
                     <date-time :value="row.item.updated_at"></date-time>
@@ -46,13 +46,13 @@
                 <template v-slot:cell(operations)="row">
                     <b-button-group class="mr-2 th-autohide-sm">
                         <b-button size="sm" @click="row.toggleDetails">
-                            {{ row.detailsShowing ? '隐藏' : '详情' }}
+                            {{ row.detailsShowing ? 'Hide' : 'Show' }}
                         </b-button>
                     </b-button-group>
                     <b-button-group>
-                        <b-button v-if="!row.item.predefined" size="sm" variant="info" :to="{path:'/templates/' + row.item.id + '/edit'}">编辑</b-button>
-                        <b-button v-if="!row.item.predefined" class="th-autohide-sm" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">删除</b-button>
-                        <b-button v-if="row.item.predefined" class="th-autohide-sm" size="sm" disabled>预置</b-button>
+                        <b-button v-if="!row.item.predefined" size="sm" variant="info" :to="{path:'/templates/' + row.item.id + '/edit'}">Edit</b-button>
+                        <b-button v-if="!row.item.predefined" class="th-autohide-sm" size="sm" variant="danger" @click="delete_template(row.index, row.item.id)">Delete</b-button>
+                        <b-button v-if="row.item.predefined" class="th-autohide-sm" size="sm" disabled>Preset</b-button>
                     </b-button-group>
                 </template>
                 <template v-slot:row-details="row">
@@ -75,11 +75,11 @@
                 templates: [],
                 isBusy: true,
                 fields: [
-                    {key: 'type', label: '类型', sortable: true, class: 'th-autohide-sm'},
-                    {key: 'name', label: '名称', sortable: true, class: 'th-column-width-limit'},
-                    {key: 'content', label: '模板内容', class: 'th-autohide-md'},
-                    {key: 'updated_at', label: '最后更新', sortable: true, class: 'th-autohide-md'},
-                    {key: 'operations', label: '操作'}
+                    {key: 'type', label: 'Type', sortable: true, class: 'th-autohide-sm'},
+                    {key: 'name', label: 'Name', sortable: true, class: 'th-column-width-limit'},
+                    {key: 'content', label: 'Content', class: 'th-autohide-md'},
+                    {key: 'updated_at', label: 'Last Updated', sortable: true, class: 'th-autohide-md'},
+                    {key: 'operations', label: 'Operations'}
                 ],
             };
         },
@@ -89,14 +89,14 @@
         methods: {
             delete_template(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/templates/' + id + '/').then(() => {
                         self.templates.splice(index, 1);
-                        this.SuccessBox('操作成功')
+                        this.SuccessBox('Operation successful')
                     }).catch(error => {
                         this.ErrorBox(error);
                     });

@@ -111,7 +111,6 @@ type EventGroupRepo interface {
 	LastGroup(filter bson.M) (grp EventGroup, err error)
 	CollectingGroup(rule EventGroupRule) (group EventGroup, err error)
 
-	// Statistics
 	// StatByRuleCount 按照规则的维度，查询规则相关的报警次数
 	StatByRuleCount(ctx context.Context, startTime, endTime time.Time) ([]EventGroupByRuleCount, error)
 	StatByUserCount(ctx context.Context, startTime, endTime time.Time) ([]EventGroupByUserCount, error)

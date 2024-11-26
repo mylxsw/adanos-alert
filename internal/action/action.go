@@ -195,7 +195,7 @@ func (q QueueAction) Handle(rule repository.Rule, tr repository.Trigger, grp rep
 			Rule:    rule,
 		}
 
-		em.Publish(pubsub.MessageGroupTriggeredEvent{
+		_ = em.Publish(pubsub.MessageGroupTriggeredEvent{
 			Action:    q.action,
 			Trigger:   trigger,
 			Group:     grp,
@@ -212,7 +212,7 @@ func (q QueueAction) Handle(rule repository.Rule, tr repository.Trigger, grp rep
 		}
 
 		// 更新最终通知人
-		q.manager.Resolve(func(resolver infra.Resolver, grpRepo repository.EventGroupRepo, userRepo repository.UserRepo, evtRepo repository.EventRepo) {
+		_ = q.manager.Resolve(func(resolver infra.Resolver, grpRepo repository.EventGroupRepo, userRepo repository.UserRepo, evtRepo repository.EventRepo) {
 			trigger.UserRefs = getUserRefs(resolver, trigger, grp, evtRepo)
 			trigger.UserNames = extractNameFromUserRefs(userRepo, trigger.UserRefs)
 		})

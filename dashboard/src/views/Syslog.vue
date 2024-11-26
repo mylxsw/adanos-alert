@@ -24,11 +24,11 @@
             typeWrap(typ) {
                 switch(typ) {
                     case 'ERROR':
-                        return '\x1B[1;3;31m[错误]\x1B[0m => ';
+                        return '\x1B[1;3;31m[Error]\x1B[0m => ';
                     case 'ACTION':
-                        return '\x1B[1;3;32m[操作]\x1B[0m => ';
+                        return '\x1B[1;3;32m[Action]\x1B[0m => ';
                     case 'SYSTEM':
-                        return '\x1B[1;3;33m[系统]\x1B[0m => ';
+                        return '\x1B[1;3;33m[System]\x1B[0m => ';
                 }
 
                 return 'UNKNOWN'

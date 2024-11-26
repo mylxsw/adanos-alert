@@ -254,7 +254,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 
 			return ctx.JSON(web.M{
 				"error": nil,
-				"msg":   misc.IfElse(ignored, "该消息被忽略", "该消息不会被忽略"),
+				"msg":   misc.IfElse(ignored, "The message was ignored", "This message will not be ignored"),
 			})
 		} else {
 			_, err = matcher.NewEventMatcher(repository.Rule{Rule: "true", IgnoreRule: content})
@@ -273,8 +273,8 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 				"error": nil,
 				"msg": fmt.Sprintf(
 					"%s%s",
-					misc.IfElse(matched, "与当前 Event 匹配", "与当前 Event 不匹配"),
-					misc.IfElse(matched && ignored, "，但是该 Event 被忽略", ""),
+					misc.IfElse(matched, "Matches the current Event", "Does not match the current Event"),
+					misc.IfElse(matched && ignored, ", But the Event is ignored", ""),
 				),
 			})
 		} else {
@@ -302,7 +302,7 @@ func (r RuleController) Check(ctx web.Context, conf *configs.Config, msgRepo rep
 					if err1 == nil {
 						return ctx.JSON(web.M{
 							"error": nil,
-							"msg":   fmt.Sprintf("当前 Event 应用规则后的返回值为 %s", res),
+							"msg":   fmt.Sprintf("The return value of the Event after the rule is applied is %s", res),
 						})
 					} else {
 						err = err1
@@ -332,7 +332,7 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 	triggers := []repository.Trigger{
 		{
 			ID:           primitive.NewObjectID(),
-			Name:         "测试触发规则",
+			Name:         "Test trigger rules",
 			PreCondition: "",
 			Action:       "dingding",
 			UserRefs:     []primitive.ObjectID{primitive.NewObjectID()},
@@ -341,8 +341,8 @@ func createPayloadForTemplateCheck(r RuleController, conf *configs.Config, msgID
 	}
 	rule := repository.Rule{
 		ID:          primitive.NewObjectID(),
-		Name:        "测试报警规则",
-		Description: "测试报警规则描述",
+		Name:        "Testing Alarm Rules",
+		Description: "Test alarm rule description",
 		Tags:        []string{"test-tag"},
 		ReadyType:   repository.ReadyTypeInterval,
 		Interval:    60,
@@ -450,7 +450,7 @@ func (r RuleController) Add(ctx web.Context, repo repository.RuleRepo, em event.
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.RuleChangedEvent{
+	_ = em.Publish(pubsub.RuleChangedEvent{
 		Rule:      newRule,
 		Type:      pubsub.EventTypeAdd,
 		CreatedAt: time.Now(),
@@ -540,7 +540,7 @@ func (r RuleController) Update(ctx web.Context, ruleRepo repository.RuleRepo, em
 		return nil, web.WrapJSONError(err, http.StatusInternalServerError)
 	}
 
-	em.Publish(pubsub.RuleChangedEvent{
+	_ = em.Publish(pubsub.RuleChangedEvent{
 		Rule:      newRule,
 		Type:      pubsub.EventTypeUpdate,
 		CreatedAt: time.Now(),
@@ -669,7 +669,7 @@ func (r RuleController) Delete(ctx web.Context, em event.Manager, repo repositor
 		return err
 	}
 
-	em.Publish(pubsub.RuleChangedEvent{
+	_ = em.Publish(pubsub.RuleChangedEvent{
 		Rule:      rule,
 		Type:      pubsub.EventTypeDelete,
 		CreatedAt: time.Now(),

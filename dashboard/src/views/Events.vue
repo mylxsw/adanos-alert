@@ -4,36 +4,36 @@
             <b-card class="mb-2">
                 <b-card-text>
                     <b-form inline @submit="searchSubmit">
-                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="来源" v-model="search.origin"></b-input>
-                        <b-form-tags v-model="search.tags" class="mb-2 mr-sm-2 mb-sm-0" placeholder="标签"></b-form-tags>
-                        <b-form-select v-model="search.status" class="mb-2 mr-sm-2 mb-sm-0" placeholder="状态" :options="status_options"></b-form-select>
-                        <b-button variant="light" type="submit">搜索</b-button>
+                        <b-input class="mb-2 mr-sm-2 mb-sm-0" placeholder="Source" v-model="search.origin"></b-input>
+                        <b-form-tags v-model="search.tags" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Tag"></b-form-tags>
+                        <b-form-select v-model="search.status" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Status" :options="status_options"></b-form-select>
+                        <b-button variant="light" type="submit">Search</b-button>
                     </b-form>   
                 </b-card-text>
             </b-card>
 
-            <b-card class="mb-2" border-variant="warning" v-if="relationInfo != null" header="相关事件摘要" header-bg-variant="warning">
+            <b-card class="mb-2" border-variant="warning" v-if="relationInfo != null" header="Summary of related events" header-bg-variant="warning">
                 <b-card-body>
                     <b-row style="max-width: 100rem;" class="adanos-meta-line">
-                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">事件摘要</b></b-col>
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">Summary</b></b-col>
                         <b-col sm="9" style="text-align: left">
                             {{ relationInfo.summary }}
                         </b-col>
                     </b-row>
                     <b-row style="max-width: 100rem;" class="adanos-meta-line">
-                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">出现次数</b></b-col>
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">Frequency</b></b-col>
                         <b-col sm="9" style="text-align: left">
                             {{ relationInfo.event_count }}
                         </b-col>
                     </b-row>
                     <b-row style="max-width: 100rem;" class="adanos-meta-line">
-                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">首次出现时间</b></b-col>
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">Time of first discovery</b></b-col>
                         <b-col sm="9" style="text-align: left">
                             <date-time :value="relationInfo.created_at"></date-time>
                         </b-col>
                     </b-row>
                     <b-row style="max-width: 100rem;" class="adanos-meta-line">
-                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">最近出现时间</b></b-col>
+                        <b-col sm="3"><b class="text-black-50" style="border-bottom: 1px dashed black">Time of last discovery</b></b-col>
                         <b-col sm="9" style="text-align: left">
                             <date-time :value="relationInfo.updated_at"></date-time>
                         </b-col>
@@ -47,7 +47,7 @@
 
                             <p>
                                 <date-time :value="note.created_at"></date-time>
-                                <b-link class="mr-1 float-right" :to="{path:'/events', query: {event_id: note.event_id}}" target="_blank" title="关联事件">
+                                <b-link class="mr-1 float-right" :to="{path:'/events', query: {event_id: note.event_id}}" target="_blank" title="Related events">
                                     <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
                                 </b-link>
                             </p>
@@ -72,7 +72,7 @@
             <paginator :per_page="2" :cur="cur" :next="next" path="/events" :query="this.$route.query"></paginator>
         </b-col>
 
-        <b-modal id="matched-rules-dialog" title="匹配到的规则" hide-footer size="xl">
+        <b-modal id="matched-rules-dialog" title="Matched rules" hide-footer size="xl">
             <b-table responsive="true" :items="matched_rules" :fields="matched_rules_fields">
                 <template v-slot:cell(name)="row">
                     <span v-b-tooltip.hover :title="row.item.rule.id">{{ row.item.rule.name }}</span>
@@ -92,17 +92,17 @@
                     <p class="adanos-pre-fold" v-b-tooltip.hover :title="row.item.rule.aggregate_rule">
                         <code>{{ row.item.rule.aggregate_rule }}</code>
                     </p>
-                    <p><b-badge variant="success" v-if="row.item.aggregate_key" v-b-tooltip.hover title="实际匹配的聚合 Key">{{ row.item.aggregate_key }}</b-badge></p>
+                    <p><b-badge variant="success" v-if="row.item.aggregate_key" v-b-tooltip.hover title="Actual matched aggregate Key">{{ row.item.aggregate_key }}</b-badge></p>
                 </template>
             </b-table>
         </b-modal>
 
-        <b-modal id="event-note-dialog" title="事件备注" hide-footer size="xl">
+        <b-modal id="event-note-dialog" title="Event Notes" hide-footer size="xl">
             <b-form @submit="onEventNoteSubmit">
                 <b-form-group id="event_note" label-for="event_note_input">
-                    <b-form-textarea id="event_note_input" placeholder="输入事件备注内容" v-model="event_note_form.note" rows="6"/>
+                    <b-form-textarea id="event_note_input" placeholder="Enter event notes" v-model="event_note_form.note" rows="6"/>
                 </b-form-group>
-                <b-button type="submit" variant="primary" class="mr-2 float-right">保存</b-button>
+                <b-button type="submit" variant="primary" class="mr-2 float-right">Save</b-button>
             </b-form>
         </b-modal>
     </b-row>
@@ -137,21 +137,21 @@ export default {
                     meta: '',
                 },
                 status_options: [
-                    {value: null, text: '所有状态'},
-                    {value: 'pending', text: '准备中'},
-                    {value: 'grouped', text: '已分组'},
-                    {value: 'canceled', text: '无规则，已取消'},
-                    {value: 'expired', text: '匹配规则，已过期'},
-                    {value: 'ignored', text: '匹配规则，已忽略'},
+                    {value: null, text: 'All'},
+                    {value: 'pending', text: 'Ready'},
+                    {value: 'grouped', text: 'Grouped'},
+                    {value: 'canceled', text: 'No rules, canceled'},
+                    {value: 'expired', text: 'Rule matched, expired'},
+                    {value: 'ignored', text: 'Rule matched, ignored'},
                 ],
                 events: [],
                 cur: parseInt(this.$route.query.next !== undefined ? this.$route.query.next : 0),
                 next: -1,
                 matched_rules: [],
                 matched_rules_fields: [
-                    {key: 'name', label: '规则名称/ID'},
-                    {key: 'rule', label: '规则'},
-                    {key: 'aggregate_rule', label: '聚合条件'},
+                    {key: 'name', label: 'Name/ID'},
+                    {key: 'rule', label: 'Rule'},
+                    {key: 'aggregate_rule', label: 'Aggregate conditions'},
                 ],
                 relationInfo: {},
                 relationNotes: [],
@@ -160,7 +160,7 @@ export default {
                     event_id: null,
                 },
                 eventsByDatetime: {
-                  title: {left: 'left', text: '事件数量时间分布'},
+                  title: {left: 'left', text: 'Distribution of the number of events over time.'},
                   tooltip: {
                     trigger: 'axis',
                   },
@@ -199,7 +199,7 @@ export default {
                   },
                   series: {
                     smooth: true,
-                    name: '事件数量',
+                    name: 'Number of events',
                     data: [],
                     type: 'line',
                     sampling: 'average',
@@ -237,13 +237,13 @@ export default {
                 }}).catch(err => {this.ToastError(err);});
             },
             reproduceEvent(id) {
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.post('/api/events/' + id + '/reproduce/', {}).then(resp => {
-                        this.ToastSuccess('重新投递 Event 成功，Event ID: ' + resp.data.id);
+                        this.ToastSuccess('Event redelivered successfully, Event ID: ' + resp.data.id);
                     }).catch(error => {
                         this.ErrorBox(error);
                     });
@@ -251,14 +251,14 @@ export default {
             },
             deleteEvent(index, id) {
                 let self = this;
-                this.$bvModal.msgBoxConfirm('确定执行该操作 ?').then((value) => {
+                this.$bvModal.msgBoxConfirm('Are you sure to perform this operation?').then((value) => {
                     if (value !== true) {
                         return;
                     }
 
                     axios.delete('/api/events/' + id + '/', {}).then(() => {
                         self.events.splice(index, 1);
-                        this.ToastSuccess('事件删除成功');
+                        this.ToastSuccess('Event deleted successfully');
                     }).catch(error => {
                         this.ErrorBox(error);
                     });
@@ -280,12 +280,12 @@ export default {
                 evt.preventDefault();
 
                 if (this.event_note_form.note.trim() === '') {
-                    this.ErrorBox('备注内容不能为空');
+                    this.ErrorBox('Note content cannot be empty.');
                     return ;
                 }
 
                 axios.post('/api/event-relations/' + this.$route.query.relation_id + '/notes/', this.event_note_form).then(() => {
-                    this.ToastSuccess('操作成功');
+                    this.ToastSuccess('Operation successful!');
                     this.$root.$emit('bv::hide::modal', "event-note-dialog");
                     this.loadMore();
                 }).catch(error => {

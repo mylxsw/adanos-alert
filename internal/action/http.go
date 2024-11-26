@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -95,9 +94,11 @@ func (act HTTPAction) Handle(rule repository.Rule, trigger repository.Trigger, g
 			return fmt.Errorf("send http request failed: %v", err)
 		}
 
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"trigger": trigger,

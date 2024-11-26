@@ -232,7 +232,7 @@ func (a *AggregationJob) pendingEventGroup(groupRepo repository.EventGroupRepo, 
 		err = groupRepo.UpdateID(grp.ID, grp)
 
 		if evtCount > 0 {
-			em.Publish(pubsub.MessageGroupPendingEvent{
+			_ = em.Publish(pubsub.MessageGroupPendingEvent{
 				Group:     grp,
 				CreatedAt: time.Now(),
 			})

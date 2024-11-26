@@ -1,6 +1,6 @@
 <template>
     <b-card-body class="adanos-help">
-        <li>支持的基本字段：
+        <li>Basic fields:
             <pre>
         CreatedAt  time.Time 
         Content    string
@@ -8,7 +8,7 @@
         Tags       []string
         Origin     string</pre>
         </li>
-        <li>支持的对象、函数：
+        <li>Objects and functions:
             <ul>
                 <li v-for="(helper, i) in helpers" v-bind:key="i">
                     <code>{{ helper.text }}</code>

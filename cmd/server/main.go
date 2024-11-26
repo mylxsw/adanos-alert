@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
@@ -187,15 +186,13 @@ func main() {
 	})
 
 	ins.Async(func(conf *configs.Config, em event.Manager) {
-		rand.Seed(time.Now().Unix())
-
 		if log.DebugEnabled() {
 			log.WithFields(log.Fields{
 				"config": conf,
 			}).Debug("configuration")
 		}
 
-		em.Publish(pubsub.SystemUpDownEvent{
+		_ = em.Publish(pubsub.SystemUpDownEvent{
 			Up:        true,
 			CreatedAt: time.Now(),
 		})
@@ -203,7 +200,7 @@ func main() {
 
 	ins.BeforeServerStop(func(cc infra.Resolver) error {
 		return cc.Resolve(func(em event.Manager) {
-			em.Publish(pubsub.SystemUpDownEvent{
+			_ = em.Publish(pubsub.SystemUpDownEvent{
 				Up:        false,
 				CreatedAt: time.Now(),
 			})

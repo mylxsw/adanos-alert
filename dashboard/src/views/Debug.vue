@@ -3,18 +3,18 @@
     <b-col>
       <b-form @submit="onSubmit">
         <b-card-group class="mb-3">
-          <b-card header="表达式评估">
+          <b-card header="Expression evaluation">
             <codemirror v-model="expression" class="mt-3 adanos-code-textarea"
                         :options="codemirrorOption"></codemirror>
-            <b-button type="submit" variant="primary" class="mt-2 mr-2 float-right">评估</b-button>
+            <b-button type="submit" variant="primary" class="mt-2 mr-2 float-right">Evaluate</b-button>
           </b-card>
         </b-card-group>
-        <b-card header="评估样本" class="mb-3">
+        <b-card header="Evaluation samples" class="mb-3">
           <b-alert v-model="errorMessage"></b-alert>
           <codemirror v-model="eventSampleText" class="mt-3 adanos-code-textarea"
                       :options="codemirrorOptionSample"></codemirror>
         </b-card>
-        <EventCard class="mb-3" title="事件示例" :fold="true" v-if="eventSample !== null" :event="eventSample"
+        <EventCard class="mb-3" title="Event Example" :fold="true" v-if="eventSample !== null" :event="eventSample"
                    :event_index="0" :onlyShow="true"></EventCard>
       </b-form>
     </b-col>
@@ -48,7 +48,7 @@ export default {
         smartIndent: true,
         completeSingle: false,
         lineNumbers: true,
-        placeholder: '输入表达式',
+        placeholder: 'Enter the expression',
         lineWrapping: true
       },
       codemirrorOptionSample: {
@@ -105,7 +105,7 @@ export default {
           if (resp.data.error === undefined || resp.data.error === null || resp.data.error === "") {
             this.SuccessBox(this.$createElement('pre', {class: 'adanos-message-box-code'}, resp.data.res));
           } else {
-            this.ErrorBox('表达式错误：' + resp.data.error);
+            this.ErrorBox('Expression error: ' + resp.data.error);
           }
         }).catch(error => {
           this.ErrorBox(error);

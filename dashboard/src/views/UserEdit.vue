@@ -3,29 +3,29 @@
         <b-col>
             <b-form @submit="onSubmit">
                 <b-card-group class="mb-3">
-                    <b-card header="基本">
-                        <b-form-group label-cols="2" id="email" label="邮箱账号*" label-for="email_input">
+                    <b-card header="Basic">
+                        <b-form-group label-cols="2" id="email" label="Email*" label-for="email_input">
                             <b-form-input id="email_input" type="email" v-model="form.email" required
-                                          placeholder="输入邮箱帐号"></b-form-input>
+                                          placeholder="Email"></b-form-input>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="username" label="姓名*" label-for="username_input">
+                        <b-form-group label-cols="2" id="username" label="Name*" label-for="username_input">
                             <b-form-input id="username_input" type="text" v-model="form.name" required
-                                          placeholder="输入用户姓名"></b-form-input>
+                                          placeholder="User name"></b-form-input>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="phone" label="手机号码" label-for="phone_input">
+                        <b-form-group label-cols="2" id="phone" label="Phone" label-for="phone_input">
                             <b-form-input id="phone_input" type="text" v-model="form.phone"
-                                          placeholder="输入手机号码"></b-form-input>
+                                          placeholder="Phone number"></b-form-input>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" label="属性">
-                            <b-btn variant="success" class="mb-3" @click="propertyAdd()">添加</b-btn>
+                        <b-form-group label-cols="2" label="Attributes">
+                            <b-btn variant="success" class="mb-3" @click="propertyAdd()">Add</b-btn>
                             <b-input-group v-bind:key="index" v-for="(meta, index) in form.metas" class="mb-3">
-                                <b-form-input v-model="form.metas[index].key" placeholder="属性名" list="properties"></b-form-input>
-                                <b-form-input v-model="form.metas[index].value" placeholder="属性值"></b-form-input>
+                                <b-form-input v-model="form.metas[index].key" placeholder="Key" list="properties"></b-form-input>
+                                <b-form-input v-model="form.metas[index].value" placeholder="Value"></b-form-input>
                                 <b-input-group-append>
-                                    <b-btn variant="danger" @click="propertyDelete(index)">删除</b-btn>
+                                    <b-btn variant="danger" @click="propertyDelete(index)">Delete</b-btn>
                                 </b-input-group-append>
                             </b-input-group>
 
@@ -37,8 +37,8 @@
                     </b-card>
                 </b-card-group>
 
-                <b-button type="submit" variant="primary" class="mr-2">保存</b-button>
-                <b-button to="/users">返回</b-button>
+                <b-button type="submit" variant="primary" class="mr-2">Save</b-button>
+                <b-button to="/users">Go back</b-button>
             </b-form>
         </b-col>
     </b-row>
@@ -78,7 +78,7 @@
                 }
 
                 axios.post(url, this.createRequest()).then(() => {
-                    this.SuccessBox('操作成功', () => {
+                    this.SuccessBox('Operation successful', () => {
                         window.location.reload(true);
                     })
                 }).catch(error => {

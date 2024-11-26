@@ -61,7 +61,7 @@ Vue.prototype.ToastError = function (message) {
 Vue.prototype.SuccessBox = function (message, cb) {
     cb = cb || function () {};
     this.$bvModal.msgBoxOk(message, {
-        title: '操作成功',
+        title: 'Successful',
         centered: true,
         okVariant: 'success',
         headerClass: 'p-2 border-bottom-0',
@@ -73,7 +73,6 @@ Vue.prototype.ErrorBox = function (message, cb) {
     cb = cb || function () {};
     
     let err = this.ParseError(message);
-    console.log(err);
 
     const h = this.$createElement;
     const messageVNode = h('div', {domProps: {
@@ -82,7 +81,7 @@ Vue.prototype.ErrorBox = function (message, cb) {
 
     this.$bvModal.msgBoxOk([messageVNode], {
         centered: true,
-        title:'出错了',
+        title:'Error Occurred',
         okVariant: 'danger',
         headerClass: 'p-2 border-bottom-0',
         footerClass: 'p-2 border-top-0',

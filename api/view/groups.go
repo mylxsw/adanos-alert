@@ -1,7 +1,6 @@
 package view
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,7 +60,7 @@ func ReportView(cc infra.Resolver, templateContent string, data GroupData) (stri
 
 // fileGetContent 读取文件内容
 func fileGetContent(filename string) (string, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}

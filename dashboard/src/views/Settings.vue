@@ -2,16 +2,16 @@
     <b-row class="mb-5 main-box">
         <b-col>
             <b-card-group class="mb-3">
-                <b-card header="浏览器">
+                <b-card header="Browser">
                     <b-form @submit="updateBrowserSetting">
-                        <b-form-group horizontal id="server_url" label="服务地址*" label-for="server_url_input">
+                        <b-form-group horizontal id="server_url" label="Server*" label-for="server_url_input">
                             <b-form-input id="server_url_input" type="text" v-model="server_url" placeholder="http://localhost:8819"></b-form-input>
                         </b-form-group>
                         <b-form-group horizontal id="token" label="Token" label-for="token_input">
                             <b-form-input id="token_input" type="text" v-model="token"></b-form-input>
                         </b-form-group>
 
-                        <b-button type="submit" variant="primary">保存</b-button>
+                        <b-button type="submit" variant="primary">Save</b-button>
                     </b-form>
                 </b-card>
             </b-card-group>
@@ -34,7 +34,7 @@
                 this.$store.commit('updateToken', this.token);
 
                 this.refreshBrowserSetting();
-                this.SuccessBox('操作成功', function () {
+                this.SuccessBox('Operation successful', function () {
                     window.location.reload(true);
                 });
             },

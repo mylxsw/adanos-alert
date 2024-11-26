@@ -3,7 +3,7 @@ package jira
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -208,6 +208,6 @@ func (client Client) extractResponse(resp *jira.Response) string {
 		return ""
 	}
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	return string(body)
 }

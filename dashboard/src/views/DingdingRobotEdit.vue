@@ -5,30 +5,30 @@
                 <b-card-group class="mb-3">
                     <b-card header="基本">
 
-                        <b-form-group label-cols="2" id="name" label="机器人（群）名*" label-for="name_input">
+                        <b-form-group label-cols="2" id="name" label="Robot Name*" label-for="name_input">
                             <b-form-input id="name_input" type="text" v-model="form.name" required
-                                          placeholder="输入机器人名称或者群名称"></b-form-input>
+                                          placeholder="Enter the bot name or group name"></b-form-input>
                         </b-form-group>
 
-                        <b-form-group label-cols="2" id="description" label="描述" label-for="description_input">
-                            <b-form-textarea id="description_input" placeholder="输入机器人描述（可选）" v-model="form.description"/>
+                        <b-form-group label-cols="2" id="description" label="Description" label-for="description_input">
+                            <b-form-textarea id="description_input" placeholder="Enter bot description (optional)" v-model="form.description"/>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="token" label="Token" label-for="token_input">
                             <b-form-input id="token_input" type="text" v-model="form.token"
-                                          placeholder="输入钉钉机器人 Token"></b-form-input>
+                                          placeholder="Enter the DingTalk robot token"></b-form-input>
                         </b-form-group>
 
                         <b-form-group label-cols="2" id="secret" label="Secret" label-for="secret_input">
                             <b-form-input id="secret_input" type="text" v-model="form.secret"
-                                          placeholder="输入钉钉机器人 Secret"></b-form-input>
+                                          placeholder="Enter the DingTalk robot Secret"></b-form-input>
                         </b-form-group>
 
                     </b-card>
                 </b-card-group>
 
-                <b-button type="submit" variant="primary" class="mr-2">保存</b-button>
-                <b-button to="/dingding-robots">返回</b-button>
+                <b-button type="submit" variant="primary" class="mr-2">Save</b-button>
+                <b-button to="/dingding-robots">Go back</b-button>
             </b-form>
         </b-col>
     </b-row>
@@ -60,7 +60,7 @@
                 }
 
                 axios.post(url, this.createRequest()).then(() => {
-                    this.SuccessBox('操作成功', () => {
+                    this.SuccessBox('Operation successful', () => {
                         window.location.reload(true);
                     })
                 }).catch(error => {

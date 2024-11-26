@@ -84,6 +84,7 @@ func TestToKvPairs(t *testing.T) {
 	ju, err := json.New([]byte(message1), 0, false)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	kvPairs := ju.ToKvPairs()
@@ -106,6 +107,7 @@ func TestToKvPairsArray(t *testing.T) {
 	kvPairs := ju.ToKvPairsArray()
 	if len(kvPairs) != 19 {
 		t.Errorf("kv pairs not matched")
+		return
 	}
 }
 
@@ -113,6 +115,7 @@ func TestNullValue(t *testing.T) {
 	ju, err := json.New([]byte(message2), 0, false)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairs()
@@ -133,6 +136,7 @@ func TestKvPairsWithLevelLimit(t *testing.T) {
 	ju, err := json.New([]byte(message1), 2, false)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairsArray()
@@ -147,6 +151,7 @@ func TestNullValueSkipSimpleValue(t *testing.T) {
 	ju, err := json.New([]byte(message2), 0, true)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairs()
@@ -167,6 +172,7 @@ func TestComplexArrayValue(t *testing.T) {
 	ju, err := json.New([]byte(message3), 2, true)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairsArray()
@@ -183,6 +189,7 @@ func TestRootArrayType(t *testing.T) {
 	ju, err := json.New([]byte(message4), 2, true)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairsArray()
@@ -196,6 +203,7 @@ func TestRootArrayType2(t *testing.T) {
 	ju, err := json.New([]byte(message5), 1, true)
 	if err != nil {
 		t.Errorf("parse json failed: %s", err.Error())
+		return
 	}
 
 	pairs := ju.ToKvPairsArray()
