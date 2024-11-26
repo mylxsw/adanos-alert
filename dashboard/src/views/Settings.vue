@@ -5,9 +5,9 @@
                 <b-card header="Browser">
                     <b-form @submit="updateBrowserSetting">
                         <b-form-group horizontal id="server_url" label="Server*" label-for="server_url_input">
-                            <b-form-input id="server_url_input" type="text" v-model="server_url" placeholder="http://localhost:8819"></b-form-input>
+                            <b-form-input id="server_url_input" type="text" v-model="server_url" placeholder="http://localhost:19999"></b-form-input>
                         </b-form-group>
-                        <b-form-group horizontal id="token" label="Token" label-for="token_input">
+                        <b-form-group horizontal id="token" label="API Key" label-for="token_input">
                             <b-form-input id="token_input" type="text" v-model="token"></b-form-input>
                         </b-form-group>
 
