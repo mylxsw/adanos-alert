@@ -38,7 +38,7 @@ func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, even
 				"rule_id": grp.Rule.ID,
 				"grp_id":  grp.ID,
 				"err":     err.Error(),
-			}).Errorf("rule not exist: %w", err)
+			}).Errorf("rule not exist: %v", err)
 			return err
 		}
 
@@ -65,7 +65,7 @@ func (a TriggerJob) processEventGroups(groupRepo repository.EventGroupRepo, even
 					"trigger_id": trigger.ID,
 					"rule_id":    rule.ID,
 					"grp_id":     grp.ID,
-				}).Errorf("create matcher failed: %w", err)
+				}).Errorf("create matcher failed: %v", err)
 				continue
 			}
 

@@ -120,7 +120,8 @@ func (m EventGroupRepo) Traverse(filter bson.M, cb func(grp repository.EventGrou
 		}
 
 		if err = cb(grp); err != nil {
-			return err
+			log.With(grp).Errorf("traverse message group failed: %v", err)
+			continue
 		}
 	}
 
