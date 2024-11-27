@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/mylxsw/adanos-alert/internal/llm"
+
 	"github.com/mylxsw/adanos-alert/pubsub"
 	"github.com/mylxsw/adanos-alert/rpc"
 	"github.com/mylxsw/adanos-alert/service"
@@ -84,6 +86,10 @@ func main() {
 	ins.AddIntFlag("email_smtp_port", 25, "邮件服务器端口")
 	ins.AddStringFlag("email_smtp_username", "", "邮件服务器用户名")
 	ins.AddStringFlag("email_smtp_password", "", "邮件服务器密码")
+
+	ins.AddStringFlag("openai_endpoint", "https://api.openai.com/v1", "OpenAI API Endpoint")
+	ins.AddStringFlag("openai_api_key", "", "OpenAI API Key")
+	ins.AddStringFlag("openai_organization", "", "OpenAI Organization")
 
 	ins.Init(func(f infra.FlagContext) error {
 		stackWriter := writer.NewStackWriter()
@@ -167,6 +173,11 @@ func main() {
 				Username: c.String("email_smtp_username"),
 				Password: c.String("email_smtp_password"),
 			},
+			OpenAI: configs.OpenAI{
+				Endpoint:     c.String("openai_endpoint"),
+				APIKey:       c.String("openai_api_key"),
+				Organization: c.String("openai_organization"),
+			},
 		}
 	})
 
@@ -216,6 +227,7 @@ func main() {
 	ins.Provider(rpc.Provider{})
 	ins.Provider(service.Provider{})
 	ins.Provider(pubsub.Provider{})
+	ins.Provider(llm.Provider{})
 
 	if err := ins.Run(os.Args); err != nil {
 		log.Errorf("exit with error: %s", err)

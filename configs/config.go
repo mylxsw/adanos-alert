@@ -37,6 +37,7 @@ type Config struct {
 	AliyunVoiceCall AliyunVoiceCall `json:"aliyun_voice_call"`
 	EmailSMTP       EmailSMTP       `json:"email_smtp"`
 	Jira            Jira            `json:"jira"`
+	OpenAI          OpenAI          `json:"openai"`
 }
 
 type EmailSMTP struct {
@@ -59,6 +60,12 @@ type Jira struct {
 	BaseURL  string `json:"base_url"`
 	Username string `json:"username"`
 	Password string `json:"-"`
+}
+
+type OpenAI struct {
+	Endpoint     string `json:"endpoint"`
+	APIKey       string `json:"-"`
+	Organization string `json:"organization"`
 }
 
 func (conf *Config) Serialize() string {

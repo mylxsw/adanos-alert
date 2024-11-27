@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/mylxsw/go-utils/ternary"
 	"html"
 	"net/url"
 	"reflect"
@@ -18,6 +17,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/mylxsw/adanos-alert/internal/llm"
+	"github.com/mylxsw/go-utils/ternary"
+	"gopkg.in/yaml.v3"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/JohannesKaufmann/html-to-markdown/plugin"
@@ -156,9 +159,98 @@ func CreateParser(cc SimpleContainer, templateStr string) (*template.Template, e
 		"helpers": helper.NewHelpers,
 
 		"build_slack_body": SlackRequestBody,
+
+		"llm_summarize":        buildLLMSummarizer(cc),
+		"llm_summarize_events": buildLLMSummarizeEvents(cc),
 	}
 
 	return template.New("").Funcs(funcMap).Parse(templateStr)
+}
+
+type EventSummaryItem struct {
+	Meta      repository.EventMeta `json:"meta,omitempty" yaml:"meta,omitempty"`
+	Content   string               `json:"content,omitempty" yaml:"content,omitempty"`
+	CreatedAt string               `json:"created_at,omitempty" yaml:"created_at,omitempty"`
+}
+
+// buildLLMMultiSummarizer build a llm summarizer to summarize multiple messages
+func buildLLMSummarizeEvents(cc SimpleContainer) func(model string, events []repository.Event) string {
+	defaultFunc := func(model string, events []repository.Event) string {
+		items := make([]string, 0)
+		for _, evt := range events {
+			items = append(items, fmt.Sprintf("- %s\n\n```\n%s\n```\n", evt.CreatedAt.Format(time.RFC3339), evt.Content))
+		}
+
+		return strings.Join(items, "\n")
+	}
+
+	llm_, err := cc.Get(new(llm.LLM))
+	if err != nil {
+		log.Errorf("failed to get llm instance: %v", err)
+		return defaultFunc
+	}
+
+	m := llm_.(llm.LLM)
+	return func(model string, events []repository.Event) string {
+		items := array.Map(events, func(evt repository.Event, _ int) EventSummaryItem {
+			return EventSummaryItem{
+				Meta:      evt.Meta,
+				Content:   evt.Content,
+				CreatedAt: evt.CreatedAt.Format(time.RFC3339),
+			}
+		})
+		data, _ := yaml.Marshal(items)
+
+		prompt := `I need to send the following events as messages to users so they can take action. 
+These events are usually error logs that occur during the operation of the service. 
+Your task is to help me summarize the following events. You can refer to the content and metadata of these events, 
+then provide an interpretation. If these events correspond to different issues, 
+please interpret them separately in a list format. During the interpretation process, you should pay attention to:
+
+- Briefly describe the current event, including its content, occurrence time, metadata, etc. Provide only key information without repeating everything.
+- You need to categorize the events; if they are caused by the same issue, give a summary; if not, provide separate interpretations.
+- Offer solutions corresponding to each event to help users better understand and resolve problems.
+- Use concise language for descriptions without being overly complex. Additionally, make sure to use English for better user understanding.
+
+Here are the events that need your summarization:
+`
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		resp, err := m.Chat(ctx, model, fmt.Sprintf("%s\n\n```yaml\n%s\n```", prompt, string(data)))
+		if err != nil {
+			log.Errorf("failed to summarize content: %v", err)
+			return defaultFunc(model, events)
+		}
+
+		return resp.Content
+	}
+}
+
+// buildLLMSummarizer build a llm summarizer
+func buildLLMSummarizer(cc SimpleContainer) func(model, content string) string {
+	llm_, err := cc.Get(new(llm.LLM))
+	if err != nil {
+		return func(model, content string) string {
+			log.Errorf("failed to get llm instance: %v", err)
+			return content
+		}
+	}
+
+	m := llm_.(llm.LLM)
+	return func(model string, content string) string {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		resp, err := m.Summarize(ctx, model, content)
+		if err != nil {
+			log.Errorf("failed to summarize content: %v", err)
+			return content
+		}
+
+		return resp.Content
+	}
 }
 
 // StringTags split tags string to array

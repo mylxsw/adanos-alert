@@ -6,6 +6,9 @@ LDFLAGS := -s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit) -X ma
 run: build 
 	./build/debug/adanos-alert --enable_migrate
 
+run-with-config: build
+	./build/debug/adanos-alert --enable_migrate --conf ./server.local.yaml
+
 run-only:
 	./build/debug/adanos-alert --enable_migrate --listen :19998
 

@@ -17,3 +17,4 @@
 Makefile.local
 
 docker-build.sh
+server.local.yaml

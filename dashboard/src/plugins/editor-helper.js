@@ -217,6 +217,8 @@ let helpers = {
         {text: 'base64_encode DATA', displayText: 'base64_encode(data interface{}) string | Generates the base64-encoded value of data'},
 
         {text: 'build_slack_body', displayText: 'build_slack_body(channelName string, username string, emoji string, text string) string | Generate the body of the Slack message'},
+        {text: 'llm_summarize', displayText: 'llm_summarize(model string, content string) string | Summarize the text using LLM'},
+        {text: 'llm_summarize_events', displayText: 'llm_summarize_events(model string, events []repository.Event) string | Summarize the events using LLM'},
 
         {text: '.Action', displayText: '.Action | Type: string | Belong To: ROOT' },
         {text: '.RuleTemplateParsed', displayText: '.RuleTemplateParsed | Type: string | Belong To: ROOT' },
